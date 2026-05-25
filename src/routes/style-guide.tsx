@@ -21,6 +21,18 @@ import { VoteBar } from "@/components/sports/VoteBar";
 import { NeonRing } from "@/components/sports/NeonRing";
 import { TeamCrest } from "@/components/sports/TeamCrest";
 import { LeagueBadge, LEAGUE_KEYS } from "@/components/sports/LeagueBadge";
+import { OutcomePill } from "@/components/sports/OutcomePill";
+import { CountdownPill } from "@/components/sports/CountdownPill";
+import { StatTile } from "@/components/sports/StatTile";
+import { SectionHeader } from "@/components/sports/SectionHeader";
+import { MarketCard } from "@/components/sports/MarketCard";
+import { EventHeader } from "@/components/sports/EventHeader";
+import { OutcomeSelector } from "@/components/sports/OutcomeSelector";
+import { PriceChart } from "@/components/sports/PriceChart";
+import { OrderBook } from "@/components/sports/OrderBook";
+import { TradeForm } from "@/components/sports/TradeForm";
+import { PositionsTable } from "@/components/sports/PositionsTable";
+import { Wallet, TrendingUp, LineChart } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/style-guide")({
@@ -43,6 +55,9 @@ const SECTIONS = [
   ["decor", "Decorative Elements"],
   ["cards", "Sport Cards"],
   ["leaderboard", "Leaderboard"],
+  ["primitives", "Market Primitives"],
+  ["market", "Market Card"],
+  ["trade", "Trade Surface"],
   ["spacing", "Spacing & Radius"],
 ] as const;
 
