@@ -1,104 +1,83 @@
-## 目标
+## 调研结论：体育预测交易页通常包含什么
 
-不动 OmenX 的功能逻辑，先沉淀**一套面向体育预测的视觉规范**，落成可浏览的 `/style-guide` 页面。后面再做 Events 等示范页时，直接消费这些 tokens 和组件，保证一致性。
+参考 Polymarket / SX Bet / Overtime Markets 的体育详情页，核心信息块基本固定：
 
----
+1. **赛事头**：联赛 + 两队 logo + 比分/开赛时间 + 状态（Live/Upcoming/Final）+ Vol / Liquidity / Ends in
+2. **二元选择**：YES / NO 两个大色块按钮，显示当前概率 %（= 价格 ¢）和"赔付倍数"
+3. **价格走势图**：百分比折线（1H/6H/1D/1W/ALL）
+4. **订单簿 / 最近成交**（Polymarket 简化、SX Bet 完整）
+5. **下单面板**：Buy/Sell tab + 数量 + 限价/市价 + 预估收益
+6. **持仓 & 订单**：当前持仓、挂单、历史
+7. **规则 / 上下文 / 评论**
 
-## 视觉语言（从截图抽取）
+OmenX 的差异点在于"**合约杠杆**"：除了现货式买 YES/NO 份额，还能开多/开空 + 杠杆 + 保证金模式 + TP/SL + 强平价。
 
-**气质**：深夜球场 + 霓虹聚光 + 玻璃质感。Premium 球迷端的高级暗色调，比 OmenX 的"交易终端"更感性、更有比赛日仪式感。
+## 融合方案
 
-**核心 tokens**
+把 Polymarket 风的「YES/NO 概率买卖」当成默认皮，把 OmenX 的「杠杆 / 保证金 / 强平价」叠加成一个"PRO 模式"开关在下单面板里。视觉上保持 Stadium Neon 的卡片语言。
 
-| 类别 | Token | 值 | 用途 |
-|---|---|---|---|
-| 背景 | `--background` | oklch 极深紫黑 ~`#0E0B1A` | 页面底色 |
-| 表面 | `--surface` | ~`#171327` | 卡片底 |
-| 表面-高亮 | `--surface-elevated` | ~`#1E1832` | hover/激活卡 |
-| 边框 | `--border` | 白 8% | 卡片描边 |
-| 主色 | `--primary` | 淡薰衣草紫 ~`#CBB6FF` | 主按钮/激活 chip/进度条主调 |
-| 次色 | `--accent-neon` | 霓虹品红 ~`#FF3DC4` | 光环/渐变高亮/球员卡光晕 |
-| 文字 | `--foreground` | 近白 | 主文 |
-| 文字-弱 | `--muted-foreground` | 蓝灰 ~55% | 副标/label |
-| 赛果-赢 | `--win` | 翡翠绿 | Win/Yes |
-| 赛果-输 | `--loss` | 玫红 | Loss/No |
-| 半色 | `--draw` | 琥珀黄 | Draw/Pending |
-
-**渐变 / 阴影**
-- `--gradient-neon`：薰衣草 → 品红 → 紫，用于光环、进度条强调
-- `--shadow-glow`：品红 30% 外发光，球员卡/CTA hover
-
-**字体**
-- 标题：`Sora` 或 `Space Grotesk`（粗体，几何感强，球场号码味）
-- 正文：`Inter`
-- 数字 / 比分 / 赔率：`JetBrains Mono`（数据严谨）
-- 球员名等氛围位：`Instrument Serif` 斜体（"Lionel *Messi*" 那种调性）
-
-**形状语言**
-- 卡片圆角统一 `rounded-2xl`（截图里所有卡都是大圆角）
-- 顶部图标按钮：圆角方形 `rounded-xl`，激活态填充薰衣草
-- Chip：药丸形 `rounded-full`
-- 装饰元素：虚线圆环（数字 10、17 周围那种）、霓虹光环
+YES/NO 的视觉表达：**用两队的队名/队徽直接替换 Yes/No 字样**（例：上海申花 / 山东鲁能），文字下方小字标注 YES 25¢ · payout 4.0x。中性问题（"会进决赛吗？"）才退回 YES/NO 字面。
 
 ---
 
-## StyleGuide 页面结构
+## 要新增的组件（src/components/sports/）
 
-路由：`/style-guide`，单页可滚动，左侧锚点目录，右侧展示区。
+### 一、Home/列表层
+- **OutcomePill** — 单个 YES/NO 选项胶囊：队名 + 概率% + 赔付。两种 tone：`yes`(薰衣草) / `no`(品红)。是后面所有市场卡的原子。
+- **MarketCard** — 体育预测市场卡：联赛徽 + 问题（"德比大战谁会是冠军？"）+ 两个 OutcomePill 横排 + Volume / Ends in / 参与人数。这是 Home 主体。
+- **CountdownPill** — `2d 14h 32m` 倒计时，等宽数字，带圆点呼吸动效。
+- **StatTile** — 余额 / 持仓 / 今日 PnL 的数据格子（Home 顶部状态条用 3-4 个并排）。
+- **SectionHeader** — 「Trending Markets」标题 + 右侧 See all 链接 + 可选 tabs。
 
-1. **Brand & Tone** — 简短宣言 + 主色环境光示意
-2. **Color Tokens** — 表面 / 文字 / 主色 / 赛果 / 渐变，每个 swatch 可复制 token 名
-3. **Typography** — 标题/正文/数据三档字体的实际样例，含"球员名斜体"展示
-4. **Buttons** — primary（薰衣草）/ neon（霓虹品红渐变 CTA）/ ghost / icon-square（截图顶导那种）
-5. **Cards**
-   - `MatchCard`：两队 logo + 时间 + 联赛（截图右上 3 张）
-   - `PredictionCard`：question + 两队对决 + 双色投票进度条 + 互动数（Fan Zone 那张）
-   - `PlayerSpotlightCard`：人物图 + 霓虹光环 + 数据三宫格（Mbappé 那张）
-   - `LeaderboardRow`：紧凑数据行（Premier League P/W/O/L）
-   - `StatChip`：球员小卡（Messi/Haaland，含虚线圆环数字）
-6. **Chips & Badges** — 筛选 chip、联赛 chip（带 logo）、状态 badge（Live / Upcoming / Final）
-7. **Progress & Vote Bars** — 双色投票条、单色进度条
-8. **Decorative Elements** — 虚线圆环、霓虹光环、渐变分隔线（独立成段，让设计语言显形）
-9. **Iconography** — Lucide 子集 + 几何示意
-10. **Spacing / Radius** — 4/8/12/16/24 + 圆角档位
-11. **Component Playground** — 选 2-3 个核心组件（MatchCard / PredictionCard / PlayerSpotlightCard）做可调参数预览
+### 二、Trade 详情层
+- **EventHeader** — 大版赛事头：联赛 chip + 两队 TeamCrest + VS + 开赛时间 + 状态 badge + 右侧 Vol / Liquidity / Ends。
+- **OutcomeSelector** — 大尺寸 YES/NO 二选一（队名版），选中态有 neon ring + 渐变填充。
+- **PriceChart** — 占位走势图（recharts AreaChart，纯静态 mock，主题色 = 当前选中 outcome 的色调）+ 时间区间 tabs（1H/6H/1D/1W/ALL）。
+- **OrderBook** — 两列对照（YES bids / NO bids），价格 ¢、数量、累计。极简 12 行版即可。
+- **TradeForm** — 下单面板，含：
+  - Buy/Sell tab
+  - Limit/Market tab
+  - 数量输入 + Slider（25/50/75/Max）
+  - **PRO 模式开关**（默认关）→ 打开后展开：杠杆 Slider (1×–20×) + 保证金类型（Cross/Isolated）+ TP/SL 输入 + 强平价显示
+  - 摘要栏：Avg Price · Total Cost · Fee · Potential Win · Liq. Price（PRO 时）
+  - CTA：`Buy YES @ 28¢`（颜色随 outcome）
+- **PositionRow / OrderRow** — 持仓行 / 挂单行（mock 数据，含 PnL、ROE、平仓 / 撤单按钮）。
+- **PositionsTable** — 包裹上面两个 Row 的 Tabs：Positions / Open Orders / History。
+- **LiquidationBar** — 杠杆模式下用：入场价 / 当前价 / 强平价的水平刻度条。
 
----
+### 三、对话/弹层（轻量包装现有 shadcn）
+- **ConfirmTradeDialog** — 复用 `dialog`，下单确认。
+- **DepositDialog** — 充值占位（仅 UI）。
 
-## 技术实现
-
-- **Tailwind v4 + `src/styles.css`**：所有 token 定义在 `:root`，通过 `@theme inline` 暴露 Tailwind 工具类（已有结构，扩展即可）
-- **字体**：通过 Google Fonts `<link>` 注入 Sora / Inter / JetBrains Mono / Instrument Serif，在 `__root.tsx` head 里加
-- **新组件目录**：`src/components/sports/`
-  - `MatchCard.tsx`
-  - `PredictionCard.tsx`
-  - `PlayerSpotlightCard.tsx`
-  - `LeaderboardRow.tsx`
-  - `StatChip.tsx`
-  - `VoteBar.tsx`
-  - `NeonRing.tsx`（装饰，纯 CSS / SVG）
-  - `LeagueBadge.tsx`
-- **StyleGuide 路由**：`src/routes/style-guide.tsx`，单文件，分 section 渲染上述组件
-- **首页处理**：保留现有 placeholder，临时加一个跳转 link 到 `/style-guide`，方便预览
-- **不接后端**：所有数据 hard-coded mock（球队名、比分、虚拟头像用渐变占位 + 几个 unsplash 占位足球意象图）
+> 现有 `MatchCard / PredictionCard / PlayerSpotlightCard / LeaderboardRow / StatChip` 保留，作为 Home 的二级模块（赛程、社区预测、球员聚光、积分榜）。
 
 ---
 
-## 不在本轮范围
+## /style-guide 更新
 
-- Events / Trade / Portfolio 等业务页（等本规范定稿后再做一个示范页）
-- Web3、Supabase、ethers 等真实集成
-- 移动端 drawer / bottom nav（先桌面端展示规范，移动端在示范页阶段处理）
+新增三段：
+- **8. Market Primitives** — OutcomePill / CountdownPill / StatTile / SectionHeader
+- **9. Market Card** — MarketCard 三种样态（队名二元 / 中性 Yes-No / Live 进行中）
+- **10. Trade Surface** — EventHeader + OutcomeSelector + PriceChart + OrderBook + TradeForm（普通态 / PRO 杠杆态）+ PositionsTable
+
+每段右侧给一句使用说明，让后续搭页面时直接复用。
 
 ---
 
-## 交付物
+## 技术清单
 
-确认计划后，一次性产出：
-1. 更新 `src/styles.css` 注入新的 tokens / 渐变 / 阴影
-2. 在 `__root.tsx` 注入 Google Fonts
-3. `src/components/sports/` 下 8 个组件
-4. `src/routes/style-guide.tsx` 完整规范页
-5. 首页 placeholder 加一个去 StyleGuide 的入口
+- 安装 `recharts`（PriceChart 占位）
+- 在 `styles.css` 增加 outcome tone 工具类：`--yes`（复用 primary 薰衣草）、`--no`（复用 neon 品红），导出 `bg-yes/10`、`text-yes`、`ring-yes` 等
+- 新增文件：`src/components/sports/{OutcomePill,MarketCard,CountdownPill,StatTile,SectionHeader,EventHeader,OutcomeSelector,PriceChart,OrderBook,TradeForm,PositionRow,OrderRow,PositionsTable,LiquidationBar}.tsx`
+- 更新：`src/routes/style-guide.tsx`（新增三段 + 锚点目录）
+- **不动**：Home/Trade 实际页面这轮不做，等组件确认后再搭
 
-你确认后我就开始写。
+---
+
+## 不在本轮
+
+- 真实数据 / Web3 / 钱包
+- 移动端响应式
+- 评论、规则、社区 tab 这些非交易核心模块
+
+确认后我开始写。
