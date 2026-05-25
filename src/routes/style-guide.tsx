@@ -1,0 +1,441 @@
+import { createFileRoute } from "@tanstack/react-router";
+import {
+  Bell,
+  Search,
+  Home,
+  Compass,
+  Trophy,
+  ListChecks,
+  Wallet as WalletIcon,
+  Settings as SettingsIcon,
+  Plus,
+} from "lucide-react";
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { MatchCard } from "@/components/sports/MatchCard";
+import { PredictionCard } from "@/components/sports/PredictionCard";
+import { PlayerSpotlightCard } from "@/components/sports/PlayerSpotlightCard";
+import { LeaderboardRow, LeaderboardHeader } from "@/components/sports/LeaderboardRow";
+import { StatChip } from "@/components/sports/StatChip";
+import { VoteBar } from "@/components/sports/VoteBar";
+import { NeonRing } from "@/components/sports/NeonRing";
+import { TeamCrest } from "@/components/sports/TeamCrest";
+import { LeagueBadge, LEAGUE_KEYS } from "@/components/sports/LeagueBadge";
+import { cn } from "@/lib/utils";
+
+export const Route = createFileRoute("/style-guide")({
+  head: () => ({
+    meta: [
+      { title: "Stadium Neon — Design System" },
+      { name: "description", content: "Visual language and component library for the sports prediction product." },
+    ],
+  }),
+  component: StyleGuide,
+});
+
+const SECTIONS = [
+  ["brand", "Brand & Tone"],
+  ["colors", "Color Tokens"],
+  ["typography", "Typography"],
+  ["buttons", "Buttons"],
+  ["chips", "Chips & Badges"],
+  ["bars", "Vote & Progress"],
+  ["decor", "Decorative Elements"],
+  ["cards", "Sport Cards"],
+  ["leaderboard", "Leaderboard"],
+  ["spacing", "Spacing & Radius"],
+] as const;
+
+function Section({ id, title, kicker, children }: { id: string; title: string; kicker?: string; children: React.ReactNode }) {
+  return (
+    <section id={id} className="scroll-mt-24 py-12 border-t border-border first:border-t-0 first:pt-0">
+      <div className="mb-6 flex items-baseline justify-between gap-4">
+        <div>
+          <div className="text-[11px] font-mono uppercase tracking-[0.25em] text-muted-foreground">{kicker ?? id}</div>
+          <h2 className="mt-1 text-3xl font-display font-bold">{title}</h2>
+        </div>
+      </div>
+      {children}
+    </section>
+  );
+}
+
+function TokenSwatch({ name, varName, hint }: { name: string; varName: string; hint?: string }) {
+  return (
+    <div className="rounded-2xl border border-border bg-surface p-4 shadow-card">
+      <div
+        className="h-20 w-full rounded-xl ring-1 ring-white/5"
+        style={{ background: `var(${varName})` }}
+      />
+      <div className="mt-3 flex items-center justify-between">
+        <span className="text-sm font-medium text-foreground">{name}</span>
+        <code className="font-mono text-[10px] text-muted-foreground">{varName}</code>
+      </div>
+      {hint && <p className="mt-1 text-xs text-muted-foreground">{hint}</p>}
+    </div>
+  );
+}
+
+function StyleGuide() {
+  const [activeNav, setActiveNav] = useState<string>("home");
+  const navItems = [
+    { id: "home", icon: Home },
+    { id: "compass", icon: Compass },
+    { id: "trophy", icon: Trophy },
+    { id: "list", icon: ListChecks },
+    { id: "wallet", icon: WalletIcon },
+  ];
+
+  return (
+    <div className="min-h-screen bg-background bg-ambient text-foreground">
+      {/* Top chrome — also serves as a live nav-button reference */}
+      <header className="sticky top-0 z-20 backdrop-blur-xl bg-background/70 border-b border-border">
+        <div className="mx-auto flex max-w-7xl items-center gap-4 px-6 py-3">
+          <div className="flex items-center gap-2">
+            <div className="grid h-9 w-9 place-items-center rounded-xl bg-gradient-neon shadow-glow">
+              <span className="font-display font-bold text-sm text-white">S</span>
+            </div>
+            <span className="font-display font-bold text-lg">Stadium Neon</span>
+          </div>
+
+          <div className="ml-2 hidden flex-1 max-w-sm md:block">
+            <div className="flex items-center gap-2 rounded-full bg-white/[0.04] px-4 py-2 ring-1 ring-white/5">
+              <Search className="h-3.5 w-3.5 text-muted-foreground" />
+              <input
+                placeholder="Search components, tokens…"
+                className="w-full bg-transparent text-sm placeholder:text-muted-foreground focus:outline-none"
+              />
+            </div>
+          </div>
+
+          <nav className="mx-auto flex items-center gap-1.5">
+            {navItems.map(({ id, icon: Icon }) => (
+              <button
+                key={id}
+                onClick={() => setActiveNav(id)}
+                className={cn(
+                  "grid h-10 w-10 place-items-center rounded-xl transition-all",
+                  activeNav === id
+                    ? "bg-primary text-primary-foreground shadow-glow"
+                    : "bg-white/[0.04] text-muted-foreground hover:text-foreground hover:bg-white/[0.08]",
+                )}
+                aria-label={id}
+              >
+                <Icon className="h-4 w-4" />
+              </button>
+            ))}
+          </nav>
+
+          <div className="flex items-center gap-2">
+            <div className="hidden md:block text-right leading-tight">
+              <div className="text-[10px] uppercase tracking-widest text-muted-foreground">Hi,</div>
+              <div className="text-sm font-display font-semibold">Jeremy</div>
+            </div>
+            <TeamCrest name="Jeremy" size="md" />
+            <button className="relative grid h-10 w-10 place-items-center rounded-xl bg-white/[0.04] text-muted-foreground hover:text-foreground">
+              <Bell className="h-4 w-4" />
+              <span className="absolute right-2 top-2 h-1.5 w-1.5 rounded-full bg-neon" />
+            </button>
+            <button className="grid h-10 w-10 place-items-center rounded-xl bg-white/[0.04] text-muted-foreground hover:text-foreground">
+              <SettingsIcon className="h-4 w-4" />
+            </button>
+          </div>
+        </div>
+      </header>
+
+      <div className="mx-auto grid max-w-7xl grid-cols-[200px_1fr] gap-10 px-6 py-10">
+        {/* Section nav */}
+        <aside className="sticky top-24 hidden h-fit md:block">
+          <div className="text-[11px] font-mono uppercase tracking-[0.25em] text-muted-foreground mb-3">Contents</div>
+          <ul className="space-y-1.5">
+            {SECTIONS.map(([id, label]) => (
+              <li key={id}>
+                <a
+                  href={`#${id}`}
+                  className="block rounded-lg px-3 py-1.5 text-sm text-muted-foreground hover:bg-white/5 hover:text-foreground"
+                >
+                  {label}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </aside>
+
+        <main>
+          {/* BRAND */}
+          <Section id="brand" title="Stadium Neon" kicker="01 — Brand & Tone">
+            <div className="relative overflow-hidden rounded-3xl border border-border bg-surface p-10 shadow-card bg-ambient">
+              <div className="max-w-xl">
+                <div className="text-[11px] font-mono uppercase tracking-[0.3em] text-neon">design system</div>
+                <h1 className="mt-3 text-5xl font-display font-bold leading-[1.05]">
+                  Match-day energy,
+                  <br />
+                  <span className="text-gradient-neon font-serif-display italic">distilled into pixels.</span>
+                </h1>
+                <p className="mt-4 text-sm text-muted-foreground leading-relaxed">
+                  A dark-first visual language for fan-driven sports prediction. Lavender hush over
+                  deep arena black, magenta neon for the moment of decision, mono-set numbers for
+                  the trust of a scoreboard.
+                </p>
+                <div className="mt-6 flex gap-3">
+                  <Button className="bg-gradient-neon text-white shadow-glow hover:opacity-90">Primary CTA</Button>
+                  <Button variant="outline" className="border-white/10 bg-white/[0.03]">
+                    Secondary
+                  </Button>
+                </div>
+              </div>
+              <div className="absolute -right-12 -top-12 hidden md:block">
+                <NeonRing size={320} dashed>
+                  <div className="grid h-56 w-56 place-items-center rounded-full bg-surface text-6xl font-display font-bold text-foreground">
+                    10
+                  </div>
+                </NeonRing>
+              </div>
+            </div>
+          </Section>
+
+          {/* COLORS */}
+          <Section id="colors" title="Color Tokens" kicker="02 — Palette">
+            <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+              <TokenSwatch name="Background" varName="--background" hint="Page base" />
+              <TokenSwatch name="Surface" varName="--surface" hint="Cards" />
+              <TokenSwatch name="Surface Elevated" varName="--surface-elevated" hint="Hover" />
+              <TokenSwatch name="Foreground" varName="--foreground" hint="Primary text" />
+              <TokenSwatch name="Primary" varName="--primary" hint="Lavender — actions" />
+              <TokenSwatch name="Neon" varName="--neon" hint="Magenta — emphasis" />
+              <TokenSwatch name="Win" varName="--win" />
+              <TokenSwatch name="Loss" varName="--loss" />
+              <TokenSwatch name="Draw" varName="--draw" />
+              <TokenSwatch name="Muted" varName="--muted" />
+              <TokenSwatch name="Muted FG" varName="--muted-foreground" />
+              <TokenSwatch name="Border" varName="--border" />
+            </div>
+            <div className="mt-4 grid grid-cols-1 gap-3 md:grid-cols-2">
+              <div className="h-24 rounded-2xl bg-gradient-neon shadow-glow flex items-end p-4">
+                <span className="font-mono text-xs text-white">--gradient-neon</span>
+              </div>
+              <div className="h-24 rounded-2xl bg-gradient-vote flex items-end p-4">
+                <span className="font-mono text-xs text-white">--gradient-vote</span>
+              </div>
+            </div>
+          </Section>
+
+          {/* TYPOGRAPHY */}
+          <Section id="typography" title="Typography" kicker="03 — Type">
+            <div className="grid gap-3 md:grid-cols-2">
+              <div className="rounded-2xl border border-border bg-surface p-6 shadow-card">
+                <div className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground">Display — Sora</div>
+                <div className="mt-2 font-display font-bold text-5xl">Dashboard</div>
+                <div className="mt-1 font-display font-semibold text-xl text-muted-foreground">Upcoming event</div>
+              </div>
+              <div className="rounded-2xl border border-border bg-surface p-6 shadow-card">
+                <div className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground">Atmospheric — Instrument Serif</div>
+                <div className="mt-2 font-serif-display italic text-5xl">Mbappé</div>
+                <div className="mt-1 font-serif-display italic text-xl text-muted-foreground">vs · season ‘26</div>
+              </div>
+              <div className="rounded-2xl border border-border bg-surface p-6 shadow-card">
+                <div className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground">Body — Inter</div>
+                <p className="mt-2 text-base">
+                  Predict outcomes, climb the leaderboard, share calls with the fan zone.
+                </p>
+                <p className="mt-1 text-sm text-muted-foreground">Used for descriptions and UI copy.</p>
+              </div>
+              <div className="rounded-2xl border border-border bg-surface p-6 shadow-card">
+                <div className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground">Data — JetBrains Mono</div>
+                <div className="mt-2 font-mono text-3xl tabular-nums">2 : 1</div>
+                <div className="mt-1 font-mono text-xs text-muted-foreground">23 Aug 4:30pm · La Liga</div>
+              </div>
+            </div>
+          </Section>
+
+          {/* BUTTONS */}
+          <Section id="buttons" title="Buttons" kicker="04 — Actions">
+            <div className="flex flex-wrap items-center gap-3 rounded-2xl border border-border bg-surface p-6 shadow-card">
+              <Button className="bg-primary text-primary-foreground hover:opacity-90">Place Pick</Button>
+              <Button className="bg-gradient-neon text-white shadow-glow hover:opacity-90">
+                <Plus className="h-4 w-4" /> Create Prediction
+              </Button>
+              <Button variant="outline" className="border-white/10 bg-white/[0.03]">Cancel</Button>
+              <Button variant="ghost">Skip</Button>
+              <Button size="icon" className="bg-white/[0.04] text-muted-foreground hover:text-foreground rounded-xl">
+                <Bell className="h-4 w-4" />
+              </Button>
+              <Button size="icon" className="bg-primary text-primary-foreground rounded-xl shadow-glow">
+                <Home className="h-4 w-4" />
+              </Button>
+            </div>
+          </Section>
+
+          {/* CHIPS */}
+          <Section id="chips" title="Chips & Badges" kicker="05 — Tags">
+            <div className="space-y-4 rounded-2xl border border-border bg-surface p-6 shadow-card">
+              <div className="flex flex-wrap gap-2">
+                {LEAGUE_KEYS.map((k) => (
+                  <LeagueBadge key={k} league={k} />
+                ))}
+              </div>
+              <div className="flex flex-wrap gap-2">
+                <span className="rounded-full bg-neon/10 px-3 py-1 text-[11px] font-medium uppercase tracking-widest text-neon ring-1 ring-neon/30">Live</span>
+                <span className="rounded-full bg-primary/10 px-3 py-1 text-[11px] font-medium uppercase tracking-widest text-primary ring-1 ring-primary/30">Upcoming</span>
+                <span className="rounded-full bg-white/[0.04] px-3 py-1 text-[11px] font-medium uppercase tracking-widest text-muted-foreground">Final</span>
+                <span className="rounded-full bg-win/10 px-3 py-1 text-[11px] font-medium uppercase tracking-widest text-win ring-1 ring-win/30">Win</span>
+                <span className="rounded-full bg-loss/10 px-3 py-1 text-[11px] font-medium uppercase tracking-widest text-loss ring-1 ring-loss/30">Loss</span>
+                <span className="rounded-full bg-draw/10 px-3 py-1 text-[11px] font-medium uppercase tracking-widest text-draw ring-1 ring-draw/30">Draw</span>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                <button className="inline-flex items-center gap-2 rounded-full bg-primary/15 px-4 py-1.5 text-xs font-medium text-primary ring-1 ring-primary/30">
+                  📅 Newest
+                </button>
+                <button className="inline-flex items-center gap-2 rounded-full bg-white/[0.04] px-4 py-1.5 text-xs text-muted-foreground hover:text-foreground">
+                  Trending
+                </button>
+                <button className="inline-flex items-center gap-2 rounded-full bg-white/[0.04] px-4 py-1.5 text-xs text-muted-foreground hover:text-foreground">
+                  Following
+                </button>
+              </div>
+            </div>
+          </Section>
+
+          {/* BARS */}
+          <Section id="bars" title="Vote & Progress" kicker="06 — Data Bars">
+            <div className="grid gap-3 rounded-2xl border border-border bg-surface p-6 shadow-card md:grid-cols-2">
+              <div className="space-y-3">
+                <VoteBar label="Chelsea" value={42} count={21} tone="blue" />
+                <VoteBar label="PSG" value={58} count={29} tone="primary" />
+              </div>
+              <div className="space-y-3">
+                <VoteBar label="Yes" value={73} count={730} tone="win" />
+                <VoteBar label="No" value={27} count={270} tone="loss" />
+              </div>
+            </div>
+          </Section>
+
+          {/* DECOR */}
+          <Section id="decor" title="Decorative Elements" kicker="07 — Signature">
+            <div className="grid gap-4 md:grid-cols-3">
+              <div className="grid place-items-center rounded-2xl border border-border bg-surface p-8 shadow-card bg-ambient">
+                <NeonRing size={180}>
+                  <div className="grid h-32 w-32 place-items-center rounded-full bg-surface-elevated font-display font-bold text-3xl">10</div>
+                </NeonRing>
+                <span className="mt-4 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">Neon Halo</span>
+              </div>
+              <div className="grid place-items-center rounded-2xl border border-border bg-surface p-8 shadow-card">
+                <div className="relative grid h-36 w-36 place-items-center">
+                  <div className="absolute inset-0 rounded-full border border-dashed border-white/20" />
+                  <div className="absolute inset-3 rounded-full border border-dashed border-white/10" />
+                  <span className="font-display font-bold text-4xl">17</span>
+                </div>
+                <span className="mt-4 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">Dashed Aura</span>
+              </div>
+              <div className="grid place-items-center rounded-2xl border border-border bg-surface p-8 shadow-card">
+                <div className="h-1 w-40 rounded-full bg-gradient-neon shadow-glow" />
+                <div className="mt-3 h-px w-40 bg-gradient-to-r from-transparent via-white/20 to-transparent" />
+                <span className="mt-4 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">Dividers</span>
+              </div>
+            </div>
+          </Section>
+
+          {/* CARDS */}
+          <Section id="cards" title="Sport Cards" kicker="08 — Composites">
+            <div className="grid gap-5 lg:grid-cols-3">
+              <div className="space-y-4 lg:col-span-1">
+                <h3 className="text-xs font-mono uppercase tracking-widest text-muted-foreground">Match Card</h3>
+                <MatchCard home="Man City" away="Arsenal" kickoff="5:30pm" date="Today 6:00pm" league="epl" status="live" />
+                <MatchCard home="Chelsea" away="PSG" kickoff="5:30pm" date="23 Aug 4:30pm" league="ucl" />
+                <MatchCard home="Barça" away="Real" kickoff="9:00pm" date="28 Aug 9:00pm" league="laliga" status="upcoming" />
+              </div>
+
+              <div className="lg:col-span-1">
+                <h3 className="mb-4 text-xs font-mono uppercase tracking-widest text-muted-foreground">Prediction Card</h3>
+                <PredictionCard
+                  author={{ name: "Chelsea", handle: "chelsea_official" }}
+                  question="Who will win today's match?"
+                  home="Chelsea"
+                  away="PSG"
+                  kickoff="Today 8:00pm"
+                  votes={{ home: 21, away: 29 }}
+                />
+              </div>
+
+              <div className="lg:col-span-1">
+                <h3 className="mb-4 text-xs font-mono uppercase tracking-widest text-muted-foreground">Player Spotlight</h3>
+                <PlayerSpotlightCard
+                  handle="KIL_SEBGEY_B"
+                  name="Kylian Mbappé"
+                  position="Forward"
+                  jersey={10}
+                  stats={[
+                    { label: "Goals", value: 132 },
+                    { label: "Assist", value: 320 },
+                    { label: "Matches", value: 89 },
+                  ]}
+                />
+              </div>
+            </div>
+
+            <div className="mt-6 grid gap-3 md:grid-cols-2">
+              <StatChip player="Lionel Messi" firstName="Lionel" metric="21" metricLabel="Goals" number={10} />
+              <StatChip player="Erling Haaland" firstName="Erling" metric="16" metricLabel="Goals" number={17} />
+            </div>
+          </Section>
+
+          {/* LEADERBOARD */}
+          <Section id="leaderboard" title="Leaderboard" kicker="09 — Data Density">
+            <div className="rounded-2xl border border-border bg-surface p-4 shadow-card">
+              <div className="flex items-center justify-between px-3 pb-3">
+                <div className="font-display font-semibold">Premier League</div>
+                <div className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground">Top 4</div>
+              </div>
+              <LeaderboardHeader />
+              <div className="mt-1 space-y-0.5">
+                <LeaderboardRow rank={1} team="Man City" played={8} wins={2} draws={0} losses={0} points={82} />
+                <LeaderboardRow rank={2} team="Arsenal" played={8} wins={2} draws={0} losses={0} points={82} />
+                <LeaderboardRow rank={3} team="Newcastle" played={6} wins={2} draws={0} losses={0} points={62} />
+                <LeaderboardRow rank={4} team="Liverpool" played={3} wins={4} draws={0} losses={0} points={22} />
+              </div>
+            </div>
+          </Section>
+
+          {/* SPACING */}
+          <Section id="spacing" title="Spacing & Radius" kicker="10 — Geometry">
+            <div className="grid gap-3 md:grid-cols-2">
+              <div className="rounded-2xl border border-border bg-surface p-6 shadow-card">
+                <div className="text-xs font-mono uppercase tracking-widest text-muted-foreground mb-4">Spacing scale</div>
+                <div className="flex items-end gap-2">
+                  {[4, 8, 12, 16, 24, 32, 48].map((n) => (
+                    <div key={n} className="flex flex-col items-center gap-2">
+                      <div className="rounded bg-primary/40" style={{ width: 28, height: n }} />
+                      <span className="font-mono text-[10px] text-muted-foreground">{n}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <div className="rounded-2xl border border-border bg-surface p-6 shadow-card">
+                <div className="text-xs font-mono uppercase tracking-widest text-muted-foreground mb-4">Radius scale</div>
+                <div className="flex items-center gap-3">
+                  {[
+                    ["sm", "rounded-sm"],
+                    ["md", "rounded-md"],
+                    ["lg", "rounded-lg"],
+                    ["xl", "rounded-xl"],
+                    ["2xl", "rounded-2xl"],
+                    ["3xl", "rounded-3xl"],
+                  ].map(([name, cls]) => (
+                    <div key={name} className="flex flex-col items-center gap-2">
+                      <div className={cn("h-14 w-14 bg-primary/30 ring-1 ring-primary/40", cls)} />
+                      <span className="font-mono text-[10px] text-muted-foreground">{name}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </Section>
+
+          <footer className="mt-12 border-t border-border pt-6 text-center text-xs text-muted-foreground font-mono">
+            Stadium Neon · v0.1 · sports prediction design system
+          </footer>
+        </main>
+      </div>
+    </div>
+  );
+}
