@@ -28,11 +28,6 @@ const TONE_TEXT: Record<OutcomeTone, string> = {
   yes: "text-primary",
   no: "text-neon",
 };
-const TONE_TAG: Record<OutcomeTone, string> = {
-  yes: "bg-primary/15 text-primary",
-  no: "bg-neon/15 text-neon",
-};
-
 const SIZES = {
   sm: { box: "px-3 py-2 gap-2", label: "text-xs", price: "text-sm", crest: "xs" },
   md: { box: "px-4 py-3 gap-3", label: "text-sm", price: "text-lg", crest: "sm" },
@@ -64,12 +59,7 @@ export function OutcomePill({
     >
       <div className="flex min-w-0 items-center gap-2.5">
         {showCrest && <TeamCrest name={label} size={s.crest as "xs" | "sm" | "md"} />}
-        <div className="flex flex-col items-start leading-tight min-w-0">
-          <span className={cn("font-display font-semibold text-foreground truncate", s.label)}>{label}</span>
-          <span className={cn("rounded-full px-1.5 py-0.5 mt-0.5 text-[9px] font-mono uppercase tracking-widest", TONE_TAG[tone])}>
-            {tone}
-          </span>
-        </div>
+        <span className={cn("font-display font-semibold text-foreground truncate", s.label)}>{label}</span>
       </div>
       <div className="flex flex-col items-end leading-tight">
         <span className={cn("font-mono font-bold tabular-nums", s.price, TONE_TEXT[tone])}>
