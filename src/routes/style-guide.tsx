@@ -412,7 +412,137 @@ function StyleGuide() {
           </Section>
 
           {/* SPACING */}
-          <Section id="spacing" title="Spacing & Radius" kicker="10 — Geometry">
+          {/* MARKET PRIMITIVES */}
+          <Section id="primitives" title="Market Primitives" kicker="10 — Atoms">
+            <p className="mb-4 max-w-2xl text-sm text-muted-foreground">
+              Atomic pieces that compose every market list and trade surface. <code className="font-mono text-foreground">OutcomePill</code> renders team-vs-team or neutral Yes/No selections; <code className="font-mono text-foreground">StatTile</code> handles balance / PnL grids; <code className="font-mono text-foreground">CountdownPill</code> animates the "ends in" state.
+            </p>
+            <div className="grid gap-4 lg:grid-cols-2">
+              <div className="rounded-2xl border border-border bg-surface p-6 shadow-card">
+                <div className="mb-4 text-[10px] font-mono uppercase tracking-widest text-muted-foreground">OutcomePill — sizes & states</div>
+                <div className="space-y-3">
+                  <div className="grid grid-cols-2 gap-2">
+                    <OutcomePill label="Shanghai Shenhua" probability={62} tone="yes" selected />
+                    <OutcomePill label="Shandong Luneng" probability={38} tone="no" />
+                  </div>
+                  <div className="grid grid-cols-2 gap-2">
+                    <OutcomePill label="Yes" probability={73} tone="yes" size="sm" showCrest={false} />
+                    <OutcomePill label="No" probability={27} tone="no" size="sm" showCrest={false} />
+                  </div>
+                </div>
+              </div>
+              <div className="rounded-2xl border border-border bg-surface p-6 shadow-card">
+                <div className="mb-4 text-[10px] font-mono uppercase tracking-widest text-muted-foreground">Countdowns & section header</div>
+                <div className="flex flex-wrap gap-2">
+                  <CountdownPill value="2d 14h 32m" />
+                  <CountdownPill value="04:12" tone="live" />
+                  <CountdownPill value="Ends in 6h" />
+                </div>
+                <div className="mt-6">
+                  <SectionHeader
+                    kicker="trending"
+                    title="Hot markets"
+                    description="Highest 24h volume across all leagues."
+                    action={{ label: "See all" }}
+                    tabs={[
+                      { label: "All", active: true },
+                      { label: "Soccer" },
+                      { label: "NBA" },
+                    ]}
+                  />
+                </div>
+              </div>
+            </div>
+            <div className="mt-4 grid gap-3 md:grid-cols-4">
+              <StatTile label="Balance" value="$5,240.50" hint="USDC" icon={Wallet} />
+              <StatTile label="Open positions" value="3" hint="2 long · 1 short" icon={LineChart} />
+              <StatTile label="Today PnL" value="+$184.20" tone="win" icon={TrendingUp} />
+              <StatTile label="Total volume" value="$28.4k" hint="last 30d" />
+            </div>
+          </Section>
+
+          {/* MARKET CARD */}
+          <Section id="market" title="Market Card" kicker="11 — Discover">
+            <p className="mb-4 max-w-2xl text-sm text-muted-foreground">
+              The primary unit on Home, Discover, and league pages. Team-vs-team markets show the two team names; neutral markets fall back to Yes / No.
+            </p>
+            <div className="grid gap-4 md:grid-cols-3">
+              <MarketCard
+                league="laliga"
+                question="El Clásico — who lifts the trophy?"
+                outcomes={[
+                  { label: "Real Madrid", probability: 54 },
+                  { label: "Barcelona", probability: 46 },
+                ]}
+                volume="$182k"
+                endsIn="2d 14h"
+                participants={1284}
+              />
+              <MarketCard
+                league="ucl"
+                question="Will Man City reach the UCL final?"
+                outcomes={[
+                  { label: "Yes", probability: 38 },
+                  { label: "No", probability: 62 },
+                ]}
+                volume="$94k"
+                endsIn="11d 02h"
+                participants={612}
+              />
+              <MarketCard
+                league="nba"
+                question="Lakers vs Celtics — tonight's winner"
+                outcomes={[
+                  { label: "Lakers", probability: 41 },
+                  { label: "Celtics", probability: 59 },
+                ]}
+                volume="$58k"
+                endsIn="04:12"
+                participants={2410}
+                status="live"
+              />
+            </div>
+          </Section>
+
+          {/* TRADE SURFACE */}
+          <Section id="trade" title="Trade Surface" kicker="12 — Detail">
+            <p className="mb-6 max-w-2xl text-sm text-muted-foreground">
+              Polymarket-style Yes/No buying with OmenX-style leverage folded into a "PRO" switch. Default state is a clean cash buy; flip PRO to expose leverage, margin mode, TP/SL, and the liquidation price.
+            </p>
+
+            <EventHeader
+              league="ucl"
+              home="Man City"
+              away="Real Madrid"
+              kickoff="Wed · 21:00 BST"
+              status="upcoming"
+              volume="$182k"
+              liquidity="$54k"
+              endsIn="2d 14h"
+            />
+
+            <div className="mt-6 grid gap-5 lg:grid-cols-[1fr_360px]">
+              <div className="space-y-5">
+                <OutcomeSelector
+                  options={[
+                    { label: "Man City", probability: 38 },
+                    { label: "Real Madrid", probability: 62 },
+                  ]}
+                  value="no"
+                  onChange={() => {}}
+                />
+                <PriceChart tone="no" />
+                <OrderBook />
+              </div>
+              <TradeForm outcome="no" outcomeLabel="Real Madrid" price={62} />
+            </div>
+
+            <div className="mt-6">
+              <PositionsTable />
+            </div>
+          </Section>
+
+          <Section id="spacing" title="Spacing & Radius" kicker="13 — Geometry">
             <div className="grid gap-3 md:grid-cols-2">
               <div className="rounded-2xl border border-border bg-surface p-6 shadow-card">
                 <div className="text-xs font-mono uppercase tracking-widest text-muted-foreground mb-4">Spacing scale</div>
