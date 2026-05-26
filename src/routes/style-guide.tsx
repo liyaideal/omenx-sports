@@ -57,7 +57,8 @@ const SECTIONS = [
   ["cards", "Sport Cards"],
   ["leaderboard", "Leaderboard"],
   ["primitives", "Market Primitives"],
-  ["market", "Market Card"],
+  ["market", "Single-Market Binary"],
+  ["multi", "Multi-Market Event"],
   ["trade", "Trade Surface"],
   ["language", "Trading Language"],
   ["spacing", "Spacing & Radius"],
@@ -465,11 +466,17 @@ function StyleGuide() {
           </Section>
 
           {/* MARKET CARD */}
-          <Section id="market" title="Market Card" kicker="11 — Discover">
-            <p className="mb-4 max-w-2xl text-sm text-muted-foreground">
-              The primary unit on Home, Discover, and league pages. Every market is a single Yes/No binary — team-vs-team events alias the two sides via <code className="font-mono text-foreground">sideLabels: {`{ yes, no }`}</code>. Prices and 24h deltas are always mirrored: <code className="font-mono text-foreground">p(No) = 100 − p(Yes)</code>.
+          <Section id="market" title="Single-Market Binary" kicker="11 — One Market">
+            <p className="mb-6 max-w-3xl text-sm text-muted-foreground">
+              Every market is a single Yes/No binary. Prices are always mirrored: <code className="font-mono text-foreground">p(No) = 100 − p(Yes)</code>. The two variants below cover every binary surface in the product — the difference is whether the market provides <code className="font-mono text-foreground">sideLabels</code>.
             </p>
-            <div className="grid gap-4 md:grid-cols-3">
+
+            {/* 11a — Team-vs-team (aliased) */}
+            <div className="mb-4 flex items-baseline justify-between">
+              <h3 className="font-display font-semibold text-lg">11a · Team-vs-team <span className="text-muted-foreground font-normal">— aliased</span></h3>
+              <code className="font-mono text-[10px] text-muted-foreground">sideLabels: {`{ yes: "Chelsea", no: "PSG" }`}</code>
+            </div>
+            <div className="grid gap-4 lg:grid-cols-3">
               <MarketCard
                 league="laliga"
                 question="El Clásico — who lifts the trophy?"
@@ -479,25 +486,112 @@ function StyleGuide() {
                 endsIn="2d 14h"
                 openInterest="412K"
               />
-              <MarketCard
+              <SentimentCard
                 league="ucl"
-                question="Will Man City reach the UCL final?"
+                question="Chelsea vs PSG — who advances?"
+                home="Chelsea"
+                away="PSG"
+                kickoff="Today 8:00pm"
+                yesNotional={1240000}
+                noNotional={680000}
+                sideLabels={{ yes: "Chelsea", no: "PSG" }}
+                openInterest="$1.92M"
+                oiDelta24h={12}
+              />
+              <OrderBook sideLabels={{ yes: "Man City", no: "Real Madrid" }} />
+            </div>
+            <div className="mt-3 rounded-xl border border-loss/30 bg-loss/10 px-4 py-2.5 text-xs text-loss">
+              YES / NO never appears in user-facing text. Color carries the semantic — primary/green = YES side, neon/red = NO side.
+            </div>
+
+            {/* 11b — Neutral */}
+            <div className="mt-10 mb-4 flex items-baseline justify-between">
+              <h3 className="font-display font-semibold text-lg">11b · Neutral <span className="text-muted-foreground font-normal">— no alias</span></h3>
+              <code className="font-mono text-[10px] text-muted-foreground">sideLabels: undefined</code>
+            </div>
+            <div className="grid gap-4 lg:grid-cols-3">
+              <MarketCard
+                league="epl"
+                question="Will it rain at kickoff in Manchester?"
                 yes={{ team: teams.yes, probability: 38 }}
                 no={{ team: teams.no }}
-                volume="$94k"
-                endsIn="11d 02h"
-                openInterest="208K"
+                volume="$24k"
+                endsIn="6h 12m"
+                openInterest="48K"
+              />
+              <SentimentCard
+                league="nba"
+                question="Will tonight's game go to overtime?"
+                home="Yes"
+                away="No"
+                kickoff="Tip-off 7:30pm"
+                yesNotional={210000}
+                noNotional={540000}
+                openInterest="$0.75M"
+                oiDelta24h={-4}
+              />
+              <OrderBook />
+            </div>
+            <div className="mt-3 rounded-xl border border-border bg-white/[0.02] px-4 py-2.5 text-xs text-muted-foreground">
+              Only when the market provides no <code className="font-mono text-foreground">sideLabels</code> do "Yes" / "No" appear as literal user text.
+            </div>
+          </Section>
+
+          {/* MULTI-MARKET EVENT */}
+          <Section id="multi" title="Multi-Market Event" kicker="12 — Bundled Binaries">
+            <p className="mb-6 max-w-3xl text-sm text-muted-foreground">
+              An <strong className="text-foreground">event</strong> aggregates multiple independent binary markets. Each market is its own Yes/No (prices do <em>not</em> sum across markets — Man City reaching the final does not preclude Real Madrid from also reaching it). Each card inside the event still follows the Section 11 rules.
+            </p>
+            <EventHeader
+              league="ucl"
+              home="UCL Semis"
+              away="4 Markets"
+              kickoff="Tonight · 20:00 BST"
+              status="upcoming"
+              volume="$1.4M"
+              liquidity="$420k"
+              endsIn="6h 30m"
+            />
+            <div className="mt-6 grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+              <MarketCard
+                league="ucl"
+                question="Man City reach the final?"
+                yes={{ team: teams.manCity, probability: 64, delta24h: 5 }}
+                no={{ label: "—" }}
+                volume="$480k"
+                endsIn="6h 30m"
+                openInterest="180K"
               />
               <MarketCard
-                league="nba"
-                question="Lakers vs Celtics — tonight's winner"
-                yes={{ team: teams.lakers, probability: 41 }}
-                no={{ team: teams.celtics }}
-                volume="$58k"
-                endsIn="04:12"
-                openInterest="124K"
-                status="live"
+                league="ucl"
+                question="Real Madrid reach the final?"
+                yes={{ team: teams.realMadrid, probability: 58, delta24h: -2 }}
+                no={{ label: "—" }}
+                volume="$390k"
+                endsIn="6h 30m"
+                openInterest="142K"
               />
+              <MarketCard
+                league="ucl"
+                question="Chelsea reach the final?"
+                yes={{ team: teams.chelsea, probability: 41, delta24h: 3 }}
+                no={{ label: "—" }}
+                volume="$310k"
+                endsIn="6h 30m"
+                openInterest="98K"
+              />
+              <MarketCard
+                league="ucl"
+                question="PSG reach the final?"
+                yes={{ team: teams.psg, probability: 37, delta24h: -1 }}
+                no={{ label: "—" }}
+                volume="$260k"
+                endsIn="6h 30m"
+                openInterest="86K"
+              />
+            </div>
+            <div className="mt-3 rounded-xl border border-border bg-white/[0.02] px-4 py-2.5 text-xs text-muted-foreground">
+              4 independent binary markets · probabilities sum to <span className="text-foreground tabular-nums">200%</span>, not 100% — each Yes is judged on its own.
             </div>
           </Section>
 
