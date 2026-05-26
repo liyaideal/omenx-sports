@@ -37,7 +37,7 @@ export function StandingsPreview({ league, rows, className }: StandingsPreviewPr
         </a>
       </div>
       <LeaderboardHeader />
-      <div className="mt-1 flex flex-1 flex-col justify-between">
+      <div className="mt-1 flex flex-col">
         {rows.map((r, i) => (
           <LeaderboardRow key={r.team} rank={i + 1} {...r} />
         ))}
