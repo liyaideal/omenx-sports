@@ -98,21 +98,30 @@ function Index() {
           </div>
         </section>
 
-        {/* BOTTOM CENTER — Futures + Top scorer */}
-        <section className="flex flex-col gap-5 lg:col-start-2 lg:row-start-2">
-          <LeagueWinnerMarketCard market={LEAGUE_WINNER_MARKET} />
-          <TopScorerMarketCard
-            market={TOP_SCORER_MARKET}
-            photos={{
-              messi: TOP_SCORERS[0].photo,
-              haaland: TOP_SCORERS[1].photo,
-            }}
+        {/* BOTTOM — Season markets (futures + player props) */}
+        <section className="flex flex-col gap-4 lg:col-span-2 lg:col-start-2 lg:row-start-2">
+          <SectionHeader
+            title="Season"
+            accent="markets"
+            right={
+              <a href={omenxUrl.markets()} className="inline-flex items-center gap-1 text-xs font-medium text-muted-foreground hover:text-foreground">
+                Browse all <ArrowUpRight className="h-3.5 w-3.5" />
+              </a>
+            }
           />
-        </section>
-
-        {/* BOTTOM RIGHT — Player props spotlight */}
-        <section className="flex flex-col lg:col-start-3 lg:row-start-2">
-          <PlayerPropsSpotlight player={SPOTLIGHT} />
+          <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_360px]">
+            <div className="flex flex-col gap-5">
+              <LeagueWinnerMarketCard market={LEAGUE_WINNER_MARKET} />
+              <TopScorerMarketCard
+                market={TOP_SCORER_MARKET}
+                photos={{
+                  messi: TOP_SCORERS[0].photo,
+                  haaland: TOP_SCORERS[1].photo,
+                }}
+              />
+            </div>
+            <PlayerPropsSpotlight player={SPOTLIGHT} />
+          </div>
         </section>
       </div>
 
