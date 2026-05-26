@@ -133,6 +133,9 @@ function Index() {
             onSelect={setSelectedOffset}
             countsByOffset={countsByOffset}
           />
+          <p className="-mt-1 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+            Prices in ¢ (0–100) · arrows show 24h change
+          </p>
           {visibleMarkets.length > 0 ? (
             <>
               <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">

@@ -21,6 +21,7 @@ import { RatioBar } from "@/components/sports/RatioBar";
 import { NeonRing } from "@/components/sports/NeonRing";
 import { TeamCrest } from "@/components/sports/TeamCrest";
 import { LeagueBadge, LeagueChip, LEAGUE_KEYS } from "@/components/sports/LeagueBadge";
+import { PricePill } from "@/components/sports/dashboard/PricePill";
 import { OutcomePill } from "@/components/sports/OutcomePill";
 import { CountdownPill } from "@/components/sports/CountdownPill";
 import { StatTile } from "@/components/sports/StatTile";
@@ -340,6 +341,18 @@ function StyleGuide() {
                 <button className="inline-flex items-center gap-2 rounded-full bg-white/[0.04] px-4 py-1.5 text-xs text-muted-foreground hover:text-foreground">
                   Following
                 </button>
+              </div>
+              <div>
+                <div className="mb-2 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">Price pill — signed delta with ¢ unit</div>
+                <div className="flex flex-wrap items-center gap-3">
+                  <PricePill price={0.42} delta={0.03} />
+                  <PricePill price={0.21} delta={-0.01} />
+                  <PricePill price={0.37} delta={0} />
+                  <PricePill price={0.58} delta={0.04} showTimeframe />
+                </div>
+                <p className="mt-2 text-xs text-muted-foreground">
+                  Prices are in cents (0–100). Delta is signed (<code className="font-mono text-foreground">+3¢</code> / <code className="font-mono text-foreground">−1¢</code> / <code className="font-mono text-foreground">0¢</code>) and represents the 24h change. Arrow + color are redundant cues — the number alone must still read correctly.
+                </p>
               </div>
             </div>
           </Section>
