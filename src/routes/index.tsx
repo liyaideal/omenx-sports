@@ -255,18 +255,6 @@ function Index() {
                 href="#bento"
               />
               <LiveTicker rows={TICKER_ROWS} />
-              <SentimentCard
-                league="ucl"
-                question="Real Madrid to win vs Man City"
-                home="Real Madrid"
-                away="Man City"
-                kickoff="Sat · 21:00 CET"
-                yesNotional={812000}
-                noNotional={398000}
-                sideLabels={{ yes: "RMA", no: "MCI" }}
-                openInterest="$1.21M"
-                oiDelta24h={12.4}
-              />
             </div>
 
             {/* CENTER COLUMN */}
@@ -314,6 +302,18 @@ function Index() {
                 jersey={SPOTLIGHT_PLAYER.jersey}
               />
               <TopTradersCard rows={TOP_TRADERS} />
+              <SentimentCard
+                league="ucl"
+                question="Real Madrid to win vs Man City"
+                home="Real Madrid"
+                away="Man City"
+                kickoff="Sat · 21:00 CET"
+                yesNotional={812000}
+                noNotional={398000}
+                sideLabels={{ yes: "RMA", no: "MCI" }}
+                openInterest="$1.21M"
+                oiDelta24h={12.4}
+              />
             </div>
           </div>
         </section>
