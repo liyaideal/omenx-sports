@@ -1,5 +1,6 @@
 import { Clock } from "lucide-react";
 import type { TeamLite } from "@/data/sports-mock";
+import { LeagueChip } from "../LeagueBadge";
 
 interface UpcomingEventCardProps {
   home: TeamLite;
@@ -20,10 +21,7 @@ export function UpcomingEventCard({ home, away, kickoff, dateLabel, league, href
       </div>
       <div className="flex items-center justify-between border-t border-border pt-3 text-[11px] font-mono text-muted-foreground">
         <span className="inline-flex items-center gap-1.5"><Clock className="h-3 w-3" /> {dateLabel}</span>
-        <span className="inline-flex items-center gap-1.5">
-          <span className="grid h-4 w-4 place-items-center rounded-full bg-gradient-neon text-[8px] font-bold text-primary-foreground">L</span>
-          {league.name}
-        </span>
+        <LeagueChip short={league.short} />
       </div>
     </a>
   );

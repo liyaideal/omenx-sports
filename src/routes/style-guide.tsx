@@ -20,7 +20,7 @@ import { StatChip } from "@/components/sports/StatChip";
 import { RatioBar } from "@/components/sports/RatioBar";
 import { NeonRing } from "@/components/sports/NeonRing";
 import { TeamCrest } from "@/components/sports/TeamCrest";
-import { LeagueBadge, LEAGUE_KEYS } from "@/components/sports/LeagueBadge";
+import { LeagueBadge, LeagueChip, LEAGUE_KEYS } from "@/components/sports/LeagueBadge";
 import { OutcomePill } from "@/components/sports/OutcomePill";
 import { CountdownPill } from "@/components/sports/CountdownPill";
 import { StatTile } from "@/components/sports/StatTile";
@@ -289,10 +289,38 @@ function StyleGuide() {
           {/* CHIPS */}
           <Section id="chips" title="Chips & Badges" kicker="05 — Tags">
             <div className="space-y-4 rounded-2xl border border-border bg-surface p-6 shadow-card">
+              <div>
+                <div className="mb-2 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">League chip — card header (canonical)</div>
+                <div className="flex flex-wrap items-center gap-2">
+                  {LEAGUE_KEYS.map((k) => (
+                    <LeagueChip key={k} league={k} />
+                  ))}
+                  <LeagueChip short="MLS" />
+                </div>
+                <div className="mt-3 flex flex-wrap items-center gap-2">
+                  <LeagueChip league="epl" />
+                  <span className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">· MATCH</span>
+                </div>
+                <div className="mt-2 flex flex-wrap items-center gap-2">
+                  <LeagueChip league="epl" />
+                  <span className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">· SEASON WINNER</span>
+                </div>
+                <div className="mt-2 flex flex-wrap items-center gap-2">
+                  <LeagueChip league="ucl" />
+                  <span className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">· TOP SCORER</span>
+                </div>
+                <div className="mt-2 flex flex-wrap items-center gap-2">
+                  <LeagueChip league="nba" />
+                  <span className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">· EVENT</span>
+                </div>
+              </div>
+              <div>
+                <div className="mb-2 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">League badge — inline (rows / sentiment)</div>
               <div className="flex flex-wrap gap-2">
                 {LEAGUE_KEYS.map((k) => (
                   <LeagueBadge key={k} league={k} />
                 ))}
+              </div>
               </div>
               <div className="flex flex-wrap gap-2">
                 <span className="rounded-full bg-neon/10 px-3 py-1 text-[11px] font-medium uppercase tracking-widest text-neon ring-1 ring-neon/30">Live</span>

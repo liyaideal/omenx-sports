@@ -1,6 +1,7 @@
 import { Clock, Users } from "lucide-react";
 import type { Outcome, SportsMarket, TeamLite } from "@/data/sports-markets";
 import { PricePill } from "./PricePill";
+import { LeagueChip } from "../LeagueBadge";
 
 /**
  * Universal event market tile — supports two OmenX market shapes:
@@ -19,12 +20,12 @@ export function EventMarketTileCard({ market }: { market: SportsMarket }) {
       className="group flex h-full flex-col gap-4 rounded-3xl border border-border bg-surface p-5 shadow-card transition hover:border-white/15"
     >
       <header className="flex items-center justify-between gap-2">
-        <span className="inline-flex items-center gap-1.5 rounded-full bg-white/[0.05] px-2.5 py-1 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
-          <span className="grid h-3.5 w-3.5 place-items-center rounded-full bg-gradient-neon text-[8px] font-bold text-primary-foreground">L</span>
-          {market.league.short}
-        </span>
+        <div className="inline-flex items-center gap-2">
+          <LeagueChip short={market.league.short} />
+          <span className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">· EVENT</span>
+        </div>
         <span className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
-          {market.shape === "three-way" ? "1 · X · 2" : "BINARY"}
+          {market.shape === "three-way" ? "1 · X · 2" : "YES / NO"}
         </span>
       </header>
 

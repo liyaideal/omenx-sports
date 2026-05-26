@@ -1,6 +1,7 @@
 import { ArrowUpRight } from "lucide-react";
 import type { SportsMarket } from "@/data/sports-markets";
 import { PricePill } from "./PricePill";
+import { LeagueChip } from "../LeagueBadge";
 
 /**
  * Multi-outcome futures market for top scorer awards. Visually identical
@@ -20,10 +21,11 @@ export function TopScorerMarketCard({
     <section className="rounded-3xl border border-border bg-surface p-5 shadow-card">
       <header className="flex items-center justify-between pb-3">
         <div>
-          <div className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
-            {market.league.short} · FUTURES
+          <div className="inline-flex items-center gap-2">
+            <LeagueChip short={market.league.short} />
+            <span className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">· TOP SCORER</span>
           </div>
-          <h3 className="mt-0.5 font-display text-base font-semibold text-foreground">{market.title}</h3>
+          <h3 className="mt-1.5 font-display text-base font-semibold text-foreground">{market.title}</h3>
         </div>
         <a href={market.tradeHref} className="inline-flex items-center gap-1 text-xs font-medium text-muted-foreground hover:text-foreground">
           Trade <ArrowUpRight className="h-3.5 w-3.5" />
