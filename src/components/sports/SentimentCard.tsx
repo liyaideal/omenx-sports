@@ -13,6 +13,12 @@ export interface SentimentCardProps {
   yesNotional: number;
   /** Notional on NO contracts (USDC). Derived from real open positions. */
   noNotional: number;
+  /**
+   * Optional team aliases for the two sides. When present, the ratio bar
+   * labels use the team names (e.g. "Chelsea / PSG") instead of "Yes / No"
+   * — keeping the whole card in one language.
+   */
+  sideLabels?: { yes: string; no: string };
   openInterest: string;
   oiDelta24h?: number; // % change
   className?: string;
@@ -36,6 +42,7 @@ export function SentimentCard({
   kickoff,
   yesNotional,
   noNotional,
+  sideLabels,
   openInterest,
   oiDelta24h,
   className,
@@ -77,8 +84,8 @@ export function SentimentCard({
           value={yesPct}
           leftTone="win"
           rightTone="loss"
-          leftLabel={`Yes $${fmtUSDC(yesNotional)}`}
-          rightLabel={`No $${fmtUSDC(noNotional)}`}
+          leftLabel={`${sideLabels?.yes ?? "Yes"} $${fmtUSDC(yesNotional)}`}
+          rightLabel={`${sideLabels?.no ?? "No"} $${fmtUSDC(noNotional)}`}
         />
       </div>
 
