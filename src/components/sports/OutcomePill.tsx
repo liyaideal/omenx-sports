@@ -37,10 +37,10 @@ const TONE_TEXT: Record<OutcomeTone, string> = {
 const SIZES = {
   // Crest is intentionally one notch smaller than the legacy circle crest:
   // real logos use their full bounding box (no inner padding), so a "sm" real
-  // logo reads as visually larger than a "sm" letter circle.
-  sm: { box: "px-3 py-2", code: "text-sm", price: "text-base", crest: "xs" },
-  md: { box: "px-3.5 py-2.5", code: "text-base", price: "text-lg", crest: "xs" },
-  lg: { box: "px-4 py-3", code: "text-lg", price: "text-xl", crest: "sm" },
+  // logo reads visually larger than a "sm" letter circle.
+  sm: { box: "px-2.5 py-2 gap-2", code: "text-xs", price: "text-sm", crest: "xs" },
+  md: { box: "px-2.5 py-2 gap-2", code: "text-sm", price: "text-base", crest: "xs" },
+  lg: { box: "px-3.5 py-2.5 gap-3", code: "text-base", price: "text-xl", crest: "sm" },
 } as const;
 
 export function OutcomePill({
@@ -68,14 +68,14 @@ export function OutcomePill({
       type="button"
       onClick={onClick}
       className={cn(
-        "group flex w-full items-center justify-between gap-3 rounded-2xl bg-white/[0.03] ring-1 transition-all text-left",
+        "group flex w-full items-center justify-between rounded-2xl bg-white/[0.03] ring-1 transition-all text-left",
         s.box,
         selected ? TONE_SELECTED[tone] : TONE_RING[tone],
         className,
       )}
       aria-label={fullName}
     >
-      <div className="flex min-w-0 items-center gap-2">
+      <div className="flex min-w-0 items-center gap-1.5">
         {showCrest && (
           <TeamCrest
             name={fullName}
@@ -84,7 +84,7 @@ export function OutcomePill({
             size={s.crest as "xs" | "sm" | "md"}
           />
         )}
-        <span className={cn("font-display font-bold tracking-wide text-foreground uppercase", s.code)}>
+        <span className={cn("font-display font-bold tracking-wide text-foreground uppercase truncate", s.code)}>
           {displayShort}
         </span>
       </div>
