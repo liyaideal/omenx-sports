@@ -544,6 +544,8 @@ function StyleGuide() {
           </Section>
 
           <Section id="spacing" title="Spacing & Radius" kicker="13 — Geometry">
+            {""}
+          </Section>
             <div className="grid gap-3 md:grid-cols-2">
               <div className="rounded-2xl border border-border bg-surface p-6 shadow-card">
                 <div className="text-xs font-mono uppercase tracking-widest text-muted-foreground mb-4">Spacing scale</div>
