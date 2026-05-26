@@ -15,3 +15,8 @@ Rules:
 - Top nav "Events" is correct; link via omenxUrl.events()
 - Phrase "prediction markets" is a product-category noun in meta/SEO copy — keep as is
 - Component/file/data names (MatchMarketCard, MATCH_MARKETS, etc.) are technical and stay unchanged; this rule only governs visible copy
+
+Two easily-confused market shapes (do not mix in copy):
+- **Multi-outcome futures market** (one market, many candidates) → e.g. "EPL Top Scorer 25/26" with Messi / Haaland / Salah as outcomes. Subtitle pattern: "{league} · To win {award}". Each row buys one candidate.
+- **Player props bundle** (one player, many markets) → e.g. Mbappé spotlight with Anytime scorer / 2+ goals / Shots o2.5 as separate YES/NO markets. Subtitle pattern: "Player props · N markets".
+- Never label a futures-outcome row as "player props" or vice versa.

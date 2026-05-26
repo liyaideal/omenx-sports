@@ -15,7 +15,9 @@ export function PlayerPropsSpotlight({ player }: { player: PlayerSpotlight }) {
           <X className="h-4 w-4" />
         </button>
         <div className="text-center">
-          <div className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">Player markets</div>
+          <div className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+            Player props · {player.props.length} markets
+          </div>
           <div className="font-display text-base font-semibold text-foreground">
             <span className="text-neon">@</span>
             {player.handle}
