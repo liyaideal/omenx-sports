@@ -9,8 +9,8 @@ export interface MarketCardProps {
   question: string;
   /** Two outcomes. For team-vs-team markets, label = team name; for neutral, "Yes" / "No". */
   outcomes: [
-    { label: string; probability: number },
-    { label: string; probability: number },
+    { label: string; probability: number; delta24h?: number },
+    { label: string; probability: number; delta24h?: number },
   ];
   volume: string;
   endsIn: string;
@@ -54,6 +54,7 @@ export function MarketCard({
         <OutcomePill
           label={outcomes[0].label}
           probability={outcomes[0].probability}
+          delta24h={outcomes[0].delta24h}
           tone="yes"
           selected={selected === "yes"}
           onClick={() => onSelect?.("yes")}
@@ -61,6 +62,7 @@ export function MarketCard({
         <OutcomePill
           label={outcomes[1].label}
           probability={outcomes[1].probability}
+          delta24h={outcomes[1].delta24h}
           tone="no"
           selected={selected === "no"}
           onClick={() => onSelect?.("no")}
