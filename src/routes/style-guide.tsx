@@ -369,6 +369,7 @@ function StyleGuide() {
                   kickoff="Today 8:00pm"
                   yesNotional={1240000}
                   noNotional={680000}
+                  sideLabels={{ yes: "Chelsea", no: "PSG" }}
                   openInterest="$1.92M"
                   oiDelta24h={12}
                 />
