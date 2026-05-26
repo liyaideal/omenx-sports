@@ -1,78 +1,61 @@
-## 目标
+# 把 Leverage 从 PRO 折叠里拿出来
 
-把 style-guide 里 single-market binary 与 multi-market(bundled binaries) event 两种事件结构清晰拆开，并修掉所有"上下文混着喊 yes/no 与 team alias"的不一致。
+## 背景
 
-## 三条铁则（写进 Trading Language）
+当前 `TradeForm` 默认形态等同现货：只有 Buy/Sell + Amount + 百分比快捷键，Leverage 被藏在 "PRO · Leverage" 折叠开关里。但这是合约预测市场（永续/带杠杆的 binary perp），杠杆是核心心智，不是高级功能。需要把 Leverage 提到默认可见位置，PRO 只保留真正的"高级"项。
 
-1. **Yes/No 只是底层技术 label**；当 market 提供 `sideLabels: { yes, no }` 时，用户文案永远使用别名（team 名）。
-2. **绿 = YES 侧，红 = NO 侧** 是唯一承担 yes/no 语义的视觉信号；不再用 YES/NO 文字作为用户标签。
-3. 同一个 market 内的所有展示（pill / 比例条 / 订单簿列头 / 仓位标签 / PnL 行）必须用同一套别名。
+## 变更范围
 
-## 组件改动
+仅前端 UI：`src/components/sports/TradeForm.tsx` + `src/routes/style-guide.tsx` 的交易区文字说明。无业务逻辑变化。
 
-### 1. `src/components/sports/SentimentCard.tsx`
-- 新增可选 `sideLabels?: { yes: string; no: string }`。
-- `RatioBar` 标签：有别名 → `Chelsea $1.24M / PSG $680K`；无别名 → `Yes $… / No $…`。
-- 顶部 vs 区域已经渲染了 home/away 的 TeamCrest，保持。
+## TradeForm 新结构
 
-### 2. `src/components/sports/OrderBook.tsx`
-- 新增可选 `sideLabels?: { yes: string; no: string }`。
-- 双栏列头：有别名 → `CHELSEA BOOK / PSG BOOK`；无别名 → `YES BOOK / NO BOOK`。
-- 颜色规则保持（YES 侧绿/primary，NO 侧红/neon）。
-- 顶部"NO mirrors YES"提示文案保留，但措辞改为通用："right side mirrors left · price = 100 − left_price"。
+```text
+┌─ Buy / Sell ───────────────────────────┐
+├─ Market / Limit          Bal 5,000 USDC┤
+│                                         │
+│  [Margin (USDC)        ............5000]│
+│  [25%] [50%] [75%] [100%]               │
+│                                         │
+│  Leverage             1× ─────●──── 20× │   ← 始终可见
+│  Notional = 5,000 × 3 = 15,000 USDC     │   ← 实时提示
+│                                         │
+│  ⚡ PRO    Cross/Iso · TP/SL · Liq  [○] │   ← 折叠
+│  ┌─ (展开后) ─────────────────────────┐ │
+│  │  [Cross | Isolated]                │ │
+│  │  [TP ¢]  [SL ¢]                    │ │
+│  │  Liquidation bar (当 lev>1)        │ │
+│  └────────────────────────────────────┘ │
+│                                         │
+│  Avg price / Margin / Notional /        │
+│  Contracts / Fee / Est. PnL / Liq price │
+│                                         │
+│  [ SELL REAL MADRID 3× @ 62¢ ]          │
+└─────────────────────────────────────────┘
+```
 
-### 3. `src/components/sports/PositionsTable.tsx`
-- 已经吃 `outcomeLabel`，无需大改；只在 demo 数据里区分 team alias 行 vs neutral 行（已做）。
+## 关键决策
 
-### 4. 不动：MarketCard / OutcomePill / OutcomeSelector / TradeForm / MatchCard / EventHeader / LiquidationBar（这些已经按 team-first 模型工作）。
+1. **Leverage slider 永久显示**，紧跟在 Amount 快捷键下方；范围 `1×–20×`，默认 `1×`。
+2. **Amount 输入框统一改名 "Margin (USDC)"**（不再随 PRO 切换 label）。下方加一行小字提示：`Notional = Margin × Leverage = X,XXX USDC`，让用户对杠杆放大效应有直观感知。
+3. **PRO 折叠保留这些"真·高级"项**：
+   - Margin mode（Cross / Isolated）
+   - TP / SL 输入
+   - Liquidation bar + Liq price 估算说明
+   - PRO label 文字从 "PRO · Leverage / Margin, TP/SL, Liq price" 改为 "PRO · Cross/Iso · TP/SL · Liq"
+4. **Liq price 行**在 summary 区的展示规则不变：当 `leverage > 1` 时显示（无论 PRO 是否展开）。
+5. **CTA 文案规则**：`leverage > 1` 时始终带 `{n}×`，例如 `SELL REAL MADRID 3× @ 62¢`；`1×` 时省略，避免噪音。
+6. **Summary 行**：`Margin` 行改为始终显示（不再门控在 PRO 下），因为现在 Margin 是默认输入概念。
 
-## Style-guide 章节重组
+## 文案 / 设计规范同步
 
-把原来"Market Card (11)" + "Trade Surface (12)"两个段落改成下列三段，演示三种事件结构并排出现，规则一眼可见：
+`src/routes/style-guide.tsx` 中 Trade Surface 章节：
+- 更新示意截图描述：Leverage 列为默认控件，PRO 描述去掉 "Leverage" 字样。
+- 在 Trading Language 加一条规则："Leverage 是合约预测市场的一等公民，默认可见；PRO 仅承载 Cross/Iso、TP/SL、Liq 可视化等高级项。"
 
-### Section 11 — Binary Market · Single Market（单一市场二元）
+## 不动的部分
 
-**11a. Team-vs-team (aliased)** — 三列演示：
-- `MarketCard` 用 `yes: { team: Chelsea, probability: 65, delta24h: +4 }, no: { team: PSG }`
-- `SentimentCard` 传 `sideLabels: { yes: "Chelsea", no: "PSG" }`，比例条显示 `Chelsea $1.24M / PSG $680K`
-- 迷你 `OrderBook` 列头 `CHELSEA BOOK / PSG BOOK`
-- 段尾红色提醒条："YES / NO 不在用户视野出现 —— 颜色就是语义"
-
-**11b. Neutral (no alias)** — 同样三列：
-- `MarketCard` "Will it rain at kickoff?" yes/no
-- `SentimentCard` 不传 sideLabels，比例条回退为 `Yes $… / No $…`
-- 迷你 `OrderBook` 列头 `YES BOOK / NO BOOK`
-- 段尾说明："只有当 market 没有 sideLabels 时，才会真的看到 Yes/No 字样"
-
-### Section 12 — Multi-Market Event（事件聚合，B 模型）
-
-演示一个 "UCL Final Night" 事件聚合页：
-- 顶部 `EventHeader`：UCL · Tonight 21:00 BST · Aggregate Volume $X · 4 markets
-- 下方 4 张 `MarketCard` 网格，每张都是独立二元，例如：
-  - "Man City reach final?" — yes: Man City, no: "—" (neutral no side)
-  - "Real Madrid reach final?" — yes: Real Madrid, no: "—"
-  - "Bayern reach final?" — yes: Bayern, no: "—"
-  - "PSG reach final?" — yes: PSG, no: "—"
-- 重点说明："这是 4 个独立的 binary market 被同一事件聚合，每张卡内部仍遵循 Section 11 的规则；价格不互斥（4 个概率不加总到 100）"。
-- 不引入新组件，仅复用 MarketCard + EventHeader + 段落文案。
-
-### Section 13 — Trade Surface（原 12 段保留）
-不动 demo 内容，但 `OutcomeSelector` / `OrderBook` 上方加一行小字："This event has `sideLabels: { yes: Man City, no: Real Madrid }` — YES/NO never shown."；`OrderBook` demo 传 sideLabels 后列头就会变成 `MAN CITY BOOK / REAL MADRID BOOK`，作为活样本。
-
-### Section 14 — Trading Language（原 13 段，扩写）
-新增小节 "Event types"，对照表：
-
-| Type | Markets | Prices sum to | UI rule |
-|---|---|---|---|
-| Single-market binary (aliased) | 1 | 100 across yes+no | Team names everywhere, color = side |
-| Single-market binary (neutral) | 1 | 100 across yes+no | Yes/No literal text |
-| Multi-market event (bundled) | N | each market independent | List of cards, each follows row above |
-
-并把现有"Color usage"行的 "primary = YES outcome / neon = NO outcome" 改写为"primary = YES side (默认绿/win 也接受) / neon = NO side"，与组件保持一致。
-
-## 验收
-
-- 在 style-guide 全文搜索：所有 `Yes/No` 字面文案要么在 11b 的 neutral demo 里，要么在 Trading Language 解释里；team match 演示区出现的 yes/no 字样数量 = 0。
-- `SentimentCard` 在 Chelsea vs PSG demo 中比例条显示 `Chelsea / PSG` 而非 `Yes / No`。
-- `OrderBook` 在 team match demo 中列头显示 team 别名。
-- Section 11a / 11b / 12 三个段落视觉上能让人一眼区分事件结构。
+- 颜色语义（green=YES / red=NO / outcome accent on CTA）不变
+- `sideLabels` / `outcomeLabel` 团队别名规则不变
+- LiquidationBar、SummaryRow、Field 等子组件 API 不变
+- 真实下单 / 撮合 / 风控逻辑（本来就是 mock）不动

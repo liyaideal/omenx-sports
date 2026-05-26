@@ -69,9 +69,10 @@ export function TradeForm({
   }, [leverage, px, outcome]);
 
   const action = side === "buy" ? "Buy" : "Sell";
-  const ctaLabel = pro
-    ? `${action} ${outcomeLabel} ${leverage}× @ ${Math.round(px)}¢`
-    : `${action} ${outcomeLabel} @ ${Math.round(px)}¢`;
+  const ctaLabel =
+    leverage > 1
+      ? `${action} ${outcomeLabel} ${leverage}× @ ${Math.round(px)}¢`
+      : `${action} ${outcomeLabel} @ ${Math.round(px)}¢`;
 
   return (
     <div className={cn("rounded-2xl border border-border bg-surface p-5 shadow-card", className)}>
@@ -124,7 +125,7 @@ export function TradeForm({
             />
           </Field>
         )}
-        <Field label={pro ? "Margin (USDC)" : "Amount (USDC)"}>
+        <Field label="Margin (USDC)">
           <input
             type="number"
             value={margin}
@@ -145,13 +146,39 @@ export function TradeForm({
         </div>
       </div>
 
-      {/* PRO toggle */}
+      {/* Leverage — first-class control (perp prediction market) */}
+      <div className="mt-4 rounded-xl border border-border bg-white/[0.02] px-3 py-3">
+        <div className="flex items-center justify-between">
+          <span className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground">
+            Leverage
+          </span>
+          <span className="font-mono text-sm text-neon">{leverage}×</span>
+        </div>
+        <Slider
+          value={[leverage]}
+          onValueChange={([v]) => setLeverage(v)}
+          min={1}
+          max={20}
+          step={1}
+          className="mt-2"
+        />
+        <div className="mt-2 flex items-center justify-between font-mono text-[10px] text-muted-foreground">
+          <span>1×</span>
+          <span>
+            Notional = {margin.toLocaleString()} × {leverage} ={" "}
+            <span className="text-foreground">{notional.toLocaleString()} USDC</span>
+          </span>
+          <span>20×</span>
+        </div>
+      </div>
+
+      {/* PRO toggle — advanced extras only */}
       <div className="mt-5 flex items-center justify-between rounded-xl border border-border bg-white/[0.02] px-3 py-2.5">
         <div className="flex items-center gap-2">
           <Zap className={cn("h-4 w-4", pro ? "text-neon" : "text-muted-foreground")} />
           <div>
-            <div className="text-xs font-display font-semibold">PRO · Leverage</div>
-            <div className="text-[10px] font-mono text-muted-foreground">Margin, TP/SL, Liq price</div>
+            <div className="text-xs font-display font-semibold">PRO</div>
+            <div className="text-[10px] font-mono text-muted-foreground">Cross/Iso · TP/SL · Liq</div>
           </div>
         </div>
         <Switch checked={pro} onCheckedChange={setPro} />
@@ -159,21 +186,6 @@ export function TradeForm({
 
       {pro && (
         <div className="mt-4 space-y-4 rounded-xl border border-neon/20 bg-neon/[0.03] p-4">
-          <div>
-            <div className="flex items-center justify-between">
-              <span className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground">Leverage</span>
-              <span className="font-mono text-sm text-neon">{leverage}×</span>
-            </div>
-            <Slider
-              value={[leverage]}
-              onValueChange={([v]) => setLeverage(v)}
-              min={1}
-              max={20}
-              step={1}
-              className="mt-2"
-            />
-          </div>
-
           <div className="grid grid-cols-2 gap-1 rounded-lg bg-white/[0.04] p-1">
             {(["cross", "isolated"] as Margin[]).map((m) => (
               <button
@@ -224,7 +236,7 @@ export function TradeForm({
       {/* Summary */}
       <dl className="mt-5 space-y-1.5 border-t border-border pt-4 text-[11px] font-mono">
         <SummaryRow label="Avg price" value={`${Math.round(px)}¢`} />
-        {pro && <SummaryRow label="Margin" value={`${margin.toFixed(2)} USDC`} />}
+        <SummaryRow label="Margin" value={`${margin.toFixed(2)} USDC`} />
         <SummaryRow label="Notional" value={`${notional.toFixed(2)} USDC`} />
         <SummaryRow label="Contracts" value={shares.toFixed(1)} />
         <SummaryRow label="Fee" value={`${fee.toFixed(2)} USDC`} />
@@ -233,7 +245,7 @@ export function TradeForm({
           value={`${pnlAtSettle >= 0 ? "+" : ""}${pnlAtSettle.toFixed(2)} USDC`}
           highlight={pnlAtSettle >= 0 ? "win" : "loss"}
         />
-        {pro && leverage > 1 && (
+        {leverage > 1 && (
           <SummaryRow label="Liq price" value={`${Math.round(liq)}¢`} highlight="loss" />
         )}
       </dl>
