@@ -1,6 +1,7 @@
 import { Clock, MoreHorizontal, Users } from "lucide-react";
 import type { SportsMarket, TeamLite } from "@/data/sports-markets";
 import { PricePill } from "./PricePill";
+import { LeagueChip } from "../LeagueBadge";
 
 /**
  * Featured match market — replaces the old FanPollCard. Two crests, a
@@ -18,10 +19,10 @@ export function MatchMarketCard({ market }: { market: SportsMarket }) {
       <div className="pointer-events-none absolute inset-x-0 -top-24 h-48 bg-[radial-gradient(60%_100%_at_50%_100%,oklch(0.7_0.28_340/0.18),transparent_70%)]" />
 
       <header className="relative flex items-center justify-between">
-        <span className="inline-flex items-center gap-1.5 rounded-full bg-white/[0.05] px-2.5 py-1 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
-          <span className="grid h-3.5 w-3.5 place-items-center rounded-full bg-gradient-neon text-[8px] font-bold text-primary-foreground">L</span>
-          {market.league.short}
-        </span>
+        <div className="inline-flex items-center gap-2">
+          <LeagueChip short={market.league.short} />
+          <span className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">· MATCH</span>
+        </div>
         <button aria-label="More" className="text-muted-foreground hover:text-foreground">
           <MoreHorizontal className="h-5 w-5" />
         </button>
