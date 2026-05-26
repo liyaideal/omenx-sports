@@ -1,88 +1,74 @@
-## 组件与 OmenX 合约逻辑一致性审计 + 修复方案
+# MarketCard / OutcomePill 升级方案
 
-按 OmenX 核心原则（价格=概率，YES+NO=1，永续合约带杠杆/保证金/TP-SL/强平，用户↔用户撮合，无赌博话术）逐个体检。
+## 目标
+1. 队名永不截断 —— pill 主显**3–4字母缩写**（RM / BAR / LAK / CEL / MCI），hover 显示完整队名 tooltip
+2. 圆形占位 crest 替换为**真实队徽**，未命中时 fallback 到现有字母 crest
 
----
+## 1. 队伍字典 `src/lib/teams.ts`（新建）
 
-### ❌ 需要修复
+集中维护"全名 ↔ 缩写 ↔ logo URL"映射，组件只接收一个 `teamId`（slug）或完整 `Team` 对象。
 
-**1. `OutcomePill` — `×payout` 是赌博赔率话术**
-- 现状：右下角 `×(100/probability)`，等于 decimal odds。
-- 改：删 `payout`；新增可选 `delta24h?: number`，显示 `+3¢` / `-1¢`（win/loss 配色），符合"价格"叙事。
+```ts
+export interface Team {
+  id: string;          // slug, e.g. "real-madrid"
+  name: string;        // "Real Madrid"
+  short: string;       // "RM" (3–4 chars)
+  logo: string;        // remote URL or imported asset
+  accent?: string;     // optional brand color for crest ring
+}
+```
 
-**2. `MarketCard` — `participants` 字段口径**
-- "X 人参与" 是赌博平台叙事。
-- 改：字段重命名为 `openInterest`，icon 用 `Layers`，文案 `OI 1.2M`。
+预置一组 demo 数据：Real Madrid / Barcelona / Man City / Arsenal / Lakers / Celtics / 以及中性 Yes / No（Yes/No 没有真实 logo，继续走字母 crest，缩写就是 "YES"/"NO"）。
 
-**3. `TradeForm` — 多处赌博词 + 杠杆语义不清**
-- "Potential win" → 改为 **Est. PnL @ settle**，公式 `(1 - px/100) * notional - fee`（YES Long 视角，Short/NO 对称）。
-- Buy/Sell tab 现在用 win/loss 绿红 → 越界。改为中性 outcome 色（YES = primary，NO = neon）。win/loss 只留给 PnL。
-- 明确区分输入语义：用户输入是 **Margin (USDC)**，Notional = Margin × Leverage。summary 同时显示两者。
-- CTA：普通模式 `Buy {Team} @ 28¢`；PRO 模式 `Long {Team} 5× @ 28¢` / `Short {Team} 5× @ 28¢`。
-- 在 LiquidationBar 上方注释强平公式只是 mock。
+## 2. 真实队徽来源
 
-**4. `OrderBook` — 保留两栏 spot 视图，但修正口径（D2 决策）**
-- 保留 "YES 簿 / NO 簿" 并排（Polymarket spot 风），但：
-  - 标题改为 `YES Book` / `NO Book`，左右对称都显示 Bid 侧（即"买入该方向"的挂单）
-  - 列头 `Price · Size · Total` 不变
-  - 配色保持 yes=primary / no=neon（这里属于 outcome 维度，合理）
-  - 顶部加一行 **Spread** 与 **Mark price**，强调这是连续价格簿而非赔率板
+用 **稳定的体育数据 CDN URL**，无需打包资源、无需鉴权：
 
-**5. `PositionsTable` — 缺 OmenX 必要列**
-- 新增：**Margin**、**Liq.**、**Mode**（Cross/Iso）、**ROE%**。
-- "Side" 显示 `yes/no` → 改 `Long {Team}` / `Short {Team}`（用户视角的合约方向）。
-- 列顺序：Market · Side · Size · Entry · Mark · Lev · Mode · Margin · Liq · PnL · ROE · 操作。
+- 足球俱乐部：`https://r2.thesportsdb.com/images/media/team/badge/{id}.png`（TheSportsDB 公开 CDN）或 `https://a.espncdn.com/i/teamlogos/soccer/500/{id}.png`
+- NBA：`https://cdn.nba.com/logos/nba/{teamId}/global/L/logo.svg`（NBA 官方 CDN）
 
-**6. `PredictionCard` + `VoteBar` → 改造为 `SentimentCard` + `RatioBar`（D1 决策 A）**
-- `VoteBar` → 重命名 `RatioBar`，去掉 vote 语义，新增 `left/right` 双 tone（默认 win/loss 或 primary/neon），用于多空比 / 资金流向。
-- `PredictionCard` → 重命名 `SentimentCard`：
-  - 去掉社交计数（likes/comments/shares/flags）和 author 行
-  - 保留 league + 两队 matchup
-  - 中间放 **Long/Short Ratio**（来自持仓而非投票），下方两个数字：`Long: 1.2M USDC · 64%` / `Short: 680K USDC · 36%`
-  - 底部一行 `OI 1.88M · 24h Δ +12%`
-- 旧 `PredictionCard`/`VoteBar` 文件删除，引用点（style-guide）同步替换。
+具体 URL 在 `teams.ts` 里写死即可，组件不关心来源。
 
-**7. `LiquidationBar` — 配色方向反直觉**
-- 渐变改为：从 liq 端（红）→ current（accent），明确"距强平多远"。entry 标记保留灰色。
+> 提示：这些是各联盟/数据商的公开 CDN，用于 demo/style-guide 没问题；正式上线如果要规避商标风险，可以换成自绘 SVG 或购买授权图源。要不要我现在就用这些 URL，后续你再替换？
 
----
+## 3. `TeamCrest.tsx` 改造
 
-### ✅ 已经符合，无需改
+新增 `logoUrl?: string` 属性：
+- 有 `logoUrl` → 渲染 `<img>`，失败 (`onError`) 自动 fallback 到当前的字母 + 渐变圆
+- 无 → 走现有字母 crest 逻辑
+- 圆形容器、尺寸不变，避免影响其它使用方
 
-`EventHeader` / `PriceChart` / `CountdownPill` / `StatTile` / `SectionHeader` / `OutcomeSelector` / `TeamCrest` / `LeagueBadge` / `NeonRing` / `StatChip` / `LeaderboardRow` / `MatchCard`、整体色板。
+## 4. `OutcomePill.tsx` 改造
 
----
+Props 调整：
+- 新增 `team?: Team` 替代裸 `label: string`（保留 `label` 作为 fallback，向后兼容）
+- 内部用 `team.short` 做主显文案，用 `team.logo` 传给 `TeamCrest`
 
-### 设计规范层（style-guide 新增一节）
+布局回到**单行横排**（不再两行堆叠），因为缩写很短：
+```
+[logo] RM            54¢
+                     +3¢
+```
+左：圆 logo + 加粗大号缩写。右：价格（大号 mono）+ delta 小标签竖排。横向再也不会挤。
 
-**Trading Language Rules**：
+Tooltip：包一层 shadcn `<Tooltip>`，`content = team.name`，hover 0.2s 后浮出。Yes/No 这种没有"全名"的中性 outcome 不挂 tooltip。
 
-- 词汇黑名单 → 替换为：
-  - odds → price
-  - bet / wager / stake → position / order
-  - bookmaker / house → orderbook / counterparty
-  - payout / win amount → settlement value / PnL
-  - 中奖 / 输掉 → settle / liquidate
-- 配色用途矩阵：
-  - `primary`（lavender）= YES outcome only
-  - `neon`（magenta）= NO outcome only
-  - `win/loss` = PnL、ROE、强平、订单状态 only
-  - `draw` = 中性 / pending
-- 公式速查卡：Notional = Margin × Lev；PnL = (mark − entry)/100 × notional × side；ROE = PnL / Margin；Liq ≈ entry ∓ 100/lev（占位）。
+## 5. `MarketCard.tsx` 改造
 
----
+`outcomes` 类型从 `{ label, probability, delta24h }` 升级为 `{ team: Team, probability, delta24h }`。
+style-guide 里的三张示例卡改用 `teams.realMadrid` / `teams.barcelona` / `teams.mancity` / `teams.arsenal` / `teams.lakers` / `teams.celtics` / `teams.yes` / `teams.no`。
 
-### 改动清单
+## 6. 其它调用点
 
-1. `src/components/sports/OutcomePill.tsx` — 删 payout，加 delta24h
-2. `src/components/sports/MarketCard.tsx` — participants → openInterest
-3. `src/components/sports/OrderBook.tsx` — 加 Spread/Mark 顶栏，标题改 YES Book/NO Book
-4. `src/components/sports/TradeForm.tsx` — Margin/Notional 区分，文案/公式/CTA/配色重写
-5. `src/components/sports/LiquidationBar.tsx` — 渐变方向调整
-6. `src/components/sports/PositionsTable.tsx` — 新增列 + Side 改 Long/Short {Team}
-7. **新增** `src/components/sports/SentimentCard.tsx` + `RatioBar.tsx`
-8. **删除** `src/components/sports/PredictionCard.tsx` + `VoteBar.tsx`
-9. `src/routes/style-guide.tsx` — 替换旧引用，新增 "Trading Language Rules" 章节
-10. `.lovable/plan.md` — 归档本次审计
+style-guide 里所有 `<OutcomePill label="...">` 用例统一换成 `team={...}`。`MatchCard`、`OutcomeSelector` 等如果也用到，一并迁移。
 
-确认后我一次性改完。
+## 文件清单
+- 新建 `src/lib/teams.ts`
+- 修改 `src/components/sports/TeamCrest.tsx`（支持 logoUrl + 错误回退）
+- 修改 `src/components/sports/OutcomePill.tsx`（team + tooltip + 横排布局）
+- 修改 `src/components/sports/MarketCard.tsx`（接收 team 对象）
+- 修改 `src/components/sports/OutcomeSelector.tsx`、`MatchCard.tsx`（保持一致）
+- 修改 `src/routes/style-guide.tsx`（demo 数据切到 teams 字典）
+
+## 一个待确认的小决策
+Yes / No 这种中性市场，缩写要不要显示成 "YES"/"NO" 单色 pill（无 logo，只保留字母圆），还是继续显示文字 "Yes"/"No"？我倾向前者，视觉跟队伍 pill 对齐。
