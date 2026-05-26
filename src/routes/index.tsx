@@ -7,6 +7,10 @@ import { EventMarketTileCard } from "@/components/sports/dashboard/EventMarketTi
 import { LeagueWinnerMarketCard } from "@/components/sports/dashboard/LeagueWinnerMarketCard";
 import { TopScorerMarketCard } from "@/components/sports/dashboard/TopScorerMarketCard";
 import { PlayerPropsSpotlight } from "@/components/sports/dashboard/PlayerPropsSpotlight";
+import { FanZoneHeader } from "@/components/sports/dashboard/FanZoneHeader";
+import { FanPollCard } from "@/components/sports/dashboard/FanPollCard";
+import { FanPostCard } from "@/components/sports/dashboard/FanPostCard";
+import { FansZoneEmpty } from "@/components/sports/dashboard/FansZoneEmpty";
 import {
   ACCOUNT_STATS,
   FEATURED_MATCH,
@@ -15,7 +19,13 @@ import {
   SPOTLIGHT,
   TOP_SCORER_MARKET,
 } from "@/data/sports-markets";
-import { TOP_SCORERS } from "@/data/sports-mock";
+import {
+  FAN_POLL,
+  FAN_POST,
+  FOLLOWED_TEAMS,
+  SUGGESTED_TEAMS,
+  TOP_SCORERS,
+} from "@/data/sports-mock";
 import { omenxUrl } from "@/lib/omenx";
 
 export const Route = createFileRoute("/")({
@@ -50,10 +60,18 @@ function Index() {
       />
 
       <div className="grid gap-5 px-6 pb-6 pt-8 md:px-8 md:pb-8 md:pt-10 lg:grid-cols-[340px_minmax(0,1fr)_360px]">
-        {/* LEFT — Featured market (spans both rows) */}
+        {/* LEFT — Fans zone (spans both rows) */}
         <section className="flex flex-col gap-4 lg:row-span-2">
-          <SectionHeader title="Featured" accent="event" />
-          <MatchMarketCard market={FEATURED_MATCH} />
+          <FanZoneHeader followingCount={FOLLOWED_TEAMS.length} />
+          {FOLLOWED_TEAMS.length > 0 ? (
+            <>
+              <MatchMarketCard market={FEATURED_MATCH} />
+              <FanPollCard {...FAN_POLL} />
+              <FanPostCard {...FAN_POST} />
+            </>
+          ) : (
+            <FansZoneEmpty editorPick={FEATURED_MATCH} suggested={SUGGESTED_TEAMS} />
+          )}
         </section>
 
         {/* TOP — Live & upcoming, spans col 2–3, sits above the spotlight */}
