@@ -1,4 +1,5 @@
 import { cn } from "@/lib/utils";
+import eplLogo from "@/assets/leagues/epl.png";
 
 /**
  * Real league logos sourced from ESPN's public CDN. PNGs with transparent
@@ -15,7 +16,7 @@ const PRESETS: Record<
     from: "oklch(0.55 0.2 295)",
     to: "oklch(0.35 0.15 290)",
     mono: "PL",
-    logo: "https://a.espncdn.com/i/leaguelogos/soccer/500/23.png",
+    logo: eplLogo,
   },
   laliga: {
     label: "La Liga",
