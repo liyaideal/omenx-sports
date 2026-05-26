@@ -1,12 +1,18 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { ArrowRight, ArrowUpRight, ChevronRight } from "lucide-react";
+import { ArrowRight, ArrowUpRight } from "lucide-react";
 import { TopBar } from "@/components/sports/TopBar";
 import { Footer } from "@/components/sports/Footer";
 import { SectionHeader } from "@/components/sports/SectionHeader";
-import { EventHeader } from "@/components/sports/EventHeader";
 import { MarketCard } from "@/components/sports/MarketCard";
 import { MatchCard } from "@/components/sports/MatchCard";
 import { HeroMarketCard } from "@/components/sports/HeroMarketCard";
+import { FanPulseCard } from "@/components/sports/FanPulseCard";
+import { LiveTicker } from "@/components/sports/LiveTicker";
+import { TopTradersCard } from "@/components/sports/TopTradersCard";
+import { MiniEventCard } from "@/components/sports/MiniEventCard";
+import { StandingsPreview } from "@/components/sports/StandingsPreview";
+import { PlayerSpotlightCard } from "@/components/sports/PlayerSpotlightCard";
+import { SentimentCard } from "@/components/sports/SentimentCard";
 import { teams } from "@/lib/teams";
 import { omenxUrl } from "@/lib/omenx";
 
@@ -35,35 +41,52 @@ export const Route = createFileRoute("/")({
 // ─── Mock data ────────────────────────────────────────────────────────────────
 // Replace with OmenX API once the data contract is finalized.
 
-const FEATURED = {
-  league: "ucl" as const,
-  home: "Real Madrid",
-  away: "Man City",
-  kickoff: "Sat · 21:00 CET",
-  status: "live" as const,
-  volume: "$4.82M",
-  liquidity: "$1.21M",
-  endsIn: "47m",
-};
+// ─── Bento data ──────────────────────────────────────────────────────────────
 
-// Derivative markets that settle on the featured event.
-const FEATURED_DERIVATIVES = [
-  {
-    label: "Moneyline",
-    a: { name: "RMA", price: 58 },
-    b: { name: "MCI", price: 42 },
-  },
-  {
-    label: "Total goals",
-    a: { name: "Over", price: 64 },
-    b: { name: "Under", price: 36 },
-  },
-  {
-    label: "First scorer",
-    a: { name: "Mbappé", price: 22 },
-    b: { name: "Field", price: 78 },
-  },
+const TODAYS_MATCHES = [
+  { league: "ucl" as const, home: teams.realMadrid, away: teams.manCity, kickoff: "21:00", whenLabel: "Today" },
+  { league: "epl" as const, home: teams.arsenal, away: teams.chelsea, kickoff: "19:30", whenLabel: "Today" },
+  { league: "nba" as const, home: teams.lakers, away: teams.celtics, kickoff: "01:30", whenLabel: "Tonight" },
 ];
+
+const TICKER_ROWS = [
+  { short: "RMA", market: "to win vs MCI", price: 58, delta: 4.2 },
+  { short: "OVER", market: "ARS/CHE goals 2.5", price: 64, delta: -1.8 },
+  { short: "LAL", market: "cover -3.5 vs BOS", price: 47, delta: 2.1 },
+  { short: "PSG", market: "reach UCL semi", price: 72, delta: 3.2 },
+  { short: "BAR", market: "win La Liga 25/26", price: 41, delta: 5.6 },
+  { short: "HAA", market: "MCI top scorer", price: 81, delta: -0.6 },
+  { short: "ARS", market: "finish top 4", price: 68, delta: 0.9 },
+  { short: "BOS", market: "win NBA Finals", price: 28, delta: 1.4 },
+];
+
+const TOP_TRADERS = [
+  { handle: "matchday_max", pnl24h: 8420, hue: 340 },
+  { handle: "stoploss_sam", pnl24h: 5210, hue: 250 },
+  { handle: "neon_bettor", pnl24h: 3180, hue: 155 },
+  { handle: "halftime_hero", pnl24h: -1450, hue: 25 },
+];
+
+const STANDINGS = [
+  { team: "Man City", played: 8, wins: 7, draws: 1, losses: 0, points: 22 },
+  { team: "Arsenal", played: 8, wins: 6, draws: 2, losses: 0, points: 20 },
+  { team: "Liverpool", played: 8, wins: 5, draws: 2, losses: 1, points: 17 },
+  { team: "Chelsea", played: 8, wins: 4, draws: 2, losses: 2, points: 14 },
+  { team: "Newcastle", played: 8, wins: 3, draws: 3, losses: 2, points: 12 },
+];
+
+const SPOTLIGHT_PLAYER = {
+  handle: "kil_sebgey_b",
+  name: "Kylian Mbappé",
+  position: "Forward · PSG",
+  jersey: 10,
+  monogram: "KM",
+  stats: [
+    { label: "Goals", value: 132 },
+    { label: "Assists", value: 47 },
+    { label: "Matches", value: 189 },
+  ],
+};
 
 const LIVE_MARKETS = [
   {
@@ -186,7 +209,7 @@ function Index() {
               </p>
               <div className="mt-6 flex flex-wrap items-center gap-3">
                 <a
-                  href="#event-featured"
+                  href="#bento"
                   className="inline-flex items-center gap-2 rounded-full bg-gradient-neon px-5 py-3 text-sm font-semibold text-white shadow-glow transition hover:opacity-90"
                 >
                   Trade tonight's match <ArrowRight className="h-4 w-4" />
@@ -209,82 +232,89 @@ function Index() {
                 endsIn="47m"
                 yesProbability={58}
                 yesDelta={4.2}
-                href="#event-featured"
+                href="#bento"
               />
             </div>
           </div>
         </section>
 
-        {/* Featured Event */}
-        <section id="event-featured" className="py-12 scroll-mt-20">
-          <SectionHeader
-            kicker="Featured"
-            title="Tonight's headline event"
-            description="Largest open interest on the board. Tap to open the trade surface."
-            action={{ label: "All events", href: "#" }}
-          />
-          <div className="mt-6 grid gap-4 lg:grid-cols-[2fr_1fr]">
-            <EventHeader {...FEATURED} />
-            <div className="flex flex-col rounded-2xl border border-border bg-surface bg-ambient p-4 shadow-card">
-              <div className="px-2 pt-1 text-[10px] font-mono uppercase tracking-widest text-muted-foreground">
-                Derivative markets
-              </div>
-              <div className="mt-2 flex flex-col divide-y divide-border">
-                {FEATURED_DERIVATIVES.map((d) => (
-                  <a
-                    key={d.label}
-                    href="#"
-                    className="group flex items-center justify-between gap-3 rounded-lg px-2 py-3 transition-colors hover:bg-white/[0.04]"
-                  >
-                    <div className="min-w-0">
-                      <div className="font-display text-sm font-semibold text-foreground">
-                        {d.label}
-                      </div>
-                      <div className="mt-0.5 font-mono text-[11px] text-muted-foreground tabular-nums">
-                        <span className="text-win">{d.a.name} {d.a.price}¢</span>
-                        <span className="px-1.5 text-border">·</span>
-                        <span className="text-loss">{d.b.name} {d.b.price}¢</span>
-                      </div>
-                    </div>
-                    <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground transition-transform group-hover:translate-x-0.5 group-hover:text-foreground" />
+        {/* ─── BENTO ────────────────────────────────────────────────── */}
+        <section id="bento" className="py-10 scroll-mt-20">
+          <div className="grid gap-4 lg:grid-cols-12 lg:auto-rows-min">
+            {/* LEFT RAIL (col 1–3) */}
+            <div className="flex flex-col gap-4 lg:col-span-3">
+              <FanPulseCard
+                question="Who wins tonight's UCL final?"
+                home={teams.realMadrid}
+                away={teams.manCity}
+                homePct={62}
+                totalVotes={4821}
+                likes={1240}
+                comments={318}
+                href="#bento"
+              />
+              <LiveTicker rows={TICKER_ROWS} />
+            </div>
+
+            {/* CENTER COLUMN (col 4–8) */}
+            <div className="flex flex-col gap-4 lg:col-span-5">
+              <div>
+                <div className="mb-3 flex items-center justify-between">
+                  <span className="font-mono text-[10px] uppercase tracking-widest text-neon">
+                    Today's matches
+                  </span>
+                  <a href="#" className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground hover:text-foreground">
+                    All events →
                   </a>
-                ))}
+                </div>
+                <div className="flex flex-col gap-2">
+                  {TODAYS_MATCHES.map((m, i) => (
+                    <MiniEventCard key={i} {...m} />
+                  ))}
+                </div>
               </div>
-            </div>
-          </div>
-        </section>
 
-        {/* Live Now */}
-        <section id="live" className="py-12 border-t border-border">
-          <div className="relative overflow-hidden rounded-3xl border border-loss/20 bg-loss/[0.04] p-5 md:p-6 ring-1 ring-loss/10">
-            <div
-              aria-hidden
-              className="pointer-events-none absolute -top-24 -left-24 h-64 w-64 rounded-full opacity-30 blur-3xl"
-              style={{ backgroundImage: "radial-gradient(circle, var(--loss) 0%, transparent 60%)" }}
-            />
-            <div className="relative">
-              <SectionHeader
-                kicker="● Live now"
-                title="Trading in-play"
-                description="Prices move with the match. Settle when the whistle blows."
-                tabs={[
-                  { label: "All", active: true },
-                  { label: "EPL" },
-                  { label: "UCL" },
-                  { label: "NBA" },
-                ]}
-              />
-              <div className="mt-6 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                {LIVE_MARKETS.map((m, i) => (
-                  <MarketCard key={i} {...m} />
-                ))}
+              <div>
+                <div className="mb-3 flex items-center justify-between">
+                  <span className="font-mono text-[10px] uppercase tracking-widest text-neon">
+                    ● Top movers
+                  </span>
+                  <span className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
+                    Live
+                  </span>
+                </div>
+                <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+                  {LIVE_MARKETS.map((m, i) => (
+                    <MarketCard key={i} {...m} />
+                  ))}
+                </div>
               </div>
+
+              <StandingsPreview league="EPL" rows={STANDINGS} />
+            </div>
+
+            {/* RIGHT BIG (col 9–12) */}
+            <div className="flex flex-col gap-4 lg:col-span-4">
+              <PlayerSpotlightCard {...SPOTLIGHT_PLAYER} />
+              <TopTradersCard rows={TOP_TRADERS} />
+              <SentimentCard
+                league="ucl"
+                question="Real Madrid to win vs Man City"
+                home="Real Madrid"
+                away="Man City"
+                kickoff="Sat · 21:00 CET"
+                yesNotional={812000}
+                noNotional={398000}
+                sideLabels={{ yes: "RMA", no: "MCI" }}
+                openInterest="$1.21M"
+                oiDelta24h={12.4}
+              />
             </div>
           </div>
         </section>
 
         {/* Trending */}
-        <section className="py-12">
+        <section className="py-12 border-t border-border">
           <SectionHeader
             kicker="Trending"
             title="Trending markets"
