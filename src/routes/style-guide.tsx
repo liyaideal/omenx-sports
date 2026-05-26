@@ -367,8 +367,8 @@ function StyleGuide() {
                   home="Chelsea"
                   away="PSG"
                   kickoff="Today 8:00pm"
-                  longNotional={1240000}
-                  shortNotional={680000}
+                  yesNotional={1240000}
+                  noNotional={680000}
                   openInterest="$1.92M"
                   oiDelta24h={12}
                 />
@@ -457,7 +457,7 @@ function StyleGuide() {
             </div>
             <div className="mt-4 grid gap-3 md:grid-cols-4">
               <StatTile label="Balance" value="$5,240.50" hint="USDC" icon={Wallet} />
-              <StatTile label="Open positions" value="3" hint="2 long · 1 short" icon={LineChart} />
+              <StatTile label="Open positions" value="3" hint="2 Yes · 1 No" icon={LineChart} />
               <StatTile label="Today PnL" value="+$184.20" tone="win" icon={TrendingUp} />
               <StatTile label="Total volume" value="$28.4k" hint="last 30d" />
             </div>
@@ -466,16 +466,14 @@ function StyleGuide() {
           {/* MARKET CARD */}
           <Section id="market" title="Market Card" kicker="11 — Discover">
             <p className="mb-4 max-w-2xl text-sm text-muted-foreground">
-              The primary unit on Home, Discover, and league pages. Team-vs-team markets show the two team names; neutral markets fall back to Yes / No.
+              The primary unit on Home, Discover, and league pages. Every market is a single Yes/No binary — team-vs-team events alias the two sides via <code className="font-mono text-foreground">sideLabels: {`{ yes, no }`}</code>. Prices and 24h deltas are always mirrored: <code className="font-mono text-foreground">p(No) = 100 − p(Yes)</code>.
             </p>
             <div className="grid gap-4 md:grid-cols-3">
               <MarketCard
                 league="laliga"
                 question="El Clásico — who lifts the trophy?"
-                outcomes={[
-                  { team: teams.realMadrid, probability: 54, delta24h: 3 },
-                  { team: teams.barcelona, probability: 46, delta24h: -3 },
-                ]}
+                yes={{ team: teams.realMadrid, probability: 54, delta24h: 3 }}
+                no={{ team: teams.barcelona }}
                 volume="$182k"
                 endsIn="2d 14h"
                 openInterest="412K"
@@ -483,10 +481,8 @@ function StyleGuide() {
               <MarketCard
                 league="ucl"
                 question="Will Man City reach the UCL final?"
-                outcomes={[
-                  { team: teams.yes, probability: 38 },
-                  { team: teams.no, probability: 62 },
-                ]}
+                yes={{ team: teams.yes, probability: 38 }}
+                no={{ team: teams.no }}
                 volume="$94k"
                 endsIn="11d 02h"
                 openInterest="208K"
@@ -494,10 +490,8 @@ function StyleGuide() {
               <MarketCard
                 league="nba"
                 question="Lakers vs Celtics — tonight's winner"
-                outcomes={[
-                  { team: teams.lakers, probability: 41 },
-                  { team: teams.celtics, probability: 59 },
-                ]}
+                yes={{ team: teams.lakers, probability: 41 }}
+                no={{ team: teams.celtics }}
                 volume="$58k"
                 endsIn="04:12"
                 openInterest="124K"
@@ -589,8 +583,8 @@ function StyleGuide() {
                   <div className="mb-3 text-[10px] font-mono uppercase tracking-widest text-muted-foreground">Formulas</div>
                   <dl className="space-y-1.5 font-mono text-xs">
                     <div className="flex justify-between"><dt className="text-muted-foreground">Notional</dt><dd>Margin × Leverage</dd></div>
-                    <div className="flex justify-between"><dt className="text-muted-foreground">PnL (long YES)</dt><dd>(mark − entry)/100 × notional</dd></div>
-                    <div className="flex justify-between"><dt className="text-muted-foreground">PnL (short YES)</dt><dd>(entry − mark)/100 × notional</dd></div>
+                    <div className="flex justify-between"><dt className="text-muted-foreground">PnL</dt><dd>(mark − entry)/100 × notional</dd></div>
+                    <div className="flex justify-between"><dt className="text-muted-foreground">NO price</dt><dd>100 − YES price (mirror)</dd></div>
                     <div className="flex justify-between"><dt className="text-muted-foreground">ROE</dt><dd>PnL / Margin</dd></div>
                     <div className="flex justify-between"><dt className="text-muted-foreground">Liq (mock)</dt><dd>entry ∓ 100/lev</dd></div>
                   </dl>

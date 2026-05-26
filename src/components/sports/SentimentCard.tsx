@@ -9,9 +9,10 @@ export interface SentimentCardProps {
   home: string;
   away: string;
   kickoff: string;
-  /** Derived from actual open positions, not user votes. */
-  longNotional: number; // USDC
-  shortNotional: number; // USDC
+  /** Notional on YES contracts (USDC). Derived from real open positions. */
+  yesNotional: number;
+  /** Notional on NO contracts (USDC). Derived from real open positions. */
+  noNotional: number;
   openInterest: string;
   oiDelta24h?: number; // % change
   className?: string;
@@ -24,7 +25,7 @@ function fmtUSDC(n: number) {
 }
 
 /**
- * SentimentCard — shows the Long/Short money split for a market. Not social,
+ * SentimentCard — shows the Yes/No money split for a market. Not social,
  * not voting; the bar reflects real position notional from the orderbook.
  */
 export function SentimentCard({
@@ -33,14 +34,14 @@ export function SentimentCard({
   home,
   away,
   kickoff,
-  longNotional,
-  shortNotional,
+  yesNotional,
+  noNotional,
   openInterest,
   oiDelta24h,
   className,
 }: SentimentCardProps) {
-  const total = longNotional + shortNotional || 1;
-  const longPct = Math.round((longNotional / total) * 100);
+  const total = yesNotional + noNotional || 1;
+  const yesPct = Math.round((yesNotional / total) * 100);
   const positive = (oiDelta24h ?? 0) >= 0;
   return (
     <div
@@ -73,11 +74,11 @@ export function SentimentCard({
 
       <div className="mt-5">
         <RatioBar
-          value={longPct}
+          value={yesPct}
           leftTone="win"
           rightTone="loss"
-          leftLabel={`Long ${fmtUSDC(longNotional)}`}
-          rightLabel={`Short ${fmtUSDC(shortNotional)}`}
+          leftLabel={`Yes $${fmtUSDC(yesNotional)}`}
+          rightLabel={`No $${fmtUSDC(noNotional)}`}
         />
       </div>
 
