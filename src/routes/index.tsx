@@ -241,9 +241,9 @@ function Index() {
 
         {/* ─── BENTO ────────────────────────────────────────────────── */}
         <section id="bento" className="py-10 scroll-mt-20">
-          <div className="grid gap-4 lg:grid-cols-[240px_minmax(0,1fr)_320px]">
+          <div className="grid gap-4 items-start lg:grid-cols-[240px_minmax(0,1fr)_320px]">
             {/* LEFT RAIL */}
-            <div className="flex h-full flex-col gap-4">
+            <div className="flex flex-col gap-4">
               <FanPulseCard
                 question="Who wins tonight's UCL final?"
                 home={teams.realMadrid}
@@ -254,23 +254,11 @@ function Index() {
                 comments={318}
                 href="#bento"
               />
-              <LiveTicker rows={TICKER_ROWS} className="flex-1 min-h-0" />
-              <SentimentCard
-                league="ucl"
-                question="Real Madrid to win vs Man City"
-                home="Real Madrid"
-                away="Man City"
-                kickoff="Sat · 21:00 CET"
-                yesNotional={812000}
-                noNotional={398000}
-                sideLabels={{ yes: "RMA", no: "MCI" }}
-                openInterest="$1.21M"
-                oiDelta24h={12.4}
-              />
+              <LiveTicker rows={TICKER_ROWS} />
             </div>
 
             {/* CENTER COLUMN */}
-            <div className="flex h-full flex-col gap-4">
+            <div className="flex flex-col gap-4">
               <div>
                 <div className="mb-3 flex items-center justify-between">
                   <span className="font-mono text-[10px] uppercase tracking-widest text-neon">
@@ -303,18 +291,29 @@ function Index() {
                 </div>
               </div>
 
-              <StandingsPreview league="EPL" rows={STANDINGS} className="flex-1 min-h-0" />
+              <StandingsPreview league="EPL" rows={STANDINGS} />
             </div>
 
             {/* RIGHT BIG */}
-            <div className="flex h-full flex-col gap-4">
+            <div className="flex flex-col gap-4">
               <PlayerSpotlightHero
                 handle={SPOTLIGHT_PLAYER.handle}
                 monogram={SPOTLIGHT_PLAYER.monogram}
                 jersey={SPOTLIGHT_PLAYER.jersey}
-                className="flex-1 min-h-0"
               />
               <TopTradersCard rows={TOP_TRADERS} />
+              <SentimentCard
+                league="ucl"
+                question="Real Madrid to win vs Man City"
+                home="Real Madrid"
+                away="Man City"
+                kickoff="Sat · 21:00 CET"
+                yesNotional={812000}
+                noNotional={398000}
+                sideLabels={{ yes: "RMA", no: "MCI" }}
+                openInterest="$1.21M"
+                oiDelta24h={12.4}
+              />
             </div>
           </div>
         </section>
