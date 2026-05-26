@@ -928,7 +928,7 @@ function StyleGuide() {
             <div className="mt-6 rounded-2xl border border-dashed border-white/15 bg-white/[0.02] p-5 text-xs">
               <div className="mb-2 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">Rules</div>
               <ul className="space-y-1.5 text-muted-foreground">
-                <li>• Header is single-line at every column width: title <code className="font-mono text-foreground">Fans zone</code> (text-xl, no decorative suffix) + pill <code className="font-mono text-foreground">N teams</code> with <code className="font-mono text-foreground">Users</code> icon. Empty-state pill reads <code className="font-mono text-foreground">Add team</code>. Neither side wraps.</li>
+                <li>• Header is single-line at every column width: title <code className="font-mono text-foreground">Fans zone</code> (text-2xl, matches other section titles, no decorative suffix) + pill <code className="font-mono text-foreground">N teams</code> with <code className="font-mono text-foreground">Users</code> icon. Empty-state pill reads <code className="font-mono text-foreground">Add team</code>. Neither side wraps.</li>
                 <li>• Poll and post never appear without a paired trade card above them.</li>
                 <li>• Empty-state chips toggle locally; persistence happens on `Save preferences`, not per-tap.</li>
                 <li>• The column is always present — never collapsed even at the 3-col → 2-col breakpoint; it just reflows under the main grid.</li>
