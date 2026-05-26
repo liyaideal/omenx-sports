@@ -1,74 +1,66 @@
-# MarketCard / OutcomePill 升级方案
-
 ## 目标
-1. 队名永不截断 —— pill 主显**3–4字母缩写**（RM / BAR / LAK / CEL / MCI），hover 显示完整队名 tooltip
-2. 圆形占位 crest 替换为**真实队徽**，未命中时 fallback 到现有字母 crest
 
-## 1. 队伍字典 `src/lib/teams.ts`（新建）
+将 sports/markets 风格指南里的所有组件对齐 OmenX 真实交易模型：
 
-集中维护"全名 ↔ 缩写 ↔ logo URL"映射，组件只接收一个 `teamId`（slug）或完整 `Team` 对象。
+- 不存在 long/short；所有 market 都是 Yes/No 二元（底层是 Buy Yes long / Buy No long 两条独立多头）。
+- 队伍对战 = 同一个 Yes/No market，通过 `sideLabels: { yes, no }` 给两端起队名别名。
+- 价格永远互补：`p(No) = 100 − p(Yes)`，`delta24h(No) = −delta24h(Yes)`。
+- 颜色按 outcome（Yes=绿，No=红），不按 side（long/short）。
 
-```ts
-export interface Team {
-  id: string;          // slug, e.g. "real-madrid"
-  name: string;        // "Real Madrid"
-  short: string;       // "RM" (3–4 chars)
-  logo: string;        // remote URL or imported asset
-  accent?: string;     // optional brand color for crest ring
-}
-```
+## 决策（已确认）
 
-预置一组 demo 数据：Real Madrid / Barcelona / Man City / Arsenal / Lakers / Celtics / 以及中性 Yes / No（Yes/No 没有真实 logo，继续走字母 crest，缩写就是 "YES"/"NO"）。
+- Q1（OrderBook）：**A** — 保留双栏 YES Book / NO Book 视图，但加一行 hint："NO book 是 YES book 的镜像（price = 100 − yes_price）"。
+- Q2（MarketCard delta）：**强制单一真相** — props 只接收 `yesDelta24h`，No 端 UI 自动渲染 `-yesDelta24h`。
 
-## 2. 真实队徽来源
+## 文件改动
 
-用 **稳定的体育数据 CDN URL**，无需打包资源、无需鉴权：
+### 1. `src/components/sports/MarketCard.tsx`
+- Props 改为：`{ yes: { team, probability, delta24h }, no: { team } }`（删除 no.probability / no.delta24h）。
+- 内部计算 `noProbability = 100 − yes.probability`，`noDelta = −yes.delta24h`。
+- 两侧 OutcomePill 沿用绿/红 outcome 配色。
 
-- 足球俱乐部：`https://r2.thesportsdb.com/images/media/team/badge/{id}.png`（TheSportsDB 公开 CDN）或 `https://a.espncdn.com/i/teamlogos/soccer/500/{id}.png`
-- NBA：`https://cdn.nba.com/logos/nba/{teamId}/global/L/logo.svg`（NBA 官方 CDN）
+### 2. `src/components/sports/SentimentCard.tsx`
+- `longNotional` / `shortNotional` → `yesNotional` / `noNotional`。
+- 文案 "Long / Short" → "Yes / No"。
+- RatioBar 标签同步改为 "Yes $X / No $Y"。
 
-具体 URL 在 `teams.ts` 里写死即可，组件不关心来源。
+### 3. `src/components/sports/PositionsTable.tsx`
+- 删除 `side: "long" | "short"` 列与 SideTag。
+- 新增 / 复用 "Outcome" 列，渲染 Yes / No 或 team 别名，颜色按 outcome（绿/红）。
+- entry / mark / PnL 计算保持，仅展示口径调整。
 
-> 提示：这些是各联盟/数据商的公开 CDN，用于 demo/style-guide 没问题；正式上线如果要规避商标风险，可以换成自绘 SVG 或购买授权图源。要不要我现在就用这些 URL，后续你再替换？
+### 4. `src/components/sports/TradeForm.tsx`
+- 主按钮文案：`Long Real Madrid 10×` → `Buy Real Madrid 10×`（无别名时回退 `Buy YES` / `Buy NO`）。
+- 移除任何 long/short 切换；仅保留 Yes / No 选择。
 
-## 3. `TeamCrest.tsx` 改造
+### 5. `src/components/sports/LiquidationBar.tsx`
+- 描述文案从 "yes → long; no → short" 改为纯 Yes/No 说明。
 
-新增 `logoUrl?: string` 属性：
-- 有 `logoUrl` → 渲染 `<img>`，失败 (`onError`) 自动 fallback 到当前的字母 + 渐变圆
-- 无 → 走现有字母 crest 逻辑
-- 圆形容器、尺寸不变，避免影响其它使用方
+### 6. `src/components/sports/OrderBook.tsx`
+- 保留 YES Book / NO Book 双栏布局（决策 A）。
+- 顶部加一行小字 hint：`NO book mirrors YES book · price = 100 − yes_price`。
+- 内部用单一 YES book 数据源，NO 栏由镜像计算渲染，保证两侧一致。
 
-## 4. `OutcomePill.tsx` 改造
+### 7. `src/components/sports/StatTile.tsx`（及调用方）
+- 副标 "2 long · 1 short" → "2 Yes · 1 No"。
 
-Props 调整：
-- 新增 `team?: Team` 替代裸 `label: string`（保留 `label` 作为 fallback，向后兼容）
-- 内部用 `team.short` 做主显文案，用 `team.logo` 传给 `TeamCrest`
+### 8. `src/components/sports/Formulas.tsx`
+- 删除 "PnL (short YES)" 公式。
+- 只保留：`PnL = (mark − entry) / 100 × notional`，并注明 No 端价格 = 100 − Yes 价格自动镜像。
 
-布局回到**单行横排**（不再两行堆叠），因为缩写很短：
-```
-[logo] RM            54¢
-                     +3¢
-```
-左：圆 logo + 加粗大号缩写。右：价格（大号 mono）+ delta 小标签竖排。横向再也不会挤。
+### 9. `src/routes/style-guide.tsx`
+- 更新 MarketCard demo 数据：只传 yes.probability + yes.delta24h。
+- 更新所有受影响组件 demo（SentimentCard / PositionsTable / OrderBook / StatTile / Formulas / TradeForm / LiquidationBar）。
+- 顶部说明段落改写为："All markets are Yes/No binaries. Team-vs-team events alias the two sides via `sideLabels: { yes, no }`. Prices and 24h deltas are always mirrored: `p(No) = 100 − p(Yes)`."
 
-Tooltip：包一层 shadcn `<Tooltip>`，`content = team.name`，hover 0.2s 后浮出。Yes/No 这种没有"全名"的中性 outcome 不挂 tooltip。
+## 不动的部分
 
-## 5. `MarketCard.tsx` 改造
+- TeamCrest / OutcomePill / OutcomeSelector 的视觉规范（abbr + tooltip + 真实 logo 方形 object-contain）保持上一轮成果。
+- 不引入新依赖、不改动路由、不动后端。
 
-`outcomes` 类型从 `{ label, probability, delta24h }` 升级为 `{ team: Team, probability, delta24h }`。
-style-guide 里的三张示例卡改用 `teams.realMadrid` / `teams.barcelona` / `teams.mancity` / `teams.arsenal` / `teams.lakers` / `teams.celtics` / `teams.yes` / `teams.no`。
+## 验收
 
-## 6. 其它调用点
-
-style-guide 里所有 `<OutcomePill label="...">` 用例统一换成 `team={...}`。`MatchCard`、`OutcomeSelector` 等如果也用到，一并迁移。
-
-## 文件清单
-- 新建 `src/lib/teams.ts`
-- 修改 `src/components/sports/TeamCrest.tsx`（支持 logoUrl + 错误回退）
-- 修改 `src/components/sports/OutcomePill.tsx`（team + tooltip + 横排布局）
-- 修改 `src/components/sports/MarketCard.tsx`（接收 team 对象）
-- 修改 `src/components/sports/OutcomeSelector.tsx`、`MatchCard.tsx`（保持一致）
-- 修改 `src/routes/style-guide.tsx`（demo 数据切到 teams 字典）
-
-## 一个待确认的小决策
-Yes / No 这种中性市场，缩写要不要显示成 "YES"/"NO" 单色 pill（无 logo，只保留字母圆），还是继续显示文字 "Yes"/"No"？我倾向前者，视觉跟队伍 pill 对齐。
+- style-guide 全页搜索不再出现 `long` / `short` 作为方向语义（保留 "shortName" 等无关词）。
+- MarketCard 两端概率相加恒为 100，delta 互为相反数。
+- OrderBook 双栏价格满足 `yes + no = 100`。
+- PositionsTable 不再有 side 列；Outcome 颜色 Yes=绿 / No=红。
