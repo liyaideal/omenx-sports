@@ -12,6 +12,7 @@ import { PricePill } from "./PricePill";
  */
 export function EventMarketTileCard({ market }: { market: SportsMarket }) {
   const hasFixture = Boolean(market.fixture);
+  const isBinary = market.shape === "binary";
   return (
     <a
       href={market.tradeHref}
@@ -39,13 +40,21 @@ export function EventMarketTileCard({ market }: { market: SportsMarket }) {
         </h3>
       )}
 
-      <div className="flex flex-col gap-1.5">
-        {market.outcomes.map((o) => (
-          <OutcomeRow key={o.id} outcome={o} />
-        ))}
-      </div>
+      {isBinary ? (
+        <div className="grid flex-1 grid-cols-2 gap-2">
+          {market.outcomes.map((o) => (
+            <OutcomeBlock key={o.id} outcome={o} />
+          ))}
+        </div>
+      ) : (
+        <div className="flex flex-1 flex-col gap-1.5">
+          {market.outcomes.map((o) => (
+            <OutcomeRow key={o.id} outcome={o} />
+          ))}
+        </div>
+      )}
 
-      <footer className="flex items-center justify-between border-t border-border pt-3 text-[11px] font-mono text-muted-foreground">
+      <footer className="mt-auto flex items-center justify-between border-t border-border pt-3 text-[11px] font-mono text-muted-foreground">
         <span className="inline-flex items-center gap-1.5"><Clock className="h-3 w-3" /> {market.endsLabel}</span>
         <span className="inline-flex items-center gap-3">
           <span className="inline-flex items-center gap-1"><Users className="h-3 w-3" /> {market.participants.toLocaleString()}</span>
@@ -53,6 +62,54 @@ export function EventMarketTileCard({ market }: { market: SportsMarket }) {
         </span>
       </footer>
     </a>
+  );
+}
+
+function OutcomeBlock({ outcome }: { outcome: Outcome }) {
+  const isYes = outcome.label.toUpperCase() === "YES";
+  const isNo = outcome.label.toUpperCase() === "NO";
+  const cents = Math.round(outcome.price * 100);
+  const delta = outcome.delta24h ?? 0;
+  const deltaPts = Math.round(delta * 100);
+  const deltaUp = deltaPts > 0;
+  const deltaDown = deltaPts < 0;
+  return (
+    <div className="flex h-full flex-col justify-between gap-3 rounded-2xl bg-white/[0.03] p-4 ring-1 ring-white/[0.05] transition group-hover:bg-white/[0.06]">
+      <div className="flex min-w-0 items-center gap-2">
+        {outcome.team ? (
+          <img src={outcome.team.logo} alt="" className="h-5 w-5 shrink-0 object-contain" />
+        ) : (
+          <span
+            className={`grid h-5 w-5 shrink-0 place-items-center rounded-full font-mono text-[9px] font-bold ${
+              isYes
+                ? "bg-[oklch(0.78_0.18_155_/_0.18)] text-[oklch(0.78_0.18_155)]"
+                : isNo
+                  ? "bg-[oklch(0.7_0.22_25_/_0.18)] text-[oklch(0.7_0.22_25)]"
+                  : "bg-white/[0.06] text-muted-foreground"
+            }`}
+          >
+            {isYes ? "Y" : isNo ? "N" : "·"}
+          </span>
+        )}
+        <span className="truncate text-xs font-medium text-muted-foreground">
+          {outcome.team?.name ?? outcome.label}
+        </span>
+      </div>
+      <div className="font-display text-3xl font-semibold leading-none text-foreground">
+        {cents}<span className="text-lg text-muted-foreground">¢</span>
+      </div>
+      <div
+        className={`font-mono text-[11px] ${
+          deltaUp
+            ? "text-[oklch(0.78_0.18_155)]"
+            : deltaDown
+              ? "text-[oklch(0.7_0.22_25)]"
+              : "text-muted-foreground"
+        }`}
+      >
+        {deltaUp ? "↗" : deltaDown ? "↘" : "·"} {Math.abs(deltaPts)} 24h
+      </div>
+    </div>
   );
 }
 
