@@ -11,7 +11,8 @@ import { LiveTicker } from "@/components/sports/LiveTicker";
 import { TopTradersCard } from "@/components/sports/TopTradersCard";
 import { MiniEventCard } from "@/components/sports/MiniEventCard";
 import { StandingsPreview } from "@/components/sports/StandingsPreview";
-import { PlayerSpotlightCard } from "@/components/sports/PlayerSpotlightCard";
+import { PlayerSpotlightHero } from "@/components/sports/PlayerSpotlightHero";
+import { TopMoverCard } from "@/components/sports/TopMoverCard";
 import { SentimentCard } from "@/components/sports/SentimentCard";
 import { teams } from "@/lib/teams";
 import { omenxUrl } from "@/lib/omenx";
@@ -240,9 +241,9 @@ function Index() {
 
         {/* ─── BENTO ────────────────────────────────────────────────── */}
         <section id="bento" className="py-10 scroll-mt-20">
-          <div className="grid gap-4 lg:grid-cols-12 lg:auto-rows-min">
-            {/* LEFT RAIL (col 1–3) */}
-            <div className="flex flex-col gap-4 lg:col-span-3">
+          <div className="grid gap-4 items-start lg:grid-cols-[260px_minmax(0,1fr)_340px]">
+            {/* LEFT RAIL */}
+            <div className="flex flex-col gap-4">
               <FanPulseCard
                 question="Who wins tonight's UCL final?"
                 home={teams.realMadrid}
@@ -254,10 +255,22 @@ function Index() {
                 href="#bento"
               />
               <LiveTicker rows={TICKER_ROWS} />
+              <SentimentCard
+                league="ucl"
+                question="Real Madrid to win vs Man City"
+                home="Real Madrid"
+                away="Man City"
+                kickoff="Sat · 21:00 CET"
+                yesNotional={812000}
+                noNotional={398000}
+                sideLabels={{ yes: "RMA", no: "MCI" }}
+                openInterest="$1.21M"
+                oiDelta24h={12.4}
+              />
             </div>
 
-            {/* CENTER COLUMN (col 4–8) */}
-            <div className="flex flex-col gap-4 lg:col-span-5">
+            {/* CENTER COLUMN */}
+            <div className="flex flex-col gap-4">
               <div>
                 <div className="mb-3 flex items-center justify-between">
                   <span className="font-mono text-[10px] uppercase tracking-widest text-neon">
@@ -283,9 +296,9 @@ function Index() {
                     Live
                   </span>
                 </div>
-                <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+                <div className="grid gap-3 grid-cols-3">
                   {LIVE_MARKETS.map((m, i) => (
-                    <MarketCard key={i} {...m} />
+                    <TopMoverCard key={i} {...m} />
                   ))}
                 </div>
               </div>
@@ -293,22 +306,14 @@ function Index() {
               <StandingsPreview league="EPL" rows={STANDINGS} />
             </div>
 
-            {/* RIGHT BIG (col 9–12) */}
-            <div className="flex flex-col gap-4 lg:col-span-4">
-              <PlayerSpotlightCard {...SPOTLIGHT_PLAYER} />
-              <TopTradersCard rows={TOP_TRADERS} />
-              <SentimentCard
-                league="ucl"
-                question="Real Madrid to win vs Man City"
-                home="Real Madrid"
-                away="Man City"
-                kickoff="Sat · 21:00 CET"
-                yesNotional={812000}
-                noNotional={398000}
-                sideLabels={{ yes: "RMA", no: "MCI" }}
-                openInterest="$1.21M"
-                oiDelta24h={12.4}
+            {/* RIGHT BIG */}
+            <div className="flex flex-col gap-4">
+              <PlayerSpotlightHero
+                handle={SPOTLIGHT_PLAYER.handle}
+                monogram={SPOTLIGHT_PLAYER.monogram}
+                jersey={SPOTLIGHT_PLAYER.jersey}
               />
+              <TopTradersCard rows={TOP_TRADERS} />
             </div>
           </div>
         </section>
