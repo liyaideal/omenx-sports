@@ -1,5 +1,4 @@
-import { ArrowUpRight } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo } from "react";
 import type { LiveTrade, TeamKey, TeamLite } from "@/data/sports-mock";
 
 interface LiveActivityCardProps {
@@ -8,17 +7,15 @@ interface LiveActivityCardProps {
   followedTeams: TeamLite[];
   /** Stable keys for filtering trades by `eventTeams`. */
   followedKeys: TeamKey[];
-  /** Max rows to render. */
-  limit?: number;
-  seeAllHref: string;
+  /** Pixels-per-second scroll speed. */
+  speed?: number;
 }
 
 export function LiveActivityCard({
   trades,
   followedTeams,
   followedKeys,
-  limit = 5,
-  seeAllHref,
+  speed = 24,
 }: LiveActivityCardProps) {
   const isFollowing = followedKeys.length > 0;
   const pool = useMemo(
@@ -29,44 +26,7 @@ export function LiveActivityCard({
     [trades, followedKeys, isFollowing],
   );
 
-  // Live feed: deque of `limit` rows. Every `ROTATE_MS` we prepend the next
-  // pool entry (cycling) with secondsAgo=0 and drop the tail. `tick` bumps
-  // every second so timestamps age in real time.
-  const ROTATE_MS = 4500;
-  const [tick, setTick] = useState(0);
-  const [cursor, setCursor] = useState(limit);
-  const [feed, setFeed] = useState<LiveTrade[]>(() => pool.slice(0, limit));
-
-  // Reset feed when the filter changes.
-  useEffect(() => {
-    setFeed(pool.slice(0, limit));
-    setCursor(limit);
-    setTick(0);
-  }, [pool, limit]);
-
-  // 1s aging tick.
-  useEffect(() => {
-    if (pool.length === 0) return;
-    const id = setInterval(() => setTick((t) => t + 1), 1000);
-    return () => clearInterval(id);
-  }, [pool.length]);
-
-  // Rotation tick.
-  useEffect(() => {
-    if (pool.length <= limit) return;
-    const id = setInterval(() => {
-      setFeed((prev) => {
-        const next = pool[cursor % pool.length];
-        if (!next) return prev;
-        const fresh: LiveTrade = { ...next, id: `${next.id}-${cursor}`, secondsAgo: 0 };
-        return [fresh, ...prev].slice(0, limit);
-      });
-      setCursor((c) => c + 1);
-    }, ROTATE_MS);
-    return () => clearInterval(id);
-  }, [pool, cursor, limit]);
-
-  if (feed.length === 0) return null;
+  if (pool.length === 0) return null;
 
   const subtitle = isFollowing
     ? `Following · ${followedTeams.map((t) => t.name).join(", ")}`
@@ -75,9 +35,14 @@ export function LiveActivityCard({
     1,
     Math.round((pool[pool.length - 1]?.secondsAgo ?? 60) / 60),
   );
+  // Duration scales with content length so speed (px/s) stays consistent.
+  // Approx row height ~76px including divider.
+  const rowPx = 76;
+  const trackPx = pool.length * rowPx;
+  const durationS = Math.max(20, trackPx / speed);
 
   return (
-    <article className="relative overflow-hidden rounded-3xl border border-border bg-surface p-5 shadow-card">
+    <article className="relative flex h-full flex-col overflow-hidden rounded-3xl border border-border bg-surface p-5 shadow-card">
       <header className="flex items-center justify-between gap-3">
         <h3 className="inline-flex items-center gap-2 font-display text-base font-semibold text-foreground">
           <span
@@ -95,62 +60,64 @@ export function LiveActivityCard({
         {subtitle}
       </p>
 
-      <ul className="mt-4 divide-y divide-white/[0.05]">
-        {feed.map((trade, idx) => (
-          <li
-            key={trade.id}
-            className={
-              idx === 0
-                ? "animate-in fade-in slide-in-from-top-2 duration-500"
-                : undefined
-            }
-          >
-            <a
-              href={trade.tradeHref}
-              className="group flex items-start gap-3 py-3 first:pt-0 last:pb-0 hover:bg-white/[0.02]"
-            >
-              <Avatar avatar={trade.avatar} handle={trade.handle} hue={trade.hue} />
-              <div className="min-w-0 flex-1">
-                <div className="flex items-baseline justify-between gap-2">
-                  <span className="truncate text-sm font-medium text-foreground">
-                    {trade.handle}
-                  </span>
-                  <span className="shrink-0 font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
-                    {formatAgo(trade.secondsAgo + tick)}
-                  </span>
-                </div>
-                <div className="mt-1 flex items-center gap-1.5 text-xs">
-                  <span
-                    className={
-                      trade.side === "bought"
-                        ? "shrink-0 font-medium text-win"
-                        : "shrink-0 font-medium text-loss"
-                    }
-                  >
-                    {trade.side}
-                  </span>
-                  <span className="inline-flex shrink-0 items-center gap-1 whitespace-nowrap rounded-full bg-white/[0.05] px-2 py-0.5 font-mono text-[10px] text-foreground ring-1 ring-white/10">
-                    {trade.outcomeLabel}
-                    <span className="text-muted-foreground">·</span>
-                    {trade.price}¢
-                  </span>
-                </div>
-                <div className="mt-1 truncate text-xs text-muted-foreground">
-                  {trade.eventTitle}
-                </div>
-              </div>
-            </a>
-          </li>
-        ))}
-      </ul>
-
-      <a
-        href={seeAllHref}
-        className="mt-3 inline-flex items-center gap-1 text-xs font-medium text-muted-foreground hover:text-foreground"
-      >
-        See all activity <ArrowUpRight className="h-3.5 w-3.5" />
-      </a>
+      <div className="group/marquee relative mt-4 min-h-0 flex-1 overflow-hidden [mask-image:linear-gradient(to_bottom,transparent,#000_12%,#000_88%,transparent)]">
+        <div
+          className="flex flex-col will-change-transform group-hover/marquee:[animation-play-state:paused] motion-reduce:!animate-none"
+          style={{ animation: `marquee-y ${durationS}s linear infinite` }}
+        >
+          {[0, 1].map((copy) => (
+            <ul key={copy} aria-hidden={copy === 1} className="divide-y divide-white/[0.05]">
+              {pool.map((trade) => (
+                <TradeRow key={`${copy}-${trade.id}`} trade={trade} />
+              ))}
+            </ul>
+          ))}
+        </div>
+      </div>
+      <style>{`@keyframes marquee-y { from { transform: translateY(0); } to { transform: translateY(-50%); } }`}</style>
     </article>
+  );
+}
+
+function TradeRow({ trade }: { trade: LiveTrade }) {
+  return (
+    <li>
+      <a
+        href={trade.tradeHref}
+        className="group flex items-start gap-3 py-3 hover:bg-white/[0.02]"
+      >
+        <Avatar avatar={trade.avatar} handle={trade.handle} hue={trade.hue} />
+        <div className="min-w-0 flex-1">
+          <div className="flex items-baseline justify-between gap-2">
+            <span className="truncate text-sm font-medium text-foreground">
+              {trade.handle}
+            </span>
+            <span className="shrink-0 font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
+              {formatAgo(trade.secondsAgo)}
+            </span>
+          </div>
+          <div className="mt-1 flex items-center gap-1.5 text-xs">
+            <span
+              className={
+                trade.side === "bought"
+                  ? "shrink-0 font-medium text-win"
+                  : "shrink-0 font-medium text-loss"
+              }
+            >
+              {trade.side}
+            </span>
+            <span className="inline-flex shrink-0 items-center gap-1 whitespace-nowrap rounded-full bg-white/[0.05] px-2 py-0.5 font-mono text-[10px] text-foreground ring-1 ring-white/10">
+              {trade.outcomeLabel}
+              <span className="text-muted-foreground">·</span>
+              {trade.price}¢
+            </span>
+          </div>
+          <div className="mt-1 truncate text-xs text-muted-foreground">
+            {trade.eventTitle}
+          </div>
+        </div>
+      </a>
+    </li>
   );
 }
 
