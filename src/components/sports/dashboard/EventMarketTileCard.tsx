@@ -100,6 +100,7 @@ function OutcomeBlock({ outcome }: { outcome: Outcome }) {
         {cents}<span className="text-lg text-muted-foreground">¢</span>
       </div>
       <div
+        title="24h change"
         className={`font-mono text-[11px] ${
           deltaUp
             ? "text-[oklch(0.78_0.18_155)]"
@@ -108,7 +109,9 @@ function OutcomeBlock({ outcome }: { outcome: Outcome }) {
               : "text-muted-foreground"
         }`}
       >
-        {deltaUp ? "↗" : deltaDown ? "↘" : "·"} {Math.abs(deltaPts)} 24h
+        {deltaUp ? "↗" : deltaDown ? "↘" : "·"}{" "}
+        {deltaUp ? `+${deltaPts}¢` : deltaDown ? `−${Math.abs(deltaPts)}¢` : "0¢"}
+        <span className="text-muted-foreground"> · 24h</span>
       </div>
     </div>
   );
