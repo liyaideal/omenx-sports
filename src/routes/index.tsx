@@ -175,7 +175,7 @@ function Index() {
         <section className="flex flex-col gap-4 lg:col-span-2 lg:col-start-2 lg:row-start-2">
           <SectionHeader
             title="Season"
-            accent="markets"
+            accent="Events"
             right={
               <a href={omenxUrl.markets()} className="inline-flex items-center gap-1 text-xs font-medium text-muted-foreground hover:text-foreground">
                 Browse all <ArrowUpRight className="h-3.5 w-3.5" />
@@ -202,8 +202,7 @@ function Index() {
       <div className="border-t border-border px-6 py-4 md:px-8">
         <div className="flex flex-wrap items-center justify-between gap-3 text-sm">
           <div className="text-muted-foreground">
-            <span className="text-foreground font-medium">Made a call? Cash it in.</span>{" "}
-            Your wallet, open positions, and settled payouts are one click away on OmenX.
+            <span className="text-foreground font-medium">Made a call? Cash it in.</span>
           </div>
           <div className="flex items-center gap-2">
             <a href={omenxUrl.wallet()} className="inline-flex items-center gap-1.5 rounded-full bg-white/[0.06] px-3 py-1.5 text-xs font-semibold text-foreground ring-1 ring-white/10 hover:bg-white/10">
