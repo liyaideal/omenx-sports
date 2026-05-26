@@ -49,6 +49,7 @@ function Index() {
       <AppTopBar
         userName="Jeremy"
         userAvatar="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=120&h=120&fit=crop&crop=faces&q=80"
+        equity={ACCOUNT_STATS.available}
       />
       <PageHeader title="Sports" balance={ACCOUNT_STATS.available} />
 
