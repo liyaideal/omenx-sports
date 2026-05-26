@@ -13,11 +13,11 @@ import {
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { MatchCard } from "@/components/sports/MatchCard";
-import { PredictionCard } from "@/components/sports/PredictionCard";
+import { SentimentCard } from "@/components/sports/SentimentCard";
 import { PlayerSpotlightCard } from "@/components/sports/PlayerSpotlightCard";
 import { LeaderboardRow, LeaderboardHeader } from "@/components/sports/LeaderboardRow";
 import { StatChip } from "@/components/sports/StatChip";
-import { VoteBar } from "@/components/sports/VoteBar";
+import { RatioBar } from "@/components/sports/RatioBar";
 import { NeonRing } from "@/components/sports/NeonRing";
 import { TeamCrest } from "@/components/sports/TeamCrest";
 import { LeagueBadge, LEAGUE_KEYS } from "@/components/sports/LeagueBadge";
@@ -51,13 +51,14 @@ const SECTIONS = [
   ["typography", "Typography"],
   ["buttons", "Buttons"],
   ["chips", "Chips & Badges"],
-  ["bars", "Vote & Progress"],
+  ["bars", "Ratio & Progress"],
   ["decor", "Decorative Elements"],
   ["cards", "Sport Cards"],
   ["leaderboard", "Leaderboard"],
   ["primitives", "Market Primitives"],
   ["market", "Market Card"],
   ["trade", "Trade Surface"],
+  ["language", "Trading Language"],
   ["spacing", "Spacing & Radius"],
 ] as const;
 
@@ -312,16 +313,13 @@ function StyleGuide() {
           </Section>
 
           {/* BARS */}
-          <Section id="bars" title="Vote & Progress" kicker="06 — Data Bars">
-            <div className="grid gap-3 rounded-2xl border border-border bg-surface p-6 shadow-card md:grid-cols-2">
-              <div className="space-y-3">
-                <VoteBar label="Chelsea" value={42} count={21} tone="blue" />
-                <VoteBar label="PSG" value={58} count={29} tone="primary" />
-              </div>
-              <div className="space-y-3">
-                <VoteBar label="Yes" value={73} count={730} tone="win" />
-                <VoteBar label="No" value={27} count={270} tone="loss" />
-              </div>
+          <Section id="bars" title="Ratio & Progress" kicker="06 — Data Bars">
+            <p className="mb-4 max-w-2xl text-sm text-muted-foreground">
+              <code className="font-mono text-foreground">RatioBar</code> shows continuous zero-sum splits — Long/Short notional, order-flow imbalance, sentiment. Never a poll or vote.
+            </p>
+            <div className="grid gap-4 rounded-2xl border border-border bg-surface p-6 shadow-card md:grid-cols-2">
+              <RatioBar value={64} leftLabel="Long 1.2M" rightLabel="Short 680K" />
+              <RatioBar value={38} leftTone="primary" rightTone="neon" leftLabel="YES flow" rightLabel="NO flow" />
             </div>
           </Section>
 
@@ -361,14 +359,17 @@ function StyleGuide() {
               </div>
 
               <div className="lg:col-span-1">
-                <h3 className="mb-4 text-xs font-mono uppercase tracking-widest text-muted-foreground">Prediction Card</h3>
-                <PredictionCard
-                  author={{ name: "Chelsea", handle: "chelsea_official" }}
-                  question="Who will win today's match?"
+                <h3 className="mb-4 text-xs font-mono uppercase tracking-widest text-muted-foreground">Sentiment Card</h3>
+                <SentimentCard
+                  league="ucl"
+                  question="Chelsea vs PSG — who advances?"
                   home="Chelsea"
                   away="PSG"
                   kickoff="Today 8:00pm"
-                  votes={{ home: 21, away: 29 }}
+                  longNotional={1240000}
+                  shortNotional={680000}
+                  openInterest="$1.92M"
+                  oiDelta24h={12}
                 />
               </div>
 
@@ -471,12 +472,12 @@ function StyleGuide() {
                 league="laliga"
                 question="El Clásico — who lifts the trophy?"
                 outcomes={[
-                  { label: "Real Madrid", probability: 54 },
-                  { label: "Barcelona", probability: 46 },
+                  { label: "Real Madrid", probability: 54, delta24h: 3 },
+                  { label: "Barcelona", probability: 46, delta24h: -3 },
                 ]}
                 volume="$182k"
                 endsIn="2d 14h"
-                participants={1284}
+                openInterest="412K"
               />
               <MarketCard
                 league="ucl"
@@ -487,7 +488,7 @@ function StyleGuide() {
                 ]}
                 volume="$94k"
                 endsIn="11d 02h"
-                participants={612}
+                openInterest="208K"
               />
               <MarketCard
                 league="nba"
@@ -498,7 +499,7 @@ function StyleGuide() {
                 ]}
                 volume="$58k"
                 endsIn="04:12"
-                participants={2410}
+                openInterest="124K"
                 status="live"
               />
             </div>
