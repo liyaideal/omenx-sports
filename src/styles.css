@@ -159,3 +159,8 @@
   background-clip: text;
   color: transparent;
 }
+
+@keyframes ticker-scroll {
+  0% { transform: translateY(0); }
+  100% { transform: translateY(-50%); }
+}
