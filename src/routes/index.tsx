@@ -62,6 +62,7 @@ function Index() {
             title="Live & upcoming"
             accent="events"
             as="h1"
+            live
             stats={{
               positions: ACCOUNT_STATS.openPositions,
               pnl: ACCOUNT_STATS.pnlToday,
@@ -125,12 +126,14 @@ function SectionHeader({
   accent,
   right,
   stats,
+  live,
   as: As = "h2",
 }: {
   title: string;
   accent?: string;
   right?: React.ReactNode;
   stats?: { positions: number; pnl: string };
+  live?: boolean;
   as?: "h1" | "h2";
 }) {
   const pnlUp = stats?.pnl.trim().startsWith("+");
@@ -142,9 +145,17 @@ function SectionHeader({
   return (
     <div className="flex flex-wrap items-center justify-between gap-x-5 gap-y-2">
       <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
-        <As className="font-display text-2xl font-semibold">
-          {title}
-          {accent && <span className="font-serif-display italic text-neon"> {accent}</span>}
+        <As className="inline-flex items-center gap-2.5 font-display text-2xl font-semibold">
+          {live && (
+            <span
+              aria-label="Live"
+              className="h-2 w-2 animate-pulse rounded-full bg-[oklch(0.7_0.22_25)] shadow-[0_0_8px_oklch(0.7_0.22_25)]"
+            />
+          )}
+          <span>
+            {title}
+            {accent && <span className="font-serif-display italic text-neon"> {accent}</span>}
+          </span>
         </As>
         {stats && (
           <span className="inline-flex items-center gap-2 font-mono text-[11px] uppercase tracking-wider text-muted-foreground">
