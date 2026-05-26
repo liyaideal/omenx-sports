@@ -543,9 +543,62 @@ function StyleGuide() {
             </div>
           </Section>
 
-          <Section id="spacing" title="Spacing & Radius" kicker="13 — Geometry">
-            {""}
+          {/* TRADING LANGUAGE */}
+          <Section id="language" title="Trading Language" kicker="13 — Rules">
+            <p className="mb-4 max-w-2xl text-sm text-muted-foreground">
+              OmenX is a perpetual-contract market on binary outcomes. Price = probability. Never frame it as gambling.
+            </p>
+            <div className="grid gap-4 lg:grid-cols-2">
+              <div className="rounded-2xl border border-border bg-surface p-6 shadow-card">
+                <div className="mb-3 text-[10px] font-mono uppercase tracking-widest text-muted-foreground">Vocabulary</div>
+                <table className="w-full text-xs">
+                  <thead>
+                    <tr className="text-left font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+                      <th className="py-1.5">Never</th>
+                      <th className="py-1.5">Use instead</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-border">
+                    {[
+                      ["odds", "price (¢) · probability"],
+                      ["bet · wager · stake", "position · order · margin"],
+                      ["bookmaker · house", "orderbook · counterparty"],
+                      ["payout · win amount", "settlement value · PnL"],
+                      ["中奖 / 输掉", "settle / liquidate"],
+                    ].map(([bad, good]) => (
+                      <tr key={bad}>
+                        <td className="py-2 font-mono text-loss line-through">{bad}</td>
+                        <td className="py-2 font-mono text-win">{good}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+              <div className="space-y-4">
+                <div className="rounded-2xl border border-border bg-surface p-6 shadow-card">
+                  <div className="mb-3 text-[10px] font-mono uppercase tracking-widest text-muted-foreground">Color usage</div>
+                  <ul className="space-y-2 text-xs">
+                    <li><span className="inline-block h-2 w-2 rounded-full bg-primary mr-2" /><code className="font-mono text-primary">primary</code> — YES outcome only</li>
+                    <li><span className="inline-block h-2 w-2 rounded-full bg-neon mr-2" /><code className="font-mono text-neon">neon</code> — NO outcome only</li>
+                    <li><span className="inline-block h-2 w-2 rounded-full bg-win mr-2" /><code className="font-mono text-win">win / loss</code> — PnL, ROE, liquidation, order status</li>
+                    <li><span className="inline-block h-2 w-2 rounded-full bg-draw mr-2" /><code className="font-mono text-draw">draw</code> — neutral / pending</li>
+                  </ul>
+                </div>
+                <div className="rounded-2xl border border-border bg-surface p-6 shadow-card">
+                  <div className="mb-3 text-[10px] font-mono uppercase tracking-widest text-muted-foreground">Formulas</div>
+                  <dl className="space-y-1.5 font-mono text-xs">
+                    <div className="flex justify-between"><dt className="text-muted-foreground">Notional</dt><dd>Margin × Leverage</dd></div>
+                    <div className="flex justify-between"><dt className="text-muted-foreground">PnL (long YES)</dt><dd>(mark − entry)/100 × notional</dd></div>
+                    <div className="flex justify-between"><dt className="text-muted-foreground">PnL (short YES)</dt><dd>(entry − mark)/100 × notional</dd></div>
+                    <div className="flex justify-between"><dt className="text-muted-foreground">ROE</dt><dd>PnL / Margin</dd></div>
+                    <div className="flex justify-between"><dt className="text-muted-foreground">Liq (mock)</dt><dd>entry ∓ 100/lev</dd></div>
+                  </dl>
+                </div>
+              </div>
+            </div>
           </Section>
+
+          <Section id="spacing" title="Spacing & Radius" kicker="14 — Geometry">
             <div className="grid gap-3 md:grid-cols-2">
               <div className="rounded-2xl border border-border bg-surface p-6 shadow-card">
                 <div className="text-xs font-mono uppercase tracking-widest text-muted-foreground mb-4">Spacing scale</div>
