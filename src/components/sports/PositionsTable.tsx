@@ -7,10 +7,14 @@ type Tab = "positions" | "orders" | "history";
 export interface PositionRowData {
   market: string;
   league: "epl" | "laliga" | "ucl" | "seriea" | "nba";
-  /** Direction the user is holding on the YES contract. */
-  side: "long" | "short";
-  /** Team / outcome label the position is on (e.g. "Man City", "Yes"). */
-  outcome: string;
+  /**
+   * Which side of the binary the position is on. All positions are long
+   * (Buy YES or Buy NO); there is no short side. The outcome alone determines
+   * P/L direction and color.
+   */
+  outcome: "yes" | "no";
+  /** Display label for the outcome (team alias or "Yes" / "No"). */
+  outcomeLabel: string;
   size: number;
   entry: number; // ¢
   mark: number; // ¢
@@ -24,8 +28,8 @@ export interface PositionRowData {
 export interface OrderRowData {
   market: string;
   league: "epl" | "laliga" | "ucl" | "seriea" | "nba";
-  side: "long" | "short";
-  outcome: string;
+  outcome: "yes" | "no";
+  outcomeLabel: string;
   type: "limit" | "market";
   price: number;
   size: number;
@@ -39,13 +43,13 @@ interface PositionsTableProps {
 }
 
 const DEFAULT_POS: PositionRowData[] = [
-  { market: "Man City win UCL?", league: "ucl", outcome: "Man City", side: "long", size: 250, entry: 28, mark: 34, leverage: 5, mode: "cross", margin: 50, liq: 12, pnl: 53.6 },
-  { market: "El Clásico", league: "laliga", outcome: "Real Madrid", side: "short", size: 120, entry: 47, mark: 41, leverage: 1, mode: "isolated", margin: 120, liq: 99, pnl: 15.3 },
-  { market: "Liverpool top 4?", league: "epl", outcome: "Liverpool", side: "long", size: 80, entry: 62, mark: 55, leverage: 3, mode: "cross", margin: 27, liq: 28, pnl: -16.8 },
+  { market: "Man City win UCL?", league: "ucl", outcome: "yes", outcomeLabel: "Man City", size: 250, entry: 28, mark: 34, leverage: 5, mode: "cross", margin: 50, liq: 12, pnl: 53.6 },
+  { market: "El Clásico", league: "laliga", outcome: "no", outcomeLabel: "Barcelona", size: 120, entry: 53, mark: 59, leverage: 1, mode: "isolated", margin: 120, liq: 99, pnl: 15.3 },
+  { market: "Liverpool top 4?", league: "epl", outcome: "yes", outcomeLabel: "Liverpool", size: 80, entry: 62, mark: 55, leverage: 3, mode: "cross", margin: 27, liq: 28, pnl: -16.8 },
 ];
 const DEFAULT_ORD: OrderRowData[] = [
-  { market: "Arsenal vs Spurs", league: "epl", outcome: "Arsenal", side: "long", type: "limit", price: 55, size: 200, filled: 40 },
-  { market: "Lakers vs Celtics", league: "nba", outcome: "Celtics", side: "short", type: "limit", price: 48, size: 100, filled: 0 },
+  { market: "Arsenal vs Spurs", league: "epl", outcome: "yes", outcomeLabel: "Arsenal", type: "limit", price: 55, size: 200, filled: 40 },
+  { market: "Lakers vs Celtics", league: "nba", outcome: "no", outcomeLabel: "Lakers", type: "limit", price: 52, size: 100, filled: 0 },
 ];
 
 const tabs: { id: Tab; label: string }[] = [
@@ -96,7 +100,7 @@ function PositionTable({ rows }: { rows: PositionRowData[] }) {
         <thead>
           <tr className="text-left font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
             <Th>Market</Th>
-            <Th>Side</Th>
+            <Th>Outcome</Th>
             <Th className="text-right">Size</Th>
             <Th className="text-right">Entry</Th>
             <Th className="text-right">Mark</Th>
@@ -121,7 +125,7 @@ function PositionTable({ rows }: { rows: PositionRowData[] }) {
                 </div>
               </Td>
               <Td>
-                <SideTag side={r.side} outcome={r.outcome} />
+                <OutcomeTag outcome={r.outcome} label={r.outcomeLabel} />
               </Td>
               <Td className="text-right font-mono tabular-nums">{r.size}</Td>
               <Td className="text-right font-mono tabular-nums">{r.entry}¢</Td>
@@ -159,7 +163,7 @@ function OrderTable({ rows }: { rows: OrderRowData[] }) {
         <thead>
           <tr className="text-left font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
             <Th>Market</Th>
-            <Th>Side</Th>
+            <Th>Outcome</Th>
             <Th>Type</Th>
             <Th className="text-right">Price</Th>
             <Th className="text-right">Size</Th>
@@ -177,7 +181,7 @@ function OrderTable({ rows }: { rows: OrderRowData[] }) {
                 </div>
               </Td>
               <Td>
-                <SideTag side={r.side} outcome={r.outcome} />
+                <OutcomeTag outcome={r.outcome} label={r.outcomeLabel} />
               </Td>
               <Td className="font-mono uppercase text-[10px] tracking-widest text-muted-foreground">{r.type}</Td>
               <Td className="text-right font-mono tabular-nums">{r.price}¢</Td>
@@ -202,16 +206,16 @@ function Th({ children, className }: { children?: React.ReactNode; className?: s
 function Td({ children, className }: { children?: React.ReactNode; className?: string }) {
   return <td className={cn("px-4 py-3", className)}>{children}</td>;
 }
-function SideTag({ side, outcome }: { side: "long" | "short"; outcome: string }) {
+function OutcomeTag({ outcome, label }: { outcome: "yes" | "no"; label: string }) {
   return (
     <span
       className={cn(
         "inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-[10px] font-mono uppercase tracking-widest",
-        side === "long" ? "bg-win/15 text-win" : "bg-loss/15 text-loss",
+        outcome === "yes" ? "bg-win/15 text-win" : "bg-loss/15 text-loss",
       )}
     >
-      <span>{side}</span>
-      <span className="text-foreground normal-case tracking-normal">{outcome}</span>
+      <span>{outcome}</span>
+      <span className="text-foreground normal-case tracking-normal">{label}</span>
     </span>
   );
 }

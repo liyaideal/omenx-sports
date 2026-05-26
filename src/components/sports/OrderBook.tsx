@@ -6,10 +6,12 @@ interface Row {
 }
 
 interface OrderBookProps {
-  /** Bid-side resting orders on YES contract (price ascending toward mark). */
+  /**
+   * Resting orders on the YES contract. The NO book is rendered as a mirror
+   * (`no_price = 100 − yes_price`), since YES and NO are two views of the
+   * same binary market.
+   */
   yesBook?: Row[];
-  /** Bid-side resting orders on NO contract. */
-  noBook?: Row[];
   /** Mark price of the YES contract, in ¢. */
   mark?: number;
   className?: string;
@@ -22,14 +24,6 @@ const DEFAULT_YES: Row[] = [
   { price: 24, size: 410 },
   { price: 23, size: 615 },
   { price: 22, size: 1900 },
-];
-const DEFAULT_NO: Row[] = [
-  { price: 72, size: 990 },
-  { price: 71, size: 510 },
-  { price: 70, size: 2200 },
-  { price: 69, size: 740 },
-  { price: 68, size: 320 },
-  { price: 67, size: 1180 },
 ];
 
 function Side({ rows, tone, accumulate }: { rows: Row[]; tone: "yes" | "no"; accumulate: "left" | "right" }) {
@@ -78,7 +72,10 @@ function Side({ rows, tone, accumulate }: { rows: Row[]; tone: "yes" | "no"; acc
   );
 }
 
-export function OrderBook({ yesBook = DEFAULT_YES, noBook = DEFAULT_NO, mark = 28, className }: OrderBookProps) {
+export function OrderBook({ yesBook = DEFAULT_YES, mark = 28, className }: OrderBookProps) {
+  // NO book is the mirror of YES book: every YES row at price p with size s
+  // corresponds to a NO row at price (100 − p) with the same size.
+  const noBook: Row[] = yesBook.map((r) => ({ price: 100 - r.price, size: r.size }));
   const bestYes = yesBook[0]?.price ?? 0;
   const bestNo = noBook[0]?.price ?? 0;
   const spread = Math.max(0, 100 - bestYes - bestNo);
@@ -95,8 +92,11 @@ export function OrderBook({ yesBook = DEFAULT_YES, noBook = DEFAULT_NO, mark = 2
           </span>
         </div>
       </div>
-      <div className="px-2 pb-2 text-right text-[10px] font-mono uppercase tracking-widest text-muted-foreground">
-        Price · Size · Total
+      <div className="flex items-center justify-between px-2 pb-2 text-[10px] font-mono uppercase tracking-widest">
+        <span className="text-muted-foreground/70 normal-case tracking-normal">
+          NO book mirrors YES · price = 100 − yes_price
+        </span>
+        <span className="text-muted-foreground">Price · Size · Total</span>
       </div>
       <div className="grid grid-cols-2 gap-3">
         <div>

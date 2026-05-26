@@ -52,13 +52,10 @@ export function TradeForm({
   const notional = margin * leverage;
   const shares = useMemo(() => (px > 0 ? notional / (px / 100) : 0), [notional, px]);
   const fee = notional * 0.002;
-  // Est. PnL if YES settles at 100¢ (long) or 0¢ (short).
-  // Long YES profit: (1 − px/100) × notional; Short YES profit: (px/100) × notional.
-  const directionSign = (outcome === "yes" ? 1 : -1) * (side === "buy" ? 1 : -1);
-  const pnlAtSettle =
-    directionSign === 1
-      ? (1 - px / 100) * notional - fee
-      : (px / 100) * notional - fee;
+  // All positions are long (Buy YES or Buy NO). Selling closes an existing
+  // position. PnL at settle = (1 − px/100) × notional for the holder of the
+  // winning side; the losing side settles to 0.
+  const pnlAtSettle = (1 - px / 100) * notional - fee;
   // Mock liq price — for display only; real engine uses maintenance margin.
   const liq = useMemo(() => {
     if (leverage <= 1) return 0;
@@ -66,10 +63,10 @@ export function TradeForm({
     return outcome === "yes" ? Math.max(1, px - buffer) : Math.min(99, px + buffer);
   }, [leverage, px, outcome]);
 
-  const longShortWord = directionSign === 1 ? "Long" : "Short";
+  const action = side === "buy" ? "Buy" : "Sell";
   const ctaLabel = pro
-    ? `${longShortWord} ${outcomeLabel} ${leverage}× @ ${Math.round(px)}¢`
-    : `${side === "buy" ? "Buy" : "Sell"} ${outcomeLabel} @ ${Math.round(px)}¢`;
+    ? `${action} ${outcomeLabel} ${leverage}× @ ${Math.round(px)}¢`
+    : `${action} ${outcomeLabel} @ ${Math.round(px)}¢`;
 
   return (
     <div className={cn("rounded-2xl border border-border bg-surface p-5 shadow-card", className)}>
