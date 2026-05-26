@@ -12,8 +12,8 @@ export function FanZoneHeader({
       ? `${followingCount} team${followingCount === 1 ? "" : "s"}`
       : "Add team";
   return (
-    <div className="flex items-center justify-between gap-3">
-      <h2 className="min-w-0 truncate font-display text-2xl font-semibold leading-none">
+    <div className="flex min-h-9 items-center justify-between gap-3">
+      <h2 className="min-w-0 truncate font-display text-2xl font-semibold leading-9">
         {title}
       </h2>
       <button
