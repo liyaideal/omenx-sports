@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { ArrowUpRight } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { AppShell } from "@/components/sports/dashboard/AppShell";
 import { AppTopBar } from "@/components/sports/dashboard/AppTopBar";
 import { MatchMarketCard } from "@/components/sports/dashboard/MatchMarketCard";
@@ -13,6 +13,7 @@ import { FanPostCard } from "@/components/sports/dashboard/FanPostCard";
 import { FansZoneEmpty } from "@/components/sports/dashboard/FansZoneEmpty";
 import { LiveActivityCard } from "@/components/sports/dashboard/LiveActivityCard";
 import { DayStripCalendar } from "@/components/sports/dashboard/DayStripCalendar";
+import { ShowMoreEventsButton } from "@/components/sports/dashboard/ShowMoreEventsButton";
 import {
   ACCOUNT_STATS,
   FEATURED_MATCH,
@@ -59,6 +60,10 @@ function Index() {
     FOLLOWED_TEAMS.includes(TEAMS[k]),
   );
   const [selectedOffset, setSelectedOffset] = useState<number | null>(null);
+  const [expanded, setExpanded] = useState(false);
+  useEffect(() => {
+    setExpanded(false);
+  }, [selectedOffset]);
   const countsByOffset = useMemo(() => {
     const map: Record<number, number> = {};
     for (const m of MATCH_MARKETS) {
@@ -129,11 +134,33 @@ function Index() {
             countsByOffset={countsByOffset}
           />
           {visibleMarkets.length > 0 ? (
-            <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
-              {visibleMarkets.map((m) => (
-                <EventMarketTileCard key={m.id} market={m} />
-              ))}
-            </div>
+            <>
+              <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+                {visibleMarkets.map((m, idx) => {
+                  const hideClass = expanded
+                    ? ""
+                    : idx === 0
+                      ? ""
+                      : idx === 1
+                        ? "hidden md:block"
+                        : idx === 2
+                          ? "hidden xl:block"
+                          : "hidden";
+                  return (
+                    <div key={m.id} className={hideClass}>
+                      <EventMarketTileCard market={m} />
+                    </div>
+                  );
+                })}
+              </div>
+              {visibleMarkets.length > 1 && (
+                <ShowMoreEventsButton
+                  expanded={expanded}
+                  total={visibleMarkets.length}
+                  onToggle={() => setExpanded((v) => !v)}
+                />
+              )}
+            </>
           ) : (
             <div className="rounded-2xl border border-dashed border-border bg-surface/40 px-5 py-10 text-center text-sm text-muted-foreground">
               No events scheduled for {dayLabel}.
