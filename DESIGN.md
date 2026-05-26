@@ -219,6 +219,15 @@ sits directly to the right of the chip with `gap-2`.
 - Trailing pill: `2 teams` / `Add team` with `Users` icon, no decorative suffix
 - Title never gets a serif italic suffix here — only the editorial sections do
 
+### Page footer — NONE on product surfaces
+
+Product / dashboard surfaces (home, event, trade, fans zone, positions, settings)
+do not have a page-level footer. Bottom padding is the visual end-of-page.
+Footers are reserved for SEO / content pages (Insights, About, FAQ,
+Methodology, Privacy, Glossary, marketing landings), matching the OmenX
+`SeoPageLayout` convention. `Terms` / `Help` / cross-site OmenX links live
+in the existing top-right user menu, not a bottom bar.
+
 ## 5. Layout Principles
 
 ### Spacing scale
