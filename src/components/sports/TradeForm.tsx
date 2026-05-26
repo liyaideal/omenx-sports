@@ -29,32 +29,51 @@ export function TradeForm({
   const [side, setSide] = useState<Side>("buy");
   const [type, setType] = useState<Type>("market");
   const [pro, setPro] = useState(false);
-  const [amount, setAmount] = useState(100);
+  const [margin, setMargin] = useState(100);
   const [leverage, setLeverage] = useState(1);
-  const [margin, setMargin] = useState<Margin>("cross");
+  const [marginMode, setMarginMode] = useState<Margin>("cross");
   const [tp, setTp] = useState("");
   const [sl, setSl] = useState("");
   const [limit, setLimit] = useState(price.toString());
 
-  const accent = outcome === "yes" ? "primary" : "neon";
   const accentClass =
-    accent === "primary"
+    outcome === "yes"
       ? "bg-primary text-primary-foreground"
       : "bg-gradient-neon text-white shadow-glow";
+  const sideToneClass = (s: Side) =>
+    side === s
+      ? outcome === "yes"
+        ? "bg-primary/15 text-primary ring-1 ring-primary/30"
+        : "bg-neon/15 text-neon ring-1 ring-neon/30"
+      : "text-muted-foreground hover:text-foreground";
 
   const px = type === "market" ? price : Number(limit) || price;
-  const shares = useMemo(() => (px > 0 ? (amount * leverage) / (px / 100) : 0), [amount, px, leverage]);
-  const fee = amount * 0.002;
-  const potential = shares * 1 - amount * leverage; // payoff @ 1.00
+  // Notional = Margin × Leverage. Shares = Notional / (price in $).
+  const notional = margin * leverage;
+  const shares = useMemo(() => (px > 0 ? notional / (px / 100) : 0), [notional, px]);
+  const fee = notional * 0.002;
+  // Est. PnL if YES settles at 100¢ (long) or 0¢ (short).
+  // Long YES profit: (1 − px/100) × notional; Short YES profit: (px/100) × notional.
+  const directionSign = (outcome === "yes" ? 1 : -1) * (side === "buy" ? 1 : -1);
+  const pnlAtSettle =
+    directionSign === 1
+      ? (1 - px / 100) * notional - fee
+      : (px / 100) * notional - fee;
+  // Mock liq price — for display only; real engine uses maintenance margin.
   const liq = useMemo(() => {
     if (leverage <= 1) return 0;
     const buffer = 100 / leverage;
     return outcome === "yes" ? Math.max(1, px - buffer) : Math.min(99, px + buffer);
   }, [leverage, px, outcome]);
 
+  const longShortWord = directionSign === 1 ? "Long" : "Short";
+  const ctaLabel = pro
+    ? `${longShortWord} ${outcomeLabel} ${leverage}× @ ${Math.round(px)}¢`
+    : `${side === "buy" ? "Buy" : "Sell"} ${outcomeLabel} @ ${Math.round(px)}¢`;
+
   return (
     <div className={cn("rounded-2xl border border-border bg-surface p-5 shadow-card", className)}>
-      {/* Side toggle */}
+      {/* Side toggle — neutral outcome-tinted, NOT win/loss */}
       <div className="grid grid-cols-2 gap-1 rounded-xl bg-white/[0.04] p-1 ring-1 ring-white/5">
         {(["buy", "sell"] as Side[]).map((s) => (
           <button
@@ -62,11 +81,7 @@ export function TradeForm({
             onClick={() => setSide(s)}
             className={cn(
               "rounded-lg py-2 text-xs font-display font-semibold uppercase tracking-widest transition-colors",
-              side === s
-                ? s === "buy"
-                  ? "bg-win/15 text-win"
-                  : "bg-loss/15 text-loss"
-                : "text-muted-foreground hover:text-foreground",
+              sideToneClass(s),
             )}
           >
             {s}
@@ -107,11 +122,11 @@ export function TradeForm({
             />
           </Field>
         )}
-        <Field label="Amount (USDC)">
+        <Field label={pro ? "Margin (USDC)" : "Amount (USDC)"}>
           <input
             type="number"
-            value={amount}
-            onChange={(e) => setAmount(Number(e.target.value) || 0)}
+            value={margin}
+            onChange={(e) => setMargin(Number(e.target.value) || 0)}
             className="w-full bg-transparent text-right font-mono text-lg tabular-nums outline-none"
           />
         </Field>
@@ -119,7 +134,7 @@ export function TradeForm({
           {[25, 50, 75, 100].map((p) => (
             <button
               key={p}
-              onClick={() => setAmount(Math.round((balance * p) / 100))}
+              onClick={() => setMargin(Math.round((balance * p) / 100))}
               className="flex-1 rounded-lg bg-white/[0.04] py-1.5 font-mono text-[11px] text-muted-foreground hover:bg-white/[0.08] hover:text-foreground"
             >
               {p}%
@@ -161,10 +176,10 @@ export function TradeForm({
             {(["cross", "isolated"] as Margin[]).map((m) => (
               <button
                 key={m}
-                onClick={() => setMargin(m)}
+                onClick={() => setMarginMode(m)}
                 className={cn(
                   "rounded-md py-1 text-[11px] font-mono uppercase tracking-widest transition-colors",
-                  margin === m
+                  marginMode === m
                     ? "bg-surface-elevated text-foreground"
                     : "text-muted-foreground hover:text-foreground",
                 )}
@@ -194,7 +209,12 @@ export function TradeForm({
           </div>
 
           {leverage > 1 && (
-            <LiquidationBar entry={px} current={px} liquidation={Math.round(liq)} tone={outcome} />
+            <>
+              <LiquidationBar entry={px} current={px} liquidation={Math.round(liq)} tone={outcome} />
+              <p className="text-[10px] font-mono text-muted-foreground/70">
+                Liq price is an estimate · actual value depends on funding & maintenance margin
+              </p>
+            </>
           )}
         </div>
       )}
@@ -202,13 +222,14 @@ export function TradeForm({
       {/* Summary */}
       <dl className="mt-5 space-y-1.5 border-t border-border pt-4 text-[11px] font-mono">
         <SummaryRow label="Avg price" value={`${Math.round(px)}¢`} />
-        <SummaryRow label="Notional" value={`${(amount * leverage).toFixed(2)} USDC`} />
-        <SummaryRow label="Shares" value={shares.toFixed(1)} />
+        {pro && <SummaryRow label="Margin" value={`${margin.toFixed(2)} USDC`} />}
+        <SummaryRow label="Notional" value={`${notional.toFixed(2)} USDC`} />
+        <SummaryRow label="Contracts" value={shares.toFixed(1)} />
         <SummaryRow label="Fee" value={`${fee.toFixed(2)} USDC`} />
         <SummaryRow
-          label="Potential win"
-          value={`+${potential.toFixed(2)} USDC`}
-          highlight="win"
+          label="Est. PnL @ settle"
+          value={`${pnlAtSettle >= 0 ? "+" : ""}${pnlAtSettle.toFixed(2)} USDC`}
+          highlight={pnlAtSettle >= 0 ? "win" : "loss"}
         />
         {pro && leverage > 1 && (
           <SummaryRow label="Liq price" value={`${Math.round(liq)}¢`} highlight="loss" />
@@ -221,7 +242,7 @@ export function TradeForm({
           accentClass,
         )}
       >
-        {side === "buy" ? "Buy" : "Sell"} {outcomeLabel} @ {Math.round(px)}¢
+        {ctaLabel}
       </button>
     </div>
   );

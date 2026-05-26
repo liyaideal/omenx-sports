@@ -7,18 +7,25 @@ type Tab = "positions" | "orders" | "history";
 export interface PositionRowData {
   market: string;
   league: "epl" | "laliga" | "ucl" | "seriea" | "nba";
-  side: "yes" | "no";
+  /** Direction the user is holding on the YES contract. */
+  side: "long" | "short";
+  /** Team / outcome label the position is on (e.g. "Man City", "Yes"). */
+  outcome: string;
   size: number;
   entry: number; // ¢
   mark: number; // ¢
   leverage: number;
+  mode: "cross" | "isolated";
+  margin: number; // USDC
+  liq: number; // ¢
   pnl: number; // USDC
 }
 
 export interface OrderRowData {
   market: string;
   league: "epl" | "laliga" | "ucl" | "seriea" | "nba";
-  side: "yes" | "no";
+  side: "long" | "short";
+  outcome: string;
   type: "limit" | "market";
   price: number;
   size: number;
@@ -32,13 +39,13 @@ interface PositionsTableProps {
 }
 
 const DEFAULT_POS: PositionRowData[] = [
-  { market: "Man City win UCL?", league: "ucl", side: "yes", size: 250, entry: 28, mark: 34, leverage: 5, pnl: 53.6 },
-  { market: "El Clásico — Real wins?", league: "laliga", side: "no", size: 120, entry: 47, mark: 41, leverage: 1, pnl: 15.3 },
-  { market: "Liverpool top 4?", league: "epl", side: "yes", size: 80, entry: 62, mark: 55, leverage: 3, pnl: -16.8 },
+  { market: "Man City win UCL?", league: "ucl", outcome: "Man City", side: "long", size: 250, entry: 28, mark: 34, leverage: 5, mode: "cross", margin: 50, liq: 12, pnl: 53.6 },
+  { market: "El Clásico", league: "laliga", outcome: "Real Madrid", side: "short", size: 120, entry: 47, mark: 41, leverage: 1, mode: "isolated", margin: 120, liq: 99, pnl: 15.3 },
+  { market: "Liverpool top 4?", league: "epl", outcome: "Liverpool", side: "long", size: 80, entry: 62, mark: 55, leverage: 3, mode: "cross", margin: 27, liq: 28, pnl: -16.8 },
 ];
 const DEFAULT_ORD: OrderRowData[] = [
-  { market: "Arsenal vs Spurs — Arsenal", league: "epl", side: "yes", type: "limit", price: 55, size: 200, filled: 40 },
-  { market: "Lakers vs Celtics — Celtics", league: "nba", side: "no", type: "limit", price: 48, size: 100, filled: 0 },
+  { market: "Arsenal vs Spurs", league: "epl", outcome: "Arsenal", side: "long", type: "limit", price: 55, size: 200, filled: 40 },
+  { market: "Lakers vs Celtics", league: "nba", outcome: "Celtics", side: "short", type: "limit", price: 48, size: 100, filled: 0 },
 ];
 
 const tabs: { id: Tab; label: string }[] = [
@@ -94,12 +101,18 @@ function PositionTable({ rows }: { rows: PositionRowData[] }) {
             <Th className="text-right">Entry</Th>
             <Th className="text-right">Mark</Th>
             <Th className="text-right">Lev</Th>
+            <Th className="text-right">Mode</Th>
+            <Th className="text-right">Margin</Th>
+            <Th className="text-right">Liq</Th>
             <Th className="text-right">PnL</Th>
+            <Th className="text-right">ROE</Th>
             <Th />
           </tr>
         </thead>
         <tbody className="divide-y divide-border">
-          {rows.map((r, i) => (
+          {rows.map((r, i) => {
+            const roe = r.margin > 0 ? (r.pnl / r.margin) * 100 : 0;
+            return (
             <tr key={i} className="hover:bg-white/[0.02]">
               <Td>
                 <div className="flex items-center gap-2">
@@ -108,15 +121,22 @@ function PositionTable({ rows }: { rows: PositionRowData[] }) {
                 </div>
               </Td>
               <Td>
-                <SideTag side={r.side} />
+                <SideTag side={r.side} outcome={r.outcome} />
               </Td>
               <Td className="text-right font-mono tabular-nums">{r.size}</Td>
               <Td className="text-right font-mono tabular-nums">{r.entry}¢</Td>
               <Td className="text-right font-mono tabular-nums">{r.mark}¢</Td>
               <Td className="text-right font-mono tabular-nums">{r.leverage}×</Td>
+              <Td className="text-right font-mono uppercase text-[10px] tracking-widest text-muted-foreground">{r.mode}</Td>
+              <Td className="text-right font-mono tabular-nums">{r.margin.toFixed(0)}</Td>
+              <Td className="text-right font-mono tabular-nums text-loss">{r.liq}¢</Td>
               <Td className={cn("text-right font-mono tabular-nums", r.pnl >= 0 ? "text-win" : "text-loss")}>
                 {r.pnl >= 0 ? "+" : ""}
                 {r.pnl.toFixed(2)}
+              </Td>
+              <Td className={cn("text-right font-mono tabular-nums", roe >= 0 ? "text-win" : "text-loss")}>
+                {roe >= 0 ? "+" : ""}
+                {roe.toFixed(1)}%
               </Td>
               <Td className="text-right">
                 <button className="rounded-md border border-border bg-white/[0.04] px-2 py-1 text-[10px] font-mono uppercase tracking-widest text-muted-foreground hover:text-foreground">
@@ -124,7 +144,8 @@ function PositionTable({ rows }: { rows: PositionRowData[] }) {
                 </button>
               </Td>
             </tr>
-          ))}
+            );
+          })}
         </tbody>
       </table>
     </div>
@@ -156,7 +177,7 @@ function OrderTable({ rows }: { rows: OrderRowData[] }) {
                 </div>
               </Td>
               <Td>
-                <SideTag side={r.side} />
+                <SideTag side={r.side} outcome={r.outcome} />
               </Td>
               <Td className="font-mono uppercase text-[10px] tracking-widest text-muted-foreground">{r.type}</Td>
               <Td className="text-right font-mono tabular-nums">{r.price}¢</Td>
@@ -181,15 +202,16 @@ function Th({ children, className }: { children?: React.ReactNode; className?: s
 function Td({ children, className }: { children?: React.ReactNode; className?: string }) {
   return <td className={cn("px-4 py-3", className)}>{children}</td>;
 }
-function SideTag({ side }: { side: "yes" | "no" }) {
+function SideTag({ side, outcome }: { side: "long" | "short"; outcome: string }) {
   return (
     <span
       className={cn(
-        "rounded-full px-2 py-0.5 text-[10px] font-mono uppercase tracking-widest",
-        side === "yes" ? "bg-primary/15 text-primary" : "bg-neon/15 text-neon",
+        "inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-[10px] font-mono uppercase tracking-widest",
+        side === "long" ? "bg-win/15 text-win" : "bg-loss/15 text-loss",
       )}
     >
-      {side}
+      <span>{side}</span>
+      <span className="text-foreground normal-case tracking-normal">{outcome}</span>
     </span>
   );
 }
