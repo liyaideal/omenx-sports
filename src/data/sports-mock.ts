@@ -138,6 +138,21 @@ export const STANDINGS: StandingRow[] = [
   { team: TEAMS.liverpool, played: 3, wins: 4, draws: 0, losses: 22 },
 ];
 
+/**
+ * Mock user follow state. Toggle to `[]` to preview the Fans Zone
+ * empty / onboarding state in the left column of the home page.
+ */
+export const FOLLOWED_TEAMS: TeamLite[] = [TEAMS.chelsea, TEAMS.manCity];
+
+/** Surfaced in the Fans Zone empty state as one-tap follow chips. */
+export const SUGGESTED_TEAMS: TeamLite[] = [
+  TEAMS.realMadrid,
+  TEAMS.barcelona,
+  TEAMS.liverpool,
+  TEAMS.arsenal,
+  TEAMS.psg,
+];
+
 export interface TopScorer {
   firstName: string;
   lastName: string;
