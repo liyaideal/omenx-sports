@@ -1,72 +1,108 @@
-import { Bell, Compass, Headset, Home, ListChecks, Search, Settings, Wallet } from "lucide-react";
+import { ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { omenxUrl, OMENX_BASE } from "@/lib/omenx";
+import omenxLogo from "@/assets/omenx-logo.svg";
 
 const NAV = [
-  { icon: Home, key: "home", active: true },
-  { icon: Compass, key: "discover" },
-  { icon: Headset, key: "support" },
-  { icon: ListChecks, key: "bets" },
-  { icon: Wallet, key: "wallet" },
+  { label: "Events", href: `${OMENX_BASE}/events` },
+  { label: "Sports", href: "/", active: true },
+  { label: "Portfolio", href: omenxUrl.portfolio() },
+  { label: "Leaderboard", href: `${OMENX_BASE}/leaderboard` },
+  { label: "Insights", href: `${OMENX_BASE}/insights` },
 ];
 
 export function AppTopBar({
   userName,
   userAvatar,
+  equity,
 }: {
   userName: string;
   userAvatar: string;
+  equity?: number;
 }) {
+  const equityLabel = (equity ?? 0).toLocaleString(undefined, {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
+
   return (
-    <header className="flex items-center gap-4 px-6 pt-6 md:px-8 md:pt-7">
-      {/* logo */}
-      <a href="/" aria-label="OmenX Sports" className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-gradient-neon shadow-glow">
-        <span className="font-display text-lg font-bold text-white">⚽</span>
-      </a>
+    <header
+      className="sticky top-0 z-50 border-b border-border/30 backdrop-blur-md"
+      style={{
+        background:
+          "linear-gradient(180deg, hsl(222 47% 8% / 0.98) 0%, hsl(222 47% 6% / 0.95) 100%)",
+      }}
+    >
+      {/* top neon hairline — matches OmenX EventsDesktopHeader */}
+      <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-primary/40 to-transparent" />
 
-      {/* search */}
-      <div className="relative hidden flex-1 max-w-md md:block">
-        <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-        <input
-          placeholder="Search"
-          className="h-11 w-full rounded-full border border-border bg-white/[0.04] pl-10 pr-4 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary/40 focus:outline-none"
-        />
-      </div>
-
-      {/* nav */}
-      <nav className="mx-auto hidden items-center gap-2 rounded-full border border-border bg-white/[0.03] px-2 py-1.5 md:flex">
-        {NAV.map(({ icon: Icon, key, active }) => (
-          <button
-            key={key}
-            aria-label={key}
-            className={cn(
-              "grid h-9 w-9 place-items-center rounded-full transition",
-              active
-                ? "bg-primary text-primary-foreground shadow-glow"
-                : "text-muted-foreground hover:bg-white/[0.06] hover:text-foreground",
-            )}
+      <div className="mx-auto flex w-full max-w-7xl min-w-0 items-center justify-between gap-6 px-4 py-3 lg:px-6">
+        {/* Left: Logo + Nav */}
+        <div className="flex min-w-0 items-center gap-4 xl:gap-8">
+          <a
+            href={omenxUrl.home()}
+            aria-label="OmenX"
+            className="flex flex-shrink-0 items-center gap-2 transition-all duration-300 hover:scale-[1.02] hover:opacity-80"
           >
-            <Icon className="h-4 w-4" />
-          </button>
-        ))}
-      </nav>
+            <img src={omenxLogo} alt="OMENX" className="h-8 w-auto" />
+          </a>
 
-      {/* user */}
-      <div className="ml-auto flex items-center gap-3">
-        <span className="hidden text-sm text-muted-foreground md:inline">Hi, {userName}</span>
-        <div className="relative">
-          <img
-            src={userAvatar}
-            alt={userName}
-            className="h-10 w-10 rounded-full object-cover ring-2 ring-white/10"
-          />
-          <span className="absolute -right-0.5 -top-0.5 h-2.5 w-2.5 rounded-full bg-loss ring-2 ring-surface" />
+          <nav className="flex min-w-0 items-center gap-1">
+            {NAV.map((item) => {
+              const isActive = !!item.active;
+              const isInternal = item.href.startsWith("/");
+              const Tag: "a" = "a";
+              return (
+                <Tag
+                  key={item.label}
+                  href={item.href}
+                  {...(isInternal ? {} : { rel: "noopener" })}
+                  className={cn(
+                    "relative rounded-lg px-3 py-2 text-sm font-medium transition-all duration-200 xl:px-4",
+                    isActive
+                      ? "bg-primary text-primary-foreground shadow-[0_0_12px_hsl(260_60%_55%/0.3)]"
+                      : "text-muted-foreground hover:bg-primary/10 hover:text-foreground",
+                  )}
+                >
+                  {item.label}
+                  {isActive && (
+                    <span className="absolute -bottom-3 left-1/2 h-[2px] w-6 -translate-x-1/2 rounded-full bg-primary" />
+                  )}
+                </Tag>
+              );
+            })}
+          </nav>
         </div>
-        <button aria-label="Notifications" className="grid h-10 w-10 place-items-center rounded-full border border-border bg-white/[0.03] text-muted-foreground hover:text-foreground">
-          <Bell className="h-4 w-4" />
-        </button>
-        <button aria-label="Settings" className="grid h-10 w-10 place-items-center rounded-full border border-border bg-white/[0.03] text-muted-foreground hover:text-foreground">
-          <Settings className="h-4 w-4" />
-        </button>
+
+        {/* Right: Equity + Avatar */}
+        <div className="flex min-w-0 items-center gap-2 xl:gap-4">
+          <a
+            href={omenxUrl.wallet()}
+            className="flex min-w-0 items-center gap-2 rounded-lg border border-border/50 bg-white/[0.04] px-3 py-2 transition-all duration-200 hover:border-win/40 hover:bg-win/5 xl:px-4"
+          >
+            <span className="hidden text-sm text-muted-foreground xl:inline">
+              Equity:
+            </span>
+            <span className="font-mono text-sm font-bold text-win">
+              ${equityLabel}
+            </span>
+          </a>
+
+          <button
+            type="button"
+            className="flex min-w-0 items-center gap-2 rounded-lg px-2 py-1.5 transition-colors hover:bg-white/[0.06] xl:gap-2.5 xl:px-3"
+          >
+            <img
+              src={userAvatar}
+              alt={userName}
+              className="h-9 w-9 rounded-full border-2 border-primary/50 object-cover"
+            />
+            <span className="max-w-[64px] truncate text-sm font-medium text-foreground xl:max-w-[100px]">
+              {userName}
+            </span>
+            <ChevronDown className="h-4 w-4 text-muted-foreground" />
+          </button>
+        </div>
       </div>
     </header>
   );
