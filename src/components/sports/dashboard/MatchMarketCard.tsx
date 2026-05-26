@@ -9,7 +9,7 @@ import { PricePill } from "./PricePill";
  */
 export function MatchMarketCard({ market }: { market: SportsMarket }) {
   if (!market.fixture) return null;
-  const { home, away, whenLabel, kickoff } = market.fixture;
+  const { home, away } = market.fixture;
   const total = market.outcomes.reduce((s, o) => s + o.price, 0) || 1;
   const hueFor = (o: typeof market.outcomes[number], isDraw: boolean): string =>
     isDraw ? "280" : o.team ? String(o.team.hue) : "305";
@@ -29,16 +29,9 @@ export function MatchMarketCard({ market }: { market: SportsMarket }) {
 
       <h3 className="relative mt-3 font-display text-lg font-semibold text-foreground">{market.title}</h3>
 
-      <div className="relative mt-5 flex items-center justify-center gap-4">
+      <div className="relative mt-5 flex items-center justify-center gap-6">
         <CrestBubble team={home} />
-        <div className="flex flex-col items-center gap-1">
-          <span className="font-serif-display italic text-xl text-muted-foreground">vs</span>
-          <span className="rounded-full bg-white/[0.05] px-2.5 py-1 text-center font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
-            {whenLabel}
-            <br />
-            at {kickoff}
-          </span>
-        </div>
+        <span className="font-serif-display italic text-xl text-muted-foreground">vs</span>
         <CrestBubble team={away} />
       </div>
 
