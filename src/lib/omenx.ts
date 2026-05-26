@@ -6,7 +6,7 @@
  * on the OmenX main site. When the deployment shape changes (sub-path,
  * sub-domain, or independent domain), only this file needs to change.
  */
-export const OMENX_BASE = "https://omenx.app";
+export const OMENX_BASE = "https://omenx.lovable.app";
 
 export const omenxUrl = {
   home: () => `${OMENX_BASE}/`,
