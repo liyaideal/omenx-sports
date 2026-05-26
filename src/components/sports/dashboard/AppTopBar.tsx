@@ -18,12 +18,9 @@ export function AppTopBar({
 }: {
   userName: string;
   userAvatar: string;
-  equity?: number;
+  equity?: string;
 }) {
-  const equityLabel = (equity ?? 0).toLocaleString(undefined, {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  });
+  const equityLabel = equity ?? "$0.00";
 
   return (
     <header
@@ -84,7 +81,7 @@ export function AppTopBar({
               Equity:
             </span>
             <span className="font-mono text-sm font-bold text-win">
-              ${equityLabel}
+              {equityLabel}
             </span>
           </a>
 
