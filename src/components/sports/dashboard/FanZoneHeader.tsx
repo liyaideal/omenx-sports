@@ -1,19 +1,30 @@
-import { CalendarDays, ChevronDown, Plus } from "lucide-react";
+import { ChevronDown, Users } from "lucide-react";
 
-export function FanZoneHeader({ title = "Fan Zone" }: { title?: string }) {
+export function FanZoneHeader({
+  title = "Fans zone",
+  followingCount,
+}: {
+  title?: string;
+  followingCount: number;
+}) {
+  const label =
+    followingCount > 0
+      ? `Following · ${followingCount} team${followingCount === 1 ? "" : "s"}`
+      : "Not following anyone";
   return (
-    <div className="flex items-center justify-between">
-      <h2 className="font-display text-2xl font-semibold">{title}</h2>
-      <div className="flex items-center gap-2">
-        <button className="inline-flex items-center gap-1.5 rounded-full bg-gradient-neon px-3 py-1.5 text-xs font-medium text-primary-foreground shadow-glow">
-          <CalendarDays className="h-3.5 w-3.5" />
-          Newest
-          <ChevronDown className="h-3.5 w-3.5" />
-        </button>
-        <button aria-label="New post" className="grid h-8 w-8 place-items-center rounded-full border border-dashed border-white/20 text-muted-foreground hover:text-foreground">
-          <Plus className="h-4 w-4" />
-        </button>
-      </div>
+    <div className="flex items-center justify-between gap-3">
+      <h2 className="font-display text-2xl font-semibold">
+        {title}
+        <span className="font-serif-display italic text-neon"> you</span>
+      </h2>
+      <button
+        type="button"
+        className="inline-flex items-center gap-1.5 rounded-full bg-white/[0.04] px-3 py-1.5 font-mono text-[10px] uppercase tracking-wider text-muted-foreground ring-1 ring-white/10 hover:text-foreground"
+      >
+        <Users className="h-3 w-3" />
+        {label}
+        <ChevronDown className="h-3 w-3" />
+      </button>
     </div>
   );
 }
