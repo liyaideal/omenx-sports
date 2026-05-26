@@ -148,7 +148,7 @@ export const TOP_SCORER_MARKET: SportsMarket = {
   id: "epl-top-scorer-25-26",
   kind: "top-scorer",
   shape: "three-way",
-  title: "EPL Top Scorer 25/26",
+  title: "Premier League — Top scorer 25/26",
   league: { name: "Premier League", short: "EPL" },
   endsLabel: "Settles May 24, 2026",
   volume: "$3.6M",

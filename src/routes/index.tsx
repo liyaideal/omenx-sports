@@ -6,7 +6,7 @@ import { CategoryStrip } from "@/components/sports/dashboard/CategoryStrip";
 import { MatchMarketCard } from "@/components/sports/dashboard/MatchMarketCard";
 import { EventMarketTileCard } from "@/components/sports/dashboard/EventMarketTileCard";
 import { LeagueWinnerMarketCard } from "@/components/sports/dashboard/LeagueWinnerMarketCard";
-import { TopScorerMarketRow } from "@/components/sports/dashboard/TopScorerMarketRow";
+import { TopScorerMarketCard } from "@/components/sports/dashboard/TopScorerMarketCard";
 import { PlayerPropsSpotlight } from "@/components/sports/dashboard/PlayerPropsSpotlight";
 import {
   ACCOUNT_STATS,
@@ -87,17 +87,13 @@ function Index() {
         {/* BOTTOM CENTER — Futures + Top scorer */}
         <section className="flex flex-col gap-5 lg:col-start-2 lg:row-start-2">
           <LeagueWinnerMarketCard market={LEAGUE_WINNER_MARKET} />
-          <SectionHeader title="Top scorer" accent="futures" />
-          <div className="grid gap-3">
-            {TOP_SCORER_MARKET.outcomes.map((o, i) => (
-              <TopScorerMarketRow
-                key={o.id}
-                market={TOP_SCORER_MARKET}
-                outcome={o}
-                photo={TOP_SCORERS[i]?.photo ?? TOP_SCORERS[0].photo}
-              />
-            ))}
-          </div>
+          <TopScorerMarketCard
+            market={TOP_SCORER_MARKET}
+            photos={{
+              messi: TOP_SCORERS[0].photo,
+              haaland: TOP_SCORERS[1].photo,
+            }}
+          />
         </section>
 
         {/* BOTTOM RIGHT — Player props spotlight */}
