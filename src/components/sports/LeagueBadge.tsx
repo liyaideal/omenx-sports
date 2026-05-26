@@ -8,6 +8,28 @@ const PRESETS: Record<string, { label: string; from: string; to: string; mono: s
   nba: { label: "NBA", from: "oklch(0.7 0.22 40)", to: "oklch(0.55 0.18 20)", mono: "NBA" },
 };
 
+const FALLBACK = { from: "oklch(0.55 0.12 295)", to: "oklch(0.35 0.08 290)" } as const;
+
+/**
+ * Resolve a free-form league short label (e.g. "EPL", "La Liga", "MLS") to
+ * a preset key. Falls back to a generic gradient crest using the first
+ * 1–3 characters of the short label.
+ */
+function resolvePreset(short: string): { label: string; from: string; to: string; mono: string } {
+  const norm = short.replace(/\s+/g, "").toLowerCase();
+  if (norm === "epl" || norm === "premierleague") return PRESETS.epl;
+  if (norm === "laliga") return PRESETS.laliga;
+  if (norm === "ucl" || norm === "championsleague") return PRESETS.ucl;
+  if (norm === "seriea") return PRESETS.seriea;
+  if (norm === "nba") return PRESETS.nba;
+  return {
+    label: short,
+    from: FALLBACK.from,
+    to: FALLBACK.to,
+    mono: short.slice(0, 3).toUpperCase(),
+  };
+}
+
 interface LeagueBadgeProps {
   league: keyof typeof PRESETS;
   size?: "sm" | "md";
@@ -32,3 +54,38 @@ export function LeagueBadge({ league, size = "sm", showLabel = true, className }
 }
 
 export const LEAGUE_KEYS = Object.keys(PRESETS) as Array<keyof typeof PRESETS>;
+
+/**
+ * Canonical league chip for card headers. One pill, used everywhere a league
+ * is named at the top of a card. See DESIGN.md §4 — never render
+ * `{market.league.short}` as bare text in a header.
+ *
+ * Accepts either a known preset key (`league`) or a free-form short label
+ * (`short`); the short form resolves to a preset when possible and falls back
+ * to a neutral gradient crest.
+ */
+interface LeagueChipProps {
+  league?: keyof typeof PRESETS;
+  short?: string;
+  className?: string;
+}
+
+export function LeagueChip({ league, short, className }: LeagueChipProps) {
+  const p = league ? PRESETS[league] : resolvePreset(short ?? "");
+  return (
+    <span
+      className={cn(
+        "inline-flex items-center gap-1.5 rounded-full bg-white/[0.05] px-2.5 py-1 font-mono text-[10px] uppercase tracking-widest text-muted-foreground",
+        className,
+      )}
+    >
+      <span
+        className="grid h-3.5 w-3.5 place-items-center rounded-full font-mono text-[8px] font-bold text-white"
+        style={{ backgroundImage: `linear-gradient(135deg, ${p.from}, ${p.to})` }}
+      >
+        {p.mono.slice(0, 1)}
+      </span>
+      {p.label}
+    </span>
+  );
+}
