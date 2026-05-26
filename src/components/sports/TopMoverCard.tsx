@@ -45,7 +45,7 @@ export function TopMoverCard({
     <a
       href={href}
       className={cn(
-        "group relative flex flex-col overflow-hidden rounded-2xl border border-border bg-surface p-4 shadow-card transition-all hover:-translate-y-0.5 hover:bg-surface-elevated",
+        "group relative flex flex-col overflow-hidden rounded-2xl border border-border bg-surface p-3 shadow-card transition-all hover:-translate-y-0.5 hover:bg-surface-elevated",
         className,
       )}
     >
@@ -64,11 +64,11 @@ export function TopMoverCard({
         </div>
       </div>
 
-      <h3 className="mt-3 font-display font-semibold text-[15px] leading-snug text-foreground line-clamp-2 min-h-[2.5rem]">
+      <h3 className="mt-3 font-display font-semibold text-[13px] leading-snug text-foreground line-clamp-2 min-h-[2.25rem]">
         {question}
       </h3>
 
-      <div className="mt-3 flex items-center justify-center gap-3">
+      <div className="mt-3 flex items-center justify-center gap-2">
         <PriceBubble side={yes} pct={yesPct} delta={yesDelta} tone="yes" />
         <PriceBubble side={no} pct={noPct} delta={noDelta} tone="no" />
       </div>
@@ -102,21 +102,21 @@ function PriceBubble({
   return (
     <div className="flex flex-col items-center">
       <div
-        className="relative grid h-[68px] w-[68px] place-items-center rounded-full bg-surface-elevated"
-        style={{ boxShadow: `0 0 0 1.5px ${ringColor}, 0 0 18px -4px ${ringColor}` }}
+        className="relative grid h-[52px] w-[52px] place-items-center rounded-full bg-surface-elevated"
+        style={{ boxShadow: `0 0 0 1.5px ${ringColor}, 0 0 14px -4px ${ringColor}` }}
       >
         {side.team ? (
-          <TeamCrest name={side.team.name} abbr={side.team.short} logoUrl={side.team.logo} size="sm" />
+          <TeamCrest name={side.team.name} abbr={side.team.short} logoUrl={side.team.logo} size="xs" />
         ) : (
-          <span className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+          <span className="font-mono text-[9px] uppercase tracking-widest text-muted-foreground">
             {side.label?.[0] ?? "•"}
           </span>
         )}
-        <div className="absolute -bottom-1 right-0 rounded-md bg-surface px-1.5 py-0.5 font-mono text-[11px] font-semibold tabular-nums text-foreground ring-1 ring-border">
+        <div className="absolute -bottom-1 -right-1 rounded-md bg-surface px-1 py-0.5 font-mono text-[10px] font-semibold tabular-nums text-foreground ring-1 ring-border">
           {pct}¢
         </div>
       </div>
-      <div className={cn("mt-2 font-mono text-[10px] tabular-nums", deltaColor)}>
+      <div className={cn("mt-1.5 font-mono text-[10px] tabular-nums", deltaColor)}>
         {sign}
         {delta.toFixed(1)}¢
       </div>
