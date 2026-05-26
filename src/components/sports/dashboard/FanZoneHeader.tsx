@@ -13,7 +13,7 @@ export function FanZoneHeader({
       : "Add team";
   return (
     <div className="flex items-center justify-between gap-3">
-      <h2 className="min-w-0 truncate font-display text-xl font-semibold leading-none">
+      <h2 className="min-w-0 truncate font-display text-2xl font-semibold leading-none">
         {title}
       </h2>
       <button
