@@ -11,8 +11,6 @@ export function MatchMarketCard({ market }: { market: SportsMarket }) {
   if (!market.fixture) return null;
   const { home, away, whenLabel, kickoff } = market.fixture;
   const total = market.outcomes.reduce((s, o) => s + o.price, 0) || 1;
-  const roleFor = (idx: number, isDraw: boolean): "Home" | "Draw" | "Away" =>
-    isDraw ? "Draw" : idx === 0 ? "Home" : "Away";
   const hueFor = (o: typeof market.outcomes[number], isDraw: boolean): string =>
     isDraw ? "280" : o.team ? String(o.team.hue) : "305";
   return (
@@ -62,9 +60,8 @@ export function MatchMarketCard({ market }: { market: SportsMarket }) {
           })}
         </div>
         <div className="mt-4 space-y-2.5">
-          {market.outcomes.map((o, idx) => {
+          {market.outcomes.map((o) => {
             const isDraw = !o.team;
-            const role = roleFor(idx, isDraw);
             const hue = hueFor(o, isDraw);
             const chroma = isDraw ? "0.04" : "0.2";
             return (
@@ -73,14 +70,9 @@ export function MatchMarketCard({ market }: { market: SportsMarket }) {
                   className="h-2.5 w-2.5 shrink-0 rounded-full"
                   style={{ background: `oklch(0.68 ${chroma} ${hue})` }}
                 />
-                <div className="flex min-w-0 flex-1 items-baseline gap-2">
-                  <span className="font-display text-sm font-medium text-foreground">
-                    {o.team?.name ?? o.label}
-                  </span>
-                  <span className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
-                    {role}
-                  </span>
-                </div>
+                <span className="min-w-0 flex-1 truncate font-display text-sm font-medium text-foreground">
+                  {o.team?.name ?? o.label}
+                </span>
                 <PricePill price={o.price} delta={o.delta24h} size="sm" />
               </div>
             );
