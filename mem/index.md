@@ -6,6 +6,8 @@
 - Events grid default = 1 row; expand via dashed ghost `ShowMoreEventsButton`.
 - League in a card header = `<LeagueChip>` only. Never bare `{market.league.short}` text.
 - Market-type eyebrow vocab: MATCH / SEASON WINNER / TOP SCORER / EVENT. Never "FUTURES" or other trading jargon.
+- Price delta always signed with ¢ unit (`+3¢` / `−1¢` / `0¢`), title="24h change". Never bare numbers.
 
 ## Memories
 - [League chip + market-type eyebrow](mem://design/league-chip) — canonical chip spec and user-facing TYPE vocabulary
+- [Price pill delta format](mem://design/price-delta) — signed +N¢/−N¢/0¢ with 24h tooltip
