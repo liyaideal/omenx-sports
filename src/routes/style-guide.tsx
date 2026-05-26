@@ -772,6 +772,78 @@ function StyleGuide() {
                 </div>
               </div>
             </div>
+
+            <div className="mt-6 rounded-2xl border border-border bg-surface p-6 shadow-card">
+              <div className="text-xs font-mono uppercase tracking-widest text-muted-foreground mb-4">Page rhythm</div>
+              <p className="mb-5 text-xs text-muted-foreground">
+                Vertical spacing rules for every route. Apply at the page shell, not inside individual cards.
+              </p>
+              <div className="grid gap-5 md:grid-cols-[260px_1fr]">
+                {/* Visual */}
+                <div className="rounded-xl border border-border bg-background/40 p-3">
+                  <div className="h-7 rounded-md bg-white/[0.06] ring-1 ring-white/10 grid place-items-center text-[10px] font-mono uppercase tracking-widest text-muted-foreground">TopBar</div>
+                  <div className="my-2 flex items-center justify-center">
+                    <span className="font-mono text-[10px] text-primary">↕ pt-8 / md:pt-10</span>
+                  </div>
+                  <div className="h-5 rounded-md bg-gradient-neon/40 ring-1 ring-white/10 grid place-items-center text-[10px] font-mono uppercase tracking-widest text-foreground">Section H1</div>
+                  <div className="my-1.5 flex items-center justify-center">
+                    <span className="font-mono text-[10px] text-primary">↕ gap-4</span>
+                  </div>
+                  <div className="h-12 rounded-lg bg-white/[0.04] ring-1 ring-white/10" />
+                  <div className="my-2 flex items-center justify-center">
+                    <span className="font-mono text-[10px] text-primary">↕ gap-5</span>
+                  </div>
+                  <div className="h-5 rounded-md bg-gradient-neon/40 ring-1 ring-white/10 grid place-items-center text-[10px] font-mono uppercase tracking-widest text-foreground">Section H2</div>
+                  <div className="my-1.5 flex items-center justify-center">
+                    <span className="font-mono text-[10px] text-primary">↕ gap-4</span>
+                  </div>
+                  <div className="h-12 rounded-lg bg-white/[0.04] ring-1 ring-white/10" />
+                </div>
+                {/* Table */}
+                <table className="w-full text-xs">
+                  <thead>
+                    <tr className="text-left font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+                      <th className="py-2 pr-4">Gap</th>
+                      <th className="py-2 pr-4">Tailwind</th>
+                      <th className="py-2 pr-4">px</th>
+                      <th className="py-2">When</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-border">
+                    <tr>
+                      <td className="py-2 pr-4 font-medium">TopBar → first H1</td>
+                      <td className="py-2 pr-4 font-mono text-primary">pt-8 / md:pt-10</td>
+                      <td className="py-2 pr-4 font-mono tabular-nums">32 / 40</td>
+                      <td className="py-2 text-muted-foreground">Page shell — never 0. Without this, the bar collides with the H1.</td>
+                    </tr>
+                    <tr>
+                      <td className="py-2 pr-4 font-medium">H1/H2 → first card</td>
+                      <td className="py-2 pr-4 font-mono text-primary">gap-4</td>
+                      <td className="py-2 pr-4 font-mono tabular-nums">16</td>
+                      <td className="py-2 text-muted-foreground">Inside a section's flex column.</td>
+                    </tr>
+                    <tr>
+                      <td className="py-2 pr-4 font-medium">Sibling sections</td>
+                      <td className="py-2 pr-4 font-mono text-primary">gap-5</td>
+                      <td className="py-2 pr-4 font-mono tabular-nums">20</td>
+                      <td className="py-2 text-muted-foreground">Vertical stack inside the main grid.</td>
+                    </tr>
+                    <tr>
+                      <td className="py-2 pr-4 font-medium">Card padding</td>
+                      <td className="py-2 pr-4 font-mono text-primary">p-5 · p-6</td>
+                      <td className="py-2 pr-4 font-mono tabular-nums">20 · 24</td>
+                      <td className="py-2 text-muted-foreground">p-5 default · p-6 for hero/dense.</td>
+                    </tr>
+                    <tr>
+                      <td className="py-2 pr-4 font-medium">Page horizontal</td>
+                      <td className="py-2 pr-4 font-mono text-primary">px-6 / md:px-8</td>
+                      <td className="py-2 pr-4 font-mono tabular-nums">24 / 32</td>
+                      <td className="py-2 text-muted-foreground">Outer gutter; matches TopBar gutter.</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
           </Section>
 
           <footer className="mt-12 border-t border-border pt-6 text-center text-xs text-muted-foreground font-mono">
