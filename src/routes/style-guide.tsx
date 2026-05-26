@@ -63,6 +63,7 @@ const SECTIONS = [
   ["language", "Trading Language"],
   ["spacing", "Spacing & Radius"],
   ["fans", "Personalized Zone"],
+  ["events-grid", "Events Grid"],
 ] as const;
 
 function Section({ id, title, kicker, children }: { id: string; title: string; kicker?: string; children: React.ReactNode }) {
