@@ -39,17 +39,6 @@ export interface SportsMarket {
   tradeHref: string;
 }
 
-export const CATEGORIES = [
-  { id: "all", label: "All" },
-  { id: "live", label: "Live", live: true },
-  { id: "soccer", label: "Soccer" },
-  { id: "epl", label: "EPL" },
-  { id: "ucl", label: "UCL" },
-  { id: "laliga", label: "La Liga" },
-  { id: "nba", label: "NBA" },
-  { id: "nfl", label: "NFL" },
-] as const;
-
 export const FEATURED_MATCH: SportsMarket = {
   id: "che-psg-2025-ucl",
   kind: "match",
