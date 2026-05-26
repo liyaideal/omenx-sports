@@ -1,34 +1,27 @@
-## Sports Lockup — Neon Monolith 实施
+## 三个问题的修复
 
-按用户选择的 v1 方向实施，保留原 OMENX logo 图（不重做成纯文字），删除 Mainnet 徽章，去掉 Sports nav tab，nav 回归 OmenX 标准 4 项。
+### 1) `Sports` 文字右侧被裁切
 
-### 视觉
+斜体 + `bg-clip-text` + `drop-shadow` 在容器右沿会被裁。`SPORTS` lockup 外层 `<span>` 加 `pr-1.5` 内边距，并把 `tracking-tight` 改成 `tracking-normal`（斜体下不再挤压字距）。这样 S 的右上倾斜尾巴和外发光都不会被截。
 
-```text
-[OMENX图]│ ZONE
-         │ SPORTS    Events  Portfolio  Leaderboard  Insights        [Equity] [Avatar▾]
-         ↑
-   3px 紫→粉渐变竖条 + neon 发光
-```
+### 2) Header 宽度与页面内容不一致
 
-- `OMENX` 仍是 `omenxLogo` SVG，`h-8`
-- 中间一根 `h-9 w-[3px]` 渐变竖条：from-primary via-primary to-accent + `shadow-[0_0_12px_hsl(var(--primary)/0.6)]` 霓虹光
-- 右侧两行 lockup：
-  - 上行 `Zone`：`text-[9px] font-bold uppercase tracking-[0.4em] text-white/30`
-  - 下行 `Sports`：`font-display text-2xl font-black italic uppercase`，紫→粉渐变文本（`bg-gradient-to-br from-primary to-accent bg-clip-text text-transparent`），带 `drop-shadow-[0_0_15px_hsl(var(--primary)/0.35)]` 霓虹外发光
-- hover：整组轻微缩放（logo 图 `group-hover:scale-[1.02]`），整体 `hover:opacity-95`
-- `sm:` 断点以下隐藏竖条 + Sports lockup，只剩 logo（窄屏 fallback）
-- 整组包在一个 `<a href="/">` 里，点击回 Sports 首页
+`AppShell` 已经去掉了 `max-w-7xl`，整页是全宽；但 `AppTopBar` 内层容器还套着 `mx-auto max-w-7xl`，导致 header 比下方内容窄。
 
-### Nav
+修复：把 `AppTopBar` 内层容器的 `mx-auto max-w-7xl` 去掉，改成 `w-full`，padding 用 `px-6 md:px-8`（和 `PageHeader` / 主网格 `px-6 md:px-8` 完全对齐）。
 
-- 删除 NAV 数组里的 `Sports` 项
-- 删除 `active`/`isActive` 分支（4 项都是外链跳回 omenx.app，没有 active 态）
-- 保留 hover 紫色品牌 hover 样式
+### 3) `PageHeader` 里的 `Sports` H1 删掉
+
+Header lockup 已经清楚标识"OmenX → Sports zone"，页面内再来一个 `<h1>Sports</h1>` 是重复信息，且和 header 标题撞车。
+
+修复：
+- 删除 `PageHeader` 里的 `<h1>{title}</h1>` 标题
+- 但 PageHeader 那一行的右侧"Equity 胶囊 + 三个 icon 按钮"也已经和新 header 右侧的 `Equity + Avatar` 重复 → 整个 `PageHeader` 组件不再需要，从 `index.tsx` 移除
+- SEO 用的 `<h1>` 改在第一个内容 section 里加一个语义 H1（例如 "Live & upcoming markets"），保留单 H1 + 关键字
+
+可选简化：直接删 `PageHeader.tsx` 文件并清掉 `index.tsx` 里的引用与渲染。
 
 ### 受影响文件
-
-- 编辑 `src/components/sports/dashboard/AppTopBar.tsx`
-  - 删除 Mainnet badge JSX
-  - 替换 logo `<a>` 内部为 Neon Monolith lockup
-  - NAV 数组移除 Sports，简化激活态代码分支
+- 编辑 `src/components/sports/dashboard/AppTopBar.tsx`（修 1 + 2）
+- 编辑 `src/routes/index.tsx`（移除 PageHeader 用法，给现存某个 section 标题升级为 h1 以保 SEO）
+- 删除 `src/components/sports/dashboard/PageHeader.tsx`
