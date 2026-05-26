@@ -9,17 +9,16 @@ export function FanZoneHeader({
 }) {
   const label =
     followingCount > 0
-      ? `Following · ${followingCount} team${followingCount === 1 ? "" : "s"}`
-      : "Not following anyone";
+      ? `${followingCount} team${followingCount === 1 ? "" : "s"}`
+      : "Add team";
   return (
     <div className="flex items-center justify-between gap-3">
-      <h2 className="font-display text-2xl font-semibold">
+      <h2 className="min-w-0 truncate font-display text-xl font-semibold leading-none">
         {title}
-        <span className="font-serif-display italic text-neon"> you</span>
       </h2>
       <button
         type="button"
-        className="inline-flex items-center gap-1.5 rounded-full bg-white/[0.04] px-3 py-1.5 font-mono text-[10px] uppercase tracking-wider text-muted-foreground ring-1 ring-white/10 hover:text-foreground"
+        className="inline-flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full bg-white/[0.04] px-2.5 py-1 font-mono text-[10px] uppercase tracking-wider text-muted-foreground ring-1 ring-white/10 hover:text-foreground"
       >
         <Users className="h-3 w-3" />
         {label}
