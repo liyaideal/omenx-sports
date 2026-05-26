@@ -309,6 +309,9 @@ Section 7 is append-only. Every regression the user catches gets pinned here.
   in user-facing eyebrows. Use the vocabulary in §4 Market-type eyebrow.
 - Don't ship a new card type without picking a TYPE label from the §4 vocab.
   If none fits, extend §4 first — then add the card.
+- Don't render a price delta as a bare number (e.g. `↗ 3`). It MUST carry a
+  sign and a `¢` unit, e.g. `+3¢` / `−1¢` / `0¢`. The number alone has to
+  read correctly without the arrow.
 
 ## 8. Responsive Behavior
 
