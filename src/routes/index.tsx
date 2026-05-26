@@ -108,12 +108,14 @@ function Index() {
           ) : (
             <FansZoneEmpty editorPick={FEATURED_MATCH} suggested={SUGGESTED_TEAMS} />
           )}
-          <LiveActivityCard
-            trades={LIVE_TRADES}
-            followedTeams={FOLLOWED_TEAMS}
-            followedKeys={followedKeys}
-            seeAllHref={omenxUrl.events()}
-          />
+          <div className="flex-1 [&>*]:h-full">
+            <LiveActivityCard
+              trades={LIVE_TRADES}
+              followedTeams={FOLLOWED_TEAMS}
+              followedKeys={followedKeys}
+              seeAllHref={omenxUrl.events()}
+            />
+          </div>
         </section>
 
         {/* TOP — Live & upcoming, spans col 2–3, sits above the spotlight */}
