@@ -29,16 +29,9 @@ export function MatchMarketCard({ market }: { market: SportsMarket }) {
 
       <h3 className="relative mt-3 font-display text-lg font-semibold text-foreground">{market.title}</h3>
 
-      <div className="relative mt-5 flex items-center justify-center gap-4">
+      <div className="relative mt-5 flex items-center justify-center gap-6">
         <CrestBubble team={home} />
-        <div className="flex flex-col items-center gap-1">
-          <span className="font-serif-display italic text-xl text-muted-foreground">vs</span>
-          <span className="rounded-full bg-white/[0.05] px-2.5 py-1 text-center font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
-            {whenLabel}
-            <br />
-            at {kickoff}
-          </span>
-        </div>
+        <span className="font-serif-display italic text-xl text-muted-foreground">vs</span>
         <CrestBubble team={away} />
       </div>
 
