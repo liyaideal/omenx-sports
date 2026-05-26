@@ -2,7 +2,6 @@ import { createFileRoute } from "@tanstack/react-router";
 import { ArrowUpRight } from "lucide-react";
 import { AppShell } from "@/components/sports/dashboard/AppShell";
 import { AppTopBar } from "@/components/sports/dashboard/AppTopBar";
-import { PageHeader } from "@/components/sports/dashboard/PageHeader";
 import { StatsBar } from "@/components/sports/dashboard/StatsBar";
 import { CategoryStrip } from "@/components/sports/dashboard/CategoryStrip";
 import { MatchMarketCard } from "@/components/sports/dashboard/MatchMarketCard";
@@ -51,9 +50,8 @@ function Index() {
         userAvatar="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=120&h=120&fit=crop&crop=faces&q=80"
         equity={ACCOUNT_STATS.available}
       />
-      <PageHeader title="Sports" balance={ACCOUNT_STATS.available} />
 
-      <div className="px-6 md:px-8">
+      <div className="px-6 pt-6 md:px-8 md:pt-8">
         <StatsBar
           available={ACCOUNT_STATS.available}
           openPositions={ACCOUNT_STATS.openPositions}
@@ -77,6 +75,7 @@ function Index() {
           <SectionHeader
             title="Live & upcoming"
             accent="markets"
+            as="h1"
             right={
               <a href={omenxUrl.markets()} className="inline-flex items-center gap-1 text-xs font-medium text-muted-foreground hover:text-foreground">
                 Browse all <ArrowUpRight className="h-3.5 w-3.5" />
@@ -139,17 +138,19 @@ function SectionHeader({
   title,
   accent,
   right,
+  as: As = "h2",
 }: {
   title: string;
   accent?: string;
   right?: React.ReactNode;
+  as?: "h1" | "h2";
 }) {
   return (
     <div className="flex items-center justify-between">
-      <h2 className="font-display text-2xl font-semibold">
+      <As className="font-display text-2xl font-semibold">
         {title}
         {accent && <span className="font-serif-display italic text-neon"> {accent}</span>}
-      </h2>
+      </As>
       {right}
     </div>
   );

@@ -31,7 +31,7 @@ export function AppTopBar({
       {/* top neon hairline — matches OmenX EventsDesktopHeader */}
       <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-primary/40 to-transparent" />
 
-      <div className="mx-auto flex w-full max-w-7xl min-w-0 items-center justify-between gap-6 px-4 py-3 lg:px-6">
+      <div className="flex w-full min-w-0 items-center justify-between gap-6 px-6 py-3 md:px-8">
         {/* Left: Logo + Nav */}
         <div className="flex min-w-0 items-center gap-4 xl:gap-8">
           <a
@@ -65,7 +65,7 @@ export function AppTopBar({
                 Zone
               </span>
               <span
-                className="bg-gradient-to-br from-primary to-accent bg-clip-text font-display text-2xl font-black italic uppercase tracking-tight text-transparent"
+                className="bg-gradient-to-br from-primary to-accent bg-clip-text pr-2 font-display text-2xl font-black italic uppercase tracking-normal text-transparent"
                 style={{
                   filter:
                     "drop-shadow(0 0 15px color-mix(in oklab, var(--primary) 35%, transparent))",
