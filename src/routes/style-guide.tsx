@@ -978,6 +978,7 @@ function StyleGuide() {
                 <li>• Equal card height is non-negotiable — the row reads as a single comparable shelf, not a staircase. If a new card variant breaks the row, fix the variant (footer pinning, flex-1 fill), not the grid.</li>
                 <li>• Empty state for a selected day is a dashed surface (matches <code className="font-mono text-foreground">Section 15 / Section 16</code>): <code className="font-mono text-foreground">No events scheduled for {`{dayLabel}`}.</code></li>
                 <li>• Section header keeps the live dot + open-positions + today-PnL meta. No <code className="font-mono text-foreground">Browse all</code> link — this page IS the sport's full events page.</li>
+                <li>• All section headers (Fans zone / Live &amp; upcoming / Season) share <code className="font-mono text-foreground">min-h-9 leading-9</code> so titles align on the same baseline across columns. Never set <code className="font-mono text-foreground">leading-none</code> on a section h2 — it breaks cross-column alignment.</li>
               </ul>
             </div>
           </Section>
