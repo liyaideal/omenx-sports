@@ -113,6 +113,7 @@ function Index() {
               trades={LIVE_TRADES}
               followedTeams={FOLLOWED_TEAMS}
               followedKeys={followedKeys}
+              limit={6}
               seeAllHref={omenxUrl.events()}
             />
           </div>
