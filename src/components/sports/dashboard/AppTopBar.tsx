@@ -1,11 +1,9 @@
 import { ChevronDown } from "lucide-react";
-import { cn } from "@/lib/utils";
 import { omenxUrl, OMENX_BASE } from "@/lib/omenx";
 import omenxLogo from "@/assets/omenx-logo.svg";
 
 const NAV = [
   { label: "Events", href: `${OMENX_BASE}/events` },
-  { label: "Sports", href: "/", active: true },
   { label: "Portfolio", href: omenxUrl.portfolio() },
   { label: "Leaderboard", href: `${OMENX_BASE}/leaderboard` },
   { label: "Insights", href: `${OMENX_BASE}/insights` },
@@ -37,44 +35,58 @@ export function AppTopBar({
         {/* Left: Logo + Nav */}
         <div className="flex min-w-0 items-center gap-4 xl:gap-8">
           <a
-            href={omenxUrl.home()}
-            aria-label="OmenX"
-            className="flex flex-shrink-0 items-center gap-2 transition-all duration-300 hover:scale-[1.02] hover:opacity-80"
+            href="/"
+            aria-label="OmenX Sports"
+            className="group flex flex-shrink-0 items-center gap-3 transition-opacity duration-300 hover:opacity-95"
           >
-            <img src={omenxLogo} alt="OMENX" className="h-8 w-auto" />
+            <img
+              src={omenxLogo}
+              alt="OMENX"
+              className="h-8 w-auto transition-transform duration-300 group-hover:scale-[1.02]"
+            />
+
+            {/* Neon monolith divider */}
             <span
-              aria-label="Live on mainnet"
-              className="hidden sm:inline-flex items-center gap-1 rounded-sm border border-win/40 bg-win/10 px-1.5 py-0.5 font-mono text-[10px] uppercase tracking-wider text-win"
+              aria-hidden
+              className="relative hidden h-9 w-[3px] overflow-hidden rounded-full bg-white/5 sm:block"
             >
-              <span className="h-1.5 w-1.5 rounded-full bg-win animate-pulse" />
-              Mainnet
+              <span
+                className="absolute inset-0 bg-gradient-to-b from-primary via-primary to-accent"
+                style={{
+                  boxShadow:
+                    "0 0 12px color-mix(in oklab, var(--primary) 60%, transparent)",
+                }}
+              />
+            </span>
+
+            {/* Sports sub-brand lockup */}
+            <span className="hidden flex-col items-start leading-none sm:flex">
+              <span className="mb-1 ml-px text-[9px] font-bold uppercase tracking-[0.4em] text-white/30">
+                Zone
+              </span>
+              <span
+                className="bg-gradient-to-br from-primary to-accent bg-clip-text font-display text-2xl font-black italic uppercase tracking-tight text-transparent"
+                style={{
+                  filter:
+                    "drop-shadow(0 0 15px color-mix(in oklab, var(--primary) 35%, transparent))",
+                }}
+              >
+                Sports
+              </span>
             </span>
           </a>
 
           <nav className="flex min-w-0 items-center gap-1">
-            {NAV.map((item) => {
-              const isActive = !!item.active;
-              const isInternal = item.href.startsWith("/");
-              const Tag: "a" = "a";
-              return (
-                <Tag
-                  key={item.label}
-                  href={item.href}
-                  {...(isInternal ? {} : { rel: "noopener" })}
-                  className={cn(
-                    "relative rounded-lg px-3 py-2 text-sm font-medium transition-all duration-200 xl:px-4",
-                    isActive
-                      ? "bg-primary text-primary-foreground shadow-[0_0_12px_hsl(260_60%_55%/0.3)]"
-                      : "text-muted-foreground hover:bg-primary/10 hover:text-foreground",
-                  )}
-                >
-                  {item.label}
-                  {isActive && (
-                    <span className="absolute -bottom-3 left-1/2 h-[2px] w-6 -translate-x-1/2 rounded-full bg-primary" />
-                  )}
-                </Tag>
-              );
-            })}
+            {NAV.map((item) => (
+              <a
+                key={item.label}
+                href={item.href}
+                rel="noopener"
+                className="rounded-lg px-3 py-2 text-sm font-medium text-muted-foreground transition-all duration-200 hover:bg-primary/10 hover:text-foreground xl:px-4"
+              >
+                {item.label}
+              </a>
+            ))}
           </nav>
         </div>
 
