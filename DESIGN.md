@@ -321,6 +321,9 @@ Section 7 is append-only. Every regression the user catches gets pinned here.
 - Don't render a price delta as a bare number (e.g. `↗ 3`). It MUST carry a
   sign and a `¢` unit, e.g. `+3¢` / `−1¢` / `0¢`. The number alone has to
   read correctly without the arrow.
+- Don't add a page-level footer to product / dashboard surfaces. Footers are
+  reserved for SEO / content pages (`SeoPageLayout` convention). Cross-site
+  links go in the top-right user menu, not a bottom bar.
 
 ## 8. Responsive Behavior
 
