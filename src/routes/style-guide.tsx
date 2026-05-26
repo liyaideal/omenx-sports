@@ -873,20 +873,13 @@ function StyleGuide() {
                   <li className="flex items-start gap-3">
                     <span className="grid h-5 w-5 shrink-0 place-items-center rounded-full bg-primary/20 font-mono text-[10px] text-primary">2</span>
                     <div>
-                      <div className="font-medium text-foreground">Fan poll</div>
-                      <div className="text-muted-foreground">Community sentiment on the same fixture · drives engagement, not money</div>
-                    </div>
-                  </li>
-                  <li className="flex items-start gap-3">
-                    <span className="grid h-5 w-5 shrink-0 place-items-center rounded-full bg-primary/20 font-mono text-[10px] text-primary">3</span>
-                    <div>
                       <div className="font-medium text-foreground">Fan post</div>
                       <div className="text-muted-foreground">Latest editorial / community post tagged to a followed team</div>
                     </div>
                   </li>
                 </ol>
                 <p className="mt-4 text-[11px] text-muted-foreground">
-                  Order is fixed: trade → poll → post. Never reshuffle by recency.
+                  Order is fixed: trade → post. Never reshuffle by recency.
                 </p>
               </div>
 
@@ -929,7 +922,7 @@ function StyleGuide() {
               <div className="mb-2 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">Rules</div>
               <ul className="space-y-1.5 text-muted-foreground">
                 <li>• Header is single-line at every column width: title <code className="font-mono text-foreground">Fans zone</code> (text-2xl, matches other section titles, no decorative suffix) + pill <code className="font-mono text-foreground">N teams</code> with <code className="font-mono text-foreground">Users</code> icon. Empty-state pill reads <code className="font-mono text-foreground">Add team</code>. Neither side wraps.</li>
-                <li>• Poll and post never appear without a paired trade card above them.</li>
+                <li>• Post never appears without a paired trade card above it.</li>
                 <li>• Empty-state chips toggle locally; persistence happens on `Save preferences`, not per-tap.</li>
                 <li>• The column is always present — never collapsed even at the 3-col → 2-col breakpoint; it just reflows under the main grid.</li>
               </ul>
