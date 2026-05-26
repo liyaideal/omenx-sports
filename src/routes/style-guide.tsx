@@ -681,6 +681,7 @@ function StyleGuide() {
                 <li>1. <code className="font-mono text-foreground">Yes/No</code> is the underlying technical label. Whenever a market provides <code className="font-mono text-foreground">sideLabels</code>, user-facing text uses the alias.</li>
                 <li>2. <span className="text-win">Green = YES side</span> · <span className="text-loss">Red = NO side</span>. Color is the only signal that carries yes/no semantics.</li>
                 <li>3. Inside one market, every surface (pill, ratio bar, orderbook header, position tag, PnL row) uses the same alias — never mix.</li>
+                <li>4. <span className="text-foreground">Leverage is a first-class control</span>, not a PRO feature. The trade form always shows the leverage slider next to Margin. <code className="font-mono text-foreground">PRO</code> only gates Cross/Iso, TP/SL, and liq visualization.</li>
               </ul>
             </div>
 
