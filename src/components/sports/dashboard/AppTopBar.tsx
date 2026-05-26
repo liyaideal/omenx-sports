@@ -1,5 +1,4 @@
 import { ChevronDown } from "lucide-react";
-import { cn } from "@/lib/utils";
 import { omenxUrl, OMENX_BASE } from "@/lib/omenx";
 import omenxLogo from "@/assets/omenx-logo.svg";
 
