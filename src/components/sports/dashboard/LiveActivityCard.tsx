@@ -45,7 +45,7 @@ export function LiveActivityCard({
           Live activity
         </h3>
         <span className="inline-flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full bg-white/[0.04] px-2.5 py-1 font-mono text-[10px] uppercase tracking-wider text-muted-foreground ring-1 ring-white/10">
-          {ratePerMin} trades/min
+          {trades.length} in {windowMin}m
         </span>
       </header>
 
