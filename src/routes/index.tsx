@@ -8,7 +8,6 @@ import { LeagueWinnerMarketCard } from "@/components/sports/dashboard/LeagueWinn
 import { TopScorerMarketCard } from "@/components/sports/dashboard/TopScorerMarketCard";
 import { PlayerPropsSpotlight } from "@/components/sports/dashboard/PlayerPropsSpotlight";
 import { FanZoneHeader } from "@/components/sports/dashboard/FanZoneHeader";
-import { FanPollCard } from "@/components/sports/dashboard/FanPollCard";
 import { FanPostCard } from "@/components/sports/dashboard/FanPostCard";
 import { FansZoneEmpty } from "@/components/sports/dashboard/FansZoneEmpty";
 import {
@@ -20,7 +19,6 @@ import {
   TOP_SCORER_MARKET,
 } from "@/data/sports-markets";
 import {
-  FAN_POLL,
   FAN_POST,
   FOLLOWED_TEAMS,
   SUGGESTED_TEAMS,
@@ -66,7 +64,6 @@ function Index() {
           {FOLLOWED_TEAMS.length > 0 ? (
             <>
               <MatchMarketCard market={FEATURED_MATCH} />
-              <FanPollCard {...FAN_POLL} />
               <FanPostCard {...FAN_POST} />
             </>
           ) : (
