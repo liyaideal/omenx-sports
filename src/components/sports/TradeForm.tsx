@@ -7,6 +7,11 @@ import { LiquidationBar } from "./LiquidationBar";
 
 interface TradeFormProps {
   outcome: "yes" | "no";
+  /**
+   * Display label for the side. Prefer the team alias from `sideLabels`
+   * (e.g. "Arsenal", "Real Madrid"). Only fall back to "Yes" / "No" for
+   * neutral markets with no sideLabels.
+   */
   outcomeLabel: string;
   /** Current price in ¢ (= probability). */
   price: number;
