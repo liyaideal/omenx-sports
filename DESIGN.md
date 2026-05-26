@@ -327,6 +327,8 @@ Section 7 is append-only. Every regression the user catches gets pinned here.
 - Don't add a page-level footer to product / dashboard surfaces. Footers are
   reserved for SEO / content pages (`SeoPageLayout` convention). Cross-site
   links go in the top-right user menu, not a bottom bar.
+- Don't use a placeholder "L" stub or a colored gradient monogram for a
+  known league. Register the real logo in `PRESETS` (`LeagueBadge.tsx`).
 
 ## 8. Responsive Behavior
 
