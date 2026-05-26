@@ -7,6 +7,7 @@
 - League in a card header = `<LeagueChip>` only. Never bare `{market.league.short}` text.
 - Market-type eyebrow vocab: MATCH / SEASON WINNER / TOP SCORER / EVENT. Never "FUTURES" or other trading jargon.
 - Price delta always signed with ¢ unit (`+3¢` / `−1¢` / `0¢`), title="24h change". Never bare numbers.
+- No page-level footer on product/dashboard pages. Footers only on SEO/content pages (SeoPageLayout convention).
 
 ## Memories
 - [League chip + market-type eyebrow](mem://design/league-chip) — canonical chip spec and user-facing TYPE vocabulary
