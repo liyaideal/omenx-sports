@@ -1,26 +1,74 @@
-# TopBar ↔ 首个 H1 间距 + 写入 style-guide
+# 左侧英雄槽：Featured event → Fans Zone（带 fallback）
 
-## 问题
+## 现状回顾
 
-`src/routes/index.tsx` 之前主网格用 `pb-6 md:pb-8`，但顶部 padding 为 0 —— TopBar 底边几乎贴着 `Featured event` / `Live & upcoming` H1。之前是 `CategoryStrip` 外层的 `pt-6 md:pt-8` 在撑高度，删 chips 时一起删掉了。
+- 左列（340px 宽，跨两行高）现在塞了一张 `MatchMarketCard market={FEATURED_MATCH}`（Chelsea vs PSG UCL），编辑硬选。
+- 已有但未启用的组件：`FanZoneHeader`、`FanPollCard`、`FanPostCard`。
+- 已有 mock 数据：`FAN_POLL`、`FAN_POST`、`TEAMS`。
+
+## 目标
+
+左侧变成 **Fans Zone**：基于"关注的球队"个性化呈现，社交 + 交易拼盘。
 
 ## 变更
 
-1. **`src/routes/index.tsx`**
-   - 主网格 className：`px-6 pb-6 md:px-8 md:pb-8` → `px-6 pb-6 pt-8 md:px-8 md:pb-8 md:pt-10`
-   - 给 TopBar 和首个 section H1 之间 32–40px 喘息空间
+### 1. 新增 follow 状态（mock）
 
-2. **`src/routes/style-guide.tsx`** — 在 `Spacing & Radius` (Section 15) 里新增一个 "Page rhythm" 卡片，把这条规则固化下来：
+`src/data/sports-mock.ts` 末尾加：
 
-   | Gap | Value | When |
-   |---|---|---|
-   | TopBar → 首个 H1 | `pt-8` / `md:pt-10` (32–40px) | 任何路由内容区进入时 |
-   | H1 → 首张卡 | `gap-4` (16px) | section 内部 |
-   | 同级 section 之间 | `gap-5` (20px) | 主网格的纵向 stack |
-   | Card 内部 padding | `p-5` 或 `p-6` | 卡片本体 |
+```ts
+export const FOLLOWED_TEAMS: TeamLite[] = [TEAMS.chelsea, TEAMS.manCity];
+// 切到 [] 即可演示空状态
+```
 
-   用一个简单的可视示意（带 TopBar bar、H1、card 占位）说明这三个层级。
+并加一组"推荐关注"球队 `SUGGESTED_TEAMS`（5 支，用于空状态）。
+
+### 2. 改造左列结构（`src/routes/index.tsx`）
+
+```
+<section>  ← 左列，跨两行
+  <FanZoneHeader title="Fans zone" />     ← H1 + Following 下拉
+  {FOLLOWED_TEAMS.length > 0 ? (
+    // happy path（垂直 stack，社交+交易交错）
+    <>
+      <MatchMarketCard market={FEATURED_MATCH} />   ← "你关注的球队下一场"
+      <FanPollCard {...FAN_POLL} />                  ← 球迷投票
+      <FanPostCard {...FAN_POST} />                  ← 球迷帖子
+    </>
+  ) : (
+    // fallback
+    <FansZoneEmpty suggested={SUGGESTED_TEAMS} />
+  )}
+</section>
+```
+
+`FanZoneHeader` 把"Newest 排序"改成 **"Following · 2 teams" 下拉**（含 Manage 链接），更贴合 Fans Zone 语义。
+
+### 3. 新组件 `FansZoneEmpty.tsx`
+
+未关注时的空状态卡，结构：
+- 上半：和现在 `MatchMarketCard market={FEATURED_MATCH}` 一样的编辑精选大卡（不浪费视觉），但顶上盖一条 `Editor's pick — follow your team to personalize` 小条
+- 下半：5 支推荐球队的圆形头像横排 + 每个下方 `Follow` 按钮（mock 状态，点了变 `Following`，本地 state 即可）
+- 底部：`Skip for now` 文字按钮
+
+这样既不显得空，又把 onboarding 自然嵌进去。
+
+### 4. 文案 / 微调
+
+- 把原来 `SectionHeader title="Featured" accent="event"` 整段删掉，由 `FanZoneHeader` 接管
+- `MatchMarketCard` 顶部加一条小 kicker `Following · Chelsea`（如果该卡比赛涉及关注球队）—— 这条逻辑放在 index.tsx 里推导，不改 `MatchMarketCard` 组件
+
+### 5. style-guide 同步
+
+在 Section 12 "Multi-Market Event" 后面加 Section 13 "Personalized Zone"：写明 Fans Zone 的 3 层堆叠规则（关注比赛卡 → 投票 → 帖子）和空状态规则（Editor's pick + Follow chips）。
 
 ## 不动的部分
 
-- TopBar 本体、所有卡片、Live 脉冲点、Top Scorer 卡都不变
+- 中部 `Live & upcoming events` 网格
+- 中下 League Winner + Top Scorer
+- 右侧 Mbappé spotlight
+- TopBar、Page rhythm
+
+## 结果
+
+左列从一张匿名 hero 卡变成"你的球迷主页"：关注的球队比赛 + 球迷讨论 + 投票，所有人看到的都不一样。空状态有一张正经卡 + 5 支球队 onboarding，不会一片白。
