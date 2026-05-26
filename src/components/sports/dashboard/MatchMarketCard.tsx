@@ -9,7 +9,7 @@ import { PricePill } from "./PricePill";
  */
 export function MatchMarketCard({ market }: { market: SportsMarket }) {
   if (!market.fixture) return null;
-  const { home, away, whenLabel, kickoff } = market.fixture;
+  const { home, away } = market.fixture;
   const total = market.outcomes.reduce((s, o) => s + o.price, 0) || 1;
   const hueFor = (o: typeof market.outcomes[number], isDraw: boolean): string =>
     isDraw ? "280" : o.team ? String(o.team.hue) : "305";
