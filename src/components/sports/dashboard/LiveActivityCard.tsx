@@ -61,17 +61,19 @@ export function LiveActivityCard({
       </p>
 
       <div className="group/marquee relative mt-4 min-h-0 flex-1 overflow-hidden [mask-image:linear-gradient(to_bottom,transparent,#000_12%,#000_88%,transparent)]">
-        <div
-          className="flex flex-col will-change-transform group-hover/marquee:[animation-play-state:paused] motion-reduce:!animate-none"
-          style={{ animation: `marquee-y ${durationS}s linear infinite` }}
-        >
-          {[0, 1].map((copy) => (
-            <ul key={copy} aria-hidden={copy === 1} className="divide-y divide-white/[0.05]">
-              {pool.map((trade) => (
-                <TradeRow key={`${copy}-${trade.id}`} trade={trade} />
-              ))}
-            </ul>
-          ))}
+        <div className="absolute inset-x-0 top-0">
+          <div
+            className="flex flex-col will-change-transform group-hover/marquee:[animation-play-state:paused] motion-reduce:!animate-none"
+            style={{ animation: `marquee-y ${durationS}s linear infinite` }}
+          >
+            {[0, 1].map((copy) => (
+              <ul key={copy} aria-hidden={copy === 1} className="divide-y divide-white/[0.05]">
+                {pool.map((trade) => (
+                  <TradeRow key={`${copy}-${trade.id}`} trade={trade} />
+                ))}
+              </ul>
+            ))}
+          </div>
         </div>
       </div>
       <style>{`@keyframes marquee-y { from { transform: translateY(0); } to { transform: translateY(-50%); } }`}</style>
