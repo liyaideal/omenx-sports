@@ -154,6 +154,20 @@ below (Season markets, fans-zone tail) stay first-screen visible:
   win/loss color via delta
 - Status pill: use `--win`/`--loss`/`--draw` tints (`bg-win/15 text-win` etc.)
 
+### Price pill delta — SELF-DESCRIBING
+
+The delta beside the price MUST be readable without the arrow. Locked format:
+
+- Signed and unit-bearing: `+3¢`, `−1¢`, `0¢` — never bare `3`
+- Underlying field is `delta24h`; always include `title="24h change"` on the
+  delta span and `aria-label` on the whole pill (`"42 cents, up 3 cents in
+  24 hours"`)
+- Surfaces with horizontal room (outcome blocks, hero) print `· 24h` inline
+  via `showTimeframe`
+- Colored arrow stays as a redundant visual cue, never the only signal
+- Once per page, show the legend `Prices in ¢ (0–100) · arrows show 24h change`
+  next to the first price-bearing section header so new users learn the unit
+
 ### League chip (card header) — SINGLE SOURCE
 
 There is exactly one way to name a league in a card header: `<LeagueChip>`
