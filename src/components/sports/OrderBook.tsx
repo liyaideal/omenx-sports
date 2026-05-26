@@ -14,6 +14,12 @@ interface OrderBookProps {
   yesBook?: Row[];
   /** Mark price of the YES contract, in ¢. */
   mark?: number;
+  /**
+   * Optional team aliases. When set, column headers display the team names
+   * (e.g. "MAN CITY BOOK / REAL MADRID BOOK") instead of "YES BOOK / NO BOOK"
+   * — keeping the whole surface in one language.
+   */
+  sideLabels?: { yes: string; no: string };
   className?: string;
 }
 
@@ -72,13 +78,15 @@ function Side({ rows, tone, accumulate }: { rows: Row[]; tone: "yes" | "no"; acc
   );
 }
 
-export function OrderBook({ yesBook = DEFAULT_YES, mark = 28, className }: OrderBookProps) {
+export function OrderBook({ yesBook = DEFAULT_YES, mark = 28, sideLabels, className }: OrderBookProps) {
   // NO book is the mirror of YES book: every YES row at price p with size s
   // corresponds to a NO row at price (100 − p) with the same size.
   const noBook: Row[] = yesBook.map((r) => ({ price: 100 - r.price, size: r.size }));
   const bestYes = yesBook[0]?.price ?? 0;
   const bestNo = noBook[0]?.price ?? 0;
   const spread = Math.max(0, 100 - bestYes - bestNo);
+  const yesHeader = sideLabels ? `${sideLabels.yes} Book` : "YES Book";
+  const noHeader = sideLabels ? `${sideLabels.no} Book` : "NO Book";
   return (
     <div className={cn("rounded-2xl border border-border bg-surface p-4 shadow-card", className)}>
       <div className="flex items-center justify-between px-2 pb-2">
@@ -94,17 +102,17 @@ export function OrderBook({ yesBook = DEFAULT_YES, mark = 28, className }: Order
       </div>
       <div className="flex items-center justify-between px-2 pb-2 text-[10px] font-mono uppercase tracking-widest">
         <span className="text-muted-foreground/70 normal-case tracking-normal">
-          NO book mirrors YES · price = 100 − yes_price
+          Right side mirrors left · price = 100 − left_price
         </span>
         <span className="text-muted-foreground">Price · Size · Total</span>
       </div>
       <div className="grid grid-cols-2 gap-3">
         <div>
-          <div className="px-2 pb-1.5 text-[10px] font-mono uppercase tracking-widest text-primary">YES Book</div>
+          <div className="px-2 pb-1.5 text-[10px] font-mono uppercase tracking-widest text-primary">{yesHeader}</div>
           <Side rows={yesBook} tone="yes" accumulate="left" />
         </div>
         <div>
-          <div className="px-2 pb-1.5 text-right text-[10px] font-mono uppercase tracking-widest text-neon">NO Book</div>
+          <div className="px-2 pb-1.5 text-right text-[10px] font-mono uppercase tracking-widest text-neon">{noHeader}</div>
           <Side rows={noBook} tone="no" accumulate="right" />
         </div>
       </div>
