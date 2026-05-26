@@ -5,6 +5,7 @@
  */
 import { omenxUrl } from "@/lib/omenx";
 import { TEAMS, type TeamLite } from "@/data/sports-mock";
+import mbappePhoto from "@/assets/mbappe.png";
 
 export type { TeamLite } from "@/data/sports-mock";
 export { TEAMS } from "@/data/sports-mock";
@@ -191,7 +192,7 @@ export const SPOTLIGHT: PlayerSpotlight = {
   position: "Forward · Real Madrid",
   club: TEAMS.realMadrid,
   photo:
-    "https://images.unsplash.com/photo-1551958219-acbc608c6377?w=900&h=1100&fit=crop&q=85",
+    mbappePhoto,
   props: [
     {
       id: "mbappe-anytime",
