@@ -42,12 +42,12 @@ export function TopScorerMarketRow({
 
       <div className="min-w-0">
         <div className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
-          {market.league.short} · TOP SCORER
+          {market.league.short} · To win Golden Boot
         </div>
         <div className="font-display text-2xl font-semibold leading-tight text-foreground">{outcome.label}</div>
         {outcome.meta && (
           <span className="mt-1 inline-flex items-center gap-1 rounded-full bg-primary/20 px-2.5 py-0.5 font-mono text-[10px] uppercase tracking-widest text-primary">
-            {outcome.meta}
+            {outcome.meta} this season
           </span>
         )}
       </div>
