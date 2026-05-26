@@ -154,6 +154,44 @@ below (Season markets, fans-zone tail) stay first-screen visible:
   win/loss color via delta
 - Status pill: use `--win`/`--loss`/`--draw` tints (`bg-win/15 text-win` etc.)
 
+### League chip (card header) — SINGLE SOURCE
+
+There is exactly one way to name a league in a card header: `<LeagueChip>`
+from `src/components/sports/LeagueBadge.tsx`. Never render
+`{market.league.short}` as bare mono text — that path is a regression.
+
+Spec (locked):
+
+- Container: `inline-flex items-center gap-1.5 rounded-full bg-white/[0.05] px-2.5 py-1 font-mono text-[10px] uppercase tracking-widest text-muted-foreground`
+- Leading crest: `grid h-3.5 w-3.5 place-items-center rounded-full` with the
+  league's gradient (from `PRESETS` in `LeagueBadge.tsx`), single-letter mono
+- Fallback when no preset matches: neutral purple gradient + first 3 chars
+
+Variants of the same identity system:
+
+| Component | Use |
+|---|---|
+| `<LeagueChip short="EPL">` | Card-header eyebrow — the canonical chip |
+| `<LeagueBadge league="epl">` | Inline rows: crest + label, no background pill |
+| `<LeagueBadge league="epl" showLabel={false}>` | Crest-only, dense tables / mini cards |
+
+### Market-type eyebrow — FIXED VOCABULARY
+
+Eyebrow format is always `{LeagueChip} · {TYPE}` where TYPE comes from this
+vocabulary. No trading-desk jargon ("FUTURES", "1X2", "outright", "moneyline")
+is allowed on user-facing surfaces.
+
+| Internal market kind | User-facing TYPE |
+|---|---|
+| 1X2 / binary on a fixture | `MATCH` |
+| league winner | `SEASON WINNER` |
+| top scorer | `TOP SCORER` |
+| generic event tile | `EVENT` |
+
+The `· TYPE` text uses the default pill typography
+(`font-mono text-[10px] uppercase tracking-widest text-muted-foreground`) and
+sits directly to the right of the chip with `gap-2`.
+
 ### Buttons
 
 - Primary: `bg-gradient-neon text-white shadow-glow hover:opacity-90`
@@ -251,6 +289,12 @@ Section 7 is append-only. Every regression the user catches gets pinned here.
   always be specific (handle + side + outcome + price + event + time).
 - Don't ship a placeholder empty illustration; always pair onboarding with
   real editorial content.
+- Don't render a league as plain mono text in a card header — always
+  `<LeagueChip>`. One identity, one chip, everywhere.
+- Don't use trading-desk jargon ("FUTURES", "Outrights", "Moneyline", "1X2")
+  in user-facing eyebrows. Use the vocabulary in §4 Market-type eyebrow.
+- Don't ship a new card type without picking a TYPE label from the §4 vocab.
+  If none fits, extend §4 first — then add the card.
 
 ## 8. Responsive Behavior
 
