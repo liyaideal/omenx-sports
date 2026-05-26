@@ -62,6 +62,7 @@ const SECTIONS = [
   ["trade", "Trade Surface"],
   ["language", "Trading Language"],
   ["spacing", "Spacing & Radius"],
+  ["fans", "Personalized Zone"],
 ] as const;
 
 function Section({ id, title, kicker, children }: { id: string; title: string; kicker?: string; children: React.ReactNode }) {
