@@ -26,7 +26,7 @@ export function LiveTicker({ rows, className, durationSec = 24 }: LiveTickerProp
   return (
     <div
       className={cn(
-        "group relative flex h-full flex-col overflow-hidden rounded-2xl border border-border bg-surface p-4 shadow-card",
+        "group relative flex h-[320px] flex-col overflow-hidden rounded-2xl border border-border bg-surface p-4 shadow-card",
         className,
       )}
     >
