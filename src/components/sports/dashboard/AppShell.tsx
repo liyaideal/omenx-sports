@@ -14,8 +14,6 @@ export function AppShell({
 }) {
   return (
     <div className={cn("relative min-h-screen bg-background bg-ambient", className)}>
-      {/* top ambient halo */}
-      <div className="pointer-events-none absolute inset-x-0 -top-40 h-80 bg-[radial-gradient(60%_100%_at_70%_100%,oklch(0.7_0.28_340/0.35),transparent_70%)]" />
       <div className="relative">{children}</div>
     </div>
   );
