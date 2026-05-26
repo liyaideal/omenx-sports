@@ -63,6 +63,7 @@ const SECTIONS = [
   ["language", "Trading Language"],
   ["spacing", "Spacing & Radius"],
   ["fans", "Personalized Zone"],
+  ["events-grid", "Events Grid"],
 ] as const;
 
 function Section({ id, title, kicker, children }: { id: string; title: string; kicker?: string; children: React.ReactNode }) {
@@ -940,6 +941,43 @@ function StyleGuide() {
                 <li>• Live activity sits last in the stack — never above trade or post. Rows are specific (avatar + handle + side + outcome + price + event + time), never "N people are betting" aggregates. Sides use semantic tokens: <code className="font-mono text-foreground">bought=win</code>, <code className="font-mono text-foreground">sold=loss</code>. If the filtered set is empty, the card hides entirely — no in-card empty state.</li>
                 <li>• Empty-state chips toggle locally; persistence happens on `Save preferences`, not per-tap.</li>
                 <li>• The column is always present — never collapsed even at the 3-col → 2-col breakpoint; it just reflows under the main grid.</li>
+              </ul>
+            </div>
+          </Section>
+
+          <Section id="events-grid" title="Events Grid" kicker="17 — Live & Upcoming">
+            <p className="mb-6 max-w-3xl text-sm text-muted-foreground">
+              The middle-column events grid is a responsive card grid with a fixed default
+              height, so the modules below it (Season markets, Fans zone tail) keep first-screen
+              exposure as the event count grows.
+            </p>
+
+            <div className="grid gap-4 lg:grid-cols-2">
+              <div className="rounded-2xl border border-border bg-surface p-5 shadow-card">
+                <div className="mb-3 text-xs font-mono uppercase tracking-widest text-muted-foreground">Equal-height cards</div>
+                <ul className="space-y-1.5 text-xs text-muted-foreground">
+                  <li>• Every <code className="font-mono text-foreground">EventMarketTileCard</code> stretches to the tallest sibling in its row. The card uses <code className="font-mono text-foreground">h-full flex flex-col</code>, the outcomes block uses <code className="font-mono text-foreground">flex-1</code>, and the footer uses <code className="font-mono text-foreground">mt-auto</code>.</li>
+                  <li>• Any wrapper between the grid and the card MUST pass <code className="font-mono text-foreground">h-full</code> through, or the anchor collapses to content height and the row goes ragged.</li>
+                  <li>• Never set a fixed pixel height on the card itself — three-way (1·X·2) and binary cards have different intrinsic content, and the row-stretch is what unifies them.</li>
+                </ul>
+              </div>
+
+              <div className="rounded-2xl border border-border bg-surface p-5 shadow-card">
+                <div className="mb-3 text-xs font-mono uppercase tracking-widest text-muted-foreground">Default = one row</div>
+                <ul className="space-y-1.5 text-xs text-muted-foreground">
+                  <li>• Grid columns: <code className="font-mono text-foreground">1 (base) · 2 (md) · 3 (xl)</code>. Default collapsed view shows exactly the first row at each breakpoint — extra cards use <code className="font-mono text-foreground">hidden md:block</code> / <code className="font-mono text-foreground">hidden xl:block</code> / <code className="font-mono text-foreground">hidden</code>.</li>
+                  <li>• A dashed full-width <code className="font-mono text-foreground">ShowMoreEventsButton</code> sits below the grid only when <code className="font-mono text-foreground">visibleMarkets.length &gt; 1</code>. Labels: <code className="font-mono text-foreground">Show all {`{N}`} events</code> / <code className="font-mono text-foreground">Show less</code>.</li>
+                  <li>• Switching day strip selection (incl. ALL) auto-resets to collapsed. Never persist expanded state across filters.</li>
+                </ul>
+              </div>
+            </div>
+
+            <div className="mt-6 rounded-2xl border border-dashed border-white/15 bg-white/[0.02] p-5 text-xs">
+              <div className="mb-2 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">Rules</div>
+              <ul className="space-y-1.5 text-muted-foreground">
+                <li>• Equal card height is non-negotiable — the row reads as a single comparable shelf, not a staircase. If a new card variant breaks the row, fix the variant (footer pinning, flex-1 fill), not the grid.</li>
+                <li>• Empty state for a selected day is a dashed surface (matches <code className="font-mono text-foreground">Section 15 / Section 16</code>): <code className="font-mono text-foreground">No events scheduled for {`{dayLabel}`}.</code></li>
+                <li>• Section header keeps the live dot + open-positions + today-PnL meta. No <code className="font-mono text-foreground">Browse all</code> link — this page IS the sport's full events page.</li>
               </ul>
             </div>
           </Section>

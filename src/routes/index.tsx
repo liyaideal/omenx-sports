@@ -147,7 +147,7 @@ function Index() {
                           ? "hidden xl:block"
                           : "hidden";
                   return (
-                    <div key={m.id} className={hideClass}>
+                    <div key={m.id} className={`h-full ${hideClass}`}>
                       <EventMarketTileCard market={m} />
                     </div>
                   );
