@@ -42,6 +42,13 @@ export function AppTopBar({
             className="flex flex-shrink-0 items-center gap-2 transition-all duration-300 hover:scale-[1.02] hover:opacity-80"
           >
             <img src={omenxLogo} alt="OMENX" className="h-8 w-auto" />
+            <span
+              aria-label="Live on mainnet"
+              className="hidden sm:inline-flex items-center gap-1 rounded-sm border border-win/40 bg-win/10 px-1.5 py-0.5 font-mono text-[10px] uppercase tracking-wider text-win"
+            >
+              <span className="h-1.5 w-1.5 rounded-full bg-win animate-pulse" />
+              Mainnet
+            </span>
           </a>
 
           <nav className="flex min-w-0 items-center gap-1">
