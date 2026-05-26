@@ -177,9 +177,12 @@ from `src/components/sports/LeagueBadge.tsx`. Never render
 Spec (locked):
 
 - Container: `inline-flex items-center gap-1.5 rounded-full bg-white/[0.05] px-2.5 py-1 font-mono text-[10px] uppercase tracking-widest text-muted-foreground`
-- Leading crest: `grid h-3.5 w-3.5 place-items-center rounded-full` with the
-  league's gradient (from `PRESETS` in `LeagueBadge.tsx`), single-letter mono
-- Fallback when no preset matches: neutral purple gradient + first 3 chars
+- Leading crest: real league logo (PNG, ESPN CDN) inside a
+  `h-3.5 w-3.5 rounded-full bg-white/[0.06] ring-1 ring-white/10` well,
+  rendered with `object-contain` at 78% of the circle. Registered in
+  `PRESETS` in `LeagueBadge.tsx` — never an emoji or a colored "L" stub.
+- Fallback when no logo is registered: gradient monogram (first 3 chars)
+  from the same preset. Only used for new leagues — add a real logo ASAP.
 
 Variants of the same identity system:
 
