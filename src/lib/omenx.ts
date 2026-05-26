@@ -15,6 +15,7 @@ export const omenxUrl = {
   portfolio: () => `${OMENX_BASE}/portfolio`,
   history: () => `${OMENX_BASE}/portfolio/history`,
   markets: () => `${OMENX_BASE}/markets`,
+  events: () => `${OMENX_BASE}/events`,
   crypto: () => `${OMENX_BASE}/crypto`,
   politics: () => `${OMENX_BASE}/politics`,
   terms: () => `${OMENX_BASE}/terms`,
