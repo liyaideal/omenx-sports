@@ -72,14 +72,18 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Lovable App" },
-      { name: "description", content: "Lovable Generated Project" },
+      { title: "OmenX | Sports" },
+      { name: "description", content: "OmenX Sports is a sports platform showcasing live and upcoming events with interactive features." },
       { name: "author", content: "Lovable" },
-      { property: "og:title", content: "Lovable App" },
-      { property: "og:description", content: "Lovable Generated Project" },
+      { property: "og:title", content: "OmenX | Sports" },
+      { property: "og:description", content: "OmenX Sports is a sports platform showcasing live and upcoming events with interactive features." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
       { name: "twitter:site", content: "@Lovable" },
+      { name: "twitter:title", content: "OmenX | Sports" },
+      { name: "twitter:description", content: "OmenX Sports is a sports platform showcasing live and upcoming events with interactive features." },
+      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/7dde1be3-3d6c-490f-8488-193810ff5c1e/id-preview-567e7b41--9e2b5bcb-7a38-4443-9370-578a278f2a44.lovable.app-1779805266569.png" },
+      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/7dde1be3-3d6c-490f-8488-193810ff5c1e/id-preview-567e7b41--9e2b5bcb-7a38-4443-9370-578a278f2a44.lovable.app-1779805266569.png" },
     ],
     links: [
       {
