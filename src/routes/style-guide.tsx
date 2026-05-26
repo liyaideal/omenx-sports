@@ -21,6 +21,7 @@ import { RatioBar } from "@/components/sports/RatioBar";
 import { NeonRing } from "@/components/sports/NeonRing";
 import { TeamCrest } from "@/components/sports/TeamCrest";
 import { LeagueBadge, LeagueChip, LEAGUE_KEYS } from "@/components/sports/LeagueBadge";
+import { PricePill } from "@/components/sports/dashboard/PricePill";
 import { OutcomePill } from "@/components/sports/OutcomePill";
 import { CountdownPill } from "@/components/sports/CountdownPill";
 import { StatTile } from "@/components/sports/StatTile";
