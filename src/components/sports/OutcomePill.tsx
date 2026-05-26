@@ -1,11 +1,15 @@
 import { cn } from "@/lib/utils";
 import { TeamCrest } from "./TeamCrest";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import type { Team } from "@/lib/teams";
 
 export type OutcomeTone = "yes" | "no";
 
 export interface OutcomePillProps {
-  /** Label — usually a team name. For neutral markets use "Yes" / "No". */
-  label: string;
+  /** Either pass a `team` (preferred — shows short code + tooltip + logo) or a raw `label`. */
+  team?: Team;
+  /** Fallback label when `team` is omitted. */
+  label?: string;
   /** 0–100 probability percent, also displayed as price in ¢. */
   probability: number;
   /** Optional 24h price change in ¢ (e.g. +3, -1). Shown under the price. */
@@ -31,12 +35,13 @@ const TONE_TEXT: Record<OutcomeTone, string> = {
   no: "text-neon",
 };
 const SIZES = {
-  sm: { box: "px-3 py-2", label: "text-xs", price: "text-base", crest: "xs" },
-  md: { box: "px-3.5 py-2.5", label: "text-sm", price: "text-xl", crest: "sm" },
-  lg: { box: "px-4 py-3", label: "text-base", price: "text-2xl", crest: "md" },
+  sm: { box: "px-3 py-2", code: "text-sm", price: "text-base", crest: "xs" },
+  md: { box: "px-3.5 py-2.5", code: "text-base", price: "text-xl", crest: "sm" },
+  lg: { box: "px-4 py-3", code: "text-lg", price: "text-2xl", crest: "md" },
 } as const;
 
 export function OutcomePill({
+  team,
   label,
   probability,
   delta24h,
@@ -50,24 +55,37 @@ export function OutcomePill({
   const s = SIZES[size];
   const hasDelta = typeof delta24h === "number";
   const positive = (delta24h ?? 0) >= 0;
-  return (
+  const displayShort = team?.short ?? label ?? "";
+  const fullName = team?.name ?? label ?? "";
+  // Neutral Yes/No outcomes don't need a tooltip — the code IS the full name.
+  const showTooltip = !!team && team.name.toLowerCase() !== team.short.toLowerCase();
+
+  const button = (
     <button
       type="button"
       onClick={onClick}
       className={cn(
-        "group flex w-full flex-col gap-1.5 rounded-2xl bg-white/[0.03] ring-1 transition-all text-left",
+        "group flex w-full items-center justify-between gap-3 rounded-2xl bg-white/[0.03] ring-1 transition-all text-left",
         s.box,
         selected ? TONE_SELECTED[tone] : TONE_RING[tone],
         className,
       )}
+      aria-label={fullName}
     >
       <div className="flex min-w-0 items-center gap-2">
-        {showCrest && <TeamCrest name={label} size={s.crest as "xs" | "sm" | "md"} />}
-        <span className={cn("min-w-0 flex-1 font-display font-semibold text-foreground truncate", s.label)}>
-          {label}
+        {showCrest && (
+          <TeamCrest
+            name={fullName}
+            abbr={team?.short}
+            logoUrl={team?.logo}
+            size={s.crest as "xs" | "sm" | "md"}
+          />
+        )}
+        <span className={cn("font-display font-bold tracking-wide text-foreground uppercase", s.code)}>
+          {displayShort}
         </span>
       </div>
-      <div className="flex items-baseline justify-between gap-2">
+      <div className="flex flex-col items-end gap-0.5">
         <span className={cn("font-mono font-bold tabular-nums leading-none", s.price, TONE_TEXT[tone])}>
           {Math.round(probability)}¢
         </span>
@@ -84,5 +102,15 @@ export function OutcomePill({
         )}
       </div>
     </button>
+  );
+
+  if (!showTooltip) return button;
+  return (
+    <TooltipProvider delayDuration={150}>
+      <Tooltip>
+        <TooltipTrigger asChild>{button}</TooltipTrigger>
+        <TooltipContent side="top">{fullName}</TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
   );
 }

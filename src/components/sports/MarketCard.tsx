@@ -3,14 +3,15 @@ import { cn } from "@/lib/utils";
 import { LeagueBadge } from "./LeagueBadge";
 import { OutcomePill } from "./OutcomePill";
 import { CountdownPill } from "./CountdownPill";
+import type { Team } from "@/lib/teams";
 
 export interface MarketCardProps {
   league: "epl" | "laliga" | "ucl" | "seriea" | "nba";
   question: string;
-  /** Two outcomes. For team-vs-team markets, label = team name; for neutral, "Yes" / "No". */
+  /** Two outcomes. Prefer passing a `team` for branded markets; `label` works for plain text. */
   outcomes: [
-    { label: string; probability: number; delta24h?: number },
-    { label: string; probability: number; delta24h?: number },
+    { team?: Team; label?: string; probability: number; delta24h?: number },
+    { team?: Team; label?: string; probability: number; delta24h?: number },
   ];
   volume: string;
   endsIn: string;
@@ -52,6 +53,7 @@ export function MarketCard({
 
       <div className="mt-4 grid grid-cols-2 gap-2.5">
         <OutcomePill
+          team={outcomes[0].team}
           label={outcomes[0].label}
           probability={outcomes[0].probability}
           delta24h={outcomes[0].delta24h}
@@ -60,6 +62,7 @@ export function MarketCard({
           onClick={() => onSelect?.("yes")}
         />
         <OutcomePill
+          team={outcomes[1].team}
           label={outcomes[1].label}
           probability={outcomes[1].probability}
           delta24h={outcomes[1].delta24h}
