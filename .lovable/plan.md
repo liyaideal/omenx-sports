@@ -1,50 +1,52 @@
-## 删 StatsBar + 方案 C section header chips
+# 统一 Event vs Market 文案
 
-### 视觉
+## 1. 概念定义（写入设计规范）
 
-```text
-[Header.....................................]
-[ All  Live  Soccer  EPL  UCL  ...  NBA  NFL ]
+| 术语 | 含义 | 例子 |
+|---|---|---|
+| **Event** | 现实世界的赛事 / 时段 | Arsenal vs Chelsea；EPL 24/25 赛季；EPL Top Scorer 赛季 |
+| **Market** | 挂在某个 event 上的可交易问题 | 1X2、BTTS、Over 2.5、Top Scorer |
+| **Outcome** | market 的一个选项 | Home / Draw / Away、YES / NO、Haaland |
 
-[Featured market 大卡]   Live & upcoming markets   ● 7 OPEN · +$142.20 TODAY ↑   Browse all ↗
-                         ─────────────────────────────────────────────
-                         [card][card][card]
-                         [card][card][card]
-```
+规则：
+- 用户在首页看到的卡片 = **event**（每张卡聚合了 1 个主 market 的报价）
+- "Featured / Live & upcoming / Browse all" 这一层级一律说 **event(s)**
+- "1X2 / BTTS / Top scorer / Player props" 这一层级才说 **market(s)**
+- Outcome 行（Home 58¢、Haaland 24¢）说 **outcome**，不要说 market
 
-页面从 header 直接进入 CategoryStrip → 内容网格，删掉中间那条 3 等分 KPI 横条。账户数据以小 chip 形式挂在 "Live & upcoming markets" 标题右侧。
+## 2. 首页文案改动（`src/routes/index.tsx`）
 
-### 改动
+| 位置 | 现状 | 改为 |
+|---|---|---|
+| 左栏 SectionHeader | `title="Featured" accent="market"` | `title="Featured" accent="event"` |
+| 中上 SectionHeader | `title="Live & upcoming" accent="markets"` | `title="Live & upcoming" accent="events"` |
+| "Browse all" 链接 | `omenxUrl.markets()` | `omenxUrl.events()` |
+| 中下 SectionHeader | `title="Top scorer" accent="futures"` | 保留（futures 是合理 market 分类描述） |
 
-**1. `src/routes/index.tsx`**
-- 移除 `<StatsBar>` 与外层包裹的 `<div className="px-6 pt-6 md:px-8 md:pt-8">`
-- 移除 `StatsBar` import
-- 给 `CategoryStrip` 外层加回上 padding：`pt-6 md:pt-8`（替代被删的间距）
-- 给 `SectionHeader` 增加 `stats?: { positions: number; pnl: string }` 可选 prop
-- 在 "Live & upcoming" 那个 `SectionHeader` 上传入 `stats={{ positions, pnl }}`
+`<head>` meta 文案（`description`、`og:description`）已经用 "sports markets / prediction markets"——这是平台业务定位，**保留不动**（"prediction market" 是产品类别名词）。
 
-**2. `SectionHeader` 内部**
-- 当 `stats` 存在时，title 右侧（在 `right` 之前）渲染 chips 行：
-  ```text
-  ● 7 OPEN POSITIONS   ·   +$142.20 TODAY ↑
-  ```
-  - "● 7 OPEN" 中性色：`text-muted-foreground`，点用 `bg-primary/70` 小圆点
-  - "+$142.20 TODAY ↑" 涨用 `text-win`，跌用 `text-loss`；箭头根据 `+/-` 符号
-  - 字号 `text-xs font-mono uppercase tracking-wider`
-  - chips 之间用细中分隔符 `text-border` 的 `·`
-  - 移动端（`max-md`）chips 折到标题下方一行，避免拥挤
+## 3. AppTopBar / 导航
 
-**3. 删除文件**
-- `src/components/sports/dashboard/StatsBar.tsx`
+- `AppTopBar.tsx` 顶部导航已经是 `Events`，正确，不改。
+- `omenxUrl` 工具里如果只有 `markets()` 没有 `events()`，新增 `events()`（指向 `/events`，与顶部导航一致）。
 
-### 数据来源
+## 4. 组件命名（**保留**，仅文档说明）
 
-`ACCOUNT_STATS.openPositions` 和 `ACCOUNT_STATS.pnlToday` 直接传给 SectionHeader，不新增 mock。
+文件/组件名（`MatchMarketCard`、`EventMarketTileCard`、`LeagueWinnerMarketCard`、`MATCH_MARKETS` 数据等）**不改**——这些是技术命名，表示"渲染某 event 下某 market 的卡"。强行改名会引发大面积 diff 且语义其实正确。本次只统一**面向用户的可见文案**。
 
-### 不动
+## 5. 写入设计规范
 
-- AppTopBar、AppShell、Featured 卡、其他 section、底部 OmenX bridge strip、CategoryStrip 本身样式
+在 `.lovable/plan.md` 顶部新增一节 `## Copy conventions: Event vs Market`，内容即第 1 节的定义表 + 规则，作为后续所有改动的强约束。
 
-### 受影响文件
-- 编辑 `src/routes/index.tsx`
-- 删除 `src/components/sports/dashboard/StatsBar.tsx`
+## 6. 不动的部分
+
+- 所有卡片内部 UI、布局、价格行
+- meta `title` / `description`
+- 数据层 (`src/data/sports-markets.ts`) 字段名
+- StatsBar 已删除（上一轮）
+- 紫红 halo 已删除（上一轮）
+
+## 技术细节
+
+- `SectionHeader` 的 `accent` prop 是纯展示字符串，无类型枚举约束，直接换文案即可。
+- 若 `omenxUrl` 没有 `events()`，在 `src/lib/omenx.ts`（或对应文件）追加：`events: () => \`${OMENX_BASE}/events\``。

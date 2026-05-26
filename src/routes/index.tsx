@@ -57,7 +57,7 @@ function Index() {
       <div className="grid gap-5 px-6 pb-6 md:px-8 md:pb-8 lg:grid-cols-[340px_minmax(0,1fr)_360px]">
         {/* LEFT — Featured market (spans both rows) */}
         <section className="flex flex-col gap-4 lg:row-span-2">
-          <SectionHeader title="Featured" accent="market" />
+          <SectionHeader title="Featured" accent="event" />
           <MatchMarketCard market={FEATURED_MATCH} />
         </section>
 
@@ -65,14 +65,14 @@ function Index() {
         <section className="flex flex-col gap-4 lg:col-span-2 lg:col-start-2 lg:row-start-1">
           <SectionHeader
             title="Live & upcoming"
-            accent="markets"
+            accent="events"
             as="h1"
             stats={{
               positions: ACCOUNT_STATS.openPositions,
               pnl: ACCOUNT_STATS.pnlToday,
             }}
             right={
-              <a href={omenxUrl.markets()} className="inline-flex items-center gap-1 text-xs font-medium text-muted-foreground hover:text-foreground">
+              <a href={omenxUrl.events()} className="inline-flex items-center gap-1 text-xs font-medium text-muted-foreground hover:text-foreground">
                 Browse all <ArrowUpRight className="h-3.5 w-3.5" />
               </a>
             }
