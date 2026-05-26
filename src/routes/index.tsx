@@ -10,6 +10,7 @@ import { PlayerPropsSpotlight } from "@/components/sports/dashboard/PlayerPropsS
 import { FanZoneHeader } from "@/components/sports/dashboard/FanZoneHeader";
 import { FanPostCard } from "@/components/sports/dashboard/FanPostCard";
 import { FansZoneEmpty } from "@/components/sports/dashboard/FansZoneEmpty";
+import { LiveActivityCard } from "@/components/sports/dashboard/LiveActivityCard";
 import {
   ACCOUNT_STATS,
   FEATURED_MATCH,
@@ -21,7 +22,10 @@ import {
 import {
   FAN_POST,
   FOLLOWED_TEAMS,
+  LIVE_TRADES,
   SUGGESTED_TEAMS,
+  TEAMS,
+  type TeamKey,
   TOP_SCORERS,
 } from "@/data/sports-mock";
 import { omenxUrl } from "@/lib/omenx";
@@ -49,6 +53,9 @@ export const Route = createFileRoute("/")({
 });
 
 function Index() {
+  const followedKeys = (Object.keys(TEAMS) as TeamKey[]).filter((k) =>
+    FOLLOWED_TEAMS.includes(TEAMS[k]),
+  );
   return (
     <AppShell>
       <AppTopBar
@@ -69,6 +76,12 @@ function Index() {
           ) : (
             <FansZoneEmpty editorPick={FEATURED_MATCH} suggested={SUGGESTED_TEAMS} />
           )}
+          <LiveActivityCard
+            trades={LIVE_TRADES}
+            followedTeams={FOLLOWED_TEAMS}
+            followedKeys={followedKeys}
+            seeAllHref={omenxUrl.events()}
+          />
         </section>
 
         {/* TOP — Live & upcoming, spans col 2–3, sits above the spotlight */}
