@@ -29,9 +29,9 @@ export function LiveActivityCard({
   const subtitle = isFollowing
     ? `Following · ${followedTeams.map((t) => t.name).join(", ")}`
     : "Across all markets";
-  const ratePerMin = Math.max(
+  const windowMin = Math.max(
     1,
-    Math.round((trades.length * 60) / Math.max(1, trades[trades.length - 1]?.secondsAgo ?? 60)),
+    Math.round((trades[trades.length - 1]?.secondsAgo ?? 60) / 60),
   );
 
   return (
