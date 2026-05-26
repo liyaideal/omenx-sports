@@ -58,7 +58,7 @@ function Index() {
   const followedKeys = (Object.keys(TEAMS) as TeamKey[]).filter((k) =>
     FOLLOWED_TEAMS.includes(TEAMS[k]),
   );
-  const [selectedOffset, setSelectedOffset] = useState(0);
+  const [selectedOffset, setSelectedOffset] = useState<number | null>(null);
   const countsByOffset = useMemo(() => {
     const map: Record<number, number> = {};
     for (const m of MATCH_MARKETS) {
@@ -68,10 +68,14 @@ function Index() {
     return map;
   }, []);
   const visibleMarkets = useMemo(
-    () => MATCH_MARKETS.filter((m) => (m.dayOffset ?? 0) === selectedOffset),
+    () =>
+      selectedOffset === null
+        ? MATCH_MARKETS
+        : MATCH_MARKETS.filter((m) => (m.dayOffset ?? 0) === selectedOffset),
     [selectedOffset],
   );
   const dayLabel = useMemo(() => {
+    if (selectedOffset === null) return "any day";
     if (selectedOffset === 0) return "today";
     if (selectedOffset === 1) return "tomorrow";
     if (selectedOffset === -1) return "yesterday";
