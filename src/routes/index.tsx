@@ -121,7 +121,7 @@ function Index() {
         <section className="flex flex-col gap-4 lg:col-span-2 lg:col-start-2 lg:row-start-1">
           <SectionHeader
             title="Live & upcoming"
-            accent="events"
+            accent=" Events"
             as="h1"
             live
             stats={{
