@@ -3,21 +3,22 @@ import { ArrowUpRight } from "lucide-react";
 import { AppShell } from "@/components/sports/dashboard/AppShell";
 import { AppTopBar } from "@/components/sports/dashboard/AppTopBar";
 import { PageHeader } from "@/components/sports/dashboard/PageHeader";
-import { FanZoneHeader } from "@/components/sports/dashboard/FanZoneHeader";
-import { FanPollCard } from "@/components/sports/dashboard/FanPollCard";
-import { FanPostCard } from "@/components/sports/dashboard/FanPostCard";
-import { UpcomingEventCard } from "@/components/sports/dashboard/UpcomingEventCard";
-import { LeagueTableCard } from "@/components/sports/dashboard/LeagueTableCard";
-import { PlayerScorerCard } from "@/components/sports/dashboard/PlayerScorerCard";
-import { PlayerSpotlightCard } from "@/components/sports/dashboard/PlayerSpotlightCard";
+import { StatsBar } from "@/components/sports/dashboard/StatsBar";
+import { CategoryStrip } from "@/components/sports/dashboard/CategoryStrip";
+import { MatchMarketCard } from "@/components/sports/dashboard/MatchMarketCard";
+import { EventMarketTileCard } from "@/components/sports/dashboard/EventMarketTileCard";
+import { LeagueWinnerMarketCard } from "@/components/sports/dashboard/LeagueWinnerMarketCard";
+import { TopScorerMarketRow } from "@/components/sports/dashboard/TopScorerMarketRow";
+import { PlayerPropsSpotlight } from "@/components/sports/dashboard/PlayerPropsSpotlight";
 import {
-  FAN_POLL,
-  FAN_POST,
-  SPOTLIGHT_PLAYER,
-  STANDINGS,
-  TOP_SCORERS,
-  UPCOMING_EVENTS,
-} from "@/data/sports-mock";
+  ACCOUNT_STATS,
+  FEATURED_MATCH,
+  LEAGUE_WINNER_MARKET,
+  MATCH_MARKETS,
+  SPOTLIGHT,
+  TOP_SCORER_MARKET,
+} from "@/data/sports-markets";
+import { TOP_SCORERS } from "@/data/sports-mock";
 import { omenxUrl } from "@/lib/omenx";
 
 export const Route = createFileRoute("/")({
@@ -49,39 +50,60 @@ function Index() {
         userName="Jeremy"
         userAvatar="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=120&h=120&fit=crop&crop=faces&q=80"
       />
-      <PageHeader title="Dashboard" balance="€0,00" />
+      <PageHeader title="Sports" balance={ACCOUNT_STATS.available} />
+
+      <div className="px-6 md:px-8">
+        <StatsBar
+          available={ACCOUNT_STATS.available}
+          openPositions={ACCOUNT_STATS.openPositions}
+          pnlToday={ACCOUNT_STATS.pnlToday}
+        />
+      </div>
+
+      <div className="pt-4">
+        <CategoryStrip active="all" />
+      </div>
 
       <div className="grid gap-5 px-6 pb-6 md:px-8 md:pb-8 lg:grid-cols-[340px_minmax(0,1fr)_360px]">
-        {/* LEFT — Fan Zone */}
+        {/* LEFT — Featured market */}
         <section className="flex flex-col gap-4">
-          <FanZoneHeader />
-          <FanPollCard {...FAN_POLL} />
-          <FanPostCard {...FAN_POST} />
+          <SectionHeader title="Featured" accent="market" />
+          <MatchMarketCard market={FEATURED_MATCH} />
         </section>
 
-        {/* CENTER — Upcoming + Table + Scorers */}
+        {/* CENTER — Live & upcoming + futures + top scorer */}
         <section className="flex flex-col gap-5">
-          <div className="flex items-center justify-between">
-            <h2 className="font-display text-2xl font-semibold">
-              Upcoming <span className="font-serif-display italic text-neon">event</span>
-            </h2>
-          </div>
+          <SectionHeader
+            title="Live & upcoming"
+            accent="markets"
+            right={
+              <a href={omenxUrl.markets()} className="inline-flex items-center gap-1 text-xs font-medium text-muted-foreground hover:text-foreground">
+                Browse all <ArrowUpRight className="h-3.5 w-3.5" />
+              </a>
+            }
+          />
           <div className="grid gap-3 md:grid-cols-3">
-            {UPCOMING_EVENTS.map((e, i) => (
-              <UpcomingEventCard key={i} {...e} />
+            {MATCH_MARKETS.map((m) => (
+              <EventMarketTileCard key={m.id} market={m} />
             ))}
           </div>
-          <LeagueTableCard league="PREMIER LEAGUE" rows={STANDINGS} />
+          <LeagueWinnerMarketCard market={LEAGUE_WINNER_MARKET} />
+          <SectionHeader title="Top scorer" accent="futures" />
           <div className="grid gap-3">
-            {TOP_SCORERS.map((p) => (
-              <PlayerScorerCard key={p.lastName} player={p} />
+            {TOP_SCORER_MARKET.outcomes.map((o, i) => (
+              <TopScorerMarketRow
+                key={o.id}
+                market={TOP_SCORER_MARKET}
+                outcome={o}
+                photo={TOP_SCORERS[i]?.photo ?? TOP_SCORERS[0].photo}
+              />
             ))}
           </div>
         </section>
 
-        {/* RIGHT — Spotlight */}
+        {/* RIGHT — Player props spotlight */}
         <section className="flex flex-col">
-          <PlayerSpotlightCard {...SPOTLIGHT_PLAYER} />
+          <PlayerPropsSpotlight player={SPOTLIGHT} />
         </section>
       </div>
 
@@ -89,9 +111,12 @@ function Index() {
       <div className="border-t border-border px-6 py-4 md:px-8">
         <div className="flex flex-wrap items-center justify-between gap-3 text-sm">
           <div className="text-muted-foreground">
-            Portfolio, payouts, and account live on the OmenX main site.
+            Wallet, portfolio, payouts, and account live on the OmenX main site.
           </div>
           <div className="flex items-center gap-2">
+            <a href={omenxUrl.wallet()} className="inline-flex items-center gap-1.5 rounded-full bg-white/[0.06] px-3 py-1.5 text-xs font-semibold text-foreground ring-1 ring-white/10 hover:bg-white/10">
+              Wallet <ArrowUpRight className="h-3.5 w-3.5" />
+            </a>
             <a href={omenxUrl.portfolio()} className="inline-flex items-center gap-1.5 rounded-full bg-white/[0.06] px-3 py-1.5 text-xs font-semibold text-foreground ring-1 ring-white/10 hover:bg-white/10">
               Open Portfolio <ArrowUpRight className="h-3.5 w-3.5" />
             </a>
@@ -102,5 +127,25 @@ function Index() {
         </div>
       </div>
     </AppShell>
+  );
+}
+
+function SectionHeader({
+  title,
+  accent,
+  right,
+}: {
+  title: string;
+  accent?: string;
+  right?: React.ReactNode;
+}) {
+  return (
+    <div className="flex items-center justify-between">
+      <h2 className="font-display text-2xl font-semibold">
+        {title}
+        {accent && <span className="font-serif-display italic text-neon"> {accent}</span>}
+      </h2>
+      {right}
+    </div>
   );
 }
