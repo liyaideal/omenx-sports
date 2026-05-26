@@ -1,45 +1,49 @@
-## 目标
+# Top scorer 重构：一张卡，多个 outcome
 
-Featured 卡 (`MatchMarketCard`) outcome 区当前用每行一个渐变填充条作 implied probability 可视化，在窄列里像"没填满的进度条"。换成**顶部单条三色堆叠 100% bar + 下面干净的 outcome 行**，更像 Polymarket 的标准玩法。
+## 问题
 
-## 改动范围
+当前 `Top scorer` 区块把同一个 futures market（"EPL Top Scorer 25/26"）的两个候选 outcome（Messi、Haaland）渲染成了两张独立的大卡 `TopScorerMarketRow`，视觉上像两个不同的 event。但它本质上和上方的 "Premier League — Winner 25/26" 完全同构：**一个 market，多个候选**。同时标题 `Top scorer futures` 也没说明这是哪个联赛的什么奖项。
 
-只改 `src/components/sports/dashboard/MatchMarketCard.tsx`。数据、外层布局、其他卡片不动。
+## 方案
 
-## 设计规格
+把 Top scorer 用**一张卡**呈现，复用 `LeagueWinnerMarketCard` 的样式（带球员小头像而不是球队 logo），让 "League Winner" 和 "Top Scorer" 在视觉上明显是"同类东西"。
 
-**新结构（替换现在的 `<a> outcomes`）**：
+### 变更
 
-```text
-[ ====== 42% blue ====== | == 21% violet == | ==== 37% red ==== ]    <- 单条堆叠 100% bar，h-2, rounded-full
-  ● Home              Chelsea                            42¢  ↗ 3
-  X  Draw                                                21¢  ↘ 1
-  ● Away              Paris SG                           37¢  ↘ 2
+1. **新组件** `TopScorerMarketCard.tsx`（基于 `LeagueWinnerMarketCard`）
+   - 同样的 rounded-3xl 卡片框 + header（`EPL · FUTURES` + title + `Trade ↗`）
+   - 表头：`# / Player / Price`
+   - 每行：序号、圆形球员头像（带 hue 光晕）+ 角标球队 logo、球员名 + `21G · #10 this season` 副标、`PricePill`
+   - footer：`Settles May 24, 2026` / `Vol $3.6M`
+
+2. **数据** `TOP_SCORER_MARKET.title`
+   - 改为：`Premier League — Top scorer 25/26`（与 `Premier League — Winner 25/26` 平行表述，自解释）
+
+3. **`src/routes/index.tsx`**
+   - 删掉 `SectionHeader title="Top scorer"` 和 `TOP_SCORER_MARKET.outcomes.map(...)` 那段
+   - 直接渲染 `<TopScorerMarketCard market={TOP_SCORER_MARKET} photos={[messi, haaland]} />`
+   - 区块结构变成：`<LeagueWinnerMarketCard />` + `<TopScorerMarketCard />`，两张同构的 futures 卡纵向堆叠
+
+4. **删除** `TopScorerMarketRow.tsx`（不再使用）
+
+### 不动的部分
+
+- `PlayerPropsSpotlight`（Mbappé）保持不变 —— 它是另一种形状（一个球员，多个 binary markets）
+- 上方 `Live & upcoming` 网格不动
+- `LeagueWinnerMarketCard` 不动
+
+## 结果
+
+页面中部下半部分变成两张视觉同构的 futures 卡：
 ```
-
-**堆叠条**
-- 高度 `h-2`，`rounded-full overflow-hidden bg-white/[0.05]`
-- 内部 flex，三段宽度按 `price / total * 100%`
-- 颜色：home = home team hue，draw = 中性 `oklch(0.55 0.04 280)`，away = away team hue
-- 段之间 1px 分隔（用 `gap-[2px]` 或 inset 阴影）
-- 不放任何文字标签，下面行就是图例
-
-**outcome 行**（替换 `OutcomeRow` 渲染）
-- 一行三列布局：`[hueDot/x] [teamName + small "Home/Draw/Away" muted]`，右侧 `PricePill`
-- 左侧不再是 logo 圆而是一个 `h-2.5 w-2.5` 实心圆点（颜色 = 对应堆叠段颜色），让行更轻
-- 队伍名用 `font-display text-sm font-medium`
-- `Home / Draw / Away` 角色标签用 `font-mono text-[10px] uppercase tracking-widest text-muted-foreground`
-- 行间距 `space-y-2.5`
-- 整个 outcomes 块仍包在 `<a href={market.tradeHref}>` 里
-
-**保留不动**
-- header（联赛 chip + more 按钮）
-- 标题 + 紫色光晕
-- 两队 crest + vs + kickoff
-- 底部 footer（时间 / 参与人数 / Vol）
-
-## 不做
-
-- 不动数据结构
-- 不改其他卡片
-- 不加交易按钮 / 不加 sparkline
+┌─ Premier League — Winner 25/26 ──────┐
+│  1. Man City      38¢ ↑2             │
+│  2. Arsenal       31¢ ↑4             │
+│  ...                                 │
+└──────────────────────────────────────┘
+┌─ Premier League — Top scorer 25/26 ──┐
+│  1. 🧑 E. Haaland   16G…  41¢ ↓2     │
+│  2. 🧑 L. Messi     21G…  34¢ ↑3     │
+└──────────────────────────────────────┘
+```
+用户一眼就能看出这是两个 futures market，每个市场里有多个候选 outcome。
