@@ -1,13 +1,12 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { ArrowRight, ArrowUpRight, Activity, Layers, Radio } from "lucide-react";
-import { NeonRing } from "@/components/sports/NeonRing";
+import { ArrowRight, ArrowUpRight, ChevronRight } from "lucide-react";
 import { TopBar } from "@/components/sports/TopBar";
 import { Footer } from "@/components/sports/Footer";
-import { StatTile } from "@/components/sports/StatTile";
 import { SectionHeader } from "@/components/sports/SectionHeader";
 import { EventHeader } from "@/components/sports/EventHeader";
 import { MarketCard } from "@/components/sports/MarketCard";
 import { MatchCard } from "@/components/sports/MatchCard";
+import { HeroMarketCard } from "@/components/sports/HeroMarketCard";
 import { teams } from "@/lib/teams";
 import { omenxUrl } from "@/lib/omenx";
 
@@ -46,6 +45,25 @@ const FEATURED = {
   liquidity: "$1.21M",
   endsIn: "47m",
 };
+
+// Derivative markets that settle on the featured event.
+const FEATURED_DERIVATIVES = [
+  {
+    label: "Moneyline",
+    a: { name: "RMA", price: 58 },
+    b: { name: "MCI", price: 42 },
+  },
+  {
+    label: "Total goals",
+    a: { name: "Over", price: 64 },
+    b: { name: "Under", price: 36 },
+  },
+  {
+    label: "First scorer",
+    a: { name: "Mbappé", price: 22 },
+    b: { name: "Field", price: 78 },
+  },
+];
 
 const LIVE_MARKETS = [
   {
@@ -151,27 +169,27 @@ function Index() {
 
       <main className="mx-auto max-w-7xl px-4 md:px-6">
         {/* Hero Strip */}
-        <section className="relative overflow-hidden bg-ambient -mx-4 md:-mx-6 px-4 md:px-6 pt-14 pb-12 border-b border-border">
-          <div className="grid items-center gap-10 md:grid-cols-[1fr_auto]">
+        <section className="relative overflow-hidden bg-ambient -mx-4 md:-mx-6 px-4 md:px-6 pt-12 pb-10 border-b border-border">
+          <div className="grid items-center gap-10 lg:grid-cols-[1fr_auto]">
             <div>
               <div className="text-[11px] font-mono uppercase tracking-[0.3em] text-neon">
                 Stadium Neon · a sports zone by OmenX
               </div>
-              <h1 className="mt-4 font-display font-bold leading-[1.05] text-5xl md:text-6xl">
+              <h1 className="mt-4 font-display font-bold leading-[1.05] text-4xl md:text-5xl lg:text-[3.5rem]">
                 Predict the match,
                 <br />
                 <span className="font-serif-display italic text-gradient-neon">own the moment.</span>
               </h1>
-              <p className="mt-5 max-w-lg text-sm text-muted-foreground leading-relaxed">
-                Binary sports markets across the EPL, La Liga, UCL, and NBA. Deep order books,
-                live settlement, and on-chain receipts — all clearing through your OmenX wallet.
+              <p className="mt-4 max-w-md text-sm text-muted-foreground leading-relaxed">
+                Binary sports markets across EPL, La Liga, UCL, and NBA — deep order books,
+                live settlement, clearing through your OmenX wallet.
               </p>
-              <div className="mt-8 flex flex-wrap items-center gap-3">
+              <div className="mt-6 flex flex-wrap items-center gap-3">
                 <a
-                  href="#live"
+                  href="#event-featured"
                   className="inline-flex items-center gap-2 rounded-full bg-gradient-neon px-5 py-3 text-sm font-semibold text-white shadow-glow transition hover:opacity-90"
                 >
-                  Browse live markets <ArrowRight className="h-4 w-4" />
+                  Trade tonight's match <ArrowRight className="h-4 w-4" />
                 </a>
                 <a
                   href={omenxUrl.portfolio()}
@@ -181,24 +199,24 @@ function Index() {
                 </a>
               </div>
             </div>
-            <div className="hidden md:block">
-              <NeonRing size={260} dashed>
-                <div className="grid h-44 w-44 place-items-center rounded-full bg-surface font-display font-bold text-5xl">
-                  10
-                </div>
-              </NeonRing>
+            <div className="hidden lg:block">
+              <HeroMarketCard
+                league="ucl"
+                home={teams.realMadrid}
+                away={teams.manCity}
+                score="1 – 0"
+                minute="67'"
+                endsIn="47m"
+                yesProbability={58}
+                yesDelta={4.2}
+                href="#event-featured"
+              />
             </div>
-          </div>
-
-          <div className="mt-10 grid grid-cols-2 gap-3 md:grid-cols-3">
-            <StatTile label="24h Sports Volume" value="$18.4M" hint="+12.3% vs yesterday" icon={Activity} />
-            <StatTile label="Open Markets" value="247" hint="across 5 leagues" icon={Layers} />
-            <StatTile label="Live Now" value="14" hint="settling within 3h" icon={Radio} tone="win" />
           </div>
         </section>
 
         {/* Featured Event */}
-        <section className="py-12">
+        <section id="event-featured" className="py-12 scroll-mt-20">
           <SectionHeader
             kicker="Featured"
             title="Tonight's headline event"
@@ -207,47 +225,66 @@ function Index() {
           />
           <div className="mt-6 grid gap-4 lg:grid-cols-[2fr_1fr]">
             <EventHeader {...FEATURED} />
-            <div className="flex flex-col justify-between rounded-2xl border border-border bg-surface bg-ambient p-6 shadow-card">
-              <div>
-                <div className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground">
-                  Why it matters
-                </div>
-                <p className="mt-3 font-display text-lg leading-snug text-foreground">
-                  Three derivative markets settle on this match — moneyline, total goals, and first
-                  scorer. Liquidity is concentrated tonight.
-                </p>
+            <div className="flex flex-col rounded-2xl border border-border bg-surface bg-ambient p-4 shadow-card">
+              <div className="px-2 pt-1 text-[10px] font-mono uppercase tracking-widest text-muted-foreground">
+                Derivative markets
               </div>
-              <a
-                href="#"
-                className="mt-6 inline-flex items-center gap-2 self-start rounded-full bg-gradient-neon px-4 py-2.5 text-xs font-semibold text-white shadow-glow transition hover:opacity-90"
-              >
-                Open market <ArrowRight className="h-3.5 w-3.5" />
-              </a>
+              <div className="mt-2 flex flex-col divide-y divide-border">
+                {FEATURED_DERIVATIVES.map((d) => (
+                  <a
+                    key={d.label}
+                    href="#"
+                    className="group flex items-center justify-between gap-3 rounded-lg px-2 py-3 transition-colors hover:bg-white/[0.04]"
+                  >
+                    <div className="min-w-0">
+                      <div className="font-display text-sm font-semibold text-foreground">
+                        {d.label}
+                      </div>
+                      <div className="mt-0.5 font-mono text-[11px] text-muted-foreground tabular-nums">
+                        <span className="text-win">{d.a.name} {d.a.price}¢</span>
+                        <span className="px-1.5 text-border">·</span>
+                        <span className="text-loss">{d.b.name} {d.b.price}¢</span>
+                      </div>
+                    </div>
+                    <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground transition-transform group-hover:translate-x-0.5 group-hover:text-foreground" />
+                  </a>
+                ))}
+              </div>
             </div>
           </div>
         </section>
 
         {/* Live Now */}
         <section id="live" className="py-12 border-t border-border">
-          <SectionHeader
-            kicker="Live"
-            title="Live now"
-            tabs={[
-              { label: "All", active: true },
-              { label: "EPL" },
-              { label: "UCL" },
-              { label: "NBA" },
-            ]}
-          />
-          <div className="mt-6 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {LIVE_MARKETS.map((m, i) => (
-              <MarketCard key={i} {...m} />
-            ))}
+          <div className="relative overflow-hidden rounded-3xl border border-loss/20 bg-loss/[0.04] p-5 md:p-6 ring-1 ring-loss/10">
+            <div
+              aria-hidden
+              className="pointer-events-none absolute -top-24 -left-24 h-64 w-64 rounded-full opacity-30 blur-3xl"
+              style={{ backgroundImage: "radial-gradient(circle, var(--loss) 0%, transparent 60%)" }}
+            />
+            <div className="relative">
+              <SectionHeader
+                kicker="● Live now"
+                title="Trading in-play"
+                description="Prices move with the match. Settle when the whistle blows."
+                tabs={[
+                  { label: "All", active: true },
+                  { label: "EPL" },
+                  { label: "UCL" },
+                  { label: "NBA" },
+                ]}
+              />
+              <div className="mt-6 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                {LIVE_MARKETS.map((m, i) => (
+                  <MarketCard key={i} {...m} />
+                ))}
+              </div>
+            </div>
           </div>
         </section>
 
         {/* Trending */}
-        <section className="py-12 border-t border-border">
+        <section className="py-12">
           <SectionHeader
             kicker="Trending"
             title="Trending markets"
