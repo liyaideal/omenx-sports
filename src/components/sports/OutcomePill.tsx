@@ -35,9 +35,12 @@ const TONE_TEXT: Record<OutcomeTone, string> = {
   no: "text-neon",
 };
 const SIZES = {
+  // Crest is intentionally one notch smaller than the legacy circle crest:
+  // real logos use their full bounding box (no inner padding), so a "sm" real
+  // logo reads as visually larger than a "sm" letter circle.
   sm: { box: "px-3 py-2", code: "text-sm", price: "text-base", crest: "xs" },
-  md: { box: "px-3.5 py-2.5", code: "text-base", price: "text-xl", crest: "sm" },
-  lg: { box: "px-4 py-3", code: "text-lg", price: "text-2xl", crest: "md" },
+  md: { box: "px-3.5 py-2.5", code: "text-base", price: "text-lg", crest: "xs" },
+  lg: { box: "px-4 py-3", code: "text-lg", price: "text-xl", crest: "sm" },
 } as const;
 
 export function OutcomePill({
