@@ -877,9 +877,16 @@ function StyleGuide() {
                       <div className="text-muted-foreground">Latest editorial / community post tagged to a followed team</div>
                     </div>
                   </li>
+                  <li className="flex items-start gap-3">
+                    <span className="grid h-5 w-5 shrink-0 place-items-center rounded-full bg-primary/20 font-mono text-[10px] text-primary">3</span>
+                    <div>
+                      <div className="font-medium text-foreground">Live activity</div>
+                      <div className="text-muted-foreground">Trades on followed teams · social proof, never aggregated stats</div>
+                    </div>
+                  </li>
                 </ol>
                 <p className="mt-4 text-[11px] text-muted-foreground">
-                  Order is fixed: trade → post. Never reshuffle by recency.
+                  Order is fixed: trade → post → live activity. Never reshuffle by recency.
                 </p>
               </div>
 
@@ -911,6 +918,13 @@ function StyleGuide() {
                       <div className="text-muted-foreground">One-tap follow with check/plus state · local until `Save preferences`</div>
                     </div>
                   </li>
+                  <li className="flex items-start gap-3">
+                    <span className="grid h-5 w-5 shrink-0 place-items-center rounded-full bg-neon/20 font-mono text-[10px] text-neon">4</span>
+                    <div>
+                      <div className="font-medium text-foreground">Live activity</div>
+                      <div className="text-muted-foreground">Trades across all markets · same component, unfiltered</div>
+                    </div>
+                  </li>
                 </ol>
                 <p className="mt-4 text-[11px] text-muted-foreground">
                   Never show a blank or illustration-only state — real content + onboarding side-by-side.
@@ -923,6 +937,7 @@ function StyleGuide() {
               <ul className="space-y-1.5 text-muted-foreground">
                 <li>• Header is single-line at every column width: title <code className="font-mono text-foreground">Fans zone</code> (text-2xl, matches other section titles, no decorative suffix) + pill <code className="font-mono text-foreground">N teams</code> with <code className="font-mono text-foreground">Users</code> icon. Empty-state pill reads <code className="font-mono text-foreground">Add team</code>. Neither side wraps.</li>
                 <li>• Post never appears without a paired trade card above it.</li>
+                <li>• Live activity sits last in the stack — never above trade or post. Rows are specific (avatar + handle + side + outcome + price + event + time), never "N people are betting" aggregates. Sides use semantic tokens: <code className="font-mono text-foreground">bought=win</code>, <code className="font-mono text-foreground">sold=loss</code>. If the filtered set is empty, the card hides entirely — no in-card empty state.</li>
                 <li>• Empty-state chips toggle locally; persistence happens on `Save preferences`, not per-tap.</li>
                 <li>• The column is always present — never collapsed even at the 3-col → 2-col breakpoint; it just reflows under the main grid.</li>
               </ul>
