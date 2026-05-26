@@ -1,4 +1,5 @@
 import { ArrowUpRight } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
 import type { LiveTrade, TeamKey, TeamLite } from "@/data/sports-mock";
 
 interface LiveActivityCardProps {
@@ -20,18 +21,59 @@ export function LiveActivityCard({
   seeAllHref,
 }: LiveActivityCardProps) {
   const isFollowing = followedKeys.length > 0;
-  const filtered = isFollowing
-    ? trades.filter((t) => t.eventTeams.some((k) => followedKeys.includes(k)))
-    : trades;
-  const rows = filtered.slice(0, limit);
-  if (rows.length === 0) return null;
+  const pool = useMemo(
+    () =>
+      isFollowing
+        ? trades.filter((t) => t.eventTeams.some((k) => followedKeys.includes(k)))
+        : trades,
+    [trades, followedKeys, isFollowing],
+  );
+
+  // Live feed: deque of `limit` rows. Every `ROTATE_MS` we prepend the next
+  // pool entry (cycling) with secondsAgo=0 and drop the tail. `tick` bumps
+  // every second so timestamps age in real time.
+  const ROTATE_MS = 4500;
+  const [tick, setTick] = useState(0);
+  const [cursor, setCursor] = useState(limit);
+  const [feed, setFeed] = useState<LiveTrade[]>(() => pool.slice(0, limit));
+
+  // Reset feed when the filter changes.
+  useEffect(() => {
+    setFeed(pool.slice(0, limit));
+    setCursor(limit);
+    setTick(0);
+  }, [pool, limit]);
+
+  // 1s aging tick.
+  useEffect(() => {
+    if (pool.length === 0) return;
+    const id = setInterval(() => setTick((t) => t + 1), 1000);
+    return () => clearInterval(id);
+  }, [pool.length]);
+
+  // Rotation tick.
+  useEffect(() => {
+    if (pool.length <= limit) return;
+    const id = setInterval(() => {
+      setFeed((prev) => {
+        const next = pool[cursor % pool.length];
+        if (!next) return prev;
+        const fresh: LiveTrade = { ...next, id: `${next.id}-${cursor}`, secondsAgo: 0 };
+        return [fresh, ...prev].slice(0, limit);
+      });
+      setCursor((c) => c + 1);
+    }, ROTATE_MS);
+    return () => clearInterval(id);
+  }, [pool, cursor, limit]);
+
+  if (feed.length === 0) return null;
 
   const subtitle = isFollowing
     ? `Following · ${followedTeams.map((t) => t.name).join(", ")}`
     : "Across all markets";
   const windowMin = Math.max(
     1,
-    Math.round((trades[trades.length - 1]?.secondsAgo ?? 60) / 60),
+    Math.round((pool[pool.length - 1]?.secondsAgo ?? 60) / 60),
   );
 
   return (
@@ -54,8 +96,15 @@ export function LiveActivityCard({
       </p>
 
       <ul className="mt-4 divide-y divide-white/[0.05]">
-        {rows.map((trade) => (
-          <li key={trade.id}>
+        {feed.map((trade, idx) => (
+          <li
+            key={trade.id}
+            className={
+              idx === 0
+                ? "animate-in fade-in slide-in-from-top-2 duration-500"
+                : undefined
+            }
+          >
             <a
               href={trade.tradeHref}
               className="group flex items-start gap-3 py-3 first:pt-0 last:pb-0 hover:bg-white/[0.02]"
@@ -67,25 +116,27 @@ export function LiveActivityCard({
                     {trade.handle}
                   </span>
                   <span className="shrink-0 font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
-                    {formatAgo(trade.secondsAgo)}
+                    {formatAgo(trade.secondsAgo + tick)}
                   </span>
                 </div>
-                <div className="mt-0.5 flex flex-wrap items-center gap-x-1.5 gap-y-1 text-xs text-muted-foreground">
+                <div className="mt-1 flex items-center gap-1.5 text-xs">
                   <span
                     className={
                       trade.side === "bought"
-                        ? "font-medium text-win"
-                        : "font-medium text-loss"
+                        ? "shrink-0 font-medium text-win"
+                        : "shrink-0 font-medium text-loss"
                     }
                   >
                     {trade.side}
                   </span>
-                  <span className="inline-flex items-center gap-1 rounded-full bg-white/[0.05] px-2 py-0.5 font-mono text-[10px] text-foreground ring-1 ring-white/10">
+                  <span className="inline-flex shrink-0 items-center gap-1 whitespace-nowrap rounded-full bg-white/[0.05] px-2 py-0.5 font-mono text-[10px] text-foreground ring-1 ring-white/10">
                     {trade.outcomeLabel}
                     <span className="text-muted-foreground">·</span>
                     {trade.price}¢
                   </span>
-                  <span className="truncate">{trade.eventTitle}</span>
+                </div>
+                <div className="mt-1 truncate text-xs text-muted-foreground">
+                  {trade.eventTitle}
                 </div>
               </div>
             </a>
