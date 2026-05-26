@@ -2,10 +2,11 @@ import { Clock } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { TeamCrest } from "./TeamCrest";
 import { LeagueBadge } from "./LeagueBadge";
+import type { Team } from "@/lib/teams";
 
 export interface MatchCardProps {
-  home: string;
-  away: string;
+  home: Team | string;
+  away: Team | string;
   kickoff: string;
   date: string;
   league: "epl" | "laliga" | "ucl" | "seriea" | "nba";
@@ -21,6 +22,8 @@ const STATUS: Record<NonNullable<MatchCardProps["status"]>, { label: string; cls
 
 export function MatchCard({ home, away, kickoff, date, league, status = "upcoming", className }: MatchCardProps) {
   const s = STATUS[status];
+  const h = typeof home === "string" ? { name: home, short: home, logo: undefined } : home;
+  const a = typeof away === "string" ? { name: away, short: away, logo: undefined } : away;
   return (
     <div
       className={cn(
@@ -30,13 +33,13 @@ export function MatchCard({ home, away, kickoff, date, league, status = "upcomin
     >
       <div className="flex items-center justify-between gap-3">
         <div className="flex items-center gap-2.5">
-          <TeamCrest name={home} size="md" />
-          <div className="text-sm font-display font-semibold text-foreground">{home}</div>
+          <TeamCrest name={h.name} abbr={h.short} logoUrl={h.logo} size="md" />
+          <div className="text-sm font-display font-semibold text-foreground">{h.name}</div>
         </div>
         <div className="font-mono text-xs text-muted-foreground tabular-nums">{kickoff}</div>
         <div className="flex items-center gap-2.5">
-          <div className="text-sm font-display font-semibold text-foreground text-right">{away}</div>
-          <TeamCrest name={away} size="md" />
+          <div className="text-sm font-display font-semibold text-foreground text-right">{a.name}</div>
+          <TeamCrest name={a.name} abbr={a.short} logoUrl={a.logo} size="md" />
         </div>
       </div>
       <div className="mt-4 flex items-center justify-between">

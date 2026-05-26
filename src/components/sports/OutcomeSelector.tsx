@@ -1,10 +1,11 @@
 import { cn } from "@/lib/utils";
 import { OutcomePill, type OutcomeTone } from "./OutcomePill";
+import type { Team } from "@/lib/teams";
 
 interface OutcomeSelectorProps {
   options: [
-    { label: string; probability: number },
-    { label: string; probability: number },
+    { team?: Team; label?: string; probability: number },
+    { team?: Team; label?: string; probability: number },
   ];
   /** Currently selected tone, or null. */
   value: OutcomeTone | null;
@@ -16,6 +17,7 @@ export function OutcomeSelector({ options, value, onChange, className }: Outcome
   return (
     <div className={cn("grid grid-cols-2 gap-3", className)}>
       <OutcomePill
+        team={options[0].team}
         label={options[0].label}
         probability={options[0].probability}
         tone="yes"
@@ -24,6 +26,7 @@ export function OutcomeSelector({ options, value, onChange, className }: Outcome
         onClick={() => onChange("yes")}
       />
       <OutcomePill
+        team={options[1].team}
         label={options[1].label}
         probability={options[1].probability}
         tone="no"

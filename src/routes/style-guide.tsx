@@ -28,6 +28,7 @@ import { SectionHeader } from "@/components/sports/SectionHeader";
 import { MarketCard } from "@/components/sports/MarketCard";
 import { EventHeader } from "@/components/sports/EventHeader";
 import { OutcomeSelector } from "@/components/sports/OutcomeSelector";
+import { teams } from "@/lib/teams";
 import { PriceChart } from "@/components/sports/PriceChart";
 import { OrderBook } from "@/components/sports/OrderBook";
 import { TradeForm } from "@/components/sports/TradeForm";
@@ -353,9 +354,9 @@ function StyleGuide() {
             <div className="grid gap-5 lg:grid-cols-3">
               <div className="space-y-4 lg:col-span-1">
                 <h3 className="text-xs font-mono uppercase tracking-widest text-muted-foreground">Match Card</h3>
-                <MatchCard home="Man City" away="Arsenal" kickoff="5:30pm" date="Today 6:00pm" league="epl" status="live" />
-                <MatchCard home="Chelsea" away="PSG" kickoff="5:30pm" date="23 Aug 4:30pm" league="ucl" />
-                <MatchCard home="Barça" away="Real" kickoff="9:00pm" date="28 Aug 9:00pm" league="laliga" status="upcoming" />
+                <MatchCard home={teams.manCity} away={teams.arsenal} kickoff="5:30pm" date="Today 6:00pm" league="epl" status="live" />
+                <MatchCard home={teams.chelsea} away={teams.psg} kickoff="5:30pm" date="23 Aug 4:30pm" league="ucl" />
+                <MatchCard home={teams.barcelona} away={teams.realMadrid} kickoff="9:00pm" date="28 Aug 9:00pm" league="laliga" status="upcoming" />
               </div>
 
               <div className="lg:col-span-1">
@@ -423,12 +424,12 @@ function StyleGuide() {
                 <div className="mb-4 text-[10px] font-mono uppercase tracking-widest text-muted-foreground">OutcomePill — sizes & states</div>
                 <div className="space-y-3">
                   <div className="grid grid-cols-2 gap-2">
-                    <OutcomePill label="Shanghai Shenhua" probability={62} tone="yes" selected />
-                    <OutcomePill label="Shandong Luneng" probability={38} tone="no" />
+                    <OutcomePill team={teams.realMadrid} probability={62} tone="yes" selected />
+                    <OutcomePill team={teams.barcelona} probability={38} tone="no" />
                   </div>
                   <div className="grid grid-cols-2 gap-2">
-                    <OutcomePill label="Yes" probability={73} tone="yes" size="sm" showCrest={false} />
-                    <OutcomePill label="No" probability={27} tone="no" size="sm" showCrest={false} />
+                    <OutcomePill team={teams.yes} probability={73} tone="yes" size="sm" showCrest={false} />
+                    <OutcomePill team={teams.no} probability={27} tone="no" size="sm" showCrest={false} />
                   </div>
                 </div>
               </div>
@@ -472,8 +473,8 @@ function StyleGuide() {
                 league="laliga"
                 question="El Clásico — who lifts the trophy?"
                 outcomes={[
-                  { label: "Real Madrid", probability: 54, delta24h: 3 },
-                  { label: "Barcelona", probability: 46, delta24h: -3 },
+                  { team: teams.realMadrid, probability: 54, delta24h: 3 },
+                  { team: teams.barcelona, probability: 46, delta24h: -3 },
                 ]}
                 volume="$182k"
                 endsIn="2d 14h"
@@ -483,8 +484,8 @@ function StyleGuide() {
                 league="ucl"
                 question="Will Man City reach the UCL final?"
                 outcomes={[
-                  { label: "Yes", probability: 38 },
-                  { label: "No", probability: 62 },
+                  { team: teams.yes, probability: 38 },
+                  { team: teams.no, probability: 62 },
                 ]}
                 volume="$94k"
                 endsIn="11d 02h"
@@ -494,8 +495,8 @@ function StyleGuide() {
                 league="nba"
                 question="Lakers vs Celtics — tonight's winner"
                 outcomes={[
-                  { label: "Lakers", probability: 41 },
-                  { label: "Celtics", probability: 59 },
+                  { team: teams.lakers, probability: 41 },
+                  { team: teams.celtics, probability: 59 },
                 ]}
                 volume="$58k"
                 endsIn="04:12"
@@ -526,8 +527,8 @@ function StyleGuide() {
               <div className="space-y-5">
                 <OutcomeSelector
                   options={[
-                    { label: "Man City", probability: 38 },
-                    { label: "Real Madrid", probability: 62 },
+                    { team: teams.manCity, probability: 38 },
+                    { team: teams.realMadrid, probability: 62 },
                   ]}
                   value="no"
                   onChange={() => {}}
