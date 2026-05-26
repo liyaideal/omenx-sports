@@ -186,21 +186,29 @@ export function TradeForm({
 
       {pro && (
         <div className="mt-4 space-y-4 rounded-xl border border-neon/20 bg-neon/[0.03] p-4">
-          <div className="grid grid-cols-2 gap-1 rounded-lg bg-white/[0.04] p-1">
-            {(["cross", "isolated"] as Margin[]).map((m) => (
+          <div>
+            <div className="grid grid-cols-2 gap-1 rounded-lg bg-white/[0.04] p-1">
               <button
-                key={m}
-                onClick={() => setMarginMode(m)}
-                className={cn(
-                  "rounded-md py-1 text-[11px] font-mono uppercase tracking-widest transition-colors",
-                  marginMode === m
-                    ? "bg-surface-elevated text-foreground"
-                    : "text-muted-foreground hover:text-foreground",
-                )}
+                onClick={() => setMarginMode("cross")}
+                className="rounded-md py-1 text-[11px] font-mono uppercase tracking-widest bg-surface-elevated text-foreground"
               >
-                {m}
+                cross
               </button>
-            ))}
+              <button
+                disabled
+                aria-disabled
+                title="Isolated margin — coming soon"
+                className="relative rounded-md py-1 text-[11px] font-mono uppercase tracking-widest text-muted-foreground/50 cursor-not-allowed"
+              >
+                isolated
+                <span className="ml-1.5 rounded bg-neon/15 px-1 py-px text-[8px] font-mono uppercase tracking-widest text-neon align-middle">
+                  soon
+                </span>
+              </button>
+            </div>
+            <p className="mt-1.5 text-[10px] font-mono text-muted-foreground/70">
+              Isolated margin — coming soon
+            </p>
           </div>
 
           <div className="grid grid-cols-2 gap-2">
@@ -222,13 +230,23 @@ export function TradeForm({
             </Field>
           </div>
 
-          {leverage > 1 && (
+          {leverage > 1 ? (
             <>
               <LiquidationBar entry={px} current={px} liquidation={Math.round(liq)} tone={outcome} />
               <p className="text-[10px] font-mono text-muted-foreground/70">
                 Liq price is an estimate · actual value depends on funding & maintenance margin
               </p>
             </>
+          ) : (
+            <div className="rounded-lg border border-dashed border-border bg-white/[0.02] px-3 py-3">
+              <div className="flex items-center justify-between text-[10px] font-mono uppercase tracking-widest">
+                <span className="text-muted-foreground">Liquidation price</span>
+                <span className="text-muted-foreground/50">—</span>
+              </div>
+              <p className="mt-1 text-[10px] font-mono text-muted-foreground/70">
+                Raise leverage above 1× to unlock the liq bar.
+              </p>
+            </div>
           )}
         </div>
       )}
