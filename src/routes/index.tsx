@@ -241,7 +241,7 @@ function Index() {
 
         {/* ─── BENTO ────────────────────────────────────────────────── */}
         <section id="bento" className="py-10 scroll-mt-20">
-          <div className="grid gap-4 items-start lg:grid-cols-[260px_minmax(0,1fr)_340px]">
+          <div className="grid gap-4 items-start lg:grid-cols-[240px_minmax(0,1fr)_320px]">
             {/* LEFT RAIL */}
             <div className="flex flex-col gap-4">
               <FanPulseCard
@@ -296,7 +296,7 @@ function Index() {
                     Live
                   </span>
                 </div>
-                <div className="grid gap-3 grid-cols-3">
+                <div className="grid gap-2 grid-cols-3">
                   {LIVE_MARKETS.map((m, i) => (
                     <TopMoverCard key={i} {...m} />
                   ))}
