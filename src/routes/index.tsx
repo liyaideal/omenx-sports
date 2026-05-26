@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { ArrowUpRight } from "lucide-react";
+import { useMemo, useState } from "react";
 import { AppShell } from "@/components/sports/dashboard/AppShell";
 import { AppTopBar } from "@/components/sports/dashboard/AppTopBar";
 import { MatchMarketCard } from "@/components/sports/dashboard/MatchMarketCard";
@@ -11,6 +12,7 @@ import { FanZoneHeader } from "@/components/sports/dashboard/FanZoneHeader";
 import { FanPostCard } from "@/components/sports/dashboard/FanPostCard";
 import { FansZoneEmpty } from "@/components/sports/dashboard/FansZoneEmpty";
 import { LiveActivityCard } from "@/components/sports/dashboard/LiveActivityCard";
+import { DayStripCalendar } from "@/components/sports/dashboard/DayStripCalendar";
 import {
   ACCOUNT_STATS,
   FEATURED_MATCH,
@@ -56,6 +58,27 @@ function Index() {
   const followedKeys = (Object.keys(TEAMS) as TeamKey[]).filter((k) =>
     FOLLOWED_TEAMS.includes(TEAMS[k]),
   );
+  const [selectedOffset, setSelectedOffset] = useState(0);
+  const countsByOffset = useMemo(() => {
+    const map: Record<number, number> = {};
+    for (const m of MATCH_MARKETS) {
+      const o = m.dayOffset ?? 0;
+      map[o] = (map[o] ?? 0) + 1;
+    }
+    return map;
+  }, []);
+  const visibleMarkets = useMemo(
+    () => MATCH_MARKETS.filter((m) => (m.dayOffset ?? 0) === selectedOffset),
+    [selectedOffset],
+  );
+  const dayLabel = useMemo(() => {
+    if (selectedOffset === 0) return "today";
+    if (selectedOffset === 1) return "tomorrow";
+    if (selectedOffset === -1) return "yesterday";
+    const d = new Date();
+    d.setDate(d.getDate() + selectedOffset);
+    return d.toLocaleDateString(undefined, { weekday: "long", month: "short", day: "numeric" });
+  }, [selectedOffset]);
   return (
     <AppShell>
       <AppTopBar
@@ -95,17 +118,23 @@ function Index() {
               positions: ACCOUNT_STATS.openPositions,
               pnl: ACCOUNT_STATS.pnlToday,
             }}
-            right={
-              <a href={omenxUrl.events()} className="inline-flex items-center gap-1 text-xs font-medium text-muted-foreground hover:text-foreground">
-                Browse all <ArrowUpRight className="h-3.5 w-3.5" />
-              </a>
-            }
           />
-          <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
-            {MATCH_MARKETS.map((m) => (
-              <EventMarketTileCard key={m.id} market={m} />
-            ))}
-          </div>
+          <DayStripCalendar
+            selectedOffset={selectedOffset}
+            onSelect={setSelectedOffset}
+            countsByOffset={countsByOffset}
+          />
+          {visibleMarkets.length > 0 ? (
+            <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+              {visibleMarkets.map((m) => (
+                <EventMarketTileCard key={m.id} market={m} />
+              ))}
+            </div>
+          ) : (
+            <div className="rounded-2xl border border-dashed border-border bg-surface/40 px-5 py-10 text-center text-sm text-muted-foreground">
+              No events scheduled for {dayLabel}.
+            </div>
+          )}
         </section>
 
         {/* BOTTOM — Season markets (futures + player props) */}

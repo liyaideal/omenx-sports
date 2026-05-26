@@ -37,6 +37,8 @@ export interface SportsMarket {
   outcomes: Outcome[];
   fixture?: { home: TeamLite; away: TeamLite; kickoff: string; whenLabel: string };
   tradeHref: string;
+  /** Calendar day offset from today (today=0, tomorrow=1, yesterday=-1). */
+  dayOffset?: number;
 }
 
 export const FEATURED_MATCH: SportsMarket = {
@@ -76,6 +78,7 @@ export const MATCH_MARKETS: SportsMarket[] = [
       { id: "a", label: "ARS", price: 0.28, delta24h: -0.02, team: TEAMS.arsenal },
     ],
     tradeHref: omenxUrl.markets(),
+    dayOffset: 0,
   },
   {
     // Binary two-team market (no draw) — e.g. NBA / playoff / knockout.
@@ -94,6 +97,7 @@ export const MATCH_MARKETS: SportsMarket[] = [
       { id: "a", label: "NEW", price: 0.37, delta24h: -0.04, team: TEAMS.newcastle },
     ],
     tradeHref: omenxUrl.markets(),
+    dayOffset: 1,
   },
   {
     // Binary single-market YES/NO event — non-match prop.
@@ -111,6 +115,7 @@ export const MATCH_MARKETS: SportsMarket[] = [
       { id: "n", label: "NO", price: 0.82, delta24h: -0.02 },
     ],
     tradeHref: omenxUrl.markets(),
+    dayOffset: 2,
   },
 ];
 
