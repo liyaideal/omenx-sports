@@ -23,6 +23,10 @@ export interface Outcome {
 export interface SportsMarket {
   id: string;
   kind: MarketKind;
+  /** Outcome shape — drives card layout. binary = 2 outcomes (YES/NO or A/B),
+   *  three-way = 1X2 soccer-style. Inferable from outcomes.length but
+   *  explicit keeps rendering decisions cheap. */
+  shape: "binary" | "three-way";
   title: string;
   league: { name: string; short: string };
   endsLabel: string;
@@ -48,6 +52,7 @@ export const CATEGORIES = [
 export const FEATURED_MATCH: SportsMarket = {
   id: "che-psg-2025-ucl",
   kind: "match",
+  shape: "three-way",
   title: "Chelsea vs Paris SG — Full time result",
   league: { name: "UEFA Champions League", short: "UCL" },
   endsLabel: "Today 8:00pm",
@@ -67,6 +72,7 @@ export const MATCH_MARKETS: SportsMarket[] = [
   {
     id: "mci-ars",
     kind: "match",
+    shape: "three-way",
     title: "Man City vs Arsenal",
     league: { name: "Premier League", short: "EPL" },
     endsLabel: "Today 6:00pm",
@@ -82,36 +88,37 @@ export const MATCH_MARKETS: SportsMarket[] = [
     tradeHref: omenxUrl.markets(),
   },
   {
-    id: "che-psg",
+    // Binary two-team market (no draw) — e.g. NBA / playoff / knockout.
+    id: "liv-new",
     kind: "match",
-    title: "Chelsea vs Paris SG",
-    league: { name: "UCL", short: "UCL" },
+    shape: "binary",
+    title: "Liverpool to beat Newcastle",
+    league: { name: "Premier League", short: "EPL" },
     endsLabel: "23 Aug 4:30pm",
-    volume: "$2.45M",
-    volume24h: "$612K",
-    participants: 4821,
-    fixture: { home: TEAMS.chelsea, away: TEAMS.psg, kickoff: "4:30pm", whenLabel: "23 Aug" },
+    volume: "$1.18M",
+    volume24h: "$310K",
+    participants: 2604,
+    fixture: { home: TEAMS.liverpool, away: TEAMS.newcastle, kickoff: "4:30pm", whenLabel: "23 Aug" },
     outcomes: [
-      { id: "h", label: "CHE", price: 0.42, delta24h: 0.03, team: TEAMS.chelsea },
-      { id: "d", label: "Draw", price: 0.21, delta24h: -0.01, meta: "X" },
-      { id: "a", label: "PSG", price: 0.37, delta24h: -0.02, team: TEAMS.psg },
+      { id: "h", label: "LIV", price: 0.63, delta24h: 0.04, team: TEAMS.liverpool },
+      { id: "a", label: "NEW", price: 0.37, delta24h: -0.04, team: TEAMS.newcastle },
     ],
     tradeHref: omenxUrl.markets(),
   },
   {
-    id: "bar-ars",
-    kind: "match",
-    title: "Barcelona vs Arsenal",
-    league: { name: "Friendly", short: "FRIENDLY" },
+    // Binary single-market YES/NO event — non-match prop.
+    id: "messi-hattrick",
+    kind: "player-prop",
+    shape: "binary",
+    title: "Messi scores a hat-trick on Sunday",
+    league: { name: "MLS", short: "MLS" },
     endsLabel: "28 Aug 9:00pm",
-    volume: "$640K",
-    volume24h: "$88K",
-    participants: 982,
-    fixture: { home: TEAMS.barcelona, away: TEAMS.arsenal, kickoff: "9:00pm", whenLabel: "28 Aug" },
+    volume: "$420K",
+    volume24h: "$96K",
+    participants: 1184,
     outcomes: [
-      { id: "h", label: "BAR", price: 0.55, delta24h: 0.01, team: TEAMS.barcelona },
-      { id: "d", label: "Draw", price: 0.22, delta24h: 0, meta: "X" },
-      { id: "a", label: "ARS", price: 0.23, delta24h: -0.01, team: TEAMS.arsenal },
+      { id: "y", label: "YES", price: 0.18, delta24h: 0.02 },
+      { id: "n", label: "NO", price: 0.82, delta24h: -0.02 },
     ],
     tradeHref: omenxUrl.markets(),
   },
@@ -120,6 +127,7 @@ export const MATCH_MARKETS: SportsMarket[] = [
 export const LEAGUE_WINNER_MARKET: SportsMarket = {
   id: "epl-winner-25-26",
   kind: "league-winner",
+  shape: "three-way",
   title: "Premier League — Winner 25/26",
   league: { name: "Premier League", short: "EPL" },
   endsLabel: "Settles May 24, 2026",
@@ -138,6 +146,7 @@ export const LEAGUE_WINNER_MARKET: SportsMarket = {
 export const TOP_SCORER_MARKET: SportsMarket = {
   id: "epl-top-scorer-25-26",
   kind: "top-scorer",
+  shape: "three-way",
   title: "EPL Top Scorer 25/26",
   league: { name: "Premier League", short: "EPL" },
   endsLabel: "Settles May 24, 2026",
@@ -187,6 +196,7 @@ export const SPOTLIGHT: PlayerSpotlight = {
     {
       id: "mbappe-anytime",
       kind: "player-prop",
+      shape: "binary",
       title: "Anytime goalscorer",
       league: { name: "La Liga", short: "LL" },
       endsLabel: "Today 8:00pm",
@@ -202,6 +212,7 @@ export const SPOTLIGHT: PlayerSpotlight = {
     {
       id: "mbappe-2plus",
       kind: "player-prop",
+      shape: "binary",
       title: "2+ goals scored",
       league: { name: "La Liga", short: "LL" },
       endsLabel: "Today 8:00pm",
@@ -217,6 +228,7 @@ export const SPOTLIGHT: PlayerSpotlight = {
     {
       id: "mbappe-shots",
       kind: "player-prop",
+      shape: "binary",
       title: "Over 3.5 shots on target",
       league: { name: "La Liga", short: "LL" },
       endsLabel: "Today 8:00pm",

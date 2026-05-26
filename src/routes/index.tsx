@@ -65,14 +65,14 @@ function Index() {
       </div>
 
       <div className="grid gap-5 px-6 pb-6 md:px-8 md:pb-8 lg:grid-cols-[340px_minmax(0,1fr)_360px]">
-        {/* LEFT — Featured market */}
-        <section className="flex flex-col gap-4">
+        {/* LEFT — Featured market (spans both rows) */}
+        <section className="flex flex-col gap-4 lg:row-span-2">
           <SectionHeader title="Featured" accent="market" />
           <MatchMarketCard market={FEATURED_MATCH} />
         </section>
 
-        {/* CENTER — Live & upcoming + futures + top scorer */}
-        <section className="flex flex-col gap-5">
+        {/* TOP — Live & upcoming, spans col 2–3, sits above the spotlight */}
+        <section className="flex flex-col gap-4 lg:col-span-2 lg:col-start-2 lg:row-start-1">
           <SectionHeader
             title="Live & upcoming"
             accent="markets"
@@ -82,11 +82,15 @@ function Index() {
               </a>
             }
           />
-          <div className="grid gap-3 md:grid-cols-3">
+          <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
             {MATCH_MARKETS.map((m) => (
               <EventMarketTileCard key={m.id} market={m} />
             ))}
           </div>
+        </section>
+
+        {/* BOTTOM CENTER — Futures + Top scorer */}
+        <section className="flex flex-col gap-5 lg:col-start-2 lg:row-start-2">
           <LeagueWinnerMarketCard market={LEAGUE_WINNER_MARKET} />
           <SectionHeader title="Top scorer" accent="futures" />
           <div className="grid gap-3">
@@ -101,8 +105,8 @@ function Index() {
           </div>
         </section>
 
-        {/* RIGHT — Player props spotlight */}
-        <section className="flex flex-col">
+        {/* BOTTOM RIGHT — Player props spotlight */}
+        <section className="flex flex-col lg:col-start-3 lg:row-start-2">
           <PlayerPropsSpotlight player={SPOTLIGHT} />
         </section>
       </div>
