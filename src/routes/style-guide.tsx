@@ -847,6 +847,95 @@ function StyleGuide() {
             </div>
           </Section>
 
+          <Section id="fans" title="Personalized Zone" kicker="16 — Fans Zone">
+            <p className="mb-6 max-w-3xl text-sm text-muted-foreground">
+              The left column of the home page is a personalized zone, not an editorial slot.
+              Content is keyed off the user's <code className="font-mono text-foreground">followedTeams</code>
+              and mixes one trading surface with social surfaces. The stack order is fixed
+              so users learn where to look.
+            </p>
+
+            <div className="grid gap-4 lg:grid-cols-2">
+              {/* Filled state */}
+              <div className="rounded-2xl border border-border bg-surface p-5 shadow-card">
+                <div className="mb-4 flex items-center justify-between">
+                  <div className="text-xs font-mono uppercase tracking-widest text-muted-foreground">Filled state</div>
+                  <span className="rounded-full bg-win/15 px-2 py-0.5 font-mono text-[10px] uppercase tracking-widest text-win">followedTeams.length &gt; 0</span>
+                </div>
+                <ol className="space-y-2.5 text-xs">
+                  <li className="flex items-start gap-3">
+                    <span className="grid h-5 w-5 shrink-0 place-items-center rounded-full bg-primary/20 font-mono text-[10px] text-primary">1</span>
+                    <div>
+                      <div className="font-medium text-foreground">Followed-team match card</div>
+                      <div className="text-muted-foreground">Next fixture of any followed team · full <code className="font-mono">MatchMarketCard</code></div>
+                    </div>
+                  </li>
+                  <li className="flex items-start gap-3">
+                    <span className="grid h-5 w-5 shrink-0 place-items-center rounded-full bg-primary/20 font-mono text-[10px] text-primary">2</span>
+                    <div>
+                      <div className="font-medium text-foreground">Fan poll</div>
+                      <div className="text-muted-foreground">Community sentiment on the same fixture · drives engagement, not money</div>
+                    </div>
+                  </li>
+                  <li className="flex items-start gap-3">
+                    <span className="grid h-5 w-5 shrink-0 place-items-center rounded-full bg-primary/20 font-mono text-[10px] text-primary">3</span>
+                    <div>
+                      <div className="font-medium text-foreground">Fan post</div>
+                      <div className="text-muted-foreground">Latest editorial / community post tagged to a followed team</div>
+                    </div>
+                  </li>
+                </ol>
+                <p className="mt-4 text-[11px] text-muted-foreground">
+                  Order is fixed: trade → poll → post. Never reshuffle by recency.
+                </p>
+              </div>
+
+              {/* Empty state */}
+              <div className="rounded-2xl border border-border bg-surface p-5 shadow-card">
+                <div className="mb-4 flex items-center justify-between">
+                  <div className="text-xs font-mono uppercase tracking-widest text-muted-foreground">Empty state</div>
+                  <span className="rounded-full bg-loss/15 px-2 py-0.5 font-mono text-[10px] uppercase tracking-widest text-loss">followedTeams.length === 0</span>
+                </div>
+                <ol className="space-y-2.5 text-xs">
+                  <li className="flex items-start gap-3">
+                    <span className="grid h-5 w-5 shrink-0 place-items-center rounded-full bg-neon/20 font-mono text-[10px] text-neon">1</span>
+                    <div>
+                      <div className="font-medium text-foreground">Editor's pick kicker</div>
+                      <div className="text-muted-foreground">Dashed strip · `Editor's pick · follow your team to personalize`</div>
+                    </div>
+                  </li>
+                  <li className="flex items-start gap-3">
+                    <span className="grid h-5 w-5 shrink-0 place-items-center rounded-full bg-neon/20 font-mono text-[10px] text-neon">2</span>
+                    <div>
+                      <div className="font-medium text-foreground">Editorial match card</div>
+                      <div className="text-muted-foreground">Same `MatchMarketCard`, real content — never an empty illustration</div>
+                    </div>
+                  </li>
+                  <li className="flex items-start gap-3">
+                    <span className="grid h-5 w-5 shrink-0 place-items-center rounded-full bg-neon/20 font-mono text-[10px] text-neon">3</span>
+                    <div>
+                      <div className="font-medium text-foreground">Follow chips · 5 suggested clubs</div>
+                      <div className="text-muted-foreground">One-tap follow with check/plus state · local until `Save preferences`</div>
+                    </div>
+                  </li>
+                </ol>
+                <p className="mt-4 text-[11px] text-muted-foreground">
+                  Never show a blank or illustration-only state — real content + onboarding side-by-side.
+                </p>
+              </div>
+            </div>
+
+            <div className="mt-6 rounded-2xl border border-dashed border-white/15 bg-white/[0.02] p-5 text-xs">
+              <div className="mb-2 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">Rules</div>
+              <ul className="space-y-1.5 text-muted-foreground">
+                <li>• Header reads <code className="font-mono text-foreground">Fans zone · Following N teams</code> — both states.</li>
+                <li>• Poll and post never appear without a paired trade card above them.</li>
+                <li>• Empty-state chips toggle locally; persistence happens on `Save preferences`, not per-tap.</li>
+                <li>• The column is always present — never collapsed even at the 3-col → 2-col breakpoint; it just reflows under the main grid.</li>
+              </ul>
+            </div>
+          </Section>
+
           <footer className="mt-12 border-t border-border pt-6 text-center text-xs text-muted-foreground font-mono">
             Stadium Neon · v0.1 · sports prediction design system
           </footer>
