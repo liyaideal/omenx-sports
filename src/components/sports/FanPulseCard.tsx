@@ -37,7 +37,7 @@ export function FanPulseCard({
   return (
     <div
       className={cn(
-        "flex h-full flex-col rounded-2xl border border-border bg-surface p-4 shadow-card",
+        "flex flex-col rounded-2xl border border-border bg-surface p-4 shadow-card",
         className,
       )}
     >
@@ -93,7 +93,7 @@ export function FanPulseCard({
         </a>
       </div>
 
-      <div className="mt-auto flex items-center justify-between pt-3 text-[11px] font-mono text-muted-foreground">
+      <div className="mt-3 flex items-center justify-between text-[11px] font-mono text-muted-foreground">
         <div className="flex items-center gap-3">
           <span className="inline-flex items-center gap-1"><Heart className="h-3 w-3" /> {likes}</span>
           <span className="inline-flex items-center gap-1"><MessageCircle className="h-3 w-3" /> {comments}</span>
