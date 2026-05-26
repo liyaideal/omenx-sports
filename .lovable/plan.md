@@ -1,27 +1,50 @@
-## 三个问题的修复
+## 删 StatsBar + 方案 C section header chips
 
-### 1) `Sports` 文字右侧被裁切
+### 视觉
 
-斜体 + `bg-clip-text` + `drop-shadow` 在容器右沿会被裁。`SPORTS` lockup 外层 `<span>` 加 `pr-1.5` 内边距，并把 `tracking-tight` 改成 `tracking-normal`（斜体下不再挤压字距）。这样 S 的右上倾斜尾巴和外发光都不会被截。
+```text
+[Header.....................................]
+[ All  Live  Soccer  EPL  UCL  ...  NBA  NFL ]
 
-### 2) Header 宽度与页面内容不一致
+[Featured market 大卡]   Live & upcoming markets   ● 7 OPEN · +$142.20 TODAY ↑   Browse all ↗
+                         ─────────────────────────────────────────────
+                         [card][card][card]
+                         [card][card][card]
+```
 
-`AppShell` 已经去掉了 `max-w-7xl`，整页是全宽；但 `AppTopBar` 内层容器还套着 `mx-auto max-w-7xl`，导致 header 比下方内容窄。
+页面从 header 直接进入 CategoryStrip → 内容网格，删掉中间那条 3 等分 KPI 横条。账户数据以小 chip 形式挂在 "Live & upcoming markets" 标题右侧。
 
-修复：把 `AppTopBar` 内层容器的 `mx-auto max-w-7xl` 去掉，改成 `w-full`，padding 用 `px-6 md:px-8`（和 `PageHeader` / 主网格 `px-6 md:px-8` 完全对齐）。
+### 改动
 
-### 3) `PageHeader` 里的 `Sports` H1 删掉
+**1. `src/routes/index.tsx`**
+- 移除 `<StatsBar>` 与外层包裹的 `<div className="px-6 pt-6 md:px-8 md:pt-8">`
+- 移除 `StatsBar` import
+- 给 `CategoryStrip` 外层加回上 padding：`pt-6 md:pt-8`（替代被删的间距）
+- 给 `SectionHeader` 增加 `stats?: { positions: number; pnl: string }` 可选 prop
+- 在 "Live & upcoming" 那个 `SectionHeader` 上传入 `stats={{ positions, pnl }}`
 
-Header lockup 已经清楚标识"OmenX → Sports zone"，页面内再来一个 `<h1>Sports</h1>` 是重复信息，且和 header 标题撞车。
+**2. `SectionHeader` 内部**
+- 当 `stats` 存在时，title 右侧（在 `right` 之前）渲染 chips 行：
+  ```text
+  ● 7 OPEN POSITIONS   ·   +$142.20 TODAY ↑
+  ```
+  - "● 7 OPEN" 中性色：`text-muted-foreground`，点用 `bg-primary/70` 小圆点
+  - "+$142.20 TODAY ↑" 涨用 `text-win`，跌用 `text-loss`；箭头根据 `+/-` 符号
+  - 字号 `text-xs font-mono uppercase tracking-wider`
+  - chips 之间用细中分隔符 `text-border` 的 `·`
+  - 移动端（`max-md`）chips 折到标题下方一行，避免拥挤
 
-修复：
-- 删除 `PageHeader` 里的 `<h1>{title}</h1>` 标题
-- 但 PageHeader 那一行的右侧"Equity 胶囊 + 三个 icon 按钮"也已经和新 header 右侧的 `Equity + Avatar` 重复 → 整个 `PageHeader` 组件不再需要，从 `index.tsx` 移除
-- SEO 用的 `<h1>` 改在第一个内容 section 里加一个语义 H1（例如 "Live & upcoming markets"），保留单 H1 + 关键字
+**3. 删除文件**
+- `src/components/sports/dashboard/StatsBar.tsx`
 
-可选简化：直接删 `PageHeader.tsx` 文件并清掉 `index.tsx` 里的引用与渲染。
+### 数据来源
+
+`ACCOUNT_STATS.openPositions` 和 `ACCOUNT_STATS.pnlToday` 直接传给 SectionHeader，不新增 mock。
+
+### 不动
+
+- AppTopBar、AppShell、Featured 卡、其他 section、底部 OmenX bridge strip、CategoryStrip 本身样式
 
 ### 受影响文件
-- 编辑 `src/components/sports/dashboard/AppTopBar.tsx`（修 1 + 2）
-- 编辑 `src/routes/index.tsx`（移除 PageHeader 用法，给现存某个 section 标题升级为 h1 以保 SEO）
-- 删除 `src/components/sports/dashboard/PageHeader.tsx`
+- 编辑 `src/routes/index.tsx`
+- 删除 `src/components/sports/dashboard/StatsBar.tsx`
