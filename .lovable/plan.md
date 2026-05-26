@@ -1,96 +1,80 @@
+# Bento 排版修复计划
 
-# 首页 Bento 改版方案
+## 当前问题（对比参考图诊断）
 
-参考用户上传的 dashboard 排版，把当前"全宽分段杂志风"重构为「Hero + Bento 网格 + 已有三段保留」。所有视觉令牌、配色、字体不变；不动 trading 组件接口。
+1. **Top Movers 卡片崩了** — 中间列只有 ~440px 宽，硬塞 3 个完整 `MarketCard`（含 EventHeader + 双 OutcomePill + sparkline + Vol/OI），结果 grid 退化成 2 列，第 3 张换行，标题全部折行到 2 行，看起来很挤。
+2. **Player Spotlight 不像参考的视觉主角** — 参考里它是右栏最大的"方块"，几乎只有大圆环 + KM。我们用了带 prev/next 箭头、name、3 个 stat chip 的完整版，但右栏太窄导致 NeonRing 被两侧箭头挤压、name + stat 区域反而被 `overflow-hidden` 切掉。
+3. **左栏巨大空白** — `FanPulseCard` 用 `h-full` + `mt-auto`，会被拉到和中间列一样高，% 进度条和 Trade footer 之间留出大片空白。
+4. **右栏 SentimentCard 被压扁** — TopTradersCard 之后空一大块再到 SentimentCard，且 SentimentCard 文字被裁。
 
-## 新结构
+## 修复方案
+
+### A. 新增组件 `TopMoverCard.tsx`（核心修复）
+
+参考图中"Top Movers"那 3 张卡的精简版本，**仅供 bento 中栏使用**，不替换通用 `MarketCard`：
+
+- 高度固定 ~260px，宽度自适应（3 列 grid，每张 ~135–160px 也能撑住）
+- 顶部：联赛 pill + 倒计时 pill（同 MarketCard 样式但更紧凑）
+- 标题：font-display 16px，`line-clamp-2`，最多两行
+- 两个圆形价格徽章（沿用 NeonRing 思路，参考图中的 58¢/+4.2¢ 圆球样式），并排居中
+- 下方迷你 sparkline（高 ~36px）
+- 底部一行：`Vol $X` · `OI $Y`，font-mono 10px
+- 整卡可点击进入对应 market
+
+### B. 重构 PlayerSpotlight 使用方式
+
+新增 `PlayerSpotlightHero.tsx`（参考图右栏顶部的大方块）：
+
+- 去掉 prev/next 箭头（参考图也没有；那两个箭头在窄列里把 ring 挤变形）
+- 顶部只留 `@handle` + 右上角 chart icon
+- 主体：居中大号 `NeonRing` (size ~260)，里面只放 monogram (text-6xl) + `#10`
+- **删除下方的 name / position / 3 stats** —— 这块在参考图里就没有，我们之前堆上去反而显得乱且会被裁。stats 改放在 bento 别处或彻底去掉。
+- 卡片设成接近正方形（aspect-square 或 min-h-[360px]），让它成为右栏的视觉重心。
+
+保留原 `PlayerSpotlightCard.tsx` 不动（其它页面/路由仍在用）。
+
+### C. 修 FanPulseCard 拉伸空白
+
+- 去掉外层 `h-full`，改成自然高度
+- 去掉 footer 上的 `mt-auto`，换成 `mt-3`
+- 让左栏 FanPulse + LiveTicker 按内容堆叠，下方留白由 grid 自然处理（中栏更高没关系）
+
+### D. 调整 bento grid 比例
+
+把 `lg:grid-cols-12` + `col-span-3/5/4` 改为显式像素：
 
 ```text
-TopBar
-Hero Strip（保留并瘦身，右侧 HeroMarketCard 保留）
-─────────────────────────────────────────────
-BENTO GRID (lg:grid-cols-12, gap-4)
-  ┌─ Col 1–3 (左轨) ─────┐ ┌─ Col 4–8 (中柱) ────┐ ┌─ Col 9–12 (右大区) ─┐
-  │ FanPulseCard         │ │ "Today's matches"   │ │ PlayerSpotlight      │
-  │ (投票 + RatioBar)    │ │ + 3 MiniEventCard 行 │ │  (NeonRing + 缩写    │
-  │                      │ │                      │ │   + 队徽 + 3 stat)   │
-  │ LiveTicker           │ │ "Top movers"         │ │                      │
-  │ (垂直滚动价格)        │ │ + 3 MarketCard       │ │ SentimentCard        │
-  │                      │ │                      │ │  (右下半高)          │
-  │ TopTraders           │ │ StandingsPreview     │ │                      │
-  │ (3–4 LeaderboardRow) │ │  (EPL top 5)         │ │                      │
-  └──────────────────────┘ └──────────────────────┘ └──────────────────────┘
-─────────────────────────────────────────────
-Trending markets（保留 6-card 网格）
-Upcoming fixtures（保留）
-OmenX bridge（保留）
-Footer
+lg:grid-cols-[260px_minmax(0,1fr)_340px]
 ```
 
-中等屏 (md) 退化成 2 列：左轨 + 中柱合并堆叠在左 (col-span-7)，右大区 (col-span-5)。
-小屏 (<md) 全部单列堆叠，顺序：FanPulse → Today's matches → PlayerSpotlight → Top movers → LiveTicker → Standings → TopTraders → Sentiment。
+- 左 260：FanPulse 紧凑、LiveTicker 行不压字
+- 中 1fr (~520px)：3 张新 `TopMoverCard` 能舒服地一行排开
+- 右 340：PlayerSpotlightHero 接近方形、TopTraders 行不挤、SentimentCard 不裁
 
-## 新建组件（src/components/sports/）
+各列 `items-start`（不再 stretch），消除拉伸空白。
 
-### `FanPulseCard.tsx`
-投票卡。"Who wins tonight?" + 两个队徽 + 两条 `RatioBar` 显示当前社区投票占比 + 总投票数 + "vote yes / vote no" 跳具体市场。复用 `RatioBar` 和 `TeamCrest`。
+### E. SentimentCard 兜底
 
-### `LiveTicker.tsx`
-垂直滚动条。一列 mono 行：`RMA 58¢ ↑4.2` / `LAL 47¢ ↑2.1` …。CSS `@keyframes` 无限上滚 + 鼠标 hover 暂停。每行可点跳市场。高度填满 col。
+如果 340px 下 SentimentCard 仍然挤，把它从右栏挪到左栏 LiveTicker 下方（左栏空间富余），右栏只留 PlayerSpotlightHero + TopTraders。最终在浏览器复核后决定。
 
-### `TopTradersCard.tsx`
-3–4 行 `LeaderboardRow`（设计系统已有），头像 + 用户名 + 24h P&L。Mock 数据；点击跳 OmenX profile。
+## 不动的部分
 
-### `MiniEventCard.tsx`
-紧凑横向赛事卡（替代当前 EventHeader 在 bento 里太大的问题）。左队徽 vs 右队徽 + kickoff 时间 + 联赛 + 「Trade →」按钮。高度 ~96px。
-
-### `StandingsPreview.tsx`
-小表格：联赛 tab（EPL/UCL/NBA）+ 5 行队伍排名（队徽 / 队名 / P W D L Pts）。每行点击跳那支队的市场聚合页（暂用 `#`）。
-
-### `PlayerSpotlightHero.tsx`（即 PlayerSpotlightCard 的 hero 变体）
-查看现有 `PlayerSpotlightCard`，若已经够用则**直接复用**，不新建。设计：`NeonRing size={220} dashed` 包裹一个大号球员缩写（如 "MBP"）+ 队徽小标 + 球员名 + 位置 + 3 个 StatChip（Goals 132 / Assist 320 / Matches 89）。我会先 read 一下 PlayerSpotlightCard，能复用就复用。
-
-## 现有组件改动
-
-### `src/routes/index.tsx`
-重写第二屏起的结构。删除当前 Featured Event section（被 bento 取代——Tonight's headline event 的角色由 PlayerSpotlightHero + Today's matches 第 1 张 + Top movers 共同承担）。`#event-featured` 锚点改为指向 bento 区。
-
-### 其他组件不动
-`HeroMarketCard`、`MarketCard`、`MatchCard`、`SectionHeader`、`TopBar`、`Footer`、`EventHeader`（虽然 homepage 不再用，但保留在事件页/style guide）、`OutcomePill`、`CountdownPill`、所有 trading 组件。
-
-## 视觉规则
-
-- Bento 每个卡：`rounded-2xl border border-border bg-surface shadow-card`，hover 同当前 MarketCard 的微动效。
-- 区分卡片分量：大卡（PlayerSpotlight）加 `bg-ambient + ring-1 ring-neon/15`；小卡保持 surface。
-- LiveTicker 行用 `loss` / `win` 色标 delta，与 MarketCard sparkline 一致。
-- 每个卡片右上角放小 SectionHeader-lite（kicker + 可选 action），不用 `SectionHeader` 组件（太重），inline 写。
-- 不引入新的字体、新的色值、新的圆角。
-
-## 不做的事
-
-- 不引入真实球员/球队照片（版权）。PlayerSpotlight 用 NeonRing + 缩写 + 队徽（用户选项）。
-- 不做投票后的实际提交逻辑。FanPulseCard 是展示态 + CTA 跳市场。
-- 不做 LiveTicker 的真实数据，mock 8–10 条静态行循环。
-- 不动 Trending/Upcoming/Bridge 三段。
-- 不做响应式精修到 <640px——bento 在 md+ 是主战场，sm 单列堆叠即可。
+- Stadium Neon 配色 / 字体 / 圆角 token 全部不变
+- Hero strip、Today's matches（MiniEventCard）、Standings、Trending、Upcoming、OmenX Bridge **完全不动**
+- 通用 `MarketCard`、`PlayerSpotlightCard` 组件保持原样（其它地方仍在用）
+- 不引入新的依赖、不动 routing
 
 ## 验收
 
-改完截 full_page，对比：
-1. Hero 之后第一个 viewport (~777px) 是否同时能看到至少 4 个异构模块（参考图水平：6+）。
-2. PlayerSpotlight 是否成为右侧视觉焦点。
-3. LiveTicker 是否真的在动。
-4. 每个 bento 卡是否都有可点击的"通往交易"路径。
+- 1021×777 视口下，bento 第一屏看得清：3 张 Top Mover 卡一行不换行、每张标题不被截断
+- Player Spotlight 是右栏视觉锚点，圆环居中不被挤压
+- 左栏 FanPulse 底部不再有大片空白
+- SentimentCard 完整显示（位置可能在左栏底部）
+- 截图复核通过
 
-## 文件清单
+## 涉及文件
 
-新建：
-- `src/components/sports/FanPulseCard.tsx`
-- `src/components/sports/LiveTicker.tsx`
-- `src/components/sports/TopTradersCard.tsx`
-- `src/components/sports/MiniEventCard.tsx`
-- `src/components/sports/StandingsPreview.tsx`
-- `src/components/sports/PlayerSpotlightHero.tsx`（仅当现有 `PlayerSpotlightCard` 不能直接复用时）
-
-修改：
-- `src/routes/index.tsx`
+- 新建 `src/components/sports/TopMoverCard.tsx`
+- 新建 `src/components/sports/PlayerSpotlightHero.tsx`
+- 编辑 `src/components/sports/FanPulseCard.tsx`（去 h-full / mt-auto）
+- 编辑 `src/routes/index.tsx`（grid 模板、组件替换、可能挪 SentimentCard）
