@@ -24,7 +24,7 @@ export function PlayerSpotlightHero({
     <div
       className={cn(
         "relative overflow-hidden rounded-2xl border border-border bg-surface bg-ambient p-5 shadow-card",
-        "h-full min-h-0",
+        "aspect-square",
         className,
       )}
     >
