@@ -47,19 +47,17 @@ export function TeamCrest({ name, abbr, hue, logoUrl, size = "md", className }: 
   const to = `oklch(0.4 0.16 ${(h + 40) % 360})`;
   const [imgFailed, setImgFailed] = useState(false);
   if (logoUrl && !imgFailed) {
+    // Real crests have their own shapes — never clip them into a circle.
+    // Square container, transparent, object-contain preserves the native aspect ratio.
     return (
       <div
-        className={cn(
-          "inline-flex items-center justify-center rounded-full bg-white/5 ring-1 ring-white/10 shadow-card overflow-hidden",
-          SIZES[size],
-          className,
-        )}
+        className={cn("inline-flex items-center justify-center shrink-0", SIZES[size], className)}
         aria-label={name}
       >
         <img
           src={logoUrl}
           alt={name}
-          className="h-[78%] w-[78%] object-contain"
+          className="h-full w-full object-contain"
           loading="lazy"
           onError={() => setImgFailed(true)}
         />
