@@ -70,20 +70,6 @@ export const TEAMS = {
   },
 } as const satisfies Record<string, TeamLite>;
 
-export const FAN_POLL = {
-  authorAvatar: TEAMS.chelsea.logo,
-  authorName: "Chelsea",
-  authorHandle: "@chelsea_official",
-  question: "Who will win today's match?",
-  home: TEAMS.chelsea,
-  away: TEAMS.psg,
-  whenLabel: "Today",
-  kickoff: "8:00pm",
-  votes: { home: 21, away: 29 },
-  reactions: { likes: 78, comments: 35, shares: 32, flags: 32 },
-  marketHref: omenxUrl.markets(),
-};
-
 export const FAN_POST = {
   authorAvatar:
     "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=160&h=160&fit=crop&crop=faces&q=80",
