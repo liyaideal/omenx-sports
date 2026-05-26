@@ -14,6 +14,13 @@ export function LiquidationBar({ entry, current, liquidation, tone = "yes", clas
   const max = Math.max(entry, current, liquidation) + 5;
   const pct = (v: number) => Math.max(0, Math.min(100, ((v - min) / (max - min)) * 100));
   const accent = tone === "yes" ? "var(--primary)" : "var(--neon)";
+  // Always paint from the liq edge (red) toward the current price (accent),
+  // so the colored span = "safety budget" between liquidation and current.
+  const liqPct = pct(liquidation);
+  const curPct = pct(current);
+  const left = Math.min(liqPct, curPct);
+  const width = Math.abs(curPct - liqPct);
+  const liqOnLeft = liqPct <= curPct;
   return (
     <div className={cn("space-y-2", className)}>
       <div className="flex justify-between text-[10px] font-mono uppercase tracking-widest text-muted-foreground">
@@ -25,15 +32,17 @@ export function LiquidationBar({ entry, current, liquidation, tone = "yes", clas
         <div
           className="absolute inset-y-0 rounded-full"
           style={{
-            left: `${Math.min(pct(liquidation), pct(current))}%`,
-            width: `${Math.abs(pct(current) - pct(liquidation))}%`,
-            background: `linear-gradient(90deg, var(--loss), ${accent})`,
-            opacity: 0.6,
+            left: `${left}%`,
+            width: `${width}%`,
+            background: liqOnLeft
+              ? `linear-gradient(90deg, var(--loss), ${accent})`
+              : `linear-gradient(90deg, ${accent}, var(--loss))`,
+            opacity: 0.7,
           }}
         />
-        <Marker pct={pct(liquidation)} color="var(--loss)" />
+        <Marker pct={liqPct} color="var(--loss)" />
         <Marker pct={pct(entry)} color="var(--muted-foreground)" />
-        <Marker pct={pct(current)} color={accent} large />
+        <Marker pct={curPct} color={accent} large />
       </div>
     </div>
   );

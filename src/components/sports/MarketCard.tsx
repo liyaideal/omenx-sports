@@ -1,4 +1,4 @@
-import { Users, TrendingUp } from "lucide-react";
+import { Layers, TrendingUp } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { LeagueBadge } from "./LeagueBadge";
 import { OutcomePill } from "./OutcomePill";
@@ -9,12 +9,13 @@ export interface MarketCardProps {
   question: string;
   /** Two outcomes. For team-vs-team markets, label = team name; for neutral, "Yes" / "No". */
   outcomes: [
-    { label: string; probability: number },
-    { label: string; probability: number },
+    { label: string; probability: number; delta24h?: number },
+    { label: string; probability: number; delta24h?: number },
   ];
   volume: string;
   endsIn: string;
-  participants?: number;
+  /** Open Interest — total notional value of open positions. */
+  openInterest?: string;
   status?: "live" | "upcoming";
   selected?: "yes" | "no" | null;
   onSelect?: (tone: "yes" | "no") => void;
@@ -27,7 +28,7 @@ export function MarketCard({
   outcomes,
   volume,
   endsIn,
-  participants,
+  openInterest,
   status = "upcoming",
   selected = null,
   onSelect,
@@ -53,6 +54,7 @@ export function MarketCard({
         <OutcomePill
           label={outcomes[0].label}
           probability={outcomes[0].probability}
+          delta24h={outcomes[0].delta24h}
           tone="yes"
           selected={selected === "yes"}
           onClick={() => onSelect?.("yes")}
@@ -60,6 +62,7 @@ export function MarketCard({
         <OutcomePill
           label={outcomes[1].label}
           probability={outcomes[1].probability}
+          delta24h={outcomes[1].delta24h}
           tone="no"
           selected={selected === "no"}
           onClick={() => onSelect?.("no")}
@@ -71,10 +74,10 @@ export function MarketCard({
           <TrendingUp className="h-3 w-3" />
           <span>Vol {volume}</span>
         </div>
-        {participants !== undefined && (
+        {openInterest && (
           <div className="flex items-center gap-1.5">
-            <Users className="h-3 w-3" />
-            <span className="tabular-nums">{participants.toLocaleString()}</span>
+            <Layers className="h-3 w-3" />
+            <span className="tabular-nums">OI {openInterest}</span>
           </div>
         )}
       </div>

@@ -8,6 +8,8 @@ export interface OutcomePillProps {
   label: string;
   /** 0–100 probability percent, also displayed as price in ¢. */
   probability: number;
+  /** Optional 24h price change in ¢ (e.g. +3, -1). Shown under the price. */
+  delta24h?: number;
   tone: OutcomeTone;
   size?: "sm" | "md" | "lg";
   selected?: boolean;
@@ -37,6 +39,7 @@ const SIZES = {
 export function OutcomePill({
   label,
   probability,
+  delta24h,
   tone,
   size = "md",
   selected,
@@ -45,7 +48,8 @@ export function OutcomePill({
   className,
 }: OutcomePillProps) {
   const s = SIZES[size];
-  const payout = probability > 0 ? (100 / probability).toFixed(2) : "—";
+  const hasDelta = typeof delta24h === "number";
+  const positive = (delta24h ?? 0) >= 0;
   return (
     <button
       type="button"
@@ -65,7 +69,17 @@ export function OutcomePill({
         <span className={cn("font-mono font-bold tabular-nums", s.price, TONE_TEXT[tone])}>
           {Math.round(probability)}¢
         </span>
-        <span className="text-[10px] font-mono text-muted-foreground">×{payout}</span>
+        {hasDelta && (
+          <span
+            className={cn(
+              "text-[10px] font-mono tabular-nums",
+              positive ? "text-win" : "text-loss",
+            )}
+          >
+            {positive ? "+" : ""}
+            {delta24h}¢ 24h
+          </span>
+        )}
       </div>
     </button>
   );

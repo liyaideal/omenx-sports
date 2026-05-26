@@ -6,14 +6,16 @@ interface Row {
 }
 
 interface OrderBookProps {
-  /** "Buy YES" side (descending price). */
-  bids?: Row[];
-  /** "Buy NO" side (ascending price). */
-  asks?: Row[];
+  /** Bid-side resting orders on YES contract (price ascending toward mark). */
+  yesBook?: Row[];
+  /** Bid-side resting orders on NO contract. */
+  noBook?: Row[];
+  /** Mark price of the YES contract, in ¢. */
+  mark?: number;
   className?: string;
 }
 
-const DEFAULT_BIDS: Row[] = [
+const DEFAULT_YES: Row[] = [
   { price: 27, size: 1240 },
   { price: 26, size: 880 },
   { price: 25, size: 2030 },
@@ -21,13 +23,13 @@ const DEFAULT_BIDS: Row[] = [
   { price: 23, size: 615 },
   { price: 22, size: 1900 },
 ];
-const DEFAULT_ASKS: Row[] = [
-  { price: 28, size: 990 },
-  { price: 29, size: 510 },
-  { price: 30, size: 2200 },
-  { price: 31, size: 740 },
-  { price: 32, size: 320 },
-  { price: 33, size: 1180 },
+const DEFAULT_NO: Row[] = [
+  { price: 72, size: 990 },
+  { price: 71, size: 510 },
+  { price: 70, size: 2200 },
+  { price: 69, size: 740 },
+  { price: 68, size: 320 },
+  { price: 67, size: 1180 },
 ];
 
 function Side({ rows, tone, accumulate }: { rows: Row[]; tone: "yes" | "no"; accumulate: "left" | "right" }) {
@@ -76,21 +78,34 @@ function Side({ rows, tone, accumulate }: { rows: Row[]; tone: "yes" | "no"; acc
   );
 }
 
-export function OrderBook({ bids = DEFAULT_BIDS, asks = DEFAULT_ASKS, className }: OrderBookProps) {
+export function OrderBook({ yesBook = DEFAULT_YES, noBook = DEFAULT_NO, mark = 28, className }: OrderBookProps) {
+  const bestYes = yesBook[0]?.price ?? 0;
+  const bestNo = noBook[0]?.price ?? 0;
+  const spread = Math.max(0, 100 - bestYes - bestNo);
   return (
     <div className={cn("rounded-2xl border border-border bg-surface p-4 shadow-card", className)}>
-      <div className="flex items-center justify-between px-2 pb-3">
+      <div className="flex items-center justify-between px-2 pb-2">
         <div className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground">Order Book</div>
-        <div className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground">Price · Size · Total</div>
+        <div className="flex items-center gap-3 text-[10px] font-mono uppercase tracking-widest text-muted-foreground">
+          <span>
+            Mark <span className="text-foreground tabular-nums">{mark}¢</span>
+          </span>
+          <span>
+            Spread <span className="text-foreground tabular-nums">{spread}¢</span>
+          </span>
+        </div>
+      </div>
+      <div className="px-2 pb-2 text-right text-[10px] font-mono uppercase tracking-widest text-muted-foreground">
+        Price · Size · Total
       </div>
       <div className="grid grid-cols-2 gap-3">
         <div>
-          <div className="px-2 pb-1.5 text-[10px] font-mono uppercase tracking-widest text-primary">Buy Yes</div>
-          <Side rows={bids} tone="yes" accumulate="left" />
+          <div className="px-2 pb-1.5 text-[10px] font-mono uppercase tracking-widest text-primary">YES Book</div>
+          <Side rows={yesBook} tone="yes" accumulate="left" />
         </div>
         <div>
-          <div className="px-2 pb-1.5 text-right text-[10px] font-mono uppercase tracking-widest text-neon">Buy No</div>
-          <Side rows={asks} tone="no" accumulate="right" />
+          <div className="px-2 pb-1.5 text-right text-[10px] font-mono uppercase tracking-widest text-neon">NO Book</div>
+          <Side rows={noBook} tone="no" accumulate="right" />
         </div>
       </div>
     </div>
