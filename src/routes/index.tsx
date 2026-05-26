@@ -240,9 +240,9 @@ function SectionHeader({
       : "text-loss"
     : "";
   return (
-    <div className="flex flex-wrap items-center justify-between gap-x-5 gap-y-2">
+    <div className="flex min-h-9 flex-wrap items-center justify-between gap-x-5 gap-y-2">
       <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
-        <As className="inline-flex items-center gap-2.5 font-display text-2xl font-semibold">
+        <As className="inline-flex items-center gap-2.5 font-display text-2xl font-semibold leading-9">
           {live && (
             <span
               aria-label="Live"
