@@ -139,6 +139,166 @@ export const SUGGESTED_TEAMS: TeamLite[] = [
   TEAMS.psg,
 ];
 
+/** Team keys used to filter LIVE_TRADES against FOLLOWED_TEAMS. */
+export type TeamKey = keyof typeof TEAMS;
+
+export interface LiveTrade {
+  id: string;
+  handle: string;
+  /** Real avatar URL, or null to render an initial-letter swatch. */
+  avatar: string | null;
+  /** Solid swatch color for fallback avatar, oklch hue. */
+  hue: number;
+  side: "bought" | "sold";
+  outcomeLabel: string;
+  /** Price in cents (1-99). */
+  price: number;
+  eventTitle: string;
+  eventTeams: TeamKey[];
+  league: string;
+  secondsAgo: number;
+  tradeHref: string;
+}
+
+/**
+ * Live activity feed mock. Variety is deliberate — mixed avatar shapes,
+ * mixed handle lengths, mixed timestamps, mixed sides. Fake patterns
+ * (all real photos, all "2s ago") read as fake and kill the social proof.
+ */
+export const LIVE_TRADES: LiveTrade[] = [
+  {
+    id: "t1",
+    handle: "@ronin_99",
+    avatar:
+      "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=80&h=80&fit=crop&crop=faces&q=80",
+    hue: 245,
+    side: "bought",
+    outcomeLabel: "Chelsea",
+    price: 42,
+    eventTitle: "Chelsea vs Paris SG",
+    eventTeams: ["chelsea", "psg"],
+    league: "UCL",
+    secondsAgo: 8,
+    tradeHref: omenxUrl.markets(),
+  },
+  {
+    id: "t2",
+    handle: "@samira.k",
+    avatar: null,
+    hue: 320,
+    side: "sold",
+    outcomeLabel: "Draw",
+    price: 21,
+    eventTitle: "Chelsea vs Paris SG",
+    eventTeams: ["chelsea", "psg"],
+    league: "UCL",
+    secondsAgo: 34,
+    tradeHref: omenxUrl.markets(),
+  },
+  {
+    id: "t3",
+    handle: "@kdb_stan",
+    avatar:
+      "https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=80&h=80&fit=crop&crop=faces&q=80",
+    hue: 210,
+    side: "bought",
+    outcomeLabel: "Man City",
+    price: 48,
+    eventTitle: "Man City vs Arsenal",
+    eventTeams: ["manCity", "arsenal"],
+    league: "EPL",
+    secondsAgo: 61,
+    tradeHref: omenxUrl.markets(),
+  },
+  {
+    id: "t4",
+    handle: "@arsenal4life",
+    avatar: null,
+    hue: 10,
+    side: "bought",
+    outcomeLabel: "Arsenal",
+    price: 28,
+    eventTitle: "Man City vs Arsenal",
+    eventTeams: ["manCity", "arsenal"],
+    league: "EPL",
+    secondsAgo: 96,
+    tradeHref: omenxUrl.markets(),
+  },
+  {
+    id: "t5",
+    handle: "@boots_off",
+    avatar:
+      "https://images.unsplash.com/photo-1547425260-76bcadfb4f2c?w=80&h=80&fit=crop&crop=faces&q=80",
+    hue: 15,
+    side: "sold",
+    outcomeLabel: "Newcastle",
+    price: 37,
+    eventTitle: "Liverpool vs Newcastle",
+    eventTeams: ["liverpool", "newcastle"],
+    league: "EPL",
+    secondsAgo: 142,
+    tradeHref: omenxUrl.markets(),
+  },
+  {
+    id: "t6",
+    handle: "@degen.eth",
+    avatar: null,
+    hue: 270,
+    side: "bought",
+    outcomeLabel: "Yes",
+    price: 18,
+    eventTitle: "Messi hat-trick · Sunday",
+    eventTeams: ["interMiami"],
+    league: "MLS",
+    secondsAgo: 188,
+    tradeHref: omenxUrl.markets(),
+  },
+  {
+    id: "t7",
+    handle: "@blue_lions",
+    avatar:
+      "https://images.unsplash.com/photo-1517841905240-472988babdf9?w=80&h=80&fit=crop&crop=faces&q=80",
+    hue: 245,
+    side: "bought",
+    outcomeLabel: "Chelsea",
+    price: 43,
+    eventTitle: "Chelsea vs Paris SG",
+    eventTeams: ["chelsea", "psg"],
+    league: "UCL",
+    secondsAgo: 244,
+    tradeHref: omenxUrl.markets(),
+  },
+  {
+    id: "t8",
+    handle: "@mads",
+    avatar: null,
+    hue: 200,
+    side: "sold",
+    outcomeLabel: "Man City",
+    price: 47,
+    eventTitle: "Man City vs Arsenal",
+    eventTeams: ["manCity", "arsenal"],
+    league: "EPL",
+    secondsAgo: 312,
+    tradeHref: omenxUrl.markets(),
+  },
+  {
+    id: "t9",
+    handle: "@yarapsg",
+    avatar:
+      "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=80&h=80&fit=crop&crop=faces&q=80",
+    hue: 295,
+    side: "bought",
+    outcomeLabel: "Paris SG",
+    price: 37,
+    eventTitle: "Chelsea vs Paris SG",
+    eventTeams: ["chelsea", "psg"],
+    league: "UCL",
+    secondsAgo: 360,
+    tradeHref: omenxUrl.markets(),
+  },
+];
+
 export interface TopScorer {
   firstName: string;
   lastName: string;
