@@ -88,7 +88,6 @@ export const MATCH_MARKETS: SportsMarket[] = [
     tradeHref: omenxUrl.markets(),
   },
   {
-  {
     // Binary two-team market (no draw) — e.g. NBA / playoff / knockout.
     id: "liv-new",
     kind: "match",
