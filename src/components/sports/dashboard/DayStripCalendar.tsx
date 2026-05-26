@@ -11,8 +11,9 @@
 import { useMemo } from "react";
 
 export interface DayStripCalendarProps {
-  selectedOffset: number;
-  onSelect: (offset: number) => void;
+  /** null = "All" (no day filter). */
+  selectedOffset: number | null;
+  onSelect: (offset: number | null) => void;
   /** Map of offset → count of events that day, used to render the dot indicator. */
   countsByOffset?: Record<number, number>;
 }
@@ -40,7 +41,38 @@ export function DayStripCalendar({
 
   return (
     <div className="rounded-2xl border border-border bg-surface p-2">
-      <div className="grid grid-cols-7 gap-1">
+      <div className="flex items-stretch gap-1">
+        <button
+          type="button"
+          onClick={() => onSelect(null)}
+          aria-pressed={selectedOffset === null}
+          className={[
+            "flex min-w-[56px] flex-col items-center justify-center gap-0.5 rounded-xl px-3 py-2 transition",
+            selectedOffset === null
+              ? "bg-neon text-primary-foreground shadow-[0_0_8px_var(--primary)]"
+              : "text-muted-foreground hover:bg-white/[0.04] hover:text-foreground",
+          ].join(" ")}
+        >
+          <span
+            className={[
+              "font-mono text-[10px] uppercase tracking-wider",
+              selectedOffset === null ? "text-primary-foreground/80" : "text-muted-foreground/80",
+            ].join(" ")}
+          >
+            ALL
+          </span>
+          <span
+            className={[
+              "font-display text-lg font-semibold leading-none",
+              selectedOffset === null ? "text-primary-foreground" : "text-foreground",
+            ].join(" ")}
+          >
+            ★
+          </span>
+          <span aria-hidden className="mt-0.5 h-1 w-1 rounded-full bg-transparent" />
+        </button>
+        <div aria-hidden className="my-2 w-px self-stretch bg-border/60" />
+        <div className="grid flex-1 grid-cols-7 gap-1">
         {days.map((d) => {
           const active = d.offset === selectedOffset;
           const count = countsByOffset[d.offset] ?? 0;
@@ -87,6 +119,7 @@ export function DayStripCalendar({
             </button>
           );
         })}
+        </div>
       </div>
     </div>
   );
