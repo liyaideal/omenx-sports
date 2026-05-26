@@ -4,7 +4,11 @@ interface LiquidationBarProps {
   entry: number;
   current: number;
   liquidation: number;
-  /** "yes" → liq is below entry (long); "no" → liq is above entry (short). */
+  /**
+   * Which side of the binary this position is on. YES positions liquidate
+   * when YES price falls (liq < entry); NO positions liquidate when YES
+   * price rises (liq > entry, since NO price = 100 − YES price).
+   */
   tone?: "yes" | "no";
   className?: string;
 }

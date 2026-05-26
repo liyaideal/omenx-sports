@@ -8,11 +8,14 @@ import type { Team } from "@/lib/teams";
 export interface MarketCardProps {
   league: "epl" | "laliga" | "ucl" | "seriea" | "nba";
   question: string;
-  /** Two outcomes. Prefer passing a `team` for branded markets; `label` works for plain text. */
-  outcomes: [
-    { team?: Team; label?: string; probability: number; delta24h?: number },
-    { team?: Team; label?: string; probability: number; delta24h?: number },
-  ];
+  /**
+   * Every market is a single Yes/No binary. Team-vs-team events alias the two
+   * sides via `sideLabels: { yes, no }`. Price and delta are always mirrored
+   * (`p(No) = 100 − p(Yes)`, `delta(No) = −delta(Yes)`), so the card only
+   * accepts the YES side's truth and renders NO automatically.
+   */
+  yes: { team?: Team; label?: string; probability: number; delta24h?: number };
+  no: { team?: Team; label?: string };
   volume: string;
   endsIn: string;
   /** Open Interest — total notional value of open positions. */
@@ -26,7 +29,8 @@ export interface MarketCardProps {
 export function MarketCard({
   league,
   question,
-  outcomes,
+  yes,
+  no,
   volume,
   endsIn,
   openInterest,
@@ -35,6 +39,10 @@ export function MarketCard({
   onSelect,
   className,
 }: MarketCardProps) {
+  const yesProbability = yes.probability;
+  const noProbability = Math.max(0, Math.min(100, 100 - yesProbability));
+  const yesDelta = yes.delta24h;
+  const noDelta = yesDelta === undefined ? undefined : -yesDelta;
   return (
     <div
       className={cn(
@@ -53,19 +61,19 @@ export function MarketCard({
 
       <div className="mt-4 grid grid-cols-2 gap-2.5">
         <OutcomePill
-          team={outcomes[0].team}
-          label={outcomes[0].label}
-          probability={outcomes[0].probability}
-          delta24h={outcomes[0].delta24h}
+          team={yes.team}
+          label={yes.label}
+          probability={yesProbability}
+          delta24h={yesDelta}
           tone="yes"
           selected={selected === "yes"}
           onClick={() => onSelect?.("yes")}
         />
         <OutcomePill
-          team={outcomes[1].team}
-          label={outcomes[1].label}
-          probability={outcomes[1].probability}
-          delta24h={outcomes[1].delta24h}
+          team={no.team}
+          label={no.label}
+          probability={noProbability}
+          delta24h={noDelta}
           tone="no"
           selected={selected === "no"}
           onClick={() => onSelect?.("no")}
