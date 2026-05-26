@@ -2,7 +2,6 @@ import { createFileRoute } from "@tanstack/react-router";
 import { ArrowUpRight } from "lucide-react";
 import { AppShell } from "@/components/sports/dashboard/AppShell";
 import { AppTopBar } from "@/components/sports/dashboard/AppTopBar";
-import { CategoryStrip } from "@/components/sports/dashboard/CategoryStrip";
 import { MatchMarketCard } from "@/components/sports/dashboard/MatchMarketCard";
 import { EventMarketTileCard } from "@/components/sports/dashboard/EventMarketTileCard";
 import { LeagueWinnerMarketCard } from "@/components/sports/dashboard/LeagueWinnerMarketCard";
@@ -49,10 +48,6 @@ function Index() {
         userAvatar="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=120&h=120&fit=crop&crop=faces&q=80"
         equity={ACCOUNT_STATS.available}
       />
-
-      <div className="pt-6 md:pt-8">
-        <CategoryStrip active="all" />
-      </div>
 
       <div className="grid gap-5 px-6 pb-6 md:px-8 md:pb-8 lg:grid-cols-[340px_minmax(0,1fr)_360px]">
         {/* LEFT — Featured market (spans both rows) */}
