@@ -49,7 +49,7 @@ function Index() {
         equity={ACCOUNT_STATS.available}
       />
 
-      <div className="grid gap-5 px-6 pb-6 md:px-8 md:pb-8 lg:grid-cols-[340px_minmax(0,1fr)_360px]">
+      <div className="grid gap-5 px-6 pb-6 pt-8 md:px-8 md:pb-8 md:pt-10 lg:grid-cols-[340px_minmax(0,1fr)_360px]">
         {/* LEFT — Featured market (spans both rows) */}
         <section className="flex flex-col gap-4 lg:row-span-2">
           <SectionHeader title="Featured" accent="event" />

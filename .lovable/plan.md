@@ -1,25 +1,26 @@
-# 删除顶部 CategoryStrip
+# TopBar ↔ 首个 H1 间距 + 写入 style-guide
+
+## 问题
+
+`src/routes/index.tsx` 之前主网格用 `pb-6 md:pb-8`，但顶部 padding 为 0 —— TopBar 底边几乎贴着 `Featured event` / `Live & upcoming` H1。之前是 `CategoryStrip` 外层的 `pt-6 md:pt-8` 在撑高度，删 chips 时一起删掉了。
 
 ## 变更
 
 1. **`src/routes/index.tsx`**
-   - 删掉 `<CategoryStrip />` 及其外层 `<div className="pt-6 md:pt-8">`
-   - 删掉 `CategoryStrip` 的 import
-   - 这样 `AppTopBar` 下面直接接主网格，`Featured` / `Live & upcoming` H1 自然成为页面入口
+   - 主网格 className：`px-6 pb-6 md:px-8 md:pb-8` → `px-6 pb-6 pt-8 md:px-8 md:pb-8 md:pt-10`
+   - 给 TopBar 和首个 section H1 之间 32–40px 喘息空间
 
-2. **`src/components/sports/dashboard/CategoryStrip.tsx`** — 删除
-3. **`src/data/sports-markets.ts`** — 删掉 `CATEGORIES` 常量（如果只有 CategoryStrip 在用）
+2. **`src/routes/style-guide.tsx`** — 在 `Spacing & Radius` (Section 15) 里新增一个 "Page rhythm" 卡片，把这条规则固化下来：
 
-4. **保留 "Live" 角标**
-   - 在 `Live & upcoming` 的 SectionHeader 标题左侧加一个 `h-2 w-2 animate-pulse rounded-full bg-[oklch(0.7_0.22_25)]`（红色脉冲点）
-   - 这样"现在有 live 内容"的信号还在，但不再是一个独立的过滤器 chip
+   | Gap | Value | When |
+   |---|---|---|
+   | TopBar → 首个 H1 | `pt-8` / `md:pt-10` (32–40px) | 任何路由内容区进入时 |
+   | H1 → 首张卡 | `gap-4` (16px) | section 内部 |
+   | 同级 section 之间 | `gap-5` (20px) | 主网格的纵向 stack |
+   | Card 内部 padding | `p-5` 或 `p-6` | 卡片本体 |
+
+   用一个简单的可视示意（带 TopBar bar、H1、card 占位）说明这三个层级。
 
 ## 不动的部分
 
-- 主网格、所有卡片、Top scorer 卡、Mbappé spotlight 全部不变
-- `AppTopBar` 不变
-- 季节性问题暂不处理（demo 数据，不深究）
-
-## 结果
-
-页面更干净：TopBar → 直接进入 `Featured event` + `Live & upcoming events`（带红色 live 脉冲点）。没有看起来能点但其实没用的 chips。
+- TopBar 本体、所有卡片、Live 脉冲点、Top Scorer 卡都不变
