@@ -1,61 +1,106 @@
-# 把 Leverage 从 PRO 折叠里拿出来
+# Stadium Neon × OmenX — 体育专区首页方案
 
-## 背景
+## 定位
 
-当前 `TradeForm` 默认形态等同现货：只有 Buy/Sell + Amount + 百分比快捷键，Leverage 被藏在 "PRO · Leverage" 折叠开关里。但这是合约预测市场（永续/带杠杆的 binary perp），杠杆是核心心智，不是高级功能。需要把 Leverage 提到默认可见位置，PRO 只保留真正的"高级"项。
+这个项目是 OmenX 的体育子专区，部署在 `omenx.app/sports`。所有账户类功能（钱包、设置、Portfolio、已结算历史、KYC、登录）都跳回 OmenX 主站对应页。本专区只负责两件事：**赛事/市场发现**（homepage）+ **简化交易页**（已有 EventHeader/OrderBook/TradeForm）。
 
-## 变更范围
+风格独立（Stadium Neon），但通过双 logo 联合品牌让用户始终知道"我还在 OmenX 里"。
 
-仅前端 UI：`src/components/sports/TradeForm.tsx` + `src/routes/style-guide.tsx` 的交易区文字说明。无业务逻辑变化。
+## TopBar：联合品牌 + 出口
 
-## TradeForm 新结构
+固定在顶部，所有页面共用。结构（≥1024）：
 
 ```text
-┌─ Buy / Sell ───────────────────────────┐
-├─ Market / Limit          Bal 5,000 USDC┤
-│                                         │
-│  [Margin (USDC)        ............5000]│
-│  [25%] [50%] [75%] [100%]               │
-│                                         │
-│  Leverage             1× ─────●──── 20× │   ← 始终可见
-│  Notional = 5,000 × 3 = 15,000 USDC     │   ← 实时提示
-│                                         │
-│  ⚡ PRO    Cross/Iso · TP/SL · Liq  [○] │   ← 折叠
-│  ┌─ (展开后) ─────────────────────────┐ │
-│  │  [Cross | Isolated]                │ │
-│  │  [TP ¢]  [SL ¢]                    │ │
-│  │  Liquidation bar (当 lev>1)        │ │
-│  └────────────────────────────────────┘ │
-│                                         │
-│  Avg price / Margin / Notional /        │
-│  Contracts / Fee / Est. PnL / Liq price │
-│                                         │
-│  [ SELL REAL MADRID 3× @ 62¢ ]          │
-└─────────────────────────────────────────┘
+[OmenX] | [⚽ Stadium Neon]          Markets  Sports  Crypto     [Search]  [Wallet ↗]  [Avatar ↗]
+└─ 双 logo 联合品牌 ─┘                └─ 品类导航 ─┘                └── 全部跳 OmenX ──┘
 ```
 
-## 关键决策
+- 左侧：OmenX 主 logo（小，灰阶） + 细竖线分隔 + "Stadium Neon" 子品牌（霓虹）。点 OmenX logo → `omenx.app`；点 Stadium Neon → `/sports`（home）。
+- 中间：品类 tabs。`Sports` 高亮（neon underline）；其它（Markets/Crypto/Politics）= `<a>` 链接到 OmenX 主站对应路径，hover 显示外链小箭头 `↗`。
+- 右侧：
+  - `Search` 图标（先不实现搜索逻辑，hover tooltip "Coming soon"）
+  - `Wallet ↗`：直接 `<a href="https://omenx.app/wallet">`，外链箭头 + tooltip "Open in OmenX"
+  - `Avatar ↗`：同上，跳 `omenx.app/account`
+- ≤768：折叠成 OmenX·Stadium Neon 双 logo + 汉堡菜单（菜单里列品类 + Wallet/Account 跳转项）。
 
-1. **Leverage slider 永久显示**，紧跟在 Amount 快捷键下方；范围 `1×–20×`，默认 `1×`。
-2. **Amount 输入框统一改名 "Margin (USDC)"**（不再随 PRO 切换 label）。下方加一行小字提示：`Notional = Margin × Leverage = X,XXX USDC`，让用户对杠杆放大效应有直观感知。
-3. **PRO 折叠保留这些"真·高级"项**：
-   - Margin mode（Cross / Isolated）
-   - TP / SL 输入
-   - Liquidation bar + Liq price 估算说明
-   - PRO label 文字从 "PRO · Leverage / Margin, TP/SL, Liq price" 改为 "PRO · Cross/Iso · TP/SL · Liq"
-4. **Liq price 行**在 summary 区的展示规则不变：当 `leverage > 1` 时显示（无论 PRO 是否展开）。
-5. **CTA 文案规则**：`leverage > 1` 时始终带 `{n}×`，例如 `SELL REAL MADRID 3× @ 62¢`；`1×` 时省略，避免噪音。
-6. **Summary 行**：`Margin` 行改为始终显示（不再门控在 PRO 下），因为现在 Margin 是默认输入概念。
+**关键设计原则**：所有跳出 sports 专区的链接统一用 `↗` 角标 + `text-muted-foreground` 处理，让"离开"是显式的而非偷偷跳走。
 
-## 文案 / 设计规范同步
+## Homepage 内容（赛事发现导向）
 
-`src/routes/style-guide.tsx` 中 Trade Surface 章节：
-- 更新示意截图描述：Leverage 列为默认控件，PRO 描述去掉 "Leverage" 字样。
-- 在 Trading Language 加一条规则："Leverage 是合约预测市场的一等公民，默认可见；PRO 仅承载 Cross/Iso、TP/SL、Liq 可视化等高级项。"
+去掉 Leaderboard、Portfolio summary、个人统计这类账户类模块。结构：
 
-## 不动的部分
+```text
+┌─ TopBar ─────────────────────────────────────────────┐
+├─ Hero Strip ─────────────────────────────────────────┤
+│ Kicker "STADIUM NEON · A SPORTS ZONE BY OMENX"       │
+│ H1 "Predict the match, own the moment."              │
+│ 副文案 + NeonRing 装饰                                │
+│ 3 个 StatTile: 24h Sports Volume / Open Markets /    │
+│                Live Now （都是全站级，不是个人）        │
+├─ Featured Event ─────────────────────────────────────┤
+│ EventHeader（最大牌的赛事）+ "Open market →" 跳 /sports/event/[id]  │
+├─ Live Now ───────────────────────────────────────────┤
+│ SectionHeader(kicker=LIVE, tabs=All/EPL/UCL/NBA)     │
+│ MarketCard × 3                                       │
+├─ Trending Markets ───────────────────────────────────┤
+│ SectionHeader(kicker=TRENDING, action="View all →")  │
+│ MarketCard × 6（2×3 网格）                            │
+├─ Upcoming Fixtures ──────────────────────────────────┤
+│ SectionHeader(kicker=UPCOMING)                       │
+│ MatchCard × 4（点击进事件页）                          │
+├─ Cross-link Strip ───────────────────────────────────┤
+│ "Looking for your positions or settled bets?"        │
+│ → Open Portfolio on OmenX ↗                          │
+├─ Footer ─────────────────────────────────────────────┤
+│ 极简：© OmenX · Sports zone · Terms ↗ · Help ↗       │
+│ 隐藏的 dev 入口：/style-guide                          │
+└──────────────────────────────────────────────────────┘
+```
 
-- 颜色语义（green=YES / red=NO / outcome accent on CTA）不变
-- `sideLabels` / `outcomeLabel` 团队别名规则不变
-- LiquidationBar、SummaryRow、Field 等子组件 API 不变
-- 真实下单 / 撮合 / 风控逻辑（本来就是 mock）不动
+不放：Leaderboard、个人 P&L、推荐玩家、内容/编辑专题（用户选了"纯发现导向"）。
+
+## 跳转 URL 约定
+
+抽到 `src/lib/omenx.ts` 单一来源：
+
+```ts
+export const OMENX_BASE = "https://omenx.app";
+export const omenxUrl = {
+  home:      () => `${OMENX_BASE}/`,
+  wallet:    () => `${OMENX_BASE}/wallet`,
+  account:   () => `${OMENX_BASE}/account`,
+  portfolio: () => `${OMENX_BASE}/portfolio`,
+  history:   () => `${OMENX_BASE}/portfolio/history`,
+  markets:   () => `${OMENX_BASE}/markets`,
+  crypto:    () => `${OMENX_BASE}/crypto`,
+  politics:  () => `${OMENX_BASE}/politics`,
+};
+```
+
+部署形态变化时（变成子域或独立域），只改这一处 + 加 SSO/cookie 配置即可。
+
+## 反向入口（OmenX → Sports）
+
+文档化但不在本项目实现（在 OmenX 那侧的导航里加一个 `Sports` tab 指向 `/sports`）。Plan 里只确认 URL 契约：`/sports`、`/sports/event/[id]`、`/sports/markets`。
+
+## 这次要做的文件
+
+
+| 文件                                 | 动作                                        |
+| ---------------------------------- | ----------------------------------------- |
+| `src/lib/omenx.ts`                 | 新建，集中外链                                   |
+| `src/components/sports/TopBar.tsx` | 新建，联合品牌 + 跳转                              |
+| `src/components/sports/Footer.tsx` | 新建，极简                                     |
+| `src/routes/index.tsx`             | 重写为 homepage                              |
+| `src/routes/__root.tsx`            | 仅更新 `head()` 默认 title/desc 为 OmenX Sports |
+
+
+mock 数据全部内联在 `index.tsx` 顶部常量里，方便后续替换为 OmenX API。
+
+## 不在这次范围
+
+- 真正的事件详情页 `/sports/event/[id]`（下一步）
+- 搜索、筛选交互
+- OmenX 那边的导航改动
+- SSO / cookie / 余额数据共享（部署阶段再做）
+- 移动端深度优化（保证 ≥768 不破版即可）
