@@ -598,7 +598,7 @@ function StyleGuide() {
           {/* TRADE SURFACE */}
           <Section id="trade" title="Trade Surface" kicker="13 — Detail">
             <p className="mb-2 max-w-2xl text-sm text-muted-foreground">
-              Polymarket-style Yes/No buying with OmenX-style leverage folded into a "PRO" switch. Default state is a clean cash buy; flip PRO to expose leverage, margin mode, TP/SL, and the liquidation price.
+              Perpetual-contract buying on binary outcomes. <span className="text-foreground">Leverage is a first-class control</span> — exposed by default alongside Margin, not hidden. The <code className="font-mono text-foreground">PRO</code> switch only reveals truly advanced extras: Cross/Isolated margin mode, TP/SL, and the liquidation-price visualizer.
             </p>
             <p className="mb-6 max-w-2xl text-xs text-muted-foreground/80">
               This event has <code className="font-mono text-foreground">sideLabels: {`{ yes: "Man City", no: "Real Madrid" }`}</code> — YES/NO never shown to users.
