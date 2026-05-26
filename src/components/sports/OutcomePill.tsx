@@ -31,9 +31,9 @@ const TONE_TEXT: Record<OutcomeTone, string> = {
   no: "text-neon",
 };
 const SIZES = {
-  sm: { box: "px-3 py-2 gap-2", label: "text-xs", price: "text-sm", crest: "xs" },
-  md: { box: "px-4 py-3 gap-3", label: "text-sm", price: "text-lg", crest: "sm" },
-  lg: { box: "px-5 py-4 gap-3", label: "text-base", price: "text-2xl", crest: "md" },
+  sm: { box: "px-3 py-2", label: "text-xs", price: "text-base", crest: "xs" },
+  md: { box: "px-3.5 py-2.5", label: "text-sm", price: "text-xl", crest: "sm" },
+  lg: { box: "px-4 py-3", label: "text-base", price: "text-2xl", crest: "md" },
 } as const;
 
 export function OutcomePill({
@@ -55,29 +55,31 @@ export function OutcomePill({
       type="button"
       onClick={onClick}
       className={cn(
-        "group flex w-full items-center justify-between rounded-2xl bg-white/[0.03] ring-1 transition-all",
+        "group flex w-full flex-col gap-1.5 rounded-2xl bg-white/[0.03] ring-1 transition-all text-left",
         s.box,
         selected ? TONE_SELECTED[tone] : TONE_RING[tone],
         className,
       )}
     >
-      <div className="flex min-w-0 items-center gap-2.5">
+      <div className="flex min-w-0 items-center gap-2">
         {showCrest && <TeamCrest name={label} size={s.crest as "xs" | "sm" | "md"} />}
-        <span className={cn("font-display font-semibold text-foreground truncate", s.label)}>{label}</span>
+        <span className={cn("min-w-0 flex-1 font-display font-semibold text-foreground truncate", s.label)}>
+          {label}
+        </span>
       </div>
-      <div className="flex flex-col items-end leading-tight">
-        <span className={cn("font-mono font-bold tabular-nums", s.price, TONE_TEXT[tone])}>
+      <div className="flex items-baseline justify-between gap-2">
+        <span className={cn("font-mono font-bold tabular-nums leading-none", s.price, TONE_TEXT[tone])}>
           {Math.round(probability)}¢
         </span>
         {hasDelta && (
           <span
             className={cn(
-              "text-[10px] font-mono tabular-nums",
-              positive ? "text-win" : "text-loss",
+              "rounded-md px-1.5 py-0.5 text-[10px] font-mono tabular-nums leading-none",
+              positive ? "bg-win/10 text-win" : "bg-loss/10 text-loss",
             )}
           >
             {positive ? "+" : ""}
-            {delta24h}¢ 24h
+            {delta24h}¢
           </span>
         )}
       </div>
