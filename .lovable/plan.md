@@ -1,66 +1,34 @@
-## 目标
+## 问题
 
-将 sports/markets 风格指南里的所有组件对齐 OmenX 真实交易模型：
+`Arsenal vs Spurs` 是一个二元 market，`sideLabels: { yes: "Arsenal", no: "Spurs" }`。Arsenal 就是 YES 这一侧本身，不是"YES 上的 Arsenal 仓位"。当前 `PositionsTable` 的 `OutcomeTag` 同时渲染了 `YES` 徽章 + `Arsenal` 文本，对用户来说是冗余的重复信息。
 
-- 不存在 long/short；所有 market 都是 Yes/No 二元（底层是 Buy Yes long / Buy No long 两条独立多头）。
-- 队伍对战 = 同一个 Yes/No market，通过 `sideLabels: { yes, no }` 给两端起队名别名。
-- 价格永远互补：`p(No) = 100 − p(Yes)`，`delta24h(No) = −delta24h(Yes)`。
-- 颜色按 outcome（Yes=绿，No=红），不按 side（long/short）。
+## 规则（与 OmenX 一致）
 
-## 决策（已确认）
+- **有别名（团队赛/有 sideLabels）**：只显示别名（如 `Arsenal`、`Lakers`），用绿/红颜色承担 yes/no 语义。
+- **无别名（纯中性市场，如 "Will it rain?"）**：显示 `Yes` / `No` 文本，配绿/红色。
+- 列名保持 `Outcome`，不再叫 Side。
 
-- Q1（OrderBook）：**A** — 保留双栏 YES Book / NO Book 视图，但加一行 hint："NO book 是 YES book 的镜像（price = 100 − yes_price）"。
-- Q2（MarketCard delta）：**强制单一真相** — props 只接收 `yesDelta24h`，No 端 UI 自动渲染 `-yesDelta24h`。
+## 改动
 
-## 文件改动
+### 1. `src/components/sports/PositionsTable.tsx`
 
-### 1. `src/components/sports/MarketCard.tsx`
-- Props 改为：`{ yes: { team, probability, delta24h }, no: { team } }`（删除 no.probability / no.delta24h）。
-- 内部计算 `noProbability = 100 − yes.probability`，`noDelta = −yes.delta24h`。
-- 两侧 OutcomePill 沿用绿/红 outcome 配色。
+- 数据模型同时保留 `outcome: "yes" | "no"`（决定颜色）和 `outcomeLabel: string`（决定显示文本）。
+- `OutcomeTag` 简化为：
+  - 只渲染一段文本 = `outcomeLabel`（如果与 "Yes"/"No" 大小写无关相同则显示首字母大写的 `Yes` / `No`）。
+  - 颜色：`outcome === "yes"` → 绿；`"no"` → 红。
+  - 不再渲染 `YES` / `NO` 前缀徽章。
+- 默认 demo 数据保留现有的 `Arsenal` / `Lakers` / `Liverpool` / `Barcelona` / `Man City` 等别名；额外加 1 条纯中性 market 行（如 `Will it rain at kickoff? → Yes`）来展示无别名场景，方便在 style-guide 验证两种状态都正确。
 
-### 2. `src/components/sports/SentimentCard.tsx`
-- `longNotional` / `shortNotional` → `yesNotional` / `noNotional`。
-- 文案 "Long / Short" → "Yes / No"。
-- RatioBar 标签同步改为 "Yes $X / No $Y"。
+### 2. `src/components/sports/TradeForm.tsx`（顺手）
 
-### 3. `src/components/sports/PositionsTable.tsx`
-- 删除 `side: "long" | "short"` 列与 SideTag。
-- 新增 / 复用 "Outcome" 列，渲染 Yes / No 或 team 别名，颜色按 outcome（绿/红）。
-- entry / mark / PnL 计算保持，仅展示口径调整。
+CTA 文案目前是 `Buy {outcomeLabel} @ 62¢`。当 `outcomeLabel` 就是别名（Arsenal / Real Madrid）时，符合预期；当上层没传别名直接传了 `YES` / `NO` 时也合理。**不改动逻辑**，仅在注释里补一句"label 应优先传别名；只有无 sideLabels 时才传 Yes/No"。
 
-### 4. `src/components/sports/TradeForm.tsx`
-- 主按钮文案：`Long Real Madrid 10×` → `Buy Real Madrid 10×`（无别名时回退 `Buy YES` / `Buy NO`）。
-- 移除任何 long/short 切换；仅保留 Yes / No 选择。
+### 3. `src/routes/style-guide.tsx`
 
-### 5. `src/components/sports/LiquidationBar.tsx`
-- 描述文案从 "yes → long; no → short" 改为纯 Yes/No 说明。
-
-### 6. `src/components/sports/OrderBook.tsx`
-- 保留 YES Book / NO Book 双栏布局（决策 A）。
-- 顶部加一行小字 hint：`NO book mirrors YES book · price = 100 − yes_price`。
-- 内部用单一 YES book 数据源，NO 栏由镜像计算渲染，保证两侧一致。
-
-### 7. `src/components/sports/StatTile.tsx`（及调用方）
-- 副标 "2 long · 1 short" → "2 Yes · 1 No"。
-
-### 8. `src/components/sports/Formulas.tsx`
-- 删除 "PnL (short YES)" 公式。
-- 只保留：`PnL = (mark − entry) / 100 × notional`，并注明 No 端价格 = 100 − Yes 价格自动镜像。
-
-### 9. `src/routes/style-guide.tsx`
-- 更新 MarketCard demo 数据：只传 yes.probability + yes.delta24h。
-- 更新所有受影响组件 demo（SentimentCard / PositionsTable / OrderBook / StatTile / Formulas / TradeForm / LiquidationBar）。
-- 顶部说明段落改写为："All markets are Yes/No binaries. Team-vs-team events alias the two sides via `sideLabels: { yes, no }`. Prices and 24h deltas are always mirrored: `p(No) = 100 − p(Yes)`."
-
-## 不动的部分
-
-- TeamCrest / OutcomePill / OutcomeSelector 的视觉规范（abbr + tooltip + 真实 logo 方形 object-contain）保持上一轮成果。
-- 不引入新依赖、不改动路由、不动后端。
+`PositionsTable` 的 demo 数据：把 `Lakers vs Celtics` 那一行的 `outcomeLabel` 从 `Lakers` 改成更直观的、清晰区分两种情况：保留团队赛行（显示别名），新增一行 `Will it snow at tip-off? → outcome: yes, outcomeLabel: "Yes"` 演示中性 market。
 
 ## 验收
 
-- style-guide 全页搜索不再出现 `long` / `short` 作为方向语义（保留 "shortName" 等无关词）。
-- MarketCard 两端概率相加恒为 100，delta 互为相反数。
-- OrderBook 双栏价格满足 `yes + no = 100`。
-- PositionsTable 不再有 side 列；Outcome 颜色 Yes=绿 / No=红。
+- 团队赛行：标签只有 `Arsenal`（绿）、`Lakers`（红），无 `YES` / `NO` 徽章。
+- 中性 market 行：标签为 `Yes`（绿）或 `No`（红）。
+- 颜色规则一致：绿 = YES 侧，红 = NO 侧；语义全部由颜色承担。

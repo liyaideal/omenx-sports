@@ -49,7 +49,8 @@ const DEFAULT_POS: PositionRowData[] = [
 ];
 const DEFAULT_ORD: OrderRowData[] = [
   { market: "Arsenal vs Spurs", league: "epl", outcome: "yes", outcomeLabel: "Arsenal", type: "limit", price: 55, size: 200, filled: 40 },
-  { market: "Lakers vs Celtics", league: "nba", outcome: "no", outcomeLabel: "Lakers", type: "limit", price: 52, size: 100, filled: 0 },
+  { market: "Lakers vs Celtics", league: "nba", outcome: "no", outcomeLabel: "Celtics", type: "limit", price: 52, size: 100, filled: 0 },
+  { market: "Will it snow at tip-off?", league: "nba", outcome: "yes", outcomeLabel: "Yes", type: "market", price: 18, size: 60, filled: 100 },
 ];
 
 const tabs: { id: Tab; label: string }[] = [
@@ -206,16 +207,26 @@ function Th({ children, className }: { children?: React.ReactNode; className?: s
 function Td({ children, className }: { children?: React.ReactNode; className?: string }) {
   return <td className={cn("px-4 py-3", className)}>{children}</td>;
 }
+/**
+ * Renders the user-facing outcome. For team-vs-team markets the label IS the
+ * side alias (e.g. "Arsenal" = YES); color carries the yes/no semantic. For
+ * neutral markets without sideLabels, the label is literally "Yes" / "No".
+ */
 function OutcomeTag({ outcome, label }: { outcome: "yes" | "no"; label: string }) {
+  const isNeutral = label.toLowerCase() === "yes" || label.toLowerCase() === "no";
+  const display = isNeutral
+    ? label.charAt(0).toUpperCase() + label.slice(1).toLowerCase()
+    : label;
   return (
     <span
       className={cn(
-        "inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-[10px] font-mono uppercase tracking-widest",
-        outcome === "yes" ? "bg-win/15 text-win" : "bg-loss/15 text-loss",
+        "inline-flex items-center rounded-full px-2.5 py-0.5 text-[11px] font-medium",
+        outcome === "yes"
+          ? "bg-win/15 text-win ring-1 ring-win/25"
+          : "bg-loss/15 text-loss ring-1 ring-loss/25",
       )}
     >
-      <span>{outcome}</span>
-      <span className="text-foreground normal-case tracking-normal">{label}</span>
+      {display}
     </span>
   );
 }
