@@ -30,6 +30,7 @@ import { SectionHeader } from "@/components/sports/SectionHeader";
 import { MarketCard } from "@/components/sports/MarketCard";
 import { EventHeader } from "@/components/sports/EventHeader";
 import { OutcomeSelector } from "@/components/sports/OutcomeSelector";
+import { TeamName } from "@/components/sports/TeamName";
 import { teams } from "@/lib/teams";
 import { PriceChart } from "@/components/sports/PriceChart";
 import { OrderBook } from "@/components/sports/OrderBook";
@@ -512,6 +513,25 @@ function StyleGuide() {
               <StatTile label="Open positions" value="3" hint="2 Yes · 1 No" icon={LineChart} />
               <StatTile label="Today PnL" value="+$184.20" tone="win" icon={TrendingUp} />
               <StatTile label="Total volume" value="$28.4k" hint="last 30d" />
+            </div>
+            <div className="mt-4 rounded-2xl border border-border bg-surface p-6 shadow-card">
+              <div className="mb-3 text-[10px] font-mono uppercase tracking-widest text-muted-foreground">
+                TeamName — hover (desktop) / tap (mobile) reveals full name
+              </div>
+              <p className="mb-4 max-w-2xl text-xs text-muted-foreground">
+                Wrap any standalone <code className="font-mono text-foreground">team.short</code>
+                render. Desktop shows a tooltip on hover; mobile triggers a sonner toast on tap.
+                Click propagation is stopped so taps inside clickable cards don&apos;t navigate.
+              </p>
+              <div className="flex flex-wrap items-center gap-4 text-sm">
+                <TeamName short="MCI" full="Manchester City" className="text-base font-semibold" />
+                <span className="text-muted-foreground">vs</span>
+                <TeamName short="LIV" full="Liverpool" className="text-base font-semibold" />
+                <span className="text-muted-foreground">·</span>
+                <TeamName short="RMA" full="Real Madrid" className="text-base font-semibold" />
+                <span className="text-muted-foreground">vs</span>
+                <TeamName short="BAR" full="Barcelona" className="text-base font-semibold" />
+              </div>
             </div>
           </Section>
 
