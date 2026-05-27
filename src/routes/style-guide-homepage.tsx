@@ -417,7 +417,7 @@ function Section({
           #{id}
         </a>
       </header>
-      <div className="grid gap-4 md:grid-cols-2">{children}</div>
+      <div className="grid gap-4 xl:grid-cols-2">{children}</div>
     </section>
   );
 }
@@ -428,8 +428,8 @@ function Variant({ caption, children }: { caption: string; children: React.React
       <div className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
         {caption}
       </div>
-      <div className="rounded-xl border border-dashed border-border/60 bg-background/40 p-4">
-        {children}
+      <div className="overflow-x-auto rounded-xl border border-dashed border-border/60 bg-background/40 p-4">
+        <div className="min-w-[1280px]">{children}</div>
       </div>
     </div>
   );
