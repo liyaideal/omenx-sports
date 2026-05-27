@@ -260,6 +260,148 @@ export const TOP_SCORER_MARKET: SportsMarket = {
   tradeHref: `/event/haaland`,
 };
 
+/* ---------------- Additional season markets (LaLiga, UCL) ---------------- */
+
+export const LALIGA_WINNER_MARKET: SportsMarket = {
+  id: "laliga-winner-25-26",
+  kind: "league-winner",
+  shape: "three-way",
+  title: "La Liga — Winner 25/26",
+  league: { name: "La Liga", short: "LL" },
+  endsLabel: "Settles May 24, 2026",
+  volume: "$8.7M",
+  volume24h: "$640K",
+  participants: 11240,
+  outcomes: [
+    { id: "rma", label: "Real Madrid", price: 0.46, delta24h: 0.03, team: TEAMS.realMadrid },
+    { id: "bar", label: "Barcelona", price: 0.39, delta24h: -0.01, team: TEAMS.barcelona },
+    { id: "atm", label: "Atlético Madrid", price: 0.12, delta24h: -0.01 },
+    { id: "sev", label: "Sevilla", price: 0.03, delta24h: -0.01 },
+  ],
+  tradeHref: `/event/laliga-winner-25-26`,
+};
+
+export const UCL_WINNER_MARKET: SportsMarket = {
+  id: "ucl-winner-25-26",
+  kind: "league-winner",
+  shape: "three-way",
+  title: "Champions League — Winner 25/26",
+  league: { name: "UEFA Champions League", short: "UCL" },
+  endsLabel: "Settles May 30, 2026",
+  volume: "$18.2M",
+  volume24h: "$1.8M",
+  participants: 24120,
+  outcomes: [
+    { id: "mci", label: "Man City", price: 0.32, delta24h: 0.02, team: TEAMS.manCity },
+    { id: "rma", label: "Real Madrid", price: 0.28, delta24h: 0.01, team: TEAMS.realMadrid },
+    { id: "psg", label: "Paris SG", price: 0.18, delta24h: -0.02, team: TEAMS.psg },
+    { id: "liv", label: "Liverpool", price: 0.14, delta24h: 0.01, team: TEAMS.liverpool },
+  ],
+  tradeHref: `/event/ucl-winner-25-26`,
+};
+
+export const LALIGA_TOP_SCORER_MARKET: SportsMarket = {
+  id: "laliga-top-scorer-25-26",
+  kind: "top-scorer",
+  shape: "three-way",
+  title: "La Liga — Top scorer 25/26",
+  league: { name: "La Liga", short: "LL" },
+  endsLabel: "Settles May 24, 2026",
+  volume: "$2.4M",
+  volume24h: "$310K",
+  participants: 4820,
+  outcomes: [
+    {
+      id: "mbappe",
+      label: "K. Mbappé",
+      price: 0.52,
+      delta24h: 0.04,
+      team: TEAMS.realMadrid,
+      meta: "19G · #9",
+    },
+    {
+      id: "lewandowski",
+      label: "R. Lewandowski",
+      price: 0.34,
+      delta24h: -0.02,
+      team: TEAMS.barcelona,
+      meta: "14G · #9",
+    },
+  ],
+  tradeHref: `/event/laliga-top-scorer-25-26`,
+};
+
+export const UCL_TOP_SCORER_MARKET: SportsMarket = {
+  id: "ucl-top-scorer-25-26",
+  kind: "top-scorer",
+  shape: "three-way",
+  title: "Champions League — Top scorer 25/26",
+  league: { name: "UEFA Champions League", short: "UCL" },
+  endsLabel: "Settles May 30, 2026",
+  volume: "$1.9M",
+  volume24h: "$260K",
+  participants: 3640,
+  outcomes: [
+    {
+      id: "haaland",
+      label: "E. Haaland",
+      price: 0.44,
+      delta24h: 0.02,
+      team: TEAMS.manCity,
+      meta: "8G · #17",
+    },
+    {
+      id: "mbappe",
+      label: "K. Mbappé",
+      price: 0.38,
+      delta24h: 0.03,
+      team: TEAMS.realMadrid,
+      meta: "7G · #9",
+    },
+  ],
+  tradeHref: `/event/ucl-top-scorer-25-26`,
+};
+
+/**
+ * Season-event groups rendered on the dashboard. Each group is one league:
+ * a Winner market + a Top scorer market. Photos are optional and only
+ * supplied when we have hand-curated portraits; otherwise the top-scorer
+ * card falls back to the player's club crest.
+ */
+export const SEASON_LEAGUE_GROUPS: Array<{
+  id: string;
+  winner: SportsMarket;
+  topScorer: SportsMarket;
+  photos?: Record<string, string>;
+}> = [
+  {
+    id: "epl",
+    winner: LEAGUE_WINNER_MARKET,
+    topScorer: TOP_SCORER_MARKET,
+    photos: {
+      messi: "https://images.unsplash.com/photo-1574629810360-7efbbe195018?w=400&h=400&fit=crop&q=80",
+      haaland: "https://images.unsplash.com/photo-1518568814500-bf0f8d125f46?w=400&h=400&fit=crop&q=80",
+    },
+  },
+  {
+    id: "ucl",
+    winner: UCL_WINNER_MARKET,
+    topScorer: UCL_TOP_SCORER_MARKET,
+    photos: {
+      haaland: "https://images.unsplash.com/photo-1518568814500-bf0f8d125f46?w=400&h=400&fit=crop&q=80",
+      mbappe: mbappePhoto,
+    },
+  },
+  {
+    id: "laliga",
+    winner: LALIGA_WINNER_MARKET,
+    topScorer: LALIGA_TOP_SCORER_MARKET,
+    photos: {
+      mbappe: mbappePhoto,
+    },
+  },
+];
+
 export interface PlayerSpotlight {
   handle: string;
   firstName: string;
