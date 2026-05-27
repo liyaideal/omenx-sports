@@ -58,7 +58,7 @@ import {
   DAY_COUNTS_EMPTY,
 } from "@/data/style-guide-fixtures";
 
-export const Route = createFileRoute("/style-guide/homepage")({
+export const Route = createFileRoute("/style-guide-homepage")({
   head: () => ({
     meta: [
       { title: "Homepage Playground — Stadium Neon" },

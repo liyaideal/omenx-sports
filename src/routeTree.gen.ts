@@ -9,11 +9,16 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as StyleGuideHomepageRouteImport } from './routes/style-guide-homepage'
 import { Route as StyleGuideRouteImport } from './routes/style-guide'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as StyleGuideHomepageRouteImport } from './routes/style-guide.homepage'
 import { Route as EventIdRouteImport } from './routes/event.$id'
 
+const StyleGuideHomepageRoute = StyleGuideHomepageRouteImport.update({
+  id: '/style-guide-homepage',
+  path: '/style-guide-homepage',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const StyleGuideRoute = StyleGuideRouteImport.update({
   id: '/style-guide',
   path: '/style-guide',
@@ -24,11 +29,6 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const StyleGuideHomepageRoute = StyleGuideHomepageRouteImport.update({
-  id: '/homepage',
-  path: '/homepage',
-  getParentRoute: () => StyleGuideRoute,
-} as any)
 const EventIdRoute = EventIdRouteImport.update({
   id: '/event/$id',
   path: '/event/$id',
@@ -37,39 +37,47 @@ const EventIdRoute = EventIdRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/style-guide': typeof StyleGuideRouteWithChildren
+  '/style-guide': typeof StyleGuideRoute
+  '/style-guide-homepage': typeof StyleGuideHomepageRoute
   '/event/$id': typeof EventIdRoute
-  '/style-guide/homepage': typeof StyleGuideHomepageRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/style-guide': typeof StyleGuideRouteWithChildren
+  '/style-guide': typeof StyleGuideRoute
+  '/style-guide-homepage': typeof StyleGuideHomepageRoute
   '/event/$id': typeof EventIdRoute
-  '/style-guide/homepage': typeof StyleGuideHomepageRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/style-guide': typeof StyleGuideRouteWithChildren
+  '/style-guide': typeof StyleGuideRoute
+  '/style-guide-homepage': typeof StyleGuideHomepageRoute
   '/event/$id': typeof EventIdRoute
-  '/style-guide/homepage': typeof StyleGuideHomepageRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/style-guide' | '/event/$id' | '/style-guide/homepage'
+  fullPaths: '/' | '/style-guide' | '/style-guide-homepage' | '/event/$id'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/style-guide' | '/event/$id' | '/style-guide/homepage'
-  id: '__root__' | '/' | '/style-guide' | '/event/$id' | '/style-guide/homepage'
+  to: '/' | '/style-guide' | '/style-guide-homepage' | '/event/$id'
+  id: '__root__' | '/' | '/style-guide' | '/style-guide-homepage' | '/event/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  StyleGuideRoute: typeof StyleGuideRouteWithChildren
+  StyleGuideRoute: typeof StyleGuideRoute
+  StyleGuideHomepageRoute: typeof StyleGuideHomepageRoute
   EventIdRoute: typeof EventIdRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/style-guide-homepage': {
+      id: '/style-guide-homepage'
+      path: '/style-guide-homepage'
+      fullPath: '/style-guide-homepage'
+      preLoaderRoute: typeof StyleGuideHomepageRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/style-guide': {
       id: '/style-guide'
       path: '/style-guide'
@@ -84,13 +92,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/style-guide/homepage': {
-      id: '/style-guide/homepage'
-      path: '/homepage'
-      fullPath: '/style-guide/homepage'
-      preLoaderRoute: typeof StyleGuideHomepageRouteImport
-      parentRoute: typeof StyleGuideRoute
-    }
     '/event/$id': {
       id: '/event/$id'
       path: '/event/$id'
@@ -101,23 +102,22 @@ declare module '@tanstack/react-router' {
   }
 }
 
-interface StyleGuideRouteChildren {
-  StyleGuideHomepageRoute: typeof StyleGuideHomepageRoute
-}
-
-const StyleGuideRouteChildren: StyleGuideRouteChildren = {
-  StyleGuideHomepageRoute: StyleGuideHomepageRoute,
-}
-
-const StyleGuideRouteWithChildren = StyleGuideRoute._addFileChildren(
-  StyleGuideRouteChildren,
-)
-
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  StyleGuideRoute: StyleGuideRouteWithChildren,
+  StyleGuideRoute: StyleGuideRoute,
+  StyleGuideHomepageRoute: StyleGuideHomepageRoute,
   EventIdRoute: EventIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
