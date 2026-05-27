@@ -219,6 +219,65 @@ function OrderTable({ rows }: { rows: OrderRowData[] }) {
 function Th({ children, className }: { children?: React.ReactNode; className?: string }) {
   return <th className={cn("px-4 py-2 font-normal", className)}>{children}</th>;
 }
+
+function HistoryTable({ rows }: { rows: HistoryRowData[] }) {
+  if (rows.length === 0) {
+    return (
+      <div className="p-12 text-center font-mono text-xs text-muted-foreground">
+        No historical trades yet.
+      </div>
+    );
+  }
+  return (
+    <div className="overflow-x-auto">
+      <table className="w-full text-xs">
+        <thead>
+          <tr className="text-left font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+            <Th>Market</Th>
+            <Th>Outcome</Th>
+            <Th>Action</Th>
+            <Th className="text-right">Price</Th>
+            <Th className="text-right">Size</Th>
+            <Th className="text-right">PnL</Th>
+            <Th className="text-right">When</Th>
+          </tr>
+        </thead>
+        <tbody className="divide-y divide-border">
+          {rows.map((r, i) => (
+            <tr key={i} className="hover:bg-white/[0.02]">
+              <Td>
+                <div className="flex items-center gap-2">
+                  <LeagueBadge league={r.league} showLabel={false} />
+                  <span className="font-medium text-foreground">{r.market}</span>
+                </div>
+              </Td>
+              <Td>
+                <OutcomeTag outcome={r.outcome} label={r.outcomeLabel} />
+              </Td>
+              <Td className="font-mono uppercase text-[10px] tracking-widest text-muted-foreground">{r.action}</Td>
+              <Td className="text-right font-mono tabular-nums">{r.price}¢</Td>
+              <Td className="text-right font-mono tabular-nums">{r.size}</Td>
+              <Td
+                className={cn(
+                  "text-right font-mono tabular-nums",
+                  r.pnl === undefined
+                    ? "text-muted-foreground"
+                    : r.pnl >= 0
+                      ? "text-win"
+                      : "text-loss",
+                )}
+              >
+                {r.pnl === undefined ? "—" : `${r.pnl >= 0 ? "+" : ""}${r.pnl.toFixed(2)}`}
+              </Td>
+              <Td className="text-right font-mono tabular-nums text-muted-foreground">{r.when}</Td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
 function Td({ children, className }: { children?: React.ReactNode; className?: string }) {
   return <td className={cn("px-4 py-3", className)}>{children}</td>;
 }
