@@ -290,15 +290,13 @@ function HomepagePlayground() {
           </Section>
 
           <Section id="event-tile" title="EventMarketTileCard" hint="Compact tile for the upcoming-events grid. Top-right shows HOT / TRENDING when thresholds hit.">
-            <div className="col-span-full grid gap-3 md:grid-cols-2 xl:grid-cols-3">
-              <TileVariant caption="3-way · neutral · no badge" market={TILE_THREE_WAY} />
-              <TileVariant caption="binary YES/NO · no fixture" market={TILE_BINARY} />
-              <TileVariant caption="HOT badge · participants ≥ 2000" market={TILE_HOT} />
-              <TileVariant caption="TRENDING badge · |Δ| ≥ 5¢" market={TILE_TRENDING} />
-              <TileVariant caption="low-volume neutral" market={TILE_NEUTRAL} />
-              <TileVariant caption="all outcomes up (green)" market={TILE_ALL_UP} />
-              <TileVariant caption="all outcomes down (red)" market={TILE_ALL_DOWN} />
-            </div>
+            <TileVariant caption="3-way · neutral · no badge" market={TILE_THREE_WAY} />
+            <TileVariant caption="binary YES/NO · no fixture" market={TILE_BINARY} />
+            <TileVariant caption="HOT badge · participants ≥ 2000" market={TILE_HOT} />
+            <TileVariant caption="TRENDING badge · |Δ| ≥ 5¢" market={TILE_TRENDING} />
+            <TileVariant caption="low-volume neutral" market={TILE_NEUTRAL} />
+            <TileVariant caption="all outcomes up (green)" market={TILE_ALL_UP} />
+            <TileVariant caption="all outcomes down (red)" market={TILE_ALL_DOWN} />
           </Section>
 
           <Section id="show-more" title="ShowMoreEventsButton" hint="Toggle below the event grid.">
@@ -319,29 +317,25 @@ function HomepagePlayground() {
           </Section>
 
           <Section id="winner" title="LeagueWinnerMarketCard" hint="Futures market in a league-table layout.">
-            <div className="col-span-full grid gap-5 md:grid-cols-2">
-              <Variant caption="default (4 outcomes)"><LeagueWinnerMarketCard market={WINNER_DEFAULT} /></Variant>
-              <Variant caption="short (2 outcomes)"><LeagueWinnerMarketCard market={WINNER_SHORT} /></Variant>
-              <Variant caption="all deltas up"><LeagueWinnerMarketCard market={WINNER_ALL_UP} /></Variant>
-              <Variant caption="all deltas down"><LeagueWinnerMarketCard market={WINNER_ALL_DOWN} /></Variant>
-            </div>
+            <Variant caption="default (4 outcomes)"><LeagueWinnerMarketCard market={WINNER_DEFAULT} /></Variant>
+            <Variant caption="short (2 outcomes)"><LeagueWinnerMarketCard market={WINNER_SHORT} /></Variant>
+            <Variant caption="all deltas up"><LeagueWinnerMarketCard market={WINNER_ALL_UP} /></Variant>
+            <Variant caption="all deltas down"><LeagueWinnerMarketCard market={WINNER_ALL_DOWN} /></Variant>
           </Section>
 
           <Section id="scorer" title="TopScorerMarketCard" hint="Same row layout as the winner card, but with player photos.">
-            <div className="col-span-full grid gap-5 md:grid-cols-2">
-              <Variant caption="with photos">
+            <Variant caption="with photos">
                 <TopScorerMarketCard
                   market={TOPSCORER_WITH_PHOTOS.market}
                   photos={TOPSCORER_WITH_PHOTOS.photos}
                 />
               </Variant>
-              <Variant caption="no photos — initials fallback">
+            <Variant caption="no photos — initials fallback">
                 <TopScorerMarketCard
                   market={TOPSCORER_NO_PHOTOS.market}
                   photos={TOPSCORER_NO_PHOTOS.photos}
                 />
               </Variant>
-            </div>
           </Section>
 
           <Section id="spotlight" title="PlayerPropsSpotlight" hint="Carousel of player prop bundles.">
