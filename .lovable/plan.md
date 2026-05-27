@@ -1,21 +1,51 @@
-把队徽从底部三段市场条迁移到中间的比分条，给底部三段腾出充足的横向空间，确保三个赔率完整显示。
+为全站所有队名短码加上「桌面 hover / 移动端 tap 弹 toast」的全名提示。
 
-1. Scoreboard 比分条（poster 底部居中胶囊）
-   - 在主队 short 左侧加主队 logo（h-4 w-4，圆形/object-contain）。
-   - 在客队 short 右侧加客队 logo。
-   - 胶囊整体保持现有圆角 + 背景模糊，仅增加两个小 logo。
-   - Draw 没有 logo，不影响（比分条只展示主客两队）。
+## 1. 新组件 `src/components/sports/TeamName.tsx`
 
-2. 底部 segmented market bar
-   - 移除每个 segment 内的 `<img>` 队徽与 Draw 的 `X` 圆形占位。
-   - 每段只剩：短 label（队名/DRAW）+ 价格。
-   - segment 内部布局：`flex items-baseline justify-center gap-1.5`，label 用 `font-mono text-[10px] uppercase tracking-widest text-muted-foreground`，价格 `font-display text-sm font-semibold tabular-nums`。
-   - 加 `min-w-0`，label 允许 `truncate`，price `shrink-0`，确保三段都能完整展示。
-   - 保留段间 `border-r border-white/[0.06]` 分隔线和整条 hover 高亮。
+一个轻量包装，统一所有出现 `team.short` 的地方：
 
-3. 不改的内容
-   - LIVE pill、联赛缩写、计时器、play 按钮、poster 图。
-   - footer（Streaming now / 人数 / Vol）。
-   - 卡片外框、圆角、阴影。
+```tsx
+<TeamName short="MCI" full="Manchester City" />
+```
 
-技术细节：只改 `src/components/sports/dashboard/LiveStreamCard.tsx`。增加 `fixture.home.logo` / `fixture.away.logo` 到 scoreboard 渲染；删除 outcomes map 内的 logo/占位 JSX；调整 segment className 实现安全收缩。
+行为：
+- 渲染为 `<span>`（默认）或可选 `as` 多态，保留现有 className 透传。
+- 桌面端：包一层 shadcn `Tooltip`，hover 显示 full name。
+- 移动端：`onClick` 阻止冒泡 + 阻止默认，调用 `toast(full)` 显示 sonner toast。
+- 用 `onClick` + `e.stopPropagation()` + `e.preventDefault()` 避免触发外层 `<Link>` 跳转。
+- 通过 CSS（`md:` 断点）或 `matchMedia` 区分桌面/移动；为简单起见，统一两端都启用：桌面 hover 出 tooltip，移动 tap 出 toast，不互斥（hover 在触屏设备不会触发，体验天然分流）。
+
+## 2. 替换所有短码渲染点
+
+扫描并替换以下文件中直接渲染 `team.short` / `fixture.home.short` / `fixture.away.short` 的位置：
+
+- `src/components/sports/dashboard/LiveStreamCard.tsx`（比分胶囊 + segment label）
+- `src/components/sports/MatchCard.tsx`
+- `src/components/sports/MarketCard.tsx`
+- `src/components/sports/HeroMarketCard.tsx`
+- `src/components/sports/TopMoverCard.tsx`
+- `src/components/sports/EventHeader.tsx`
+- `src/components/sports/dashboard/EventMarketTileCard.tsx`（如有）
+- `src/routes/event.$id.tsx` 中渲染对阵双方短码处
+- style-guide 路由不动（纯文档）
+
+替换原则：只把视觉上的短码 span 换成 `<TeamName>`，不动任何 className/布局。
+
+## 3. Toast 文案
+
+- 内容：`full`（如 "Manchester City"）。
+- 不加 description / icon，保持极简，避免在快速浏览时打断节奏。
+- 利用 sonner 默认 3 秒自动消失。
+
+## 4. 不改的内容
+
+- 已经显示全名的地方（如 spotlight 卡片 Liverpool/Newcastle）不动。
+- 联赛短码（EPL/LL）不在本次范围。
+- 不引入额外依赖；`sonner` 和 `Tooltip` 都已在项目里。
+
+## 技术细节
+
+- `<Tooltip>` 需要 `TooltipProvider` 包裹；如根布局没有，则在 `TeamName` 内部就近 `TooltipProvider delayDuration={150}` 即可（多实例性能开销可忽略）。
+- 阻止 Link 跳转：在 `<TeamName>` 的最外层节点绑定 `onClick={(e) => { e.preventDefault(); e.stopPropagation(); toast(full); }}`。
+- 这样桌面端 hover 出 tooltip 同时点击也能弹 toast；可接受。
+- 触屏设备不会触发 `:hover`，因此 tooltip 在移动端自然不出现，只走 toast 分支。

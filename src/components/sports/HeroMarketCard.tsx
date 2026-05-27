@@ -1,6 +1,7 @@
 import { ArrowUpRight } from "lucide-react";
 import { LeagueBadge } from "./LeagueBadge";
 import { TeamCrest } from "./TeamCrest";
+import { TeamName } from "./TeamName";
 import type { Team } from "@/lib/teams";
 
 interface HeroMarketCardProps {
@@ -72,9 +73,11 @@ export function HeroMarketCard({
       <div className="relative mt-5 flex items-center justify-between">
         <div className="flex flex-col items-center gap-1.5">
           <TeamCrest name={home.name} abbr={home.short} logoUrl={home.logo} size="md" />
-          <div className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
-            {home.short}
-          </div>
+          <TeamName
+            short={home.short}
+            full={home.name}
+            className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground"
+          />
         </div>
         <div className="flex flex-col items-center">
           <div className="font-display font-bold text-3xl tabular-nums">{score}</div>
@@ -84,9 +87,11 @@ export function HeroMarketCard({
         </div>
         <div className="flex flex-col items-center gap-1.5">
           <TeamCrest name={away.name} abbr={away.short} logoUrl={away.logo} size="md" />
-          <div className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
-            {away.short}
-          </div>
+          <TeamName
+            short={away.short}
+            full={away.name}
+            className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground"
+          />
         </div>
       </div>
 

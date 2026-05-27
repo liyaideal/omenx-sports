@@ -1,6 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { Play, Users } from "lucide-react";
 import type { SportsMarket } from "@/data/sports-markets";
+import { TeamName } from "@/components/sports/TeamName";
 
 /**
  * Compact "we are streaming this match" tile, sized to drop into the same
@@ -63,9 +64,11 @@ export function LiveStreamCard({ market }: { market: SportsMarket }) {
         <div className="absolute bottom-3 left-1/2 -translate-x-1/2">
           <div className="flex items-center gap-3 rounded-full bg-background/70 px-3 py-1.5 ring-1 ring-white/15 backdrop-blur">
             <img src={fixture.home.logo} alt="" className="h-7 w-7 shrink-0 object-contain" />
-            <span className="font-mono text-[11px] uppercase tracking-widest text-muted-foreground">
-              {fixture.home.short}
-            </span>
+            <TeamName
+              short={fixture.home.short}
+              full={fixture.home.name}
+              className="font-mono text-[11px] uppercase tracking-widest text-muted-foreground"
+            />
             <span className="font-display text-xl font-semibold leading-none tabular-nums text-foreground">
               {market.liveScore.home}
             </span>
@@ -73,9 +76,11 @@ export function LiveStreamCard({ market }: { market: SportsMarket }) {
             <span className="font-display text-xl font-semibold leading-none tabular-nums text-foreground">
               {market.liveScore.away}
             </span>
-            <span className="font-mono text-[11px] uppercase tracking-widest text-muted-foreground">
-              {fixture.away.short}
-            </span>
+            <TeamName
+              short={fixture.away.short}
+              full={fixture.away.name}
+              className="font-mono text-[11px] uppercase tracking-widest text-muted-foreground"
+            />
             <img src={fixture.away.logo} alt="" className="h-7 w-7 shrink-0 object-contain" />
           </div>
         </div>
@@ -93,9 +98,17 @@ export function LiveStreamCard({ market }: { market: SportsMarket }) {
                 i < outcomes.length - 1 ? "border-r border-white/[0.06]" : ""
               }`}
             >
-              <span className="truncate font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
-                {o.team?.short ?? o.label}
-              </span>
+              {o.team ? (
+                <TeamName
+                  short={o.team.short}
+                  full={o.team.name}
+                  className="truncate font-mono text-[10px] uppercase tracking-widest text-muted-foreground"
+                />
+              ) : (
+                <span className="truncate font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+                  {o.label}
+                </span>
+              )}
               <span className="shrink-0 font-display text-sm font-semibold tabular-nums text-foreground">
                 {cents}<span className="text-muted-foreground">¢</span>
               </span>

@@ -3,6 +3,7 @@ import { Link } from "@tanstack/react-router";
 import type { Outcome, SportsMarket, TeamLite } from "@/data/sports-markets";
 import { PricePill } from "./PricePill";
 import { LeagueChip } from "../LeagueBadge";
+import { TeamName } from "@/components/sports/TeamName";
 
 const HOT_PARTICIPANTS = 2000;
 const TRENDING_DELTA = 0.05;
@@ -178,7 +179,11 @@ function TeamSide({ team, align }: { team: TeamLite; align: "left" | "right" }) 
       >
         <img src={team.logo} alt={team.name} className="h-full w-full object-contain" />
       </div>
-      <span className="truncate text-xs font-medium text-foreground">{team.short}</span>
+      <TeamName
+        short={team.short}
+        full={team.name}
+        className="truncate text-xs font-medium text-foreground"
+      />
     </div>
   );
 }

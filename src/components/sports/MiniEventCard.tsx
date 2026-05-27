@@ -2,6 +2,7 @@ import { ArrowRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { LeagueBadge } from "./LeagueBadge";
 import { TeamCrest } from "./TeamCrest";
+import { TeamName } from "./TeamName";
 import type { Team } from "@/lib/teams";
 
 export interface MiniEventCardProps {
@@ -45,7 +46,7 @@ export function MiniEventCard({
         <TeamCrest name={away.name} abbr={away.short} logoUrl={away.logo} size="sm" />
         <div className="ml-1 flex min-w-0 flex-col">
           <span className="truncate text-xs font-semibold text-foreground">
-            {home.short} – {away.short}
+            <TeamName short={home.short} full={home.name} /> – <TeamName short={away.short} full={away.name} />
           </span>
           <span className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
             {whenLabel} · {kickoff}
