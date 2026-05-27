@@ -3,6 +3,7 @@ import { Plus, Users } from "lucide-react";
 import { toast } from "sonner";
 import type { TeamLite } from "@/data/sports-mock";
 import { TeamPickerSheet, type TeamGroup } from "./TeamPickerSheet";
+import { TeamName } from "@/components/sports/TeamName";
 
 /**
  * Compact Fans Zone follow card for large catalogs (e.g. World Cup).
@@ -63,7 +64,11 @@ export function FollowTeamsCompact({
               >
                 <img src={team.logo} alt="" className="h-full w-full object-contain" />
               </span>
-              <span className="text-[9px] font-medium text-muted-foreground">{team.short}</span>
+              <TeamName
+                short={team.short}
+                full={team.name}
+                className="text-[9px] font-medium text-muted-foreground"
+              />
             </li>
           ))}
           {followedTeams.length > 6 && (
