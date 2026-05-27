@@ -1,11 +1,10 @@
 import { createFileRoute, Link, notFound, useRouter } from "@tanstack/react-router";
-import { ArrowLeft, Clock, Users } from "lucide-react";
+import { ArrowLeft, Users } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { cn } from "@/lib/utils";
 import { AppShell } from "@/components/sports/dashboard/AppShell";
 import { AppTopBar } from "@/components/sports/dashboard/AppTopBar";
 import { LeagueChip } from "@/components/sports/LeagueBadge";
-import { CountdownPill } from "@/components/sports/CountdownPill";
 import { PriceChart } from "@/components/sports/PriceChart";
 import { OrderBook } from "@/components/sports/OrderBook";
 import { TradeForm, type PlacedOrder } from "@/components/sports/TradeForm";
@@ -13,6 +12,7 @@ import {
   PositionsTable,
   type PositionRowData,
   type OrderRowData,
+  type HistoryRowData,
 } from "@/components/sports/PositionsTable";
 import { ACCOUNT_STATS, getMarketById, type SportsMarket, type Outcome } from "@/data/sports-markets";
 
@@ -105,9 +105,18 @@ function EventTradePage() {
 
   const league = leagueKeyFromShort(market.league.short);
   const currentPx = Math.round(selected.price * 100);
+
+  // Seed a couple of mock positions/orders/history rows for this market so
+  // every visitor sees the table styling on first load, even before placing
+  // a trade.
+  const seeded = useMemo(() => buildSeed(market, league), [market, league]);
+  const [seedPositions] = useState<PositionRowData[]>(seeded.positions);
+  const [seedOrders] = useState<OrderRowData[]>(seeded.orders);
+  const history = seeded.history;
+
   // Apply a tiny live jitter so PnL updates every tick.
   const livePositions = useMemo<PositionRowData[]>(() => {
-    return positions.map((p, i) => {
+    return [...positions, ...seedPositions].map((p, i) => {
       const jitter = Math.sin((tick + i * 7) / 3) * 1.4;
       const mark = clampPct(p.entry + jitter);
       const sign = p.outcome === "yes" ? 1 : -1;
@@ -115,7 +124,12 @@ function EventTradePage() {
       const pnl = (mark / 100 - p.entry / 100) * notional * sign;
       return { ...p, mark: Math.round(mark * 10) / 10, pnl: Math.round(pnl * 100) / 100 };
     });
-  }, [positions, tick]);
+  }, [positions, seedPositions, tick]);
+
+  const allOrders = useMemo<OrderRowData[]>(
+    () => [...orders, ...seedOrders],
+    [orders, seedOrders],
+  );
 
   const handlePlaceOrder = (order: PlacedOrder) => {
     if (order.type === "limit" && order.side === "buy" && order.price !== currentPx) {
@@ -162,16 +176,7 @@ function EventTradePage() {
         equity={ACCOUNT_STATS.available}
       />
 
-      <div className="px-6 pt-6 md:px-8">
-        <Link
-          to="/"
-          className="inline-flex items-center gap-1.5 text-xs font-mono uppercase tracking-widest text-muted-foreground hover:text-foreground"
-        >
-          <ArrowLeft className="h-3.5 w-3.5" /> Back to dashboard
-        </Link>
-      </div>
-
-      <div className="grid gap-5 px-6 pb-10 pt-4 md:px-8 lg:grid-cols-[minmax(0,1fr)_360px]">
+      <div className="grid gap-5 px-6 pb-10 pt-6 md:px-8 lg:grid-cols-[minmax(0,1fr)_360px]">
         <div className="min-w-0 space-y-5">
           <EventDetailHeader
             market={market}
@@ -196,7 +201,7 @@ function EventTradePage() {
       </div>
 
       <div className="px-6 pb-12 md:px-8">
-        <PositionsTable positions={livePositions} orders={orders} />
+        <PositionsTable positions={livePositions} orders={allOrders} history={history} />
       </div>
     </AppShell>
   );
@@ -214,14 +219,11 @@ function EventDetailHeader({
   const fixture = market.fixture;
   return (
     <header className="relative overflow-hidden rounded-2xl border border-border bg-surface bg-ambient p-6 shadow-card">
-      <div className="flex items-start justify-between gap-4">
-        <div className="flex items-center gap-2.5">
-          <LeagueChip short={market.league.short} />
-          <span className="rounded-full bg-primary/10 px-2.5 py-0.5 text-[10px] font-medium uppercase tracking-widest text-primary ring-1 ring-primary/30">
-            {market.kind === "match" ? "Match" : market.kind === "league-winner" ? "Season winner" : market.kind === "top-scorer" ? "Top scorer" : "Prop"}
-          </span>
-        </div>
-        <CountdownPill value={market.endsLabel} tone="muted" />
+      <div className="flex items-center gap-2.5">
+        <LeagueChip short={market.league.short} />
+        <span className="rounded-full bg-primary/10 px-2.5 py-0.5 text-[10px] font-medium uppercase tracking-widest text-primary ring-1 ring-primary/30">
+          {market.kind === "match" ? "Match" : market.kind === "league-winner" ? "Season winner" : market.kind === "top-scorer" ? "Top scorer" : "Prop"}
+        </span>
       </div>
 
       {/* Two-column body: fixture left · outcomes right */}
@@ -232,7 +234,10 @@ function EventDetailHeader({
               <CrestBlock name={fixture.home.name} logo={fixture.home.logo} hue={fixture.home.hue} />
               <div className="text-center">
                 <div className="font-serif-display italic text-3xl text-muted-foreground">vs</div>
-                <div className="mt-1 font-mono text-[11px] tracking-wider text-muted-foreground">
+                <div className="mt-1 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+                  Kickoff
+                </div>
+                <div className="font-mono text-[11px] tracking-wider text-foreground">
                   {fixture.whenLabel} · {fixture.kickoff}
                 </div>
               </div>
@@ -264,11 +269,10 @@ function EventDetailHeader({
         </div>
       </div>
 
-      <div className="mt-6 grid grid-cols-2 divide-x divide-border border-t border-border pt-4 text-center md:grid-cols-4">
+      <div className="mt-6 grid grid-cols-3 divide-x divide-border border-t border-border pt-4 text-center">
         <Stat label="Volume" value={market.volume} />
         <Stat label="24h Vol" value={market.volume24h} />
         <Stat label="Traders" value={market.participants.toLocaleString()} icon={<Users className="h-3 w-3" />} />
-        <Stat label="Ends" value={market.endsLabel} icon={<Clock className="h-3 w-3" />} />
       </div>
     </header>
   );
