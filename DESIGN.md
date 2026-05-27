@@ -329,6 +329,11 @@ Section 7 is append-only. Every regression the user catches gets pinned here.
   links go in the top-right user menu, not a bottom bar.
 - Don't use a placeholder "L" stub or a colored gradient monogram for a
   known league. Register the real logo in `PRESETS` (`LeagueBadge.tsx`).
+- Don't render the event-detail header and a separate outcome picker as two
+  stacked blocks. The event header is a single card with a two-column body
+  (fixture / title left, outcome rows right) and the stats strip across the
+  bottom. Outcome rows are 56px tall with a lavender `ring-1 ring-primary/40`
+  selected state.
 
 ## 8. Responsive Behavior
 

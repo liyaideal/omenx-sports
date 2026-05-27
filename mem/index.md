@@ -13,3 +13,4 @@
 - [League chip + market-type eyebrow](mem://design/league-chip) — canonical chip spec and user-facing TYPE vocabulary
 - [Price pill delta format](mem://design/price-delta) — signed +N¢/−N¢/0¢ with 24h tooltip
 - [No footer on product pages](mem://design/no-product-footer) — footers reserved for SEO/content pages, matches OmenX convention
+- [Event detail header](mem://design/event-detail-header) — single two-column card (fixture left, outcomes right, stats below); no separate outcome picker block
