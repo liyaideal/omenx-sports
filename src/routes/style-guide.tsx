@@ -32,6 +32,8 @@ import { EventHeader } from "@/components/sports/EventHeader";
 import { OutcomeSelector } from "@/components/sports/OutcomeSelector";
 import { TeamName } from "@/components/sports/TeamName";
 import { teams } from "@/lib/teams";
+import { LiveStreamCard } from "@/components/sports/dashboard/LiveStreamCard";
+import { MATCH_MARKETS } from "@/data/sports-markets";
 import { PriceChart } from "@/components/sports/PriceChart";
 import { OrderBook } from "@/components/sports/OrderBook";
 import { TradeForm } from "@/components/sports/TradeForm";
