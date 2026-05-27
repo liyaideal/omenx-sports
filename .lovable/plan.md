@@ -1,95 +1,54 @@
+# 移动端直播 Hero 重做
 
-# 移动端首页适配
+## 问题
 
-参考截图风格（深色、超大圆角、大队徽、问候语 + 顶部状态栏、内容卡片层叠），把当前桌面 3 栏布局重排成单列移动流，并加上常驻 BottomNav。所有现有卡片组件（`LiveStreamCard`/`EventMarketTileCard`/`MatchMarketCard`/`FanPostCard`/`LiveActivityCard` 等）直接复用，只调整外层容器/排序，不动业务逻辑。
+目前移动端首页的 "Live Scores" 模块 (`MobileLiveHero`) 只画了两个 crest 圈 + 大比分，把桌面端 `LiveStreamCard` 里最有"直播感"的东西都丢了：
 
-## 1. 新组件
+- `market.livePoster` 海报图（球场实拍/广播画面）
+- 居中的 Play 按钮（带 backdrop blur）
+- 直播 score bug（底部圆角胶囊里的两队 logo + 比分）
+- LIVE 红色 pill + 比赛分钟数
 
-**`src/components/sports/mobile/MobileTopBar.tsx`**
-- 高 56px，sticky 顶部，半透明 + backdrop-blur
-- 左：`Ω` lockup（点击 = 跳 `omenxUrl.home()`，主站）→ 小箭头 → 斜体 `Sports`（点击 = 留在 `/`）。视觉上是一条面包屑，明确告诉用户"现在在 OmenX › Sports"
-- 中：留白
-- 右：用户头像（点击打开 Me Tab 抽屉，复用 AppTopBar 里的 DropdownMenu 项作为 sheet 内容）+ 通知铃铛（占位，先不挂逻辑）
-- 仅在 `md:hidden` 显示；桌面继续用 `AppTopBar`
+整张卡片看起来像"静态比分牌"，不像"正在直播的入口"。
 
-**`src/components/sports/mobile/MobileBottomNav.tsx`**
-- 固定 `bottom-0`, `z-50`, `pb-[env(safe-area-inset-bottom)]`, 高 64px + safe-area
-- 4 个 tab：**Home / Events / Fans / Me**
-  - Home → `/`
-  - Events → `/` 并 scrollIntoView 到 events 区段（移动端首页内 section anchor `#events`）。下一阶段再拆 `/events` 独立路由
-  - Fans → `#fans`
-  - Me → 打开 Me Sheet（见下）
-- 当前激活的 tab：图标实色 + neon 描边 + 顶部 1px gradient 指示条
-- haptic 反馈（`navigator.vibrate(10)`）
-- 仅 `md:hidden` 显示；桌面布局不受影响
+## 方案
 
-**`src/components/sports/mobile/MeSheet.tsx`**
-- 用 `Sheet`（side="bottom"），圆角 + drag handle
-- 顶部用户卡：头像 + 用户名 + Equity 大字（绿色，复用 ACCOUNT_STATS.available）
-- BridgeStrip 内容上移到这里：`openPositions` / `pnlToday` / `toClaim` 三个 stat tile + "Open Portfolio" CTA
-- 中段："Back to OmenX" 卡片组（2×2 网格）：Markets / Crypto / Politics / Leaderboard，各自带 `ArrowUpRight`，点击外链跳 omenx 主站
-- 底部菜单：Rewards / Referral / Settings / Language / Transparency / Help / Discord / Sign Out（直接搬 AppTopBar 里的 DropdownMenu 项）
+把 `MobileLiveHero` 的 `HeroCard` 重写成"全宽海报 hero"，本质是 `LiveStreamCard` 的移动端放大版本，但保留首页 hero 的尺度感。
 
-**`src/components/sports/mobile/MobileLiveHero.tsx`**（参考截图的 Live Scores 大区）
-- Section header：`Live` + 斜体 neon `Scores` + 右侧 pill `N matches`
-- 内容：第一张直播比赛用大队徽形式呈现（左队徽 80px + 比分 + 右队徽 80px + 下方队名/分钟），下方是横向滑动的额外 live 比赛缩略（如果有多场）
-- 仅当存在 `liveStreamMarkets.length > 0` 时渲染；底部接一个"Open market →"链接进 event 详情
-- 沿用 `TeamName` + 现有 fixture 数据
-
-## 2. 首页路由 `src/routes/index.tsx` 改造
+### 新的 HeroCard 结构（从上到下）
 
 ```text
-mobile (< md)                         desktop (≥ md, 不动)
-┌─────────────────────┐               同现状（AppTopBar + 3 列网格 + BridgeStrip）
-│ MobileTopBar        │
-├─────────────────────┤
-│ MobileLiveHero      │ ← 大队徽直播
-│  (id="live")        │
-├─────────────────────┤
-│ Day strip           │
-│ EventMarketTileCard │ ← 单列堆叠，全部展开
-│ EventMarketTileCard │
-│ EventMarketTileCard │
-│  (id="events")      │
-├─────────────────────┤
-│ Fans zone           │ ← 单列：FanZoneHeader → MatchMarketCard
-│  (id="fans")        │   → FanPostCard → LiveActivityCard
-├─────────────────────┤
-│ Season              │ ← 单列：League winner / Top scorer 交替
-│  (id="season")      │   → PlayerPropsSpotlight 最后
-├─────────────────────┤
-│ 80px 空白           │ ← 避免被 BottomNav 遮挡
-└─────────────────────┘
-│ MobileBottomNav     │ fixed
+┌──────────────────────────────────────────┐
+│ [LIVE • PL]              [72:14]         │  ← 海报顶部，pill + 分钟
+│                                          │
+│         ┌──────┐                         │
+│         │ ▶    │  ← 居中 56px Play 按钮  │
+│         └──────┘                         │
+│                                          │
+│  [🛡 ARS  2 — 1  CHE 🛡]  ← 比分 bug    │
+└──────────────────────────────────────────┘
+   Streaming · Premier League   Open →      ← 海报下方 footer 一行
 ```
 
-- 用 `useIsMobile()` 判断，或更稳：JSX 内同时渲染两套但用 `hidden md:block` / `md:hidden` 切换（SSR 友好，无闪烁）
-- 桌面分支保持 100% 当前代码，移动分支用新结构
-- `BridgeStrip` 在移动端不渲染（已并入 MeSheet）；`AppTopBar` 在移动端不渲染
+- 整张卡片 `aspect-[4/5]` 左右（≈ 360×450），让海报图占满视觉。
+- 海报上 overlay：顶部渐变 + 底部到 surface 的渐变，保证文字可读。
+- 没有 `livePoster` 时退化到 `from-white/[0.06] to-transparent` 渐变（与桌面端一致），并把两队 crest 放大居中作为兜底。
+- 整卡仍是 `<Link to="/event/$id">`，`active:scale-[0.99]`。
+- 保留外层 `section` 的 header（"Live Scores" 标题 + N matches pill）。
 
-## 3. Style guide 同步
+### Rail（次要直播）保持
 
-按 memory 规则，所有新组件 + 移动端首页结构都加到 `/style-guide`：
-- 新增 section "Mobile shell"，展示：
-  - `MobileTopBar`（固定宽度容器模拟手机）
-  - `MobileBottomNav`（同上）
-  - `MeSheet`（嵌入 open 状态预览）
-  - `MobileLiveHero`（用一条 live fixture）
-  - 一个 360×740 的 phone frame 容器，把整套移动首页 mock 嵌进去做整体预览
+下面横滑的 `RailCard` 保留现在的小卡（crest + 比分），但同步加一个左上 `LIVE` pill 和一个迷你播放图标，让"它们也是直播"这点更明确。如果该比赛有 `livePoster`，把卡片背景换成 16/9 的 poster 缩略图（高 ~64px），让视觉一致。
 
-## 4. 不在本次范围（后续可单做）
+## 涉及文件
 
-- `/events`、`/fans`、`/me` 拆成独立路由（目前先用 anchor + sheet，验证交互后再拆）
-- 通知铃铛逻辑
-- 真实 haptic / pull-to-refresh
-- Tablet 中间断点专属布局（先沿用 desktop 网格）
+- `src/components/sports/mobile/MobileLiveHero.tsx` — 重写 `HeroCard`，小改 `RailCard`。
+- `src/routes/style-guide.tsx` — "Mobile Shell" 区已有 `MobileLiveHero` 演示，确认改完后预览依然渲染（不需要新增条目，但要重新看一眼 phone frame 里效果）。
 
 ## 技术细节
 
-- `useIsMobile` 已存在 (`src/hooks/use-mobile.tsx`, 768 断点)；为了 SSR 不闪烁，渲染时用 Tailwind `md:hidden`/`hidden md:block` 切换两套树，而不是 JS 判断
-- BottomNav 占位用 `pb-20` 给主内容加 padding，避免遮挡
-- MeSheet 用 shadcn `Sheet`（已在 ui 目录），side="bottom"
-- 所有新组件路径放 `src/components/sports/mobile/` 便于聚类
-- 颜色全部走 design tokens（`--primary`, `--accent`, `--win`, `--loss`, `--surface`），不写裸色值
-- 不动 `routeTree.gen.ts`、不加新路由文件（本次仅在 `/` 加移动分支）
-
+- 复用现有 token：`bg-surface`、`ring-[color:var(--accent)]/20`、`text-[color:var(--accent)]`、`shadow-card`。不引入新颜色。
+- 海报图 `<img loading="lazy" />`，与 `LiveStreamCard` 一致。
+- Play 按钮：`grid h-14 w-14 place-items-center rounded-full bg-background/55 ring-1 ring-white/30 backdrop-blur-md`，比桌面端的 40px 大一圈，符合移动端触达。
+- 比分 bug 用现在 `LiveStreamCard` 同款 `bg-background/70 ring-1 ring-white/15 backdrop-blur`，字号略放大 (`text-2xl`)。
+- 不动桌面端 `LiveStreamCard`，不动 `index.tsx` 桌面分支，不动数据层。
