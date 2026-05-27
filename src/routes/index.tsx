@@ -147,17 +147,10 @@ function Index() {
           <p className="-mt-1 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
             Prices in ¢ (0–100) · arrows show 24h change
           </p>
-          {liveStreamMarkets.length > 0 && (
-            <div className="flex flex-col gap-3">
-              {liveStreamMarkets.map((m) => (
-                <LiveStreamCard key={m.id} market={m} />
-              ))}
-            </div>
-          )}
-          {upcomingMarkets.length > 0 ? (
+          {liveStreamMarkets.length + upcomingMarkets.length > 0 ? (
             <>
               <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
-                {upcomingMarkets.map((m, idx) => {
+                {[...liveStreamMarkets, ...upcomingMarkets].map((m, idx) => {
                   const hideClass = expanded
                     ? ""
                     : idx === 0
@@ -169,24 +162,28 @@ function Index() {
                           : "hidden";
                   return (
                     <div key={m.id} className={`h-full ${hideClass}`}>
-                      <EventMarketTileCard market={m} />
+                      {m.isLiveStream ? (
+                        <LiveStreamCard market={m} />
+                      ) : (
+                        <EventMarketTileCard market={m} />
+                      )}
                     </div>
                   );
                 })}
               </div>
-              {upcomingMarkets.length > 1 && (
+              {liveStreamMarkets.length + upcomingMarkets.length > 1 && (
                 <ShowMoreEventsButton
                   expanded={expanded}
-                  total={upcomingMarkets.length}
+                  total={liveStreamMarkets.length + upcomingMarkets.length}
                   onToggle={() => setExpanded((v) => !v)}
                 />
               )}
             </>
-          ) : liveStreamMarkets.length === 0 ? (
+          ) : (
             <div className="rounded-2xl border border-dashed border-border bg-surface/40 px-5 py-10 text-center text-sm text-muted-foreground">
               No events scheduled for {dayLabel}.
             </div>
-          ) : null}
+          )}
         </section>
 
         {/* BOTTOM — Season markets (futures + player props) */}
