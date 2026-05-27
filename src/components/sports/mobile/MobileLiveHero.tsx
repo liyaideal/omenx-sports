@@ -1,7 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { Play, ArrowRight } from "lucide-react";
 import type { SportsMarket } from "@/data/sports-markets";
-import { cn } from "@/lib/utils";
 
 /**
  * Mobile-only "Live Scores" hero — the first thing the user sees on the
@@ -53,55 +52,76 @@ function HeroCard({ market }: { market: SportsMarket }) {
     <Link
       to="/event/$id"
       params={{ id: market.id }}
-      className="group relative block overflow-hidden rounded-[28px] border border-[color:var(--accent)]/40 bg-surface p-5 shadow-card ring-1 ring-[color:var(--accent)]/20 transition active:scale-[0.99]"
+      className="group relative block overflow-hidden rounded-[28px] border border-[color:var(--accent)]/40 bg-surface shadow-card ring-1 ring-[color:var(--accent)]/20 transition active:scale-[0.99]"
     >
-      {/* Ambient glow */}
-      <div
-        aria-hidden
-        className="pointer-events-none absolute -top-20 left-1/2 h-48 w-48 -translate-x-1/2 rounded-full opacity-60 blur-3xl"
-        style={{
-          background:
-            "radial-gradient(circle, color-mix(in oklab, var(--accent) 35%, transparent), transparent 70%)",
-        }}
-      />
+      {/* Poster — broadcast-style hero */}
+      <div className="relative aspect-[4/5] w-full overflow-hidden">
+        {market.livePoster ? (
+          <img
+            src={market.livePoster}
+            alt={`${fixture.home.name} vs ${fixture.away.name} live`}
+            className="absolute inset-0 h-full w-full object-cover transition duration-500 group-active:scale-[1.02]"
+            loading="lazy"
+          />
+        ) : (
+          <div className="absolute inset-0 bg-gradient-to-br from-white/[0.08] to-transparent" />
+        )}
 
-      <div className="relative grid grid-cols-[1fr_auto_1fr] items-center gap-3">
-        <Crest team={fixture.home} />
-        <div className="flex flex-col items-center gap-1.5">
-          <div className="flex items-baseline gap-2 font-display text-4xl font-bold tabular-nums text-foreground">
-            <span>{score.home}</span>
-            <span className="text-muted-foreground">–</span>
-            <span>{score.away}</span>
-          </div>
-          {market.liveClock && (
-            <span className="font-mono text-[11px] tabular-nums text-muted-foreground">
-              {market.liveClock}
+        {/* Top + bottom gradient overlays for legibility */}
+        <div className="pointer-events-none absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-background/80 to-transparent" />
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-surface via-surface/70 to-transparent" />
+
+        {/* Top pills: LIVE + league / clock */}
+        <div className="absolute left-4 top-4 flex items-center gap-2">
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-[color:var(--accent)] px-2.5 py-1 font-mono text-[10px] font-bold uppercase tracking-widest text-[color:var(--accent-foreground)]">
+            <span className="relative grid h-1.5 w-1.5 place-items-center">
+              <span className="absolute inset-0 animate-ping rounded-full bg-current opacity-60" />
+              <span className="relative h-1.5 w-1.5 rounded-full bg-current" />
             </span>
-          )}
+            LIVE
+          </span>
+          <span className="font-mono text-[10px] uppercase tracking-widest text-white/85">
+            {market.league.short}
+          </span>
         </div>
-        <Crest team={fixture.away} align="right" />
+        {market.liveClock && (
+          <span className="absolute right-4 top-4 rounded-full bg-background/60 px-2.5 py-1 font-mono text-[10px] tabular-nums text-white ring-1 ring-white/20 backdrop-blur">
+            {market.liveClock}
+          </span>
+        )}
+
+        {/* Center play button */}
+        <span className="absolute left-1/2 top-1/2 grid h-14 w-14 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full bg-background/55 ring-1 ring-white/30 backdrop-blur-md transition group-active:scale-95">
+          <Play className="h-5 w-5 translate-x-0.5 fill-foreground text-foreground" />
+        </span>
+
+        {/* Bottom scoreboard bug */}
+        <div className="absolute inset-x-4 bottom-4">
+          <div className="flex items-center justify-center gap-3 rounded-full bg-background/75 px-3 py-2 ring-1 ring-white/15 backdrop-blur">
+            <img src={fixture.home.logo} alt="" className="h-8 w-8 shrink-0 object-contain" />
+            <span className="font-mono text-[11px] uppercase tracking-widest text-muted-foreground">
+              {fixture.home.short}
+            </span>
+            <span className="font-display text-2xl font-semibold leading-none tabular-nums text-foreground">
+              {score.home}
+            </span>
+            <span className="text-muted-foreground">–</span>
+            <span className="font-display text-2xl font-semibold leading-none tabular-nums text-foreground">
+              {score.away}
+            </span>
+            <span className="font-mono text-[11px] uppercase tracking-widest text-muted-foreground">
+              {fixture.away.short}
+            </span>
+            <img src={fixture.away.logo} alt="" className="h-8 w-8 shrink-0 object-contain" />
+          </div>
+        </div>
       </div>
 
-      <div className="relative mt-4 grid grid-cols-3 gap-2 text-center">
-        <span className="truncate font-mono text-[11px] uppercase tracking-widest text-foreground">
-          {fixture.home.short}
-        </span>
-        <span className="inline-flex items-center justify-center gap-1.5 font-mono text-[10px] uppercase tracking-widest text-[color:var(--accent)]">
-          <span className="relative grid h-1.5 w-1.5 place-items-center">
+      <footer className="flex items-center justify-between border-t border-white/[0.06] px-4 py-3">
+        <span className="inline-flex items-center gap-2 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+          <span className="relative grid h-1.5 w-1.5 place-items-center text-[color:var(--accent)]">
             <span className="absolute inset-0 animate-ping rounded-full bg-current opacity-60" />
             <span className="relative h-1.5 w-1.5 rounded-full bg-current" />
-          </span>
-          Live
-        </span>
-        <span className="truncate font-mono text-[11px] uppercase tracking-widest text-foreground">
-          {fixture.away.short}
-        </span>
-      </div>
-
-      <footer className="relative mt-5 flex items-center justify-between border-t border-white/[0.06] pt-3">
-        <span className="inline-flex items-center gap-2 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
-          <span className="grid h-6 w-6 place-items-center rounded-full bg-background/60 ring-1 ring-white/15">
-            <Play className="h-2.5 w-2.5 translate-x-px fill-foreground text-foreground" />
           </span>
           Streaming · {market.league.short}
         </span>
@@ -113,27 +133,6 @@ function HeroCard({ market }: { market: SportsMarket }) {
   );
 }
 
-function Crest({
-  team,
-  align = "left",
-}: {
-  team: { name: string; short: string; logo: string; hue: number };
-  align?: "left" | "right";
-}) {
-  return (
-    <div className={cn("flex flex-col items-center gap-1.5", align === "right" && "")}>
-      <div
-        className="grid h-20 w-20 place-items-center rounded-full bg-white/[0.05] p-2.5 ring-1 ring-white/10"
-        style={{
-          boxShadow: `0 0 28px -6px oklch(0.7 0.22 ${team.hue} / 0.55)`,
-        }}
-      >
-        <img src={team.logo} alt={team.name} className="h-full w-full object-contain" />
-      </div>
-    </div>
-  );
-}
-
 function RailCard({ market }: { market: SportsMarket }) {
   const fixture = market.fixture;
   const score = market.liveScore;
@@ -142,29 +141,46 @@ function RailCard({ market }: { market: SportsMarket }) {
     <Link
       to="/event/$id"
       params={{ id: market.id }}
-      className="flex w-44 shrink-0 flex-col gap-2 rounded-2xl border border-border bg-surface p-3 shadow-card transition active:scale-[0.98]"
+      className="flex w-48 shrink-0 flex-col overflow-hidden rounded-2xl border border-border bg-surface shadow-card transition active:scale-[0.98]"
     >
-      <div className="flex items-center justify-between">
-        <span className="inline-flex items-center gap-1 font-mono text-[9px] uppercase tracking-widest text-[color:var(--accent)]">
+      {/* Mini poster */}
+      <div className="relative aspect-[16/9] w-full overflow-hidden">
+        {market.livePoster ? (
+          <img
+            src={market.livePoster}
+            alt=""
+            className="h-full w-full object-cover"
+            loading="lazy"
+          />
+        ) : (
+          <div className="h-full w-full bg-gradient-to-br from-white/[0.06] to-transparent" />
+        )}
+        <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-surface/80 to-transparent" />
+        <span className="absolute left-2 top-2 inline-flex items-center gap-1 rounded-full bg-[color:var(--accent)] px-1.5 py-0.5 font-mono text-[9px] font-bold uppercase tracking-widest text-[color:var(--accent-foreground)]">
           <span className="h-1 w-1 animate-pulse rounded-full bg-current" />
           Live
         </span>
+        <span className="absolute right-2 top-2 grid h-6 w-6 place-items-center rounded-full bg-background/60 ring-1 ring-white/25 backdrop-blur">
+          <Play className="h-2.5 w-2.5 translate-x-px fill-foreground text-foreground" />
+        </span>
         {market.liveClock && (
-          <span className="font-mono text-[9px] tabular-nums text-muted-foreground">
+          <span className="absolute bottom-1.5 right-2 font-mono text-[9px] tabular-nums text-white/90">
             {market.liveClock}
           </span>
         )}
       </div>
-      <div className="flex items-center justify-between gap-2">
-        <img src={fixture.home.logo} alt="" className="h-8 w-8 object-contain" />
-        <span className="font-display text-base font-semibold tabular-nums text-foreground">
-          {score.home} – {score.away}
-        </span>
-        <img src={fixture.away.logo} alt="" className="h-8 w-8 object-contain" />
-      </div>
-      <div className="flex items-center justify-between font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
-        <span>{fixture.home.short}</span>
-        <span>{fixture.away.short}</span>
+      <div className="flex flex-col gap-1.5 p-3">
+        <div className="flex items-center justify-between gap-2">
+          <img src={fixture.home.logo} alt="" className="h-7 w-7 object-contain" />
+          <span className="font-display text-base font-semibold tabular-nums text-foreground">
+            {score.home} – {score.away}
+          </span>
+          <img src={fixture.away.logo} alt="" className="h-7 w-7 object-contain" />
+        </div>
+        <div className="flex items-center justify-between font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+          <span>{fixture.home.short}</span>
+          <span>{fixture.away.short}</span>
+        </div>
       </div>
     </Link>
   );
