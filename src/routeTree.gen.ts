@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as StyleGuideRouteImport } from './routes/style-guide'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as StyleGuideHomepageRouteImport } from './routes/style-guide.homepage'
 import { Route as EventIdRouteImport } from './routes/event.$id'
 
 const StyleGuideRoute = StyleGuideRouteImport.update({
@@ -23,6 +24,11 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const StyleGuideHomepageRoute = StyleGuideHomepageRouteImport.update({
+  id: '/homepage',
+  path: '/homepage',
+  getParentRoute: () => StyleGuideRoute,
+} as any)
 const EventIdRoute = EventIdRouteImport.update({
   id: '/event/$id',
   path: '/event/$id',
@@ -31,31 +37,34 @@ const EventIdRoute = EventIdRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/style-guide': typeof StyleGuideRoute
+  '/style-guide': typeof StyleGuideRouteWithChildren
   '/event/$id': typeof EventIdRoute
+  '/style-guide/homepage': typeof StyleGuideHomepageRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/style-guide': typeof StyleGuideRoute
+  '/style-guide': typeof StyleGuideRouteWithChildren
   '/event/$id': typeof EventIdRoute
+  '/style-guide/homepage': typeof StyleGuideHomepageRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/style-guide': typeof StyleGuideRoute
+  '/style-guide': typeof StyleGuideRouteWithChildren
   '/event/$id': typeof EventIdRoute
+  '/style-guide/homepage': typeof StyleGuideHomepageRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/style-guide' | '/event/$id'
+  fullPaths: '/' | '/style-guide' | '/event/$id' | '/style-guide/homepage'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/style-guide' | '/event/$id'
-  id: '__root__' | '/' | '/style-guide' | '/event/$id'
+  to: '/' | '/style-guide' | '/event/$id' | '/style-guide/homepage'
+  id: '__root__' | '/' | '/style-guide' | '/event/$id' | '/style-guide/homepage'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  StyleGuideRoute: typeof StyleGuideRoute
+  StyleGuideRoute: typeof StyleGuideRouteWithChildren
   EventIdRoute: typeof EventIdRoute
 }
 
@@ -75,6 +84,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/style-guide/homepage': {
+      id: '/style-guide/homepage'
+      path: '/homepage'
+      fullPath: '/style-guide/homepage'
+      preLoaderRoute: typeof StyleGuideHomepageRouteImport
+      parentRoute: typeof StyleGuideRoute
+    }
     '/event/$id': {
       id: '/event/$id'
       path: '/event/$id'
@@ -85,9 +101,21 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface StyleGuideRouteChildren {
+  StyleGuideHomepageRoute: typeof StyleGuideHomepageRoute
+}
+
+const StyleGuideRouteChildren: StyleGuideRouteChildren = {
+  StyleGuideHomepageRoute: StyleGuideHomepageRoute,
+}
+
+const StyleGuideRouteWithChildren = StyleGuideRoute._addFileChildren(
+  StyleGuideRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  StyleGuideRoute: StyleGuideRoute,
+  StyleGuideRoute: StyleGuideRouteWithChildren,
   EventIdRoute: EventIdRoute,
 }
 export const routeTree = rootRouteImport
