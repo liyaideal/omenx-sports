@@ -1,34 +1,21 @@
-## Live stream card — direction A (poster scoreboard)
+把队徽从底部三段市场条迁移到中间的比分条，给底部三段腾出充足的横向空间，确保三个赔率完整显示。
 
-### Changes to `src/components/sports/dashboard/LiveStreamCard.tsx`
+1. Scoreboard 比分条（poster 底部居中胶囊）
+   - 在主队 short 左侧加主队 logo（h-4 w-4，圆形/object-contain）。
+   - 在客队 short 右侧加客队 logo。
+   - 胶囊整体保持现有圆角 + 背景模糊，仅增加两个小 logo。
+   - Draw 没有 logo，不影响（比分条只展示主客两队）。
 
-1. **Add a scoreboard pill inside the poster.** Position absolute, bottom-center of the poster strip, sitting above the gradient fade.
-   - Layout: `MCI` short · big tabular `2` · em-dash separator `–` · big tabular `0` · `ARS` short.
-   - Style: `rounded-full bg-background/70 backdrop-blur px-3 py-1.5 ring-1 ring-white/15`, scores in `font-display text-xl tabular-nums`, team shorts in `font-mono text-[11px] tracking-widest text-muted-foreground`.
-   - Make the poster strip a bit taller (`aspect-[16/8]` instead of `16/7`) so the scoreboard has room to breathe.
+2. 底部 segmented market bar
+   - 移除每个 segment 内的 `<img>` 队徽与 Draw 的 `X` 圆形占位。
+   - 每段只剩：短 label（队名/DRAW）+ 价格。
+   - segment 内部布局：`flex items-baseline justify-center gap-1.5`，label 用 `font-mono text-[10px] uppercase tracking-widest text-muted-foreground`，价格 `font-display text-sm font-semibold tabular-nums`。
+   - 加 `min-w-0`，label 允许 `truncate`，price `shrink-0`，确保三段都能完整展示。
+   - 保留段间 `border-r border-white/[0.06]` 分隔线和整条 hover 高亮。
 
-2. **Drop the inline score** from each outcome row (remove the `scoreFor` lookup and the big score `<span>` added in the previous edit). Score now only lives in the poster overlay — no duplication.
+3. 不改的内容
+   - LIVE pill、联赛缩写、计时器、play 按钮、poster 图。
+   - footer（Streaming now / 人数 / Vol）。
+   - 卡片外框、圆角、阴影。
 
-3. **Restore the larger team crests** in outcome rows: bump logo back to `h-9 w-9` with the glowing ring (`boxShadow` using `team.hue`), the same competitive look it had before.
-
-4. Keep everything else (LIVE pill, league short, live clock, play button, footer) unchanged.
-
-### Result
-
-```
-┌──────────── poster (16:8) ──────────┐
-│ ●LIVE  EPL                  43:12  │
-│                ▶                    │
-│                                     │
-│         ┌──────────────────┐        │
-│         │ MCI  2 – 0  ARS  │        │ ← scoreboard overlay
-│         └──────────────────┘        │
-├─────────────────────────────────────┤
-│ 🛡 Man City              48¢ ↗+2¢  │
-│ 🛡 Arsenal               28¢ ↘-2¢  │
-├─────────────────────────────────────┤
-│ ● Streaming now    2,104  Vol $1.82M│
-└─────────────────────────────────────┘
-```
-
-No other files change.
+技术细节：只改 `src/components/sports/dashboard/LiveStreamCard.tsx`。增加 `fixture.home.logo` / `fixture.away.logo` 到 scoreboard 渲染；删除 outcomes map 内的 logo/占位 JSX；调整 segment className 实现安全收缩。
