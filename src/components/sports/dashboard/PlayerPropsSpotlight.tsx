@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { ChevronLeft, ChevronRight, Share2 } from "lucide-react";
+import { Link } from "@tanstack/react-router";
 import { toast } from "sonner";
 import type { PlayerSpotlight } from "@/data/sports-markets";
 import { PricePill } from "./PricePill";
@@ -104,7 +105,12 @@ export function PlayerPropsSpotlight({ players }: { players: PlayerSpotlight[] }
       {/* prop markets */}
       <div className="relative z-10 mt-4 flex flex-col gap-2 border-t border-border pt-4">
         {player.props.map((m) => (
-          <a key={m.id} href={m.tradeHref} className="flex items-center justify-between gap-3 rounded-2xl bg-white/[0.03] px-3 py-2 ring-1 ring-white/[0.06] transition hover:bg-white/[0.06]">
+          <Link
+            key={m.id}
+            to="/event/$id"
+            params={{ id: m.id }}
+            className="flex items-center justify-between gap-3 rounded-2xl bg-white/[0.03] px-3 py-2 ring-1 ring-white/[0.06] transition hover:bg-white/[0.06]"
+          >
             <div className="min-w-0">
               <div className="truncate text-sm font-medium text-foreground">{m.title}</div>
               <div className="font-mono text-[10px] text-muted-foreground">Vol {m.volume} · {m.endsLabel}</div>
@@ -117,7 +123,7 @@ export function PlayerPropsSpotlight({ players }: { players: PlayerSpotlight[] }
                 </div>
               ))}
             </div>
-          </a>
+          </Link>
         ))}
       </div>
     </section>
