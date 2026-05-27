@@ -62,6 +62,7 @@ export function LiveStreamCard({ market }: { market: SportsMarket }) {
         {/* Scoreboard overlay — broadcast-style score bug */}
         <div className="absolute bottom-3 left-1/2 -translate-x-1/2">
           <div className="flex items-center gap-3 rounded-full bg-background/70 px-4 py-1.5 ring-1 ring-white/15 backdrop-blur">
+            <img src={fixture.home.logo} alt="" className="h-4 w-4 shrink-0 object-contain" />
             <span className="font-mono text-[11px] uppercase tracking-widest text-muted-foreground">
               {fixture.home.short}
             </span>
@@ -75,6 +76,7 @@ export function LiveStreamCard({ market }: { market: SportsMarket }) {
             <span className="font-mono text-[11px] uppercase tracking-widest text-muted-foreground">
               {fixture.away.short}
             </span>
+            <img src={fixture.away.logo} alt="" className="h-4 w-4 shrink-0 object-contain" />
           </div>
         </div>
       </div>
@@ -83,26 +85,18 @@ export function LiveStreamCard({ market }: { market: SportsMarket }) {
           card flat regardless of 2- or 3-way markets and reads cleanly. */}
       <div className="flex items-stretch overflow-hidden rounded-2xl bg-white/[0.03] ring-1 ring-white/[0.05] transition group-hover:bg-white/[0.06]">
         {outcomes.map((o, i) => {
-          const isDraw = !o.team && (o.label === "Draw" || o.meta === "X");
           const cents = Math.round(o.price * 100);
           return (
             <div
               key={o.id}
-              className={`flex flex-1 items-center justify-center gap-2 px-3 py-2.5 ${
+              className={`flex min-w-0 flex-1 items-baseline justify-center gap-1.5 px-2 py-2.5 ${
                 i < outcomes.length - 1 ? "border-r border-white/[0.06]" : ""
               }`}
             >
-              {o.team ? (
-                <img src={o.team.logo} alt="" className="h-5 w-5 shrink-0 object-contain" />
-              ) : (
-                <span className="grid h-5 w-5 shrink-0 place-items-center rounded-full bg-white/[0.06] font-mono text-[10px] text-muted-foreground">
-                  {isDraw ? "X" : "·"}
-                </span>
-              )}
               <span className="truncate font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
                 {o.team?.short ?? o.label}
               </span>
-              <span className="font-display text-sm font-semibold tabular-nums text-foreground">
+              <span className="shrink-0 font-display text-sm font-semibold tabular-nums text-foreground">
                 {cents}<span className="text-muted-foreground">¢</span>
               </span>
             </div>
