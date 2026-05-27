@@ -32,6 +32,8 @@ import { EventHeader } from "@/components/sports/EventHeader";
 import { OutcomeSelector } from "@/components/sports/OutcomeSelector";
 import { TeamName } from "@/components/sports/TeamName";
 import { teams } from "@/lib/teams";
+import { LiveStreamCard } from "@/components/sports/dashboard/LiveStreamCard";
+import { MATCH_MARKETS } from "@/data/sports-markets";
 import { PriceChart } from "@/components/sports/PriceChart";
 import { OrderBook } from "@/components/sports/OrderBook";
 import { TradeForm } from "@/components/sports/TradeForm";
@@ -1052,6 +1054,14 @@ function StyleGuide() {
 
             <div className="mt-6 rounded-2xl border border-[color:var(--accent)]/30 bg-surface p-5 text-xs ring-1 ring-[color:var(--accent)]/15">
               <div className="mb-2 font-mono text-[10px] uppercase tracking-widest text-[color:var(--accent)]">Live Stream Card</div>
+              {(() => {
+                const live = MATCH_MARKETS.find((m) => m.isLiveStream);
+                return live ? (
+                  <div className="mb-4 max-w-xl">
+                    <LiveStreamCard market={live} />
+                  </div>
+                ) : null;
+              })()}
               <ul className="space-y-1.5 text-muted-foreground">
                 <li>• Driven by <code className="font-mono text-foreground">market.isLiveStream === true</code>. One card per active stream, stacked vertically <em>above</em> the regular event tile grid; never mixed inline with them.</li>
                 <li>• Card spans the full width of the events column at every breakpoint — it is intentionally heavier than <code className="font-mono text-foreground">EventMarketTileCard</code> (poster image, lime LIVE pill, accent ring) so the user can't miss that we're broadcasting.</li>
