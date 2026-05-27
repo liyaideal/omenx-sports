@@ -1,72 +1,106 @@
-目标：把首页所有"看起来能点其实没反应"的元素都接上交互。
+# Event 交易页 + PRO 模式完善 Plan
+
+style-guide §13 已经把骨架（EventHeader / OutcomeSelector / PriceChart / OrderBook / TradeForm / PositionsTable / LiquidationBar）做完了；这次把它装成真路由，并把 `TradeForm` 里 PRO 模式（TP/SL、Liq）从展示态升级成可用逻辑。Isolated 保持 "soon"，本期只动 Cross。
 
 ---
 
-### 1. AppTopBar 头像 → 复制 OmenX 的下拉菜单
+## Part A — 路由 & 数据装配
 
-按 OmenX `EventsDesktopHeader.tsx` 的下拉结构 1:1 搬过来，把里面的 `navigate("/xxx")` 全部换成跳 OmenX 绝对 URL。
+### 1. 新路由 `src/routes/event.$id.tsx`
 
-- 触发：头像 + 名字 + ChevronDown 包成 `<DropdownMenuTrigger asChild>`
-- 菜单项（与 OmenX 顺序一致）：
-  - Rewards / Referral → `omenxUrl.account()`
-  - Settings → `${OMENX_BASE}/settings`（新加 `omenxUrl.settings()`）
-  - Language 子菜单：EN/ES/FR/DE/PT/JA（本地 `useState`，纯前端切换）
-  - Transparency Audit → `${OMENX_BASE}/settings/transparency`
-  - Help & Support → 开新窗 `https://omenx-helpcenter.lovable.app`
-  - Join Discord → 开新窗 `https://discord.gg/qXssm2crf9`
-  - Sign Out → 跳 `${OMENX_BASE}/`（不在子站做 supabase signOut）
+URL `/event/$id`，结构：
 
-`shadcn/ui` 的 `dropdown-menu` 已在项目里。
+```text
+AppTopBar
+← Back to dashboard
+EventHeader (league / 队伍 / kickoff / volume / liquidity / endsIn)
+┌──────────────────────────────┬──────────────────────┐
+│ OutcomeSelector              │ TradeForm (sticky)   │
+│ PriceChart (tone 跟选中)     │ 360px 列             │
+│ OrderBook                    │                      │
+└──────────────────────────────┴──────────────────────┘
+PositionsTable
+```
 
-### 2. FanZoneHeader 的 "N teams / Add team" → 弹窗管理关注
+- `loader`：调 `getMarketById(params.id)`，找不到 `throw notFound()`。
+- `head()`：用 market.title 设置 title / og:title / og:description。
+- `errorComponent` + `notFoundComponent`：按 tanstack-errors-notfound 模板。
+- 选中 outcome 用 `useState`，切换时同步 PriceChart tone 和 TradeForm。
+- `≤1024px` 单列堆叠（TradeForm 放最下面，先不做 drawer）。
 
-- 按钮包成 `<DialogTrigger>`，打开 `<Dialog>`
-- 弹窗内容复用 `FansZoneEmpty` 里"Follow your team"那段 grid（crest + Check/Plus 角标 + Save preferences）
-- 抽出新组件 `FollowTeamsPanel.tsx`，`FansZoneEmpty` 和弹窗共用
-  - props：`suggested: TeamLite[]`、`initialFollowed?: Set<string>`、`onSave(names)`
-- 当前没有持久化层，`onSave` 只 `console.log` + 关闭弹窗（与现有 "Save preferences" 行为一致）
-- 弹窗标题："Manage teams you follow"
+### 2. 数据聚合
 
-### 3. MatchMarketCard 右上角 More (⋯) → 下拉菜单
+`src/data/sports-markets.ts`：
 
-- 把 More 按钮换成 `<DropdownMenuTrigger asChild>`
-- 菜单项：
-  - **Share market** → `navigator.clipboard.writeText(market.tradeHref 绝对 URL)` + sonner toast "Link copied"
-  - **View on Polymarket** → `<a href={market.tradeHref}>`（带 ExternalLink 图标）
-- `onClick={(e) => e.stopPropagation()}`，避免触发卡片内部 `<a>` 的跳转
+```ts
+export const ALL_MARKETS: SportsMarket[] = [
+  FEATURED_MATCH, ...MATCH_MARKETS, ...LEAGUE_WINNERS, ...PLAYER_PROPS, …
+];
+export const getMarketById = (id: string) => ALL_MARKETS.find(m => m.id === id);
+```
 
-### 4. PlayerPropsSpotlight → 多 event 轮播
+把所有 `tradeHref: omenxUrl.markets()` 替换为 `` `/event/${id}` ``。
 
-**数据：** `data/sports-markets.ts` 把 `SPOTLIGHT: PlayerSpotlight` 改成 `SPOTLIGHTS: PlayerSpotlight[]`，保留原球员为第一个，再加 2 个 mock：
+### 3. 跳转改内部链接
 
-- 一个球队主题，比如"切尔西本赛季三冠王概率"，`firstName`/`lastName` 用队名拆分，`handle` 用 team short，`photo` 用队徽（在圆形 portrait 容器里居中显示），`position` 写 "Premier League · Club"
-- 一个小组赛冠军主题，比如"Group F Winner"，`photo` 用奖杯/league badge，`position` 写 "World Cup 2026 · Group F"
-- `props` 字段每个 event 自己一组（球队的可以是 "Win the league / Top 4 / Champions League qualification"；小组冠军可以是 4 个国家队的 to-win 价格）
-
-类型 `PlayerSpotlight` 字段宽松，复用即可，不需要新建类型；命名上 `position` 当作"副标题"使用。
-
-**组件：** `PlayerPropsSpotlight` 改签名 `{ players: PlayerSpotlight[] }`
-
-- 内部 `useState<number>(0)` 维护当前 index
-- ← / → 循环切换（取模），切换时图片 / 姓名 / position / props 列表同步更新
-- 去掉左上角 X 按钮
-- 右上角原来的 ↗ "Open" 改成 **Share** 按钮（Share2 图标）：点击复制当前 event 的 tradeHref 到剪贴板 + sonner toast "Link copied"
-
-**调用方：** `index.tsx` 传 `players={SPOTLIGHTS}`；`style-guide.tsx` 同步成 `players={[SPOTLIGHTS[0]]}` 或整组。
+- `MatchMarketCard` "View on OmenX" 改 "Open event"，用 `<Link to="/event/$id">`。
+- `PlayerPropsSpotlight` Share：复制 `window.location.origin + tradeHref`。
+- 整张卡的外层链接改为内部 `<Link>`。
 
 ---
 
-### 涉及文件
+## Part B — TradeForm PRO 模式完善（仅 Cross）
 
-- `src/lib/omenx.ts`（加 `settings`、`transparency` 2 个 URL）
-- `src/components/sports/dashboard/AppTopBar.tsx`（头像换 DropdownMenu）
-- `src/components/sports/dashboard/FanZoneHeader.tsx`（按钮换 DialogTrigger）
-- `src/components/sports/dashboard/FollowTeamsPanel.tsx`（新建）
-- `src/components/sports/dashboard/FansZoneEmpty.tsx`（改用 FollowTeamsPanel）
-- `src/components/sports/dashboard/MatchMarketCard.tsx`（More 换 DropdownMenu + 阻止冒泡）
-- `src/components/sports/dashboard/PlayerPropsSpotlight.tsx`（多 event 轮播 + Share + 去 X）
-- `src/data/sports-markets.ts`（SPOTLIGHT → SPOTLIGHTS 数组，+2 个 mock）
-- `src/routes/index.tsx`（传 players 数组、FanZoneHeader 接 suggested）
-- `src/routes/style-guide.tsx`（同步 SPOTLIGHT 用法）
+### 4. Margin mode 仍是 Cross/Iso 二选一 UI，Iso 保持 disabled
 
-不引入新依赖。所有交互都在前端层，不动业务逻辑、不动路由表。
+- 维持现有 "soon" 徽章和 disabled 状态，不动结构。
+- Liq 计算只走 Cross 公式：`buffer ≈ (balance * 0.9) / (notional / 100)`，溢出 clamp 到 1..99。
+- Summary 加一行 `Margin mode: Cross`（明示当前模式，便于以后接 Iso）。
+
+### 5. TP / SL 真校验 + 收益预览
+
+- 输入支持 0–100 的数字（¢）；超出范围 / 反向即时标红 + 错误文案。
+- 校验规则：
+  - YES 仓：TP 必须 `> px`；SL 必须 `< px` 且 `> liq`
+  - NO 仓：方向相反
+- PRO 区下方新增 mini 预览：
+  - "If TP hits → +X.XX USDC"
+  - "If SL hits → −X.XX USDC"
+  - 公式：`pnl = (target/100 − px/100) * notional * sign − fee`
+- 校验失败时 CTA disabled，并在按钮上显示原因（"Fix TP/SL"）。
+
+### 6. Liq 可视化升级（`LiquidationBar`）
+
+- 加入 TP / SL marker（绿色 / 黄色），位置 = `pct(tpValue)` / `pct(slValue)`，仅在数值有效时显示。
+- `min/max` 扩展到包含 tp/sl，避免溢出。
+- marker hover tooltip："Take profit 78¢ · +120 USDC"。
+- 底部加 0¢ / 50¢ / 100¢ 刻度。
+- 当前价 marker 加 `animate-pulse`。
+
+### 7. 下单提交
+
+- CTA `onClick`：把状态拼成 mock order，`toast.success("Order placed · " + ctaLabel)`，不连后端。
+- 校验未通过 → `toast.error`。
+
+---
+
+## Part C — 不动 & 不做
+
+- 不连 OmenX 后端、不写真实交易服务。
+- 不实现 Isolated margin（保持 "soon"）。
+- 不动 AppTopBar / FansZone / Spotlight 已完成的交互。
+- PositionsTable 沿用现有 mock。
+- 不引入新依赖（toast 已是 sonner）。
+
+---
+
+## 文件清单
+
+- 新建：`src/routes/event.$id.tsx`
+- 改：`src/data/sports-markets.ts`（聚合 + 内部 tradeHref）
+- 改：`src/components/sports/TradeForm.tsx`（TP/SL 校验、预览、Cross liq 公式、提交 toast）
+- 改：`src/components/sports/LiquidationBar.tsx`（TP/SL marker、刻度、tooltip）
+- 改：`src/components/sports/dashboard/MatchMarketCard.tsx`（内部 Link、菜单文案）
+- 改：`src/components/sports/dashboard/PlayerPropsSpotlight.tsx`（Share origin 拼接）
+
+确认后我开工。

@@ -3,7 +3,6 @@
  * sport-specific contexts (match 1X2, league-winner futures, top-scorer,
  * player props). Prices are in 0..1; render as ¢ in the UI.
  */
-import { omenxUrl } from "@/lib/omenx";
 import { TEAMS, type TeamLite } from "@/data/sports-mock";
 import mbappePhoto from "@/assets/mbappe.png";
 
@@ -57,7 +56,7 @@ export const FEATURED_MATCH: SportsMarket = {
     { id: "d", label: "Draw", price: 0.21, delta24h: -0.01 },
     { id: "a", label: "Paris SG", price: 0.37, delta24h: -0.02, team: TEAMS.psg },
   ],
-  tradeHref: omenxUrl.markets(),
+  tradeHref: `/event/a`,
 };
 
 export const MATCH_MARKETS: SportsMarket[] = [
@@ -77,7 +76,7 @@ export const MATCH_MARKETS: SportsMarket[] = [
       { id: "d", label: "Draw", price: 0.24, delta24h: 0, meta: "X" },
       { id: "a", label: "ARS", price: 0.28, delta24h: -0.02, team: TEAMS.arsenal },
     ],
-    tradeHref: omenxUrl.markets(),
+    tradeHref: `/event/a`,
     dayOffset: 0,
   },
   {
@@ -96,7 +95,7 @@ export const MATCH_MARKETS: SportsMarket[] = [
       { id: "h", label: "LIV", price: 0.63, delta24h: 0.04, team: TEAMS.liverpool },
       { id: "a", label: "NEW", price: 0.37, delta24h: -0.04, team: TEAMS.newcastle },
     ],
-    tradeHref: omenxUrl.markets(),
+    tradeHref: `/event/a`,
     dayOffset: 1,
   },
   {
@@ -114,7 +113,7 @@ export const MATCH_MARKETS: SportsMarket[] = [
       { id: "y", label: "YES", price: 0.18, delta24h: 0.02 },
       { id: "n", label: "NO", price: 0.82, delta24h: -0.02 },
     ],
-    tradeHref: omenxUrl.markets(),
+    tradeHref: `/event/n`,
     dayOffset: 2,
   },
   {
@@ -133,7 +132,7 @@ export const MATCH_MARKETS: SportsMarket[] = [
       { id: "d", label: "Draw", price: 0.23, delta24h: 0, meta: "X" },
       { id: "a", label: "BAR", price: 0.36, delta24h: -0.01, team: TEAMS.barcelona },
     ],
-    tradeHref: omenxUrl.markets(),
+    tradeHref: `/event/a`,
     dayOffset: 0,
   },
   {
@@ -152,7 +151,7 @@ export const MATCH_MARKETS: SportsMarket[] = [
       { id: "d", label: "Draw", price: 0.21, delta24h: -0.01, meta: "X" },
       { id: "a", label: "PSG", price: 0.37, delta24h: -0.02, team: TEAMS.psg },
     ],
-    tradeHref: omenxUrl.markets(),
+    tradeHref: `/event/a`,
     dayOffset: 1,
   },
   {
@@ -170,7 +169,7 @@ export const MATCH_MARKETS: SportsMarket[] = [
       { id: "h", label: "ARS", price: 0.66, delta24h: 0.02, team: TEAMS.arsenal },
       { id: "a", label: "NEW", price: 0.34, delta24h: -0.02, team: TEAMS.newcastle },
     ],
-    tradeHref: omenxUrl.markets(),
+    tradeHref: `/event/a`,
     dayOffset: 3,
   },
   {
@@ -187,7 +186,7 @@ export const MATCH_MARKETS: SportsMarket[] = [
       { id: "y", label: "YES", price: 0.31, delta24h: 0.03 },
       { id: "n", label: "NO", price: 0.69, delta24h: -0.03 },
     ],
-    tradeHref: omenxUrl.markets(),
+    tradeHref: `/event/n`,
     dayOffset: 0,
   },
   {
@@ -206,7 +205,7 @@ export const MATCH_MARKETS: SportsMarket[] = [
       { id: "d", label: "Draw", price: 0.16, delta24h: 0, meta: "X" },
       { id: "a", label: "TOT", price: 0.12, delta24h: 0, team: TEAMS.arsenal },
     ],
-    tradeHref: omenxUrl.markets(),
+    tradeHref: `/event/a`,
     dayOffset: -1,
   },
 ];
@@ -227,7 +226,7 @@ export const LEAGUE_WINNER_MARKET: SportsMarket = {
     { id: "liv", label: "Liverpool", price: 0.18, delta24h: -0.01, team: TEAMS.liverpool },
     { id: "new", label: "Newcastle", price: 0.08, delta24h: -0.02, team: TEAMS.newcastle },
   ],
-  tradeHref: omenxUrl.markets(),
+  tradeHref: `/event/new`,
 };
 
 export const TOP_SCORER_MARKET: SportsMarket = {
@@ -258,7 +257,7 @@ export const TOP_SCORER_MARKET: SportsMarket = {
       meta: "16G · #17",
     },
   ],
-  tradeHref: omenxUrl.markets(),
+  tradeHref: `/event/haaland`,
 };
 
 export interface PlayerSpotlight {
@@ -297,7 +296,7 @@ const MBAPPE_SPOTLIGHT: PlayerSpotlight = {
         { id: "y", label: "Yes", price: 0.71, delta24h: 0.04 },
         { id: "n", label: "No", price: 0.29, delta24h: -0.04 },
       ],
-      tradeHref: omenxUrl.markets(),
+      tradeHref: `/event/n`,
     },
     {
       id: "mbappe-2plus",
@@ -313,7 +312,7 @@ const MBAPPE_SPOTLIGHT: PlayerSpotlight = {
         { id: "y", label: "Yes", price: 0.28, delta24h: 0.02 },
         { id: "n", label: "No", price: 0.72, delta24h: -0.02 },
       ],
-      tradeHref: omenxUrl.markets(),
+      tradeHref: `/event/n`,
     },
     {
       id: "mbappe-shots",
@@ -329,7 +328,7 @@ const MBAPPE_SPOTLIGHT: PlayerSpotlight = {
         { id: "o", label: "Over", price: 0.46, delta24h: 0.01 },
         { id: "u", label: "Under", price: 0.54, delta24h: -0.01 },
       ],
-      tradeHref: omenxUrl.markets(),
+      tradeHref: `/event/u`,
     },
   ],
 };
@@ -357,7 +356,7 @@ const CHELSEA_SPOTLIGHT: PlayerSpotlight = {
         { id: "y", label: "Yes", price: 0.18, delta24h: 0.02 },
         { id: "n", label: "No", price: 0.82, delta24h: -0.02 },
       ],
-      tradeHref: omenxUrl.markets(),
+      tradeHref: `/event/n`,
     },
     {
       id: "che-top4",
@@ -373,7 +372,7 @@ const CHELSEA_SPOTLIGHT: PlayerSpotlight = {
         { id: "y", label: "Yes", price: 0.66, delta24h: 0.03 },
         { id: "n", label: "No", price: 0.34, delta24h: -0.03 },
       ],
-      tradeHref: omenxUrl.markets(),
+      tradeHref: `/event/n`,
     },
     {
       id: "che-ucl-qual",
@@ -389,7 +388,7 @@ const CHELSEA_SPOTLIGHT: PlayerSpotlight = {
         { id: "y", label: "Yes", price: 0.74, delta24h: 0.01 },
         { id: "n", label: "No", price: 0.26, delta24h: -0.01 },
       ],
-      tradeHref: omenxUrl.markets(),
+      tradeHref: `/event/n`,
     },
   ],
 };
@@ -418,7 +417,7 @@ const GROUP_F_SPOTLIGHT: PlayerSpotlight = {
         { id: "y", label: "Yes", price: 0.52, delta24h: 0.03 },
         { id: "n", label: "No", price: 0.48, delta24h: -0.03 },
       ],
-      tradeHref: omenxUrl.markets(),
+      tradeHref: `/event/n`,
     },
     {
       id: "wc26-grpf-ger",
@@ -434,7 +433,7 @@ const GROUP_F_SPOTLIGHT: PlayerSpotlight = {
         { id: "y", label: "Yes", price: 0.31, delta24h: -0.02 },
         { id: "n", label: "No", price: 0.69, delta24h: 0.02 },
       ],
-      tradeHref: omenxUrl.markets(),
+      tradeHref: `/event/n`,
     },
     {
       id: "wc26-grpf-jpn",
@@ -450,7 +449,7 @@ const GROUP_F_SPOTLIGHT: PlayerSpotlight = {
         { id: "y", label: "Yes", price: 0.12, delta24h: 0.01 },
         { id: "n", label: "No", price: 0.88, delta24h: -0.01 },
       ],
-      tradeHref: omenxUrl.markets(),
+      tradeHref: `/event/n`,
     },
   ],
 };
@@ -469,3 +468,16 @@ export const ACCOUNT_STATS = {
   openPositions: 7,
   pnlToday: "+$142.20",
 };
+
+/** Aggregated index for the /event/$id trade page lookup. */
+export const ALL_MARKETS: SportsMarket[] = [
+  FEATURED_MATCH,
+  ...MATCH_MARKETS,
+  LEAGUE_WINNER_MARKET,
+  TOP_SCORER_MARKET,
+  ...SPOTLIGHTS.flatMap((s) => s.props),
+];
+
+export function getMarketById(id: string): SportsMarket | undefined {
+  return ALL_MARKETS.find((m) => m.id === id);
+}

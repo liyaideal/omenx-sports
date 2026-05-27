@@ -1,4 +1,5 @@
-import { Clock, ExternalLink, MoreHorizontal, Share2, Users } from "lucide-react";
+import { ArrowUpRight, Clock, MoreHorizontal, Share2, Users } from "lucide-react";
+import { Link } from "@tanstack/react-router";
 import { toast } from "sonner";
 import type { SportsMarket, TeamLite } from "@/data/sports-markets";
 import { PricePill } from "./PricePill";
@@ -60,13 +61,14 @@ export function MatchMarketCard({ market }: { market: SportsMarket }) {
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem asChild>
-              <a
-                href={market.tradeHref}
+              <Link
+                to="/event/$id"
+                params={{ id: market.id }}
                 onClick={(e) => e.stopPropagation()}
               >
-                <ExternalLink className="mr-2 h-4 w-4 text-muted-foreground" />
-                View on OmenX
-              </a>
+                <ArrowUpRight className="mr-2 h-4 w-4 text-muted-foreground" />
+                Open event
+              </Link>
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
@@ -80,7 +82,7 @@ export function MatchMarketCard({ market }: { market: SportsMarket }) {
         <CrestBubble team={away} />
       </div>
 
-      <a href={market.tradeHref} className="relative mt-5 block">
+      <Link to="/event/$id" params={{ id: market.id }} className="relative mt-5 block">
         <div className="flex h-2 gap-[2px] overflow-hidden rounded-full bg-white/[0.05]">
           {market.outcomes.map((o) => {
             const isDraw = !o.team;
@@ -116,7 +118,7 @@ export function MatchMarketCard({ market }: { market: SportsMarket }) {
             );
           })}
         </div>
-      </a>
+      </Link>
 
       <footer className="relative mt-5 flex items-center justify-between text-[11px] font-mono text-muted-foreground">
         <span className="inline-flex items-center gap-1.5"><Clock className="h-3.5 w-3.5" /> {market.endsLabel}</span>
