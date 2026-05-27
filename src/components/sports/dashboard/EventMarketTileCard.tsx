@@ -1,4 +1,5 @@
 import { Clock, Users } from "lucide-react";
+import { Link } from "@tanstack/react-router";
 import type { Outcome, SportsMarket, TeamLite } from "@/data/sports-markets";
 import { PricePill } from "./PricePill";
 import { LeagueChip } from "../LeagueBadge";
@@ -15,8 +16,9 @@ export function EventMarketTileCard({ market }: { market: SportsMarket }) {
   const hasFixture = Boolean(market.fixture);
   const isBinary = market.shape === "binary";
   return (
-    <a
-      href={market.tradeHref}
+    <Link
+      to="/event/$id"
+      params={{ id: market.id }}
       className="group flex h-full flex-col gap-4 rounded-3xl border border-border bg-surface p-5 shadow-card transition hover:border-white/15"
     >
       <header className="flex items-center justify-between gap-2">
@@ -62,7 +64,7 @@ export function EventMarketTileCard({ market }: { market: SportsMarket }) {
           <span className="text-foreground">Vol {market.volume}</span>
         </span>
       </footer>
-    </a>
+    </Link>
   );
 }
 

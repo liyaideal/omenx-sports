@@ -1,4 +1,5 @@
 import { ArrowUpRight } from "lucide-react";
+import { Link } from "@tanstack/react-router";
 import type { SportsMarket } from "@/data/sports-markets";
 import { PricePill } from "./PricePill";
 import { LeagueChip } from "../LeagueBadge";
@@ -20,9 +21,9 @@ export function LeagueWinnerMarketCard({ market }: { market: SportsMarket }) {
           </div>
           <h3 className="mt-1.5 font-display text-base font-semibold text-foreground">{market.title}</h3>
         </div>
-        <a href={market.tradeHref} className="inline-flex items-center gap-1 text-xs font-medium text-muted-foreground hover:text-foreground">
+        <Link to="/event/$id" params={{ id: market.id }} className="inline-flex items-center gap-1 text-xs font-medium text-muted-foreground hover:text-foreground">
           Trade <ArrowUpRight className="h-3.5 w-3.5" />
-        </a>
+        </Link>
       </header>
 
       <div className="grid grid-cols-[24px_1fr_auto] items-center gap-3 pb-2 text-[10px] font-mono uppercase tracking-widest text-muted-foreground">
@@ -33,9 +34,10 @@ export function LeagueWinnerMarketCard({ market }: { market: SportsMarket }) {
 
       <div className="flex flex-col divide-y divide-white/[0.04]">
         {rows.map((o, i) => (
-          <a
+          <Link
             key={o.id}
-            href={market.tradeHref}
+            to="/event/$id"
+            params={{ id: market.id }}
             className="grid grid-cols-[24px_1fr_auto] items-center gap-3 py-2.5 transition hover:bg-white/[0.02]"
           >
             <span className="font-mono text-xs tabular-nums text-muted-foreground">{i + 1}</span>
@@ -51,7 +53,7 @@ export function LeagueWinnerMarketCard({ market }: { market: SportsMarket }) {
               <span className="text-sm font-medium text-foreground">{o.label}</span>
             </div>
             <PricePill price={o.price} delta={o.delta24h} size="sm" />
-          </a>
+          </Link>
         ))}
       </div>
 
