@@ -38,6 +38,9 @@ import { MobileTopBar } from "@/components/sports/mobile/MobileTopBar";
 import { MobileBottomNav } from "@/components/sports/mobile/MobileBottomNav";
 import { MobileLiveHero } from "@/components/sports/mobile/MobileLiveHero";
 import { MeSheet } from "@/components/sports/mobile/MeSheet";
+import { MobileHomeHero } from "@/components/sports/mobile/MobileHomeHero";
+import { MobileAccountSnapshot } from "@/components/sports/mobile/MobileAccountSnapshot";
+import { MobileLiveStatusBar } from "@/components/sports/mobile/MobileLiveStatusBar";
 import { ACCOUNT_STATS } from "@/data/sports-markets";
 import { PriceChart } from "@/components/sports/PriceChart";
 import { OrderBook } from "@/components/sports/OrderBook";
@@ -1115,10 +1118,14 @@ function StyleGuide() {
 
           <Section id="mobile-shell" title="Mobile Shell" kicker="18 — Mobile homepage">
             <p className="mb-6 max-w-3xl text-sm text-muted-foreground">
-              The mobile homepage swaps the desktop 3-column grid for a single vertical flow, a
-              compact breadcrumb top bar, a 4-tab bottom nav (Home / Events / Fans / Me), and
-              folds the BridgeStrip into a Me sheet. Everything below renders inside a 360-wide
-              phone frame so the playground reads at real mobile density.
+              Mobile splits into three independent tabs with zero content overlap:
+              <b className="text-foreground"> Home</b> = personal landing (greeting,
+              account snapshot, live status, spotlight);
+              <b className="text-foreground"> Events</b> = every match market (live hero +
+              day strip + season futures);
+              <b className="text-foreground"> Fans</b> = social feed (follow, trades, posts).
+              The bottom nav is the single permanent entry point — pages don't
+              cross-promote each other with teaser cards.
             </p>
 
             <div className="grid gap-6 lg:grid-cols-[360px_minmax(0,1fr)]">
@@ -1129,9 +1136,20 @@ function StyleGuide() {
                   onAvatarClick={() => {}}
                 />
                 <div className="space-y-5 px-4 py-5">
-                  <MobileLiveHero
-                    markets={MATCH_MARKETS.filter((m) => m.isLiveStream).slice(0, 3)}
+                  <MobileHomeHero userName="Jeremy" equity={ACCOUNT_STATS.available} />
+                  <MobileAccountSnapshot
+                    openPositions={ACCOUNT_STATS.openPositions}
+                    pnlToday={ACCOUNT_STATS.pnlToday}
+                    toClaim={ACCOUNT_STATS.toClaim}
+                    portfolioHref="#"
                   />
+                  <MobileLiveStatusBar
+                    count={MATCH_MARKETS.filter((m) => m.isLiveStream).length}
+                    topLabel={MATCH_MARKETS.find((m) => m.isLiveStream)?.title.split(" — ")[0]}
+                  />
+                  <div className="rounded-2xl border border-dashed border-border bg-surface/40 px-4 py-6 text-center text-xs text-muted-foreground">
+                    Player Spotlight section here
+                  </div>
                 </div>
                 <div className="pointer-events-none sticky bottom-0">
                   <MobileBottomNav onMeClick={() => {}} />
@@ -1144,9 +1162,12 @@ function StyleGuide() {
                     Anatomy
                   </div>
                   <ul className="space-y-1.5 text-xs text-muted-foreground">
-                    <li>• <code className="font-mono text-foreground">MobileTopBar</code> — `Ω OmenX › Sports` breadcrumb (left), bell + avatar (right). Tapping Ω returns to OmenX main site. Hidden ≥ md.</li>
-                    <li>• <code className="font-mono text-foreground">MobileLiveHero</code> — big-crest score card + horizontal rail of additional live matches. Renders only when at least one stream is live.</li>
-                    <li>• <code className="font-mono text-foreground">MobileBottomNav</code> — fixed bottom, 4 tabs, safe-area aware. Active tab gets a neon top hairline + primary icon glow. Tabs scroll-to-section on homepage; Me opens the sheet.</li>
+                    <li>• <code className="font-mono text-foreground">MobileTopBar</code> — OmenX logo + Sports lockup (left), bell + avatar (right). Hidden ≥ md.</li>
+                    <li>• <code className="font-mono text-foreground">MobileHomeHero</code> — greeting card with available equity. Home-only.</li>
+                    <li>• <code className="font-mono text-foreground">MobileAccountSnapshot</code> — 3-stat card (open / today P&amp;L / to claim) linking to OmenX portfolio. Mobile equivalent of the desktop BridgeStrip.</li>
+                    <li>• <code className="font-mono text-foreground">MobileLiveStatusBar</code> — one-line "X live now" indicator linking to /events. Renders nothing when count is 0.</li>
+                    <li>• <code className="font-mono text-foreground">MobileLiveHero</code> — full live-stream card stack. Lives only on /events.</li>
+                    <li>• <code className="font-mono text-foreground">MobileBottomNav</code> — fixed bottom, 4 tabs (Home / Events / Fans / Me), safe-area aware. Tabs are real routes via TanStack `Link`; Me opens the sheet.</li>
                     <li>• <code className="font-mono text-foreground">MeSheet</code> — bottom sheet: user + Equity → 3 stats (BridgeStrip) → Open Portfolio CTA → 2×2 Explore OmenX grid → menu → Sign out. All routes that left the sports zone live in here.</li>
                   </ul>
                 </div>
@@ -1156,8 +1177,9 @@ function StyleGuide() {
                   </div>
                   <ul className="space-y-1.5 text-muted-foreground">
                     <li>• Desktop and mobile branches both render in `/` via Tailwind `hidden md:block` / `md:hidden` — no JS gate, no SSR flash.</li>
-                    <li>• `BridgeStrip` is desktop-only; its data moves into `MeSheet` on mobile to keep the bottom edge clean.</li>
-                    <li>• Bottom tabs never include cross-OmenX destinations — those belong in `MeSheet` so taps on the persistent bar never leave the zone by accident.</li>
+                    <li>• Zero overlap across tabs: live hero lives ONLY on /events, FanZoneHeader ONLY on /fans, account snapshot ONLY on /. No teaser/SeeMore cards between tabs.</li>
+                    <li>• `BridgeStrip` is desktop-only; its data appears as `MobileAccountSnapshot` on Home and inside `MeSheet`.</li>
+                    <li>• Bottom tabs never include cross-OmenX destinations — those belong in `MeSheet`.</li>
                     <li>• Mobile event grid collapses to single column; live cards become the dedicated `MobileLiveHero`, not `LiveStreamCard`.</li>
                   </ul>
                 </div>
