@@ -24,6 +24,7 @@ import { ShowMoreEventsButton } from "@/components/sports/dashboard/ShowMoreEven
 import { LeagueWinnerMarketCard } from "@/components/sports/dashboard/LeagueWinnerMarketCard";
 import { TopScorerMarketCard } from "@/components/sports/dashboard/TopScorerMarketCard";
 import { PlayerPropsSpotlight } from "@/components/sports/dashboard/PlayerPropsSpotlight";
+import { FollowTeamsCompact } from "@/components/sports/dashboard/FollowTeamsCompact";
 
 import {
   TILE_THREE_WAY,
@@ -56,6 +57,8 @@ import {
   STATS_BIG_CLAIM,
   DAY_COUNTS_VARIED,
   DAY_COUNTS_EMPTY,
+  WORLD_CUP_GROUPS,
+  WORLD_CUP_PREFOLLOWED,
 } from "@/data/style-guide-fixtures";
 
 export const Route = createFileRoute("/style-guide-homepage")({
@@ -194,6 +197,24 @@ function HomepagePlayground() {
               <div className="flex max-w-[420px] flex-col gap-4">
                 <MatchMarketCard market={FEATURED_MATCH} />
                 <FanPostCard {...FAN_POST} />
+              </div>
+            </Variant>
+            <Variant caption="large catalog — World Cup 24 teams · no follows yet (compact card + full-screen picker)">
+              <div className="max-w-[420px]">
+                <FollowTeamsCompact
+                  groups={WORLD_CUP_GROUPS}
+                  description="24 national teams · search by name or country code"
+                  emptyHint="Tap below to pick the squads you'll be cheering for."
+                />
+              </div>
+            </Variant>
+            <Variant caption="large catalog — World Cup, 3 teams pre-followed (manage flow)">
+              <div className="max-w-[420px]">
+                <FollowTeamsCompact
+                  groups={WORLD_CUP_GROUPS}
+                  initialFollowed={WORLD_CUP_PREFOLLOWED}
+                  description="24 national teams · tap Manage to edit your follows"
+                />
               </div>
             </Variant>
           </Section>
