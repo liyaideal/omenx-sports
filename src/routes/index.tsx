@@ -17,10 +17,9 @@ import { ShowMoreEventsButton } from "@/components/sports/dashboard/ShowMoreEven
 import {
   ACCOUNT_STATS,
   FEATURED_MATCH,
-  LEAGUE_WINNER_MARKET,
   MATCH_MARKETS,
+  SEASON_LEAGUE_GROUPS,
   SPOTLIGHTS,
-  TOP_SCORER_MARKET,
 } from "@/data/sports-markets";
 import {
   FAN_POST,
@@ -29,7 +28,6 @@ import {
   SUGGESTED_TEAMS,
   TEAMS,
   type TeamKey,
-  TOP_SCORERS,
 } from "@/data/sports-mock";
 import { omenxUrl } from "@/lib/omenx";
 
