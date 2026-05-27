@@ -171,3 +171,75 @@ export const DAY_COUNTS_VARIED: Record<number, number> = {
   [-3]: 0, [-2]: 2, [-1]: 4, [0]: 6, [1]: 3, [2]: 1, [3]: 0,
 };
 export const DAY_COUNTS_EMPTY: Record<number, number> = {};
+
+// ---------- World Cup 24-team picker fixture ----------
+
+import type { TeamLite } from "@/data/sports-mock";
+import type { TeamGroup } from "@/components/sports/dashboard/TeamPickerSheet";
+
+const flag = (code: string): string => `https://flagcdn.com/w80/${code}.png`;
+const nat = (name: string, short: string, code: string, hue: number): TeamLite => ({
+  name,
+  short,
+  logo: flag(code),
+  hue,
+});
+
+export const WORLD_CUP_GROUPS: TeamGroup[] = [
+  {
+    label: "Group A",
+    teams: [
+      nat("Argentina", "ARG", "ar", 210),
+      nat("Mexico", "MEX", "mx", 145),
+      nat("Poland", "POL", "pl", 10),
+      nat("Saudi Arabia", "KSA", "sa", 145),
+    ],
+  },
+  {
+    label: "Group B",
+    teams: [
+      nat("France", "FRA", "fr", 245),
+      nat("Denmark", "DEN", "dk", 10),
+      nat("Tunisia", "TUN", "tn", 10),
+      nat("Australia", "AUS", "au", 35),
+    ],
+  },
+  {
+    label: "Group C",
+    teams: [
+      nat("England", "ENG", "gb-eng", 10),
+      nat("United States", "USA", "us", 245),
+      nat("Wales", "WAL", "gb-wls", 10),
+      nat("Iran", "IRN", "ir", 145),
+    ],
+  },
+  {
+    label: "Group D",
+    teams: [
+      nat("Spain", "ESP", "es", 35),
+      nat("Germany", "GER", "de", 60),
+      nat("Japan", "JPN", "jp", 10),
+      nat("Costa Rica", "CRC", "cr", 245),
+    ],
+  },
+  {
+    label: "Group E",
+    teams: [
+      nat("Belgium", "BEL", "be", 10),
+      nat("Croatia", "CRO", "hr", 245),
+      nat("Morocco", "MAR", "ma", 10),
+      nat("Canada", "CAN", "ca", 10),
+    ],
+  },
+  {
+    label: "Group F",
+    teams: [
+      nat("Brazil", "BRA", "br", 145),
+      nat("Portugal", "POR", "pt", 145),
+      nat("Uruguay", "URU", "uy", 215),
+      nat("Switzerland", "SUI", "ch", 10),
+    ],
+  },
+];
+
+export const WORLD_CUP_PREFOLLOWED = ["Brazil", "Argentina", "England"];
