@@ -199,21 +199,43 @@ function HomepagePlayground() {
                 <FanPostCard {...FAN_POST} />
               </div>
             </Variant>
-            <Variant caption="large catalog — World Cup 24 teams · no follows yet (compact card + full-screen picker)">
+            <Variant caption="MOBILE — World Cup 24 teams · no follows (compact card + full-screen sheet picker)">
               <div className="max-w-[420px]">
                 <FollowTeamsCompact
                   groups={WORLD_CUP_GROUPS}
                   description="24 national teams · search by name or country code"
                   emptyHint="Tap below to pick the squads you'll be cheering for."
+                  pickerVariant="sheet"
                 />
               </div>
             </Variant>
-            <Variant caption="large catalog — World Cup, 3 teams pre-followed (manage flow)">
+            <Variant caption="MOBILE — World Cup, 3 teams pre-followed (manage flow, sheet picker)">
               <div className="max-w-[420px]">
                 <FollowTeamsCompact
                   groups={WORLD_CUP_GROUPS}
                   initialFollowed={WORLD_CUP_PREFOLLOWED}
                   description="24 national teams · tap Manage to edit your follows"
+                  pickerVariant="sheet"
+                />
+              </div>
+            </Variant>
+            <Variant caption="DESKTOP — World Cup 24 teams · centered dialog picker (click Add teams)">
+              <div className="max-w-[420px]">
+                <FollowTeamsCompact
+                  groups={WORLD_CUP_GROUPS}
+                  description="24 national teams · desktop uses a centered modal, not a full-screen sheet"
+                  emptyHint="Click below to open the dialog picker."
+                  pickerVariant="dialog"
+                />
+              </div>
+            </Variant>
+            <Variant caption="DESKTOP — World Cup, 3 teams pre-followed (manage via dialog)">
+              <div className="max-w-[420px]">
+                <FollowTeamsCompact
+                  groups={WORLD_CUP_GROUPS}
+                  initialFollowed={WORLD_CUP_PREFOLLOWED}
+                  description="24 national teams · click Manage to open the desktop dialog"
+                  pickerVariant="dialog"
                 />
               </div>
             </Variant>

@@ -366,6 +366,34 @@ Section 7 is append-only. Every regression the user catches gets pinned here.
   main grid but stays first-class.
 - Use `h-dvh` (not `h-screen`) for any full-height layout.
 
+### Modal / Picker presentation by form factor
+
+Large-catalog pickers (e.g. World Cup team follow, 24+ items with search +
+grouped multi-select) MUST switch presentation by form factor. Same body,
+different shell:
+
+| Form factor | Shell | Component | When |
+|---|---|---|---|
+| MOBILE (`<md`) | Full-screen bottom sheet (`Sheet side="bottom"`, `inset-0 h-full`) with sticky header + sticky Save footer | `<TeamPickerSheet variant="sheet" />` | Touch, one-hand reach, viewport-owned flow |
+| DESKTOP (`≥md`) | Centered modal (`Dialog`, `w-[min(640px,92vw)] max-h-[80vh]`, `rounded-3xl`) over the page | `<TeamPickerSheet variant="dialog" />` | Mouse, page context stays visible behind overlay |
+
+Rules:
+- Never use a full-screen sheet on desktop — it eats the workspace and feels
+  like a mobile webview. Never use a tiny centered dialog on mobile — search
+  + grouped crests need viewport-scale real estate.
+- Both variants share: sticky search header, "Following" pin group on top,
+  grouped catalog with multi-select crests, sticky Save bar (`Clear all` +
+  `Save preferences`).
+- The sheet variant ships its own close `X` in the header. The dialog
+  variant relies on the built-in `DialogContent` close button — do NOT
+  render a second one.
+- The compact entry card (`FollowTeamsCompact`) takes `pickerVariant` and
+  passes it through. The hosting surface decides — typically `"sheet"` on
+  mobile dashboards and `"dialog"` on desktop dashboards.
+- This rule generalizes: any large-catalog picker (teams, leagues, markets,
+  filters with >12 options + search) follows the same sheet-on-mobile,
+  dialog-on-desktop split.
+
 ## 9. Agent Prompt Guide
 
 Paste this block into design prompts for consistency:
