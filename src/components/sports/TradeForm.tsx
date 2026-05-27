@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import { Zap } from "lucide-react";
+import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
@@ -22,7 +23,6 @@ interface TradeFormProps {
 
 type Side = "buy" | "sell";
 type Type = "market" | "limit";
-type Margin = "cross" | "isolated";
 
 export function TradeForm({
   outcome,
@@ -36,7 +36,6 @@ export function TradeForm({
   const [pro, setPro] = useState(false);
   const [margin, setMargin] = useState(100);
   const [leverage, setLeverage] = useState(1);
-  const [marginMode, setMarginMode] = useState<Margin>("cross");
   const [tp, setTp] = useState("");
   const [sl, setSl] = useState("");
   const [limit, setLimit] = useState(price.toString());
@@ -61,18 +60,80 @@ export function TradeForm({
   // position. PnL at settle = (1 − px/100) × notional for the holder of the
   // winning side; the losing side settles to 0.
   const pnlAtSettle = (1 - px / 100) * notional - fee;
-  // Mock liq price — for display only; real engine uses maintenance margin.
+  // Cross-margin liq price — display only; real engine uses maintenance margin.
+  // Cross uses ~90% of free balance as the safety buffer, expressed in price ¢.
   const liq = useMemo(() => {
-    if (leverage <= 1) return 0;
-    const buffer = 100 / leverage;
-    return outcome === "yes" ? Math.max(1, px - buffer) : Math.min(99, px + buffer);
-  }, [leverage, px, outcome]);
+    if (leverage <= 1 || notional <= 0) return 0;
+    const buffer = ((balance * 0.9) / notional) * 100;
+    const raw = outcome === "yes" ? px - buffer : px + buffer;
+    return Math.max(1, Math.min(99, Math.round(raw)));
+  }, [leverage, px, outcome, balance, notional]);
+
+  // TP / SL validation. Inputs are in ¢ (0..100). Direction depends on side:
+  // YES → TP > px, SL < px (and > liq); NO → reversed.
+  const tpNum = tp === "" ? null : Number(tp);
+  const slNum = sl === "" ? null : Number(sl);
+  const validRange = (v: number | null) => v === null || (Number.isFinite(v) && v >= 0 && v <= 100);
+  const tpInRange = validRange(tpNum);
+  const slInRange = validRange(slNum);
+  const tpDirOk =
+    tpNum === null ? true : outcome === "yes" ? tpNum > px : tpNum < px;
+  const slDirOk =
+    slNum === null
+      ? true
+      : outcome === "yes"
+        ? slNum < px && (leverage <= 1 || slNum > liq)
+        : slNum > px && (leverage <= 1 || slNum < liq);
+  const tpError = !tpInRange
+    ? "0–100¢"
+    : !tpDirOk
+      ? outcome === "yes"
+        ? `must be > ${px}¢`
+        : `must be < ${px}¢`
+      : null;
+  const slError = !slInRange
+    ? "0–100¢"
+    : !slDirOk
+      ? outcome === "yes"
+        ? leverage > 1 && slNum !== null && slNum <= liq
+          ? `must be > liq ${liq}¢`
+          : `must be < ${px}¢`
+        : leverage > 1 && slNum !== null && slNum >= liq
+          ? `must be < liq ${liq}¢`
+          : `must be > ${px}¢`
+      : null;
+  const hasFormError = !!tpError || !!slError;
+  // Mini PnL preview at TP / SL.
+  const sign = outcome === "yes" ? 1 : -1;
+  const tpPnl =
+    tpNum !== null && tpDirOk && tpInRange
+      ? (tpNum / 100 - px / 100) * notional * sign - fee
+      : null;
+  const slPnl =
+    slNum !== null && slDirOk && slInRange
+      ? (slNum / 100 - px / 100) * notional * sign - fee
+      : null;
 
   const action = side === "buy" ? "Buy" : "Sell";
-  const ctaLabel =
+  const baseCtaLabel =
     leverage > 1
       ? `${action} ${outcomeLabel} ${leverage}× @ ${Math.round(px)}¢`
       : `${action} ${outcomeLabel} @ ${Math.round(px)}¢`;
+  const ctaLabel = hasFormError ? "Fix TP / SL" : baseCtaLabel;
+
+  const handleSubmit = () => {
+    if (hasFormError) {
+      toast.error("Fix TP / SL before submitting");
+      return;
+    }
+    if (margin <= 0) {
+      toast.error("Set a margin amount");
+      return;
+    }
+    toast.success(`Order placed · ${baseCtaLabel}`, {
+      description: `Notional ${notional.toFixed(2)} USDC · Fee ${fee.toFixed(2)}`,
+    });
+  };
 
   return (
     <div className={cn("rounded-2xl border border-border bg-surface p-5 shadow-card", className)}>
@@ -189,7 +250,7 @@ export function TradeForm({
           <div>
             <div className="grid grid-cols-2 gap-1 rounded-lg bg-white/[0.04] p-1">
               <button
-                onClick={() => setMarginMode("cross")}
+                type="button"
                 className="rounded-md py-1 text-[11px] font-mono uppercase tracking-widest bg-surface-elevated text-foreground"
               >
                 cross
@@ -212,27 +273,61 @@ export function TradeForm({
           </div>
 
           <div className="grid grid-cols-2 gap-2">
-            <Field label="TP (¢)" compact>
+            <Field label="TP (¢)" compact error={tpError}>
               <input
                 value={tp}
                 onChange={(e) => setTp(e.target.value)}
                 placeholder="—"
-                className="w-full bg-transparent text-right font-mono text-sm tabular-nums outline-none placeholder:text-muted-foreground"
+                inputMode="decimal"
+                className={cn(
+                  "w-full bg-transparent text-right font-mono text-sm tabular-nums outline-none placeholder:text-muted-foreground",
+                  tpError && "text-loss",
+                )}
               />
             </Field>
-            <Field label="SL (¢)" compact>
+            <Field label="SL (¢)" compact error={slError}>
               <input
                 value={sl}
                 onChange={(e) => setSl(e.target.value)}
                 placeholder="—"
-                className="w-full bg-transparent text-right font-mono text-sm tabular-nums outline-none placeholder:text-muted-foreground"
+                inputMode="decimal"
+                className={cn(
+                  "w-full bg-transparent text-right font-mono text-sm tabular-nums outline-none placeholder:text-muted-foreground",
+                  slError && "text-loss",
+                )}
               />
             </Field>
           </div>
 
+          {(tpPnl !== null || slPnl !== null) && (
+            <div className="grid grid-cols-2 gap-2 text-[10px] font-mono">
+              <div className="rounded-lg bg-white/[0.03] px-2.5 py-1.5">
+                <div className="text-muted-foreground uppercase tracking-widest">If TP hits</div>
+                <div className={cn("mt-0.5 tabular-nums", tpPnl !== null ? (tpPnl >= 0 ? "text-win" : "text-loss") : "text-muted-foreground/50")}>
+                  {tpPnl !== null ? `${tpPnl >= 0 ? "+" : ""}${tpPnl.toFixed(2)} USDC` : "—"}
+                </div>
+              </div>
+              <div className="rounded-lg bg-white/[0.03] px-2.5 py-1.5">
+                <div className="text-muted-foreground uppercase tracking-widest">If SL hits</div>
+                <div className={cn("mt-0.5 tabular-nums", slPnl !== null ? (slPnl >= 0 ? "text-win" : "text-loss") : "text-muted-foreground/50")}>
+                  {slPnl !== null ? `${slPnl >= 0 ? "+" : ""}${slPnl.toFixed(2)} USDC` : "—"}
+                </div>
+              </div>
+            </div>
+          )}
+
           {leverage > 1 ? (
             <>
-              <LiquidationBar entry={px} current={px} liquidation={Math.round(liq)} tone={outcome} />
+              <LiquidationBar
+                entry={px}
+                current={px}
+                liquidation={liq}
+                tone={outcome}
+                tp={tpDirOk && tpInRange ? tpNum ?? undefined : undefined}
+                sl={slDirOk && slInRange ? slNum ?? undefined : undefined}
+                tpPnl={tpPnl ?? undefined}
+                slPnl={slPnl ?? undefined}
+              />
               <p className="text-[10px] font-mono text-muted-foreground/70">
                 Liq price is an estimate · actual value depends on funding & maintenance margin
               </p>
@@ -254,6 +349,7 @@ export function TradeForm({
       {/* Summary */}
       <dl className="mt-5 space-y-1.5 border-t border-border pt-4 text-[11px] font-mono">
         <SummaryRow label="Avg price" value={`${Math.round(px)}¢`} />
+        <SummaryRow label="Margin mode" value="Cross" />
         <SummaryRow label="Margin" value={`${margin.toFixed(2)} USDC`} />
         <SummaryRow label="Notional" value={`${notional.toFixed(2)} USDC`} />
         <SummaryRow label="Contracts" value={shares.toFixed(1)} />
@@ -269,8 +365,14 @@ export function TradeForm({
       </dl>
 
       <button
+        type="button"
+        onClick={handleSubmit}
+        disabled={hasFormError}
         className={cn(
           "mt-5 w-full rounded-xl py-3 font-display font-semibold uppercase tracking-widest text-sm transition-opacity hover:opacity-90",
+          hasFormError
+            ? "cursor-not-allowed bg-white/[0.06] text-muted-foreground hover:opacity-100"
+            : "",
           accentClass,
         )}
       >
@@ -280,17 +382,33 @@ export function TradeForm({
   );
 }
 
-function Field({ label, compact, children }: { label: string; compact?: boolean; children: React.ReactNode }) {
+function Field({
+  label,
+  compact,
+  error,
+  children,
+}: {
+  label: string;
+  compact?: boolean;
+  error?: string | null;
+  children: React.ReactNode;
+}) {
   return (
-    <label
-      className={cn(
-        "flex items-center justify-between rounded-xl border border-border bg-white/[0.02]",
-        compact ? "px-3 py-1.5" : "px-3 py-2.5",
+    <div className="space-y-1">
+      <label
+        className={cn(
+          "flex items-center justify-between rounded-xl border bg-white/[0.02]",
+          compact ? "px-3 py-1.5" : "px-3 py-2.5",
+          error ? "border-loss/60" : "border-border",
+        )}
+      >
+        <span className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground">{label}</span>
+        <div className="flex-1 pl-3">{children}</div>
+      </label>
+      {error && (
+        <p className="px-1 text-[10px] font-mono text-loss">{error}</p>
       )}
-    >
-      <span className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground">{label}</span>
-      <div className="flex-1 pl-3">{children}</div>
-    </label>
+    </div>
   );
 }
 
