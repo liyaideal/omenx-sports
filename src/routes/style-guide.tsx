@@ -107,6 +107,41 @@ function TokenSwatch({ name, varName, hint }: { name: string; varName: string; h
   );
 }
 
+function PhoneFrame({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="mx-auto w-[360px] overflow-hidden rounded-[40px] border border-border bg-background shadow-card ring-1 ring-white/5">
+      <div className="relative h-[720px] overflow-y-auto bg-background bg-ambient">
+        {children}
+      </div>
+    </div>
+  );
+}
+
+function MeSheetPreviewLauncher() {
+  const [open, setOpen] = useState(false);
+  return (
+    <>
+      <button
+        type="button"
+        onClick={() => setOpen(true)}
+        className="w-full rounded-2xl border border-primary/30 bg-primary/10 px-4 py-3 text-sm font-medium text-foreground transition hover:bg-primary/15"
+      >
+        Preview MeSheet
+      </button>
+      <MeSheet
+        open={open}
+        onOpenChange={setOpen}
+        userName="Jeremy"
+        userAvatar="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=120&h=120&fit=crop&crop=faces&q=80"
+        equity={ACCOUNT_STATS.available}
+        openPositions={ACCOUNT_STATS.openPositions}
+        pnlToday={ACCOUNT_STATS.pnlToday}
+        toClaim={ACCOUNT_STATS.toClaim}
+      />
+    </>
+  );
+}
+
 function StyleGuide() {
   const [activeNav, setActiveNav] = useState<string>("home");
   const navItems = [
