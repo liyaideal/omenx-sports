@@ -1,64 +1,72 @@
-## Problem
+目标：把首页所有"看起来能点其实没反应"的元素都接上交互。
 
-`PricePill` renders e.g. `42¢ ↗ 3` — the bare `3` has no unit and no timeframe. Three things are ambiguous:
+---
 
-1. **Unit** — is `3` cents, points, percent, or count of trades? (It's cents: the price moved from 0.39 → 0.42, so `delta = 0.03`, displayed as `3`.)
-2. **Direction sign** — the arrow shows direction but the number doesn't carry a `+` / `−`, so it reads like a magnitude only.
-3. **Timeframe** — there is no `24h` / `1h` label anywhere on the pill, even though the underlying field is `delta24h`.
+### 1. AppTopBar 头像 → 复制 OmenX 的下拉菜单
 
-Same pattern appears in `EventMarketTileCard`'s `OutcomeBlock` (`↗ 3 24h` — the `24h` is there but the value still has no unit).
+按 OmenX `EventsDesktopHeader.tsx` 的下拉结构 1:1 搬过来，把里面的 `navigate("/xxx")` 全部换成跳 OmenX 绝对 URL。
 
-## Plan
+- 触发：头像 + 名字 + ChevronDown 包成 `<DropdownMenuTrigger asChild>`
+- 菜单项（与 OmenX 顺序一致）：
+  - Rewards / Referral → `omenxUrl.account()`
+  - Settings → `${OMENX_BASE}/settings`（新加 `omenxUrl.settings()`）
+  - Language 子菜单：EN/ES/FR/DE/PT/JA（本地 `useState`，纯前端切换）
+  - Transparency Audit → `${OMENX_BASE}/settings/transparency`
+  - Help & Support → 开新窗 `https://omenx-helpcenter.lovable.app`
+  - Join Discord → 开新窗 `https://discord.gg/qXssm2crf9`
+  - Sign Out → 跳 `${OMENX_BASE}/`（不在子站做 supabase signOut）
 
-### 1. Make the delta self-describing on `PricePill`
+`shadcn/ui` 的 `dropdown-menu` 已在项目里。
 
-Render: `+3¢` / `−1¢` / `0¢` (signed, with the ¢ unit) instead of bare `3`. Keep the colored arrow as a redundant visual cue. The pill becomes:
+### 2. FanZoneHeader 的 "N teams / Add team" → 弹窗管理关注
 
-```
-[ 42¢  ↗ +3¢ ]
-```
+- 按钮包成 `<DialogTrigger>`，打开 `<Dialog>`
+- 弹窗内容复用 `FansZoneEmpty` 里"Follow your team"那段 grid（crest + Check/Plus 角标 + Save preferences）
+- 抽出新组件 `FollowTeamsPanel.tsx`，`FansZoneEmpty` 和弹窗共用
+  - props：`suggested: TeamLite[]`、`initialFollowed?: Set<string>`、`onSave(names)`
+- 当前没有持久化层，`onSave` 只 `console.log` + 关闭弹窗（与现有 "Save preferences" 行为一致）
+- 弹窗标题："Manage teams you follow"
 
-Add a native `title` tooltip on the delta span: `"24h change"`. Add `aria-label` on the whole pill: `"42 cents, up 3 cents in 24 hours"` (built from the same numbers).
+### 3. MatchMarketCard 右上角 More (⋯) → 下拉菜单
 
-Optional `showTimeframe` prop (default `false`) for surfaces where there's room to print `24h` inline (e.g. `OutcomeBlock` already does this). When `true`, render `+3¢ · 24h`.
+- 把 More 按钮换成 `<DropdownMenuTrigger asChild>`
+- 菜单项：
+  - **Share market** → `navigator.clipboard.writeText(market.tradeHref 绝对 URL)` + sonner toast "Link copied"
+  - **View on Polymarket** → `<a href={market.tradeHref}>`（带 ExternalLink 图标）
+- `onClick={(e) => e.stopPropagation()}`，避免触发卡片内部 `<a>` 的跳转
 
-### 2. Align `OutcomeBlock` delta in `EventMarketTileCard`
+### 4. PlayerPropsSpotlight → 多 event 轮播
 
-Replace `↗ 3 24h` with the same signed-with-unit form: `↗ +3¢ · 24h`. This keeps the larger outcome blocks consistent with the small pills.
+**数据：** `data/sports-markets.ts` 把 `SPOTLIGHT: PlayerSpotlight` 改成 `SPOTLIGHTS: PlayerSpotlight[]`，保留原球员为第一个，再加 2 个 mock：
 
-### 3. Add a one-time legend on the page
+- 一个球队主题，比如"切尔西本赛季三冠王概率"，`firstName`/`lastName` 用队名拆分，`handle` 用 team short，`photo` 用队徽（在圆形 portrait 容器里居中显示），`position` 写 "Premier League · Club"
+- 一个小组赛冠军主题，比如"Group F Winner"，`photo` 用奖杯/league badge，`position` 写 "World Cup 2026 · Group F"
+- `props` 字段每个 event 自己一组（球队的可以是 "Win the league / Top 4 / Champions League qualification"；小组冠军可以是 4 个国家队的 to-win 价格）
 
-Tiny inline helper under the section header on the home dashboard (`Today's matches` row) — a muted `Prices in ¢ · arrows = 24h move` micro-caption. One sentence, `font-mono text-[10px] uppercase tracking-widest text-muted-foreground`, sits next to the section meta. Educates new users without bloating every pill.
+类型 `PlayerSpotlight` 字段宽松，复用即可，不需要新建类型；命名上 `position` 当作"副标题"使用。
 
-### 4. Lock the rule in DESIGN.md (§4 Pills & chips, §7 Don'ts)
+**组件：** `PlayerPropsSpotlight` 改签名 `{ players: PlayerSpotlight[] }`
 
-Append to §4 "Pills & chips":
+- 内部 `useState<number>(0)` 维护当前 index
+- ← / → 循环切换（取模），切换时图片 / 姓名 / position / props 列表同步更新
+- 去掉左上角 X 按钮
+- 右上角原来的 ↗ "Open" 改成 **Share** 按钮（Share2 图标）：点击复制当前 event 的 tradeHref 到剪贴板 + sonner toast "Link copied"
 
-> **Price pill delta.** Always signed and unit-bearing: `+3¢`, `−1¢`, `0¢`. The colored arrow is a redundant cue; the number alone must still be readable. The underlying delta is `delta24h` (price change over the last 24 hours); always include `title="24h change"` on the delta span. Surfaces with room print `· 24h` inline.
+**调用方：** `index.tsx` 传 `players={SPOTLIGHTS}`；`style-guide.tsx` 同步成 `players={[SPOTLIGHTS[0]]}` 或整组。
 
-Append to §7 Don'ts:
+---
 
-> - Don't render a price delta as a bare number (e.g. `↗ 3`). It MUST carry a sign and a `¢` unit, e.g. `+3¢`. The number alone has to read correctly without the arrow.
+### 涉及文件
 
-### 5. Mirror to `/style-guide`
+- `src/lib/omenx.ts`（加 `settings`、`transparency` 2 个 URL）
+- `src/components/sports/dashboard/AppTopBar.tsx`（头像换 DropdownMenu）
+- `src/components/sports/dashboard/FanZoneHeader.tsx`（按钮换 DialogTrigger）
+- `src/components/sports/dashboard/FollowTeamsPanel.tsx`（新建）
+- `src/components/sports/dashboard/FansZoneEmpty.tsx`（改用 FollowTeamsPanel）
+- `src/components/sports/dashboard/MatchMarketCard.tsx`（More 换 DropdownMenu + 阻止冒泡）
+- `src/components/sports/dashboard/PlayerPropsSpotlight.tsx`（多 event 轮播 + Share + 去 X）
+- `src/data/sports-markets.ts`（SPOTLIGHT → SPOTLIGHTS 数组，+2 个 mock）
+- `src/routes/index.tsx`（传 players 数组、FanZoneHeader 接 suggested）
+- `src/routes/style-guide.tsx`（同步 SPOTLIGHT 用法）
 
-In the existing `PricePill` demo row, show all three states with the new format: `42¢ +3¢`, `21¢ −1¢`, `37¢ 0¢`, plus a labeled example with `showTimeframe`. Add a short caption below explaining the unit.
-
-### 6. Memory
-
-Save `mem://design/price-delta` with the signed `+N¢` / `−N¢` / `0¢` rule and add a one-line Core entry so it sticks across sessions.
-
-## Files to touch (in build mode)
-
-- `src/components/sports/dashboard/PricePill.tsx` — signed unit, tooltip, aria-label, optional `showTimeframe`
-- `src/components/sports/dashboard/EventMarketTileCard.tsx` — apply same format to `OutcomeBlock` delta line
-- `src/routes/index.tsx` — add the one-line legend caption on the events section header
-- `src/routes/style-guide.tsx` — update PricePill demo
-- `DESIGN.md` — §4 + §7 entries
-- `mem/design/price-delta.md` + `mem/index.md` Core
-
-## Out of scope
-
-- No color or arrow icon changes (existing semantic colors stay).
-- No change to the underlying data model — `delta24h` stays a 0–1 number.
-- No tooltips beyond the native `title` attribute (no Radix tooltip dependency).
+不引入新依赖。所有交互都在前端层，不动业务逻辑、不动路由表。
