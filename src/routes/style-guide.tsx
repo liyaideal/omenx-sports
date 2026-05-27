@@ -170,7 +170,7 @@ function StyleGuide() {
         <aside className="sticky top-24 hidden h-fit md:block">
           <div className="text-[11px] font-mono uppercase tracking-[0.25em] text-muted-foreground mb-3">Contents</div>
           <Link
-            to="/style-guide/homepage"
+            to="/style-guide-homepage"
             className="mb-3 block rounded-lg border border-dashed border-neon/40 bg-neon/[0.06] px-3 py-2 text-sm font-medium text-foreground transition hover:bg-neon/[0.12]"
           >
             → Homepage Playground
