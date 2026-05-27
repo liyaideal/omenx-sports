@@ -1,6 +1,6 @@
 import { createFileRoute, Link, notFound, useRouter } from "@tanstack/react-router";
 import { ArrowLeft, Clock, Users } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { cn } from "@/lib/utils";
 import { AppShell } from "@/components/sports/dashboard/AppShell";
 import { AppTopBar } from "@/components/sports/dashboard/AppTopBar";
@@ -10,8 +10,12 @@ import { OutcomeSelector } from "@/components/sports/OutcomeSelector";
 import { OutcomePill } from "@/components/sports/OutcomePill";
 import { PriceChart } from "@/components/sports/PriceChart";
 import { OrderBook } from "@/components/sports/OrderBook";
-import { TradeForm } from "@/components/sports/TradeForm";
-import { PositionsTable } from "@/components/sports/PositionsTable";
+import { TradeForm, type PlacedOrder } from "@/components/sports/TradeForm";
+import {
+  PositionsTable,
+  type PositionRowData,
+  type OrderRowData,
+} from "@/components/sports/PositionsTable";
 import { ACCOUNT_STATS, getMarketById, type SportsMarket, type Outcome } from "@/data/sports-markets";
 
 export const Route = createFileRoute("/event/$id")({
@@ -90,6 +94,68 @@ function EventTradePage() {
   // For OutcomeSelector tone wiring (binary only)
   const binaryTone: "yes" | "no" = selectedIdx === 0 ? "yes" : "no";
 
+  // Persist positions/orders placed from this trade form for the lifetime of
+  // the page. PnL recomputes from a live "mark" that jitters around the
+  // selected outcome's price every second so the user sees motion.
+  const [positions, setPositions] = useState<PositionRowData[]>([]);
+  const [orders, setOrders] = useState<OrderRowData[]>([]);
+  const [tick, setTick] = useState(0);
+  useEffect(() => {
+    const id = setInterval(() => setTick((t) => t + 1), 1000);
+    return () => clearInterval(id);
+  }, []);
+
+  const league = leagueKeyFromShort(market.league.short);
+  const currentPx = Math.round(selected.price * 100);
+  // Apply a tiny live jitter so PnL updates every tick.
+  const livePositions = useMemo<PositionRowData[]>(() => {
+    return positions.map((p, i) => {
+      const jitter = Math.sin((tick + i * 7) / 3) * 1.4;
+      const mark = clampPct(p.entry + jitter);
+      const sign = p.outcome === "yes" ? 1 : -1;
+      const notional = p.margin * p.leverage;
+      const pnl = (mark / 100 - p.entry / 100) * notional * sign;
+      return { ...p, mark: Math.round(mark * 10) / 10, pnl: Math.round(pnl * 100) / 100 };
+    });
+  }, [positions, tick]);
+
+  const handlePlaceOrder = (order: PlacedOrder) => {
+    if (order.type === "limit" && order.side === "buy" && order.price !== currentPx) {
+      // Limit buy below/above mark → resting open order.
+      setOrders((prev) => [
+        {
+          market: market.title,
+          league,
+          outcome: order.outcome,
+          outcomeLabel: order.outcomeLabel,
+          type: "limit",
+          price: order.price,
+          size: Math.round(order.shares),
+          filled: 0,
+        },
+        ...prev,
+      ]);
+      return;
+    }
+    setPositions((prev) => [
+      {
+        market: market.title,
+        league,
+        outcome: order.outcome,
+        outcomeLabel: order.outcomeLabel,
+        size: Math.round(order.shares),
+        entry: order.price,
+        mark: order.price,
+        leverage: order.leverage,
+        mode: "cross",
+        margin: order.margin,
+        liq: order.liq,
+        pnl: 0,
+      },
+      ...prev,
+    ]);
+  };
+
   return (
     <AppShell>
       <AppTopBar
@@ -127,12 +193,13 @@ function EventTradePage() {
             outcome={binaryTone}
             outcomeLabel={getOutcomeLabel(selected)}
             price={Math.round(selected.price * 100)}
+            onPlaceOrder={handlePlaceOrder}
           />
         </div>
       </div>
 
       <div className="px-6 pb-12 md:px-8">
-        <PositionsTable />
+        <PositionsTable positions={livePositions} orders={orders} />
       </div>
     </AppShell>
   );
@@ -291,4 +358,18 @@ function hashSeed(s: string): number {
   let h = 0;
   for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) | 0;
   return Math.abs(h) % 100;
+}
+
+function clampPct(v: number): number {
+  return Math.max(1, Math.min(99, v));
+}
+
+function leagueKeyFromShort(short: string): PositionRowData["league"] {
+  const s = short.toUpperCase();
+  if (s === "EPL") return "epl";
+  if (s === "LL") return "laliga";
+  if (s === "UCL") return "ucl";
+  if (s === "SA") return "seriea";
+  if (s === "NBA") return "nba";
+  return "epl";
 }

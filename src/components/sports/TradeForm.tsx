@@ -18,17 +18,38 @@ interface TradeFormProps {
   price: number;
   /** Available wallet balance (USD). */
   balance?: number;
+  /** Notified after a successful (mock) order is placed. */
+  onPlaceOrder?: (order: PlacedOrder) => void;
   className?: string;
 }
 
 type Side = "buy" | "sell";
 type Type = "market" | "limit";
 
+export interface PlacedOrder {
+  side: Side;
+  type: Type;
+  outcome: "yes" | "no";
+  outcomeLabel: string;
+  /** Execution / limit price in ¢. */
+  price: number;
+  margin: number;
+  leverage: number;
+  notional: number;
+  shares: number;
+  fee: number;
+  liq: number;
+  tp: number | null;
+  sl: number | null;
+  label: string;
+}
+
 export function TradeForm({
   outcome,
   outcomeLabel,
   price,
   balance = 5000,
+  onPlaceOrder,
   className,
 }: TradeFormProps) {
   const [side, setSide] = useState<Side>("buy");
@@ -128,6 +149,36 @@ export function TradeForm({
     }
     if (margin <= 0) {
       toast.error("Set a margin amount");
+      return;
+    }
+    if (margin > balance) {
+      toast.error("Insufficient balance", {
+        description: `Margin ${margin.toFixed(2)} > available ${balance.toFixed(2)} USDC`,
+      });
+      return;
+    }
+    const order: PlacedOrder = {
+      side,
+      type,
+      outcome,
+      outcomeLabel,
+      price: Math.round(px),
+      margin,
+      leverage,
+      notional,
+      shares,
+      fee,
+      liq,
+      tp: tpNum,
+      sl: slNum,
+      label: baseCtaLabel,
+    };
+    try {
+      onPlaceOrder?.(order);
+    } catch (err) {
+      toast.error("Order failed", {
+        description: err instanceof Error ? err.message : "Unknown error",
+      });
       return;
     }
     toast.success(`Order placed · ${baseCtaLabel}`, {
