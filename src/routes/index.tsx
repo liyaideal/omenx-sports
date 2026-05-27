@@ -14,6 +14,13 @@ import { LiveActivityCard } from "@/components/sports/dashboard/LiveActivityCard
 import { DayStripCalendar } from "@/components/sports/dashboard/DayStripCalendar";
 import { ShowMoreEventsButton } from "@/components/sports/dashboard/ShowMoreEventsButton";
 import { LiveStreamCard } from "@/components/sports/dashboard/LiveStreamCard";
+import { MobileTopBar } from "@/components/sports/mobile/MobileTopBar";
+import {
+  MobileBottomNav,
+  type MobileTab,
+} from "@/components/sports/mobile/MobileBottomNav";
+import { MobileLiveHero } from "@/components/sports/mobile/MobileLiveHero";
+import { MeSheet } from "@/components/sports/mobile/MeSheet";
 import {
   ACCOUNT_STATS,
   FEATURED_MATCH,
@@ -55,12 +62,18 @@ export const Route = createFileRoute("/")({
   component: Index,
 });
 
+const USER_NAME = "Jeremy";
+const USER_AVATAR =
+  "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=120&h=120&fit=crop&crop=faces&q=80";
+
 function Index() {
   const followedKeys = (Object.keys(TEAMS) as TeamKey[]).filter((k) =>
     FOLLOWED_TEAMS.includes(TEAMS[k]),
   );
   const [selectedOffset, setSelectedOffset] = useState<number | null>(null);
   const [expanded, setExpanded] = useState(false);
+  const [activeTab, setActiveTab] = useState<MobileTab>("home");
+  const [meOpen, setMeOpen] = useState(false);
   useEffect(() => {
     setExpanded(false);
   }, [selectedOffset]);
@@ -100,13 +113,25 @@ function Index() {
   }, [selectedOffset]);
   return (
     <AppShell>
-      <AppTopBar
-        userName="Jeremy"
-        userAvatar="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=120&h=120&fit=crop&crop=faces&q=80"
-        equity={ACCOUNT_STATS.available}
-      />
+      {/* Desktop top bar */}
+      <div className="hidden md:block">
+        <AppTopBar
+          userName={USER_NAME}
+          userAvatar={USER_AVATAR}
+          equity={ACCOUNT_STATS.available}
+        />
+      </div>
+      {/* Mobile top bar */}
+      <div className="md:hidden">
+        <MobileTopBar
+          userName={USER_NAME}
+          userAvatar={USER_AVATAR}
+          onAvatarClick={() => setMeOpen(true)}
+        />
+      </div>
 
-      <div className="grid gap-5 px-6 pb-6 pt-8 md:px-8 md:pb-8 md:pt-10 lg:grid-cols-[340px_minmax(0,1fr)_360px]">
+      {/* DESKTOP layout (≥ md) — unchanged */}
+      <div className="hidden gap-5 px-6 pb-6 pt-8 md:grid md:px-8 md:pb-8 md:pt-10 lg:grid-cols-[340px_minmax(0,1fr)_360px]">
         {/* LEFT — Fans zone (spans both rows) */}
         <section className="flex flex-col gap-4 lg:row-span-2">
           <FanZoneHeader
@@ -133,12 +158,7 @@ function Index() {
 
         {/* TOP — Live & upcoming, spans col 2–3, sits above the spotlight */}
         <section className="flex flex-col gap-4 lg:col-span-2 lg:col-start-2 lg:row-start-1">
-          <PageSectionHeader
-            title="Live & upcoming"
-            accent=" Events"
-            as="h1"
-            live
-          />
+          <PageSectionHeader title="Live & upcoming" accent=" Events" as="h1" live />
           <DayStripCalendar
             selectedOffset={selectedOffset}
             onSelect={setSelectedOffset}
@@ -188,15 +208,16 @@ function Index() {
 
         {/* BOTTOM — Season markets (futures + player props) */}
         <section className="flex flex-col gap-4 lg:col-span-2 lg:col-start-2 lg:row-start-2">
-          <PageSectionHeader
-            title="Season"
-            accent="Events"
-          />
+          <PageSectionHeader title="Season" accent="Events" />
           <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_320px]">
             <div className="grid gap-5 xl:grid-cols-2">
               {SEASON_LEAGUE_GROUPS.flatMap((group) => [
                 <LeagueWinnerMarketCard key={`${group.id}-w`} market={group.winner} />,
-                <TopScorerMarketCard key={`${group.id}-t`} market={group.topScorer} photos={group.photos} />,
+                <TopScorerMarketCard
+                  key={`${group.id}-t`}
+                  market={group.topScorer}
+                  photos={group.photos}
+                />,
               ])}
             </div>
             <div className="lg:sticky lg:top-4 lg:self-start">
@@ -206,13 +227,110 @@ function Index() {
         </section>
       </div>
 
-      <BridgeStrip
+      {/* MOBILE layout (< md) */}
+      <div className="space-y-8 px-4 pb-24 pt-5 md:hidden">
+        {liveStreamMarkets.length > 0 && (
+          <MobileLiveHero markets={liveStreamMarkets} />
+        )}
+
+        <section id="events" className="scroll-mt-20 space-y-3">
+          <header className="flex items-center justify-between">
+            <h2 className="inline-flex items-center gap-2.5 font-display text-2xl font-semibold leading-9">
+              <span
+                aria-label="Live"
+                className="h-2 w-2 animate-pulse rounded-full bg-[oklch(0.7_0.22_25)] shadow-[0_0_8px_oklch(0.7_0.22_25)]"
+              />
+              Upcoming
+              <span className="font-serif-display italic text-neon"> Events</span>
+            </h2>
+          </header>
+          <DayStripCalendar
+            selectedOffset={selectedOffset}
+            onSelect={setSelectedOffset}
+            countsByOffset={countsByOffset}
+          />
+          <p className="-mt-1 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+            Prices in ¢ · arrows show 24h change
+          </p>
+          {upcomingMarkets.length > 0 ? (
+            <div className="grid grid-cols-1 gap-3">
+              {upcomingMarkets.map((m) => (
+                <EventMarketTileCard key={m.id} market={m} />
+              ))}
+            </div>
+          ) : (
+            <div className="rounded-2xl border border-dashed border-border bg-surface/40 px-5 py-10 text-center text-sm text-muted-foreground">
+              No events scheduled for {dayLabel}.
+            </div>
+          )}
+        </section>
+
+        <section id="fans" className="scroll-mt-20 space-y-3">
+          <FanZoneHeader
+            followingCount={FOLLOWED_TEAMS.length}
+            suggested={SUGGESTED_TEAMS}
+            followedNames={FOLLOWED_TEAMS.map((t) => t.name)}
+          />
+          {FOLLOWED_TEAMS.length > 0 ? (
+            <>
+              <MatchMarketCard market={FEATURED_MATCH} />
+              <FanPostCard {...FAN_POST} />
+            </>
+          ) : (
+            <FansZoneEmpty editorPick={FEATURED_MATCH} suggested={SUGGESTED_TEAMS} />
+          )}
+          <LiveActivityCard
+            trades={LIVE_TRADES}
+            followedTeams={FOLLOWED_TEAMS}
+            followedKeys={followedKeys}
+          />
+        </section>
+
+        <section id="season" className="scroll-mt-20 space-y-3">
+          <h2 className="font-display text-2xl font-semibold leading-9">
+            Season
+            <span className="font-serif-display italic text-neon"> Events</span>
+          </h2>
+          <div className="space-y-4">
+            {SEASON_LEAGUE_GROUPS.flatMap((group) => [
+              <LeagueWinnerMarketCard key={`${group.id}-w`} market={group.winner} />,
+              <TopScorerMarketCard
+                key={`${group.id}-t`}
+                market={group.topScorer}
+                photos={group.photos}
+              />,
+            ])}
+            <PlayerPropsSpotlight players={SPOTLIGHTS} />
+          </div>
+        </section>
+      </div>
+
+      {/* Desktop bridge strip */}
+      <div className="hidden md:block">
+        <BridgeStrip
+          openPositions={ACCOUNT_STATS.openPositions}
+          pnlToday={ACCOUNT_STATS.pnlToday}
+          toClaim={ACCOUNT_STATS.toClaim}
+          portfolioHref={omenxUrl.portfolio()}
+        />
+      </div>
+
+      {/* Mobile bottom nav + Me sheet */}
+      <MobileBottomNav
+        active={activeTab}
+        onTabChange={setActiveTab}
+        onMeClick={() => setMeOpen(true)}
+      />
+      <MeSheet
+        open={meOpen}
+        onOpenChange={setMeOpen}
+        userName={USER_NAME}
+        userAvatar={USER_AVATAR}
+        equity={ACCOUNT_STATS.available}
         openPositions={ACCOUNT_STATS.openPositions}
         pnlToday={ACCOUNT_STATS.pnlToday}
         toClaim={ACCOUNT_STATS.toClaim}
-        portfolioHref={omenxUrl.portfolio()}
       />
     </AppShell>
   );
 }
-
