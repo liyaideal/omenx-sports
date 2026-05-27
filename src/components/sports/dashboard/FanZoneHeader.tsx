@@ -23,9 +23,9 @@ export function FanZoneHeader({
 }) {
   const [open, setOpen] = useState(false);
   const [followed, setFollowed] = useState<string[]>(followedNames ?? []);
-  const count = followed.length || followingCount;
-  // Once the user has interacted, the local list is the source of truth.
-  const effectiveCount = followed.length > 0 || followedNames !== undefined ? followed.length : followingCount;
+  // Local picker state is the source of truth once mounted; falls back to the
+  // initial followingCount prop only when the parent didn't pass a list.
+  const effectiveCount = followedNames !== undefined ? followed.length : followingCount;
   const label =
     effectiveCount > 0
       ? `${effectiveCount} team${effectiveCount === 1 ? "" : "s"}`
