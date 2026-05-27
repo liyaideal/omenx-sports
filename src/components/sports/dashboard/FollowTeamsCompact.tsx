@@ -7,8 +7,9 @@ import { TeamPickerSheet, type TeamGroup } from "./TeamPickerSheet";
 /**
  * Compact Fans Zone follow card for large catalogs (e.g. World Cup).
  * Shows a "Following (n)" header with up to 5 crest avatars; tapping
- * "+ Add teams" opens a full-screen TeamPickerSheet with search +
- * grouped multi-select.
+ * "+ Add teams" opens a TeamPickerSheet — full-screen on mobile
+ * (pickerVariant="sheet", default) or a centered dialog on desktop
+ * (pickerVariant="dialog").
  */
 export function FollowTeamsCompact({
   groups,
@@ -16,12 +17,15 @@ export function FollowTeamsCompact({
   title = "Follow your team",
   description,
   emptyHint = "Tap below to pick the squads you'll be cheering for.",
+  pickerVariant = "sheet",
 }: {
   groups: TeamGroup[];
   initialFollowed?: string[];
   title?: string;
   description?: string;
   emptyHint?: string;
+  /** "sheet" = mobile full-screen, "dialog" = desktop centered modal. */
+  pickerVariant?: "sheet" | "dialog";
 }) {
   const allTeams: TeamLite[] = groups.flatMap((g) => g.teams);
   const [followed, setFollowed] = useState<string[]>(initialFollowed);
@@ -87,6 +91,7 @@ export function FollowTeamsCompact({
         onOpenChange={setOpen}
         groups={groups}
         initialFollowed={followed}
+        variant={pickerVariant}
         onSave={(names) => {
           setFollowed(names);
           toast.success(
