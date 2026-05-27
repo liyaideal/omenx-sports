@@ -13,16 +13,18 @@ export function LiveStreamCard({ market }: { market: SportsMarket }) {
   const fixture = market.fixture;
   if (!fixture || !market.liveScore) return null;
 
-  const headline = market.outcomes.filter((o) => o.label !== "Draw").slice(0, 2);
+  // Show every outcome (including Draw for 1X2) horizontally so the card
+  // stays the same height regardless of 2- or 3-way markets.
+  const outcomes = market.outcomes.slice(0, 3);
 
   return (
     <Link
       to="/event/$id"
       params={{ id: market.id }}
-      className="group flex h-full flex-col gap-4 overflow-hidden rounded-3xl border border-[color:var(--accent)]/40 bg-surface p-5 shadow-card ring-1 ring-[color:var(--accent)]/20 transition hover:border-[color:var(--accent)]/60"
+      className="group flex h-full flex-col gap-3 overflow-hidden rounded-3xl border border-[color:var(--accent)]/40 bg-surface p-4 shadow-card ring-1 ring-[color:var(--accent)]/20 transition hover:border-[color:var(--accent)]/60"
     >
       {/* Poster header strip with LIVE pill + play + score */}
-      <div className="relative -mx-5 -mt-5 aspect-[16/8] overflow-hidden">
+      <div className="relative -mx-4 -mt-4 aspect-[16/9] overflow-hidden">
         {market.livePoster ? (
           <img
             src={market.livePoster}
@@ -78,30 +80,42 @@ export function LiveStreamCard({ market }: { market: SportsMarket }) {
         </div>
       </div>
 
-      {/* Unified team rows: logo + name + live score + price */}
-      <div className="flex flex-1 flex-col gap-1.5">
-        {headline.map((o) => (
-          <div
-            key={o.id}
-            className="flex items-center gap-3 rounded-xl bg-white/[0.03] px-3 py-2 ring-1 ring-white/[0.05] transition group-hover:bg-white/[0.06]"
-          >
-            {o.team ? (
-              <div
-                className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-white/[0.05] p-1 ring-1 ring-white/10"
-                style={{ boxShadow: `0 0 16px -4px oklch(0.7 0.22 ${o.team.hue} / 0.55)` }}
-              >
-                <img src={o.team.logo} alt="" className="h-full w-full object-contain" />
+      {/* Outcome chips: side-by-side, 2- or 3-up. Keeps card height flat. */}
+      <div
+        className="grid gap-2"
+        style={{ gridTemplateColumns: `repeat(${outcomes.length}, minmax(0, 1fr))` }}
+      >
+        {outcomes.map((o) => {
+          const isDraw = !o.team && (o.label === "Draw" || o.meta === "X");
+          return (
+            <div
+              key={o.id}
+              className="flex items-center gap-2 rounded-xl bg-white/[0.03] px-2.5 py-2 ring-1 ring-white/[0.05] transition group-hover:bg-white/[0.06]"
+            >
+              {o.team ? (
+                <div
+                  className="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-white/[0.05] p-1 ring-1 ring-white/10"
+                  style={{ boxShadow: `0 0 14px -4px oklch(0.7 0.22 ${o.team.hue} / 0.55)` }}
+                >
+                  <img src={o.team.logo} alt="" className="h-full w-full object-contain" />
+                </div>
+              ) : (
+                <span className="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-white/[0.06] font-mono text-[10px] text-muted-foreground">
+                  {isDraw ? "X" : "·"}
+                </span>
+              )}
+              <div className="flex min-w-0 flex-1 flex-col gap-0.5">
+                <span className="truncate font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+                  {o.team?.short ?? o.label}
+                </span>
+                <PricePill price={o.price} delta={o.delta24h} size="sm" />
               </div>
-            ) : null}
-            <span className="min-w-0 flex-1 truncate text-sm font-medium text-foreground">
-              {o.team?.name ?? o.label}
-            </span>
-            <PricePill price={o.price} delta={o.delta24h} size="md" />
-          </div>
-        ))}
+            </div>
+          );
+        })}
       </div>
 
-      <footer className="mt-auto flex items-center justify-between border-t border-border pt-3 font-mono text-[11px] text-muted-foreground">
+      <footer className="mt-auto flex items-center justify-between border-t border-border pt-2.5 font-mono text-[11px] text-muted-foreground">
         <span className="inline-flex items-center gap-1.5 text-[color:var(--accent)]">
           <span className="relative grid h-1.5 w-1.5 place-items-center">
             <span className="absolute inset-0 animate-ping rounded-full bg-current opacity-60" />
