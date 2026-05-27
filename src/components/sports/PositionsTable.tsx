@@ -36,9 +36,22 @@ export interface OrderRowData {
   filled: number; // 0–100 %
 }
 
+export interface HistoryRowData {
+  market: string;
+  league: "epl" | "laliga" | "ucl" | "seriea" | "nba";
+  outcome: "yes" | "no";
+  outcomeLabel: string;
+  action: "open" | "close" | "fill";
+  price: number; // ¢
+  size: number;
+  pnl?: number; // USDC, only for close
+  when: string; // relative label
+}
+
 interface PositionsTableProps {
   positions?: PositionRowData[];
   orders?: OrderRowData[];
+  history?: HistoryRowData[];
   className?: string;
 }
 
@@ -52,6 +65,12 @@ const DEFAULT_ORD: OrderRowData[] = [
   { market: "Lakers vs Celtics", league: "nba", outcome: "no", outcomeLabel: "Celtics", type: "limit", price: 52, size: 100, filled: 0 },
   { market: "Will it snow at tip-off?", league: "nba", outcome: "yes", outcomeLabel: "Yes", type: "market", price: 18, size: 60, filled: 100 },
 ];
+const DEFAULT_HIST: HistoryRowData[] = [
+  { market: "Real Madrid win UCL?", league: "ucl", outcome: "yes", outcomeLabel: "Real Madrid", action: "close", price: 41, size: 180, pnl: 23.4, when: "2h ago" },
+  { market: "Inter vs Juventus", league: "seriea", outcome: "no", outcomeLabel: "Juventus", action: "open", price: 47, size: 120, when: "5h ago" },
+  { market: "Warriors over 220.5?", league: "nba", outcome: "yes", outcomeLabel: "Yes", action: "fill", price: 52, size: 75, when: "Yesterday" },
+  { market: "PSG top scorer Mbappé?", league: "ucl", outcome: "no", outcomeLabel: "No", action: "close", price: 33, size: 200, pnl: -12.0, when: "2d ago" },
+];
 
 const tabs: { id: Tab; label: string }[] = [
   { id: "positions", label: "Positions" },
@@ -59,7 +78,7 @@ const tabs: { id: Tab; label: string }[] = [
   { id: "history", label: "History" },
 ];
 
-export function PositionsTable({ positions = DEFAULT_POS, orders = DEFAULT_ORD, className }: PositionsTableProps) {
+export function PositionsTable({ positions = DEFAULT_POS, orders = DEFAULT_ORD, history = DEFAULT_HIST, className }: PositionsTableProps) {
   const [tab, setTab] = useState<Tab>("positions");
   return (
     <div className={cn("rounded-2xl border border-border bg-surface shadow-card", className)}>
@@ -78,18 +97,14 @@ export function PositionsTable({ positions = DEFAULT_POS, orders = DEFAULT_ORD, 
               <span className="absolute -bottom-px left-0 right-0 h-0.5 rounded-full bg-gradient-neon" />
             )}
             <span className="ml-1.5 rounded-full bg-white/[0.06] px-1.5 py-0.5 text-[9px] font-mono text-muted-foreground">
-              {t.id === "positions" ? positions.length : t.id === "orders" ? orders.length : 0}
+              {t.id === "positions" ? positions.length : t.id === "orders" ? orders.length : history.length}
             </span>
           </button>
         ))}
       </div>
       {tab === "positions" && <PositionTable rows={positions} />}
       {tab === "orders" && <OrderTable rows={orders} />}
-      {tab === "history" && (
-        <div className="p-12 text-center font-mono text-xs text-muted-foreground">
-          No historical trades yet.
-        </div>
-      )}
+      {tab === "history" && <HistoryTable rows={history} />}
     </div>
   );
 }
