@@ -149,6 +149,11 @@ export const MATCH_MARKETS: SportsMarket[] = [
     ],
     tradeHref: `/event/a`,
     dayOffset: 0,
+    isLiveStream: true,
+    livePoster:
+      "https://images.unsplash.com/photo-1574629810360-7efbbe195018?w=1200&h=675&fit=crop&q=80",
+    liveScore: { home: 1, away: 1 },
+    liveClock: "01:12:08",
   },
   {
     id: "che-psg-ucl",
