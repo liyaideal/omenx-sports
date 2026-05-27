@@ -30,6 +30,7 @@ import { SectionHeader } from "@/components/sports/SectionHeader";
 import { MarketCard } from "@/components/sports/MarketCard";
 import { EventHeader } from "@/components/sports/EventHeader";
 import { OutcomeSelector } from "@/components/sports/OutcomeSelector";
+import { TeamName } from "@/components/sports/TeamName";
 import { teams } from "@/lib/teams";
 import { PriceChart } from "@/components/sports/PriceChart";
 import { OrderBook } from "@/components/sports/OrderBook";
