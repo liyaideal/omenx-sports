@@ -126,10 +126,6 @@ function Index() {
             accent=" Events"
             as="h1"
             live
-            stats={{
-              positions: ACCOUNT_STATS.openPositions,
-              pnl: ACCOUNT_STATS.pnlToday,
-            }}
           />
           <DayStripCalendar
             selectedOffset={selectedOffset}
