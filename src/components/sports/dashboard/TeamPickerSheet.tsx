@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import { Check, Plus, Search, X } from "lucide-react";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 import type { TeamLite } from "@/data/sports-mock";
 
 export interface TeamGroup {
@@ -9,10 +10,16 @@ export interface TeamGroup {
 }
 
 /**
- * Full-screen team picker. Use when the catalog is large enough that an
- * inline crest grid stops scaling (e.g. World Cup 24+ national teams).
- * Surfaces a sticky search header, a "Following" pin group, and the
- * grouped catalog with multi-select crests.
+ * Team picker for large catalogs (e.g. World Cup 24+ national teams).
+ * Two presentation variants — pick by form factor:
+ *   • variant="sheet"  → MOBILE ONLY. Full-screen bottom sheet, sticky
+ *     header (title + search + close) and sticky Save bar. Optimized for
+ *     thumb reach and one-hand operation.
+ *   • variant="dialog" → DESKTOP ONLY. Centered modal (~640px wide,
+ *     max-h 80vh) with the same body, but rendered as an overlay over
+ *     the page rather than taking the whole viewport.
+ * Both variants share the same body: sticky search header, a "Following"
+ * pin group, and the grouped catalog with multi-select crests.
  */
 export function TeamPickerSheet({
   open,
@@ -22,6 +29,7 @@ export function TeamPickerSheet({
   onSave,
   title = "Pick your teams",
   description = "Search or browse — we'll surface their matches, polls, and fan posts on your home.",
+  variant = "sheet",
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -30,6 +38,8 @@ export function TeamPickerSheet({
   onSave?: (names: string[]) => void;
   title?: string;
   description?: string;
+  /** "sheet" = mobile full-screen, "dialog" = desktop centered modal. */
+  variant?: "sheet" | "dialog";
 }) {
   const [followed, setFollowed] = useState<Set<string>>(
     () => new Set(initialFollowed ?? []),
@@ -67,27 +77,25 @@ export function TeamPickerSheet({
 
   const totalMatches = filteredGroups.reduce((n, g) => n + g.teams.length, 0);
 
-  return (
-    <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent
-        side="bottom"
-        className="inset-0 flex h-full w-full max-w-none flex-col gap-0 border-0 bg-background p-0 sm:max-w-none"
-      >
-        {/* Sticky header: title + search + close */}
-        <header className="sticky top-0 z-10 border-b border-border/60 bg-background/95 px-5 pb-3 pt-5 backdrop-blur-xl">
+  const body = (
+    <>
+      {/* Sticky header: title + search + close */}
+      <header className="sticky top-0 z-10 border-b border-border/60 bg-background/95 px-5 pb-3 pt-5 backdrop-blur-xl">
           <div className="flex items-start justify-between gap-3">
             <div>
               <h2 className="font-display text-lg font-semibold text-foreground">{title}</h2>
               <p className="mt-0.5 text-xs text-muted-foreground">{description}</p>
             </div>
-            <button
-              type="button"
-              onClick={() => onOpenChange(false)}
-              aria-label="Close"
-              className="grid h-8 w-8 place-items-center rounded-full bg-white/[0.05] text-muted-foreground ring-1 ring-white/10 transition hover:text-foreground"
-            >
-              <X className="h-4 w-4" />
-            </button>
+            {variant === "sheet" && (
+              <button
+                type="button"
+                onClick={() => onOpenChange(false)}
+                aria-label="Close"
+                className="grid h-8 w-8 place-items-center rounded-full bg-white/[0.05] text-muted-foreground ring-1 ring-white/10 transition hover:text-foreground"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            )}
           </div>
 
           <div className="relative mt-4">
@@ -113,7 +121,7 @@ export function TeamPickerSheet({
         </header>
 
         {/* Scrollable body */}
-        <div className="flex-1 overflow-y-auto px-5 pb-32 pt-5">
+        <div className="flex-1 overflow-y-auto px-5 pb-6 pt-5">
           {/* Following pin group */}
           {!q && followingTeams.length > 0 && (
             <PickerGroup label={`Following · ${followingTeams.length}`}>
@@ -179,6 +187,26 @@ export function TeamPickerSheet({
             </div>
           </div>
         </footer>
+    </>
+  );
+
+  if (variant === "dialog") {
+    return (
+      <Dialog open={open} onOpenChange={onOpenChange}>
+        <DialogContent className="flex max-h-[80vh] w-[min(640px,92vw)] max-w-none flex-col gap-0 overflow-hidden border-border/60 bg-background p-0 sm:rounded-3xl">
+          {body}
+        </DialogContent>
+      </Dialog>
+    );
+  }
+
+  return (
+    <Sheet open={open} onOpenChange={onOpenChange}>
+      <SheetContent
+        side="bottom"
+        className="inset-0 flex h-full w-full max-w-none flex-col gap-0 border-0 bg-background p-0 sm:max-w-none"
+      >
+        {body}
       </SheetContent>
     </Sheet>
   );
