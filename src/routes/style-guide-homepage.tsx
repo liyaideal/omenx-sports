@@ -417,7 +417,7 @@ function Section({
           #{id}
         </a>
       </header>
-      <div className="grid gap-4 xl:grid-cols-2">{children}</div>
+      <div className="flex flex-col gap-4">{children}</div>
     </section>
   );
 }
