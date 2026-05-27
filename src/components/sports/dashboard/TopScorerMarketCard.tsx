@@ -64,7 +64,13 @@ export function TopScorerMarketCard({
                     className="h-full w-full overflow-hidden rounded-full"
                     style={{ boxShadow: `0 0 14px -4px oklch(0.7 0.22 ${hue} / 0.55)` }}
                   >
-                    {photo && <img src={photo} alt="" className="h-full w-full object-cover" />}
+                    {photo ? (
+                      <img src={photo} alt="" className="h-full w-full object-cover" />
+                    ) : (
+                      <div className="grid h-full w-full place-items-center bg-white/[0.06] font-mono text-[10px] font-bold text-muted-foreground">
+                        {initials || "?"}
+                      </div>
+                    )}
                   </div>
                   {o.team && (
                     <img
