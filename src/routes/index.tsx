@@ -179,22 +179,15 @@ function Index() {
           <SectionHeader
             title="Season"
             accent="Events"
-            right={
-              <a href={omenxUrl.markets()} className="inline-flex items-center gap-1 text-xs font-medium text-muted-foreground hover:text-foreground">
-                Browse all <ArrowUpRight className="h-3.5 w-3.5" />
-              </a>
-            }
           />
           <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_360px]">
             <div className="flex flex-col gap-5">
-              <LeagueWinnerMarketCard market={LEAGUE_WINNER_MARKET} />
-              <TopScorerMarketCard
-                market={TOP_SCORER_MARKET}
-                photos={{
-                  messi: TOP_SCORERS[0].photo,
-                  haaland: TOP_SCORERS[1].photo,
-                }}
-              />
+              {SEASON_LEAGUE_GROUPS.map((group) => (
+                <div key={group.id} className="flex flex-col gap-5">
+                  <LeagueWinnerMarketCard market={group.winner} />
+                  <TopScorerMarketCard market={group.topScorer} photos={group.photos} />
+                </div>
+              ))}
             </div>
             <PlayerPropsSpotlight players={SPOTLIGHTS} />
           </div>
