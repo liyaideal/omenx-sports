@@ -1078,6 +1078,59 @@ function StyleGuide() {
             </div>
           </Section>
 
+          <Section id="mobile-shell" title="Mobile Shell" kicker="18 — Mobile homepage">
+            <p className="mb-6 max-w-3xl text-sm text-muted-foreground">
+              The mobile homepage swaps the desktop 3-column grid for a single vertical flow, a
+              compact breadcrumb top bar, a 4-tab bottom nav (Home / Events / Fans / Me), and
+              folds the BridgeStrip into a Me sheet. Everything below renders inside a 360-wide
+              phone frame so the playground reads at real mobile density.
+            </p>
+
+            <div className="grid gap-6 lg:grid-cols-[360px_minmax(0,1fr)]">
+              <PhoneFrame>
+                <MobileTopBar
+                  userName="Jeremy"
+                  userAvatar="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=120&h=120&fit=crop&crop=faces&q=80"
+                  onAvatarClick={() => {}}
+                />
+                <div className="space-y-5 px-4 py-5">
+                  <MobileLiveHero
+                    markets={MATCH_MARKETS.filter((m) => m.isLiveStream).slice(0, 3)}
+                  />
+                </div>
+                <div className="pointer-events-none sticky bottom-0">
+                  <MobileBottomNav active="home" onTabChange={() => {}} onMeClick={() => {}} />
+                </div>
+              </PhoneFrame>
+
+              <div className="space-y-4">
+                <div className="rounded-2xl border border-border bg-surface p-5 shadow-card">
+                  <div className="mb-3 text-xs font-mono uppercase tracking-widest text-muted-foreground">
+                    Anatomy
+                  </div>
+                  <ul className="space-y-1.5 text-xs text-muted-foreground">
+                    <li>• <code className="font-mono text-foreground">MobileTopBar</code> — `Ω OmenX › Sports` breadcrumb (left), bell + avatar (right). Tapping Ω returns to OmenX main site. Hidden ≥ md.</li>
+                    <li>• <code className="font-mono text-foreground">MobileLiveHero</code> — big-crest score card + horizontal rail of additional live matches. Renders only when at least one stream is live.</li>
+                    <li>• <code className="font-mono text-foreground">MobileBottomNav</code> — fixed bottom, 4 tabs, safe-area aware. Active tab gets a neon top hairline + primary icon glow. Tabs scroll-to-section on homepage; Me opens the sheet.</li>
+                    <li>• <code className="font-mono text-foreground">MeSheet</code> — bottom sheet: user + Equity → 3 stats (BridgeStrip) → Open Portfolio CTA → 2×2 Explore OmenX grid → menu → Sign out. All routes that left the sports zone live in here.</li>
+                  </ul>
+                </div>
+                <div className="rounded-2xl border border-dashed border-white/15 bg-white/[0.02] p-5 text-xs">
+                  <div className="mb-2 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+                    Rules
+                  </div>
+                  <ul className="space-y-1.5 text-muted-foreground">
+                    <li>• Desktop and mobile branches both render in `/` via Tailwind `hidden md:block` / `md:hidden` — no JS gate, no SSR flash.</li>
+                    <li>• `BridgeStrip` is desktop-only; its data moves into `MeSheet` on mobile to keep the bottom edge clean.</li>
+                    <li>• Bottom tabs never include cross-OmenX destinations — those belong in `MeSheet` so taps on the persistent bar never leave the zone by accident.</li>
+                    <li>• Mobile event grid collapses to single column; live cards become the dedicated `MobileLiveHero`, not `LiveStreamCard`.</li>
+                  </ul>
+                </div>
+                <MeSheetPreviewLauncher />
+              </div>
+            </div>
+          </Section>
+
           <footer className="mt-12 border-t border-border pt-6 text-center text-xs text-muted-foreground font-mono">
             Stadium Neon · v0.1 · sports prediction design system
           </footer>
