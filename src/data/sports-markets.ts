@@ -609,6 +609,7 @@ export const ACCOUNT_STATS = {
   available: "$1,240.50",
   openPositions: 7,
   pnlToday: "+$142.20",
+  toClaim: "$48.00",
 };
 
 /** Aggregated index for the /event/$id trade page lookup. */
