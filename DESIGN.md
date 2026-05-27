@@ -324,6 +324,12 @@ Section 7 is append-only. Every regression the user catches gets pinned here.
   `<LeagueChip>`. One identity, one chip, everywhere.
 - Don't use trading-desk jargon ("FUTURES", "Outrights", "Moneyline", "1X2")
   in user-facing eyebrows. Use the vocabulary in §4 Market-type eyebrow.
+- Don't use the word **"Outcome" / "Outcomes" in visible copy** (column
+  headers, eyebrows, table labels). The user-facing model is
+  **event → markets**: each card represents one event; every priced row
+  under it is a market. Generic labels read "Market" / "Markets". The TS
+  `Outcome` type and `market.outcomes[]` array names stay as-is — this
+  rule is copy-only. See `mem://copy/event-vs-market`.
 - Don't ship a new card type without picking a TYPE label from the §4 vocab.
   If none fits, extend §4 first — then add the card.
 - Don't render a price delta as a bare number (e.g. `↗ 3`). It MUST carry a
