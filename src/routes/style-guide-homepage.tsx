@@ -24,6 +24,7 @@ import { ShowMoreEventsButton } from "@/components/sports/dashboard/ShowMoreEven
 import { LeagueWinnerMarketCard } from "@/components/sports/dashboard/LeagueWinnerMarketCard";
 import { TopScorerMarketCard } from "@/components/sports/dashboard/TopScorerMarketCard";
 import { PlayerPropsSpotlight } from "@/components/sports/dashboard/PlayerPropsSpotlight";
+import { FollowTeamsCompact } from "@/components/sports/dashboard/FollowTeamsCompact";
 
 import {
   TILE_THREE_WAY,
@@ -56,6 +57,8 @@ import {
   STATS_BIG_CLAIM,
   DAY_COUNTS_VARIED,
   DAY_COUNTS_EMPTY,
+  WORLD_CUP_GROUPS,
+  WORLD_CUP_PREFOLLOWED,
 } from "@/data/style-guide-fixtures";
 
 export const Route = createFileRoute("/style-guide-homepage")({
