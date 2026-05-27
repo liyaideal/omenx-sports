@@ -13,6 +13,7 @@ import { FansZoneEmpty } from "@/components/sports/dashboard/FansZoneEmpty";
 import { LiveActivityCard } from "@/components/sports/dashboard/LiveActivityCard";
 import { DayStripCalendar } from "@/components/sports/dashboard/DayStripCalendar";
 import { ShowMoreEventsButton } from "@/components/sports/dashboard/ShowMoreEventsButton";
+import { LiveStreamCard } from "@/components/sports/dashboard/LiveStreamCard";
 import {
   ACCOUNT_STATS,
   FEATURED_MATCH,
@@ -78,6 +79,16 @@ function Index() {
         : MATCH_MARKETS.filter((m) => (m.dayOffset ?? 0) === selectedOffset),
     [selectedOffset],
   );
+  // Live-streamed matches surface as prominent cards above the regular grid;
+  // they're filtered out of the non-live grid to avoid double-rendering.
+  const liveStreamMarkets = useMemo(
+    () => visibleMarkets.filter((m) => m.isLiveStream),
+    [visibleMarkets],
+  );
+  const upcomingMarkets = useMemo(
+    () => visibleMarkets.filter((m) => !m.isLiveStream),
+    [visibleMarkets],
+  );
   const dayLabel = useMemo(() => {
     if (selectedOffset === null) return "any day";
     if (selectedOffset === 0) return "today";
@@ -136,10 +147,17 @@ function Index() {
           <p className="-mt-1 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
             Prices in ¢ (0–100) · arrows show 24h change
           </p>
-          {visibleMarkets.length > 0 ? (
+          {liveStreamMarkets.length > 0 && (
+            <div className="flex flex-col gap-3">
+              {liveStreamMarkets.map((m) => (
+                <LiveStreamCard key={m.id} market={m} />
+              ))}
+            </div>
+          )}
+          {upcomingMarkets.length > 0 ? (
             <>
               <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
-                {visibleMarkets.map((m, idx) => {
+                {upcomingMarkets.map((m, idx) => {
                   const hideClass = expanded
                     ? ""
                     : idx === 0
@@ -156,19 +174,19 @@ function Index() {
                   );
                 })}
               </div>
-              {visibleMarkets.length > 1 && (
+              {upcomingMarkets.length > 1 && (
                 <ShowMoreEventsButton
                   expanded={expanded}
-                  total={visibleMarkets.length}
+                  total={upcomingMarkets.length}
                   onToggle={() => setExpanded((v) => !v)}
                 />
               )}
             </>
-          ) : (
+          ) : liveStreamMarkets.length === 0 ? (
             <div className="rounded-2xl border border-dashed border-border bg-surface/40 px-5 py-10 text-center text-sm text-muted-foreground">
               No events scheduled for {dayLabel}.
             </div>
-          )}
+          ) : null}
         </section>
 
         {/* BOTTOM — Season markets (futures + player props) */}

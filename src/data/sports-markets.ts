@@ -38,6 +38,16 @@ export interface SportsMarket {
   tradeHref: string;
   /** Calendar day offset from today (today=0, tomorrow=1, yesterday=-1). */
   dayOffset?: number;
+  /** When true, this match is being streamed live on the platform right now.
+   *  Rendered as a prominent LiveStreamCard at the top of the events grid. */
+  isLiveStream?: boolean;
+  /** Poster / stream still image for the live card (16:9). */
+  livePoster?: string;
+  /** Current in-match score (home — away). */
+  liveScore?: { home: number; away: number };
+  /** Match clock as `MM:SS` or `HH:MM:SS`, used both as a label and to
+   *  drive the progress bar (assuming a 90-minute regulation match). */
+  liveClock?: string;
 }
 
 export const FEATURED_MATCH: SportsMarket = {
@@ -78,6 +88,11 @@ export const MATCH_MARKETS: SportsMarket[] = [
     ],
     tradeHref: `/event/a`,
     dayOffset: 0,
+    isLiveStream: true,
+    livePoster:
+      "https://images.unsplash.com/photo-1431324155629-1a6deb1dec8d?w=1200&h=675&fit=crop&q=80",
+    liveScore: { home: 2, away: 0 },
+    liveClock: "00:43:43",
   },
   {
     // Binary two-team market (no draw) — e.g. NBA / playoff / knockout.
@@ -134,6 +149,11 @@ export const MATCH_MARKETS: SportsMarket[] = [
     ],
     tradeHref: `/event/a`,
     dayOffset: 0,
+    isLiveStream: true,
+    livePoster:
+      "https://images.unsplash.com/photo-1574629810360-7efbbe195018?w=1200&h=675&fit=crop&q=80",
+    liveScore: { home: 1, away: 1 },
+    liveClock: "01:12:08",
   },
   {
     id: "che-psg-ucl",
