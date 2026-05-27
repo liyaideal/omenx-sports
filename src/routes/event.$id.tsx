@@ -506,3 +506,116 @@ function leagueKeyFromShort(short: string): PositionRowData["league"] {
   if (s === "NBA") return "nba";
   return "epl";
 }
+
+/**
+ * Seed mock positions/orders/history rows tied to the current market so
+ * every visitor sees populated tables on first load. These are deterministic
+ * by market id (same market → same rows) and live alongside any new orders
+ * the user actually places.
+ */
+function buildSeed(
+  market: SportsMarket,
+  league: PositionRowData["league"],
+): {
+  positions: PositionRowData[];
+  orders: OrderRowData[];
+  history: HistoryRowData[];
+} {
+  const first = market.outcomes[0];
+  const second = market.outcomes[1] ?? market.outcomes[0];
+  const firstPx = Math.round(first.price * 100);
+  const secondPx = Math.round(second.price * 100);
+  const firstLabel = first.team?.name ?? first.label;
+  const secondLabel = second.team?.name ?? second.label;
+
+  const positions: PositionRowData[] = [
+    {
+      market: market.title,
+      league,
+      outcome: "yes",
+      outcomeLabel: firstLabel,
+      size: 180,
+      entry: clampPct(firstPx - 4),
+      mark: firstPx,
+      leverage: 3,
+      mode: "cross",
+      margin: 60,
+      liq: clampPct(firstPx - 18),
+      pnl: 0,
+    },
+    {
+      market: market.title,
+      league,
+      outcome: "no",
+      outcomeLabel: secondLabel,
+      size: 90,
+      entry: clampPct(secondPx + 3),
+      mark: secondPx,
+      leverage: 1,
+      mode: "isolated",
+      margin: 27,
+      liq: 99,
+      pnl: 0,
+    },
+  ];
+
+  const orders: OrderRowData[] = [
+    {
+      market: market.title,
+      league,
+      outcome: "yes",
+      outcomeLabel: firstLabel,
+      type: "limit",
+      price: clampPct(firstPx - 6),
+      size: 120,
+      filled: 25,
+    },
+    {
+      market: market.title,
+      league,
+      outcome: "no",
+      outcomeLabel: secondLabel,
+      type: "limit",
+      price: clampPct(secondPx - 4),
+      size: 80,
+      filled: 0,
+    },
+  ];
+
+  const history: HistoryRowData[] = [
+    {
+      market: market.title,
+      league,
+      outcome: "yes",
+      outcomeLabel: firstLabel,
+      action: "fill",
+      price: clampPct(firstPx - 4),
+      size: 180,
+      when: "1h ago",
+    },
+    {
+      market: market.title,
+      league,
+      outcome: "no",
+      outcomeLabel: secondLabel,
+      action: "close",
+      price: clampPct(secondPx + 5),
+      size: 60,
+      pnl: 8.4,
+      when: "Yesterday",
+    },
+    {
+      market: market.title,
+      league,
+      outcome: "yes",
+      outcomeLabel: firstLabel,
+      action: "close",
+      price: clampPct(firstPx - 9),
+      size: 75,
+      pnl: -5.2,
+      when: "2d ago",
+    },
+  ];
+
+  return { positions, orders, history };
+}
