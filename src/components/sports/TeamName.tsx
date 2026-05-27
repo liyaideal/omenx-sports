@@ -47,8 +47,8 @@ export function TeamName({ short, full, className, side = "top" }: TeamNameProps
         }
       }}
       className={cn(
-        "cursor-help underline decoration-dotted decoration-muted-foreground/30 decoration-from-font underline-offset-[3px] outline-none focus-visible:ring-1 focus-visible:ring-foreground/40 rounded-sm",
-        same && "cursor-inherit no-underline",
+        "cursor-help rounded-sm outline-none focus-visible:ring-1 focus-visible:ring-foreground/40",
+        same && "cursor-inherit",
         className,
       )}
     >
