@@ -15,7 +15,7 @@ export function TopScorerMarketCard({
   photos,
 }: {
   market: SportsMarket;
-  photos: Record<string, string>;
+  photos?: Record<string, string>;
 }) {
   const rows = [...market.outcomes].sort((a, b) => b.price - a.price);
   return (
@@ -42,7 +42,14 @@ export function TopScorerMarketCard({
       <div className="flex flex-col divide-y divide-white/[0.04]">
         {rows.map((o, i) => {
           const hue = o.team?.hue ?? 305;
-          const photo = photos[o.id];
+          const photo = photos?.[o.id] ?? o.team?.logo;
+          const initials = o.label
+            .split(/\s+/)
+            .map((p) => p.replace(/[^A-Za-z]/g, "").charAt(0))
+            .filter(Boolean)
+            .slice(0, 2)
+            .join("")
+            .toUpperCase();
           return (
             <Link
               key={o.id}
@@ -57,7 +64,13 @@ export function TopScorerMarketCard({
                     className="h-full w-full overflow-hidden rounded-full"
                     style={{ boxShadow: `0 0 14px -4px oklch(0.7 0.22 ${hue} / 0.55)` }}
                   >
-                    {photo && <img src={photo} alt="" className="h-full w-full object-cover" />}
+                    {photo ? (
+                      <img src={photo} alt="" className="h-full w-full object-cover" />
+                    ) : (
+                      <div className="grid h-full w-full place-items-center bg-white/[0.06] font-mono text-[10px] font-bold text-muted-foreground">
+                        {initials || "?"}
+                      </div>
+                    )}
                   </div>
                   {o.team && (
                     <img
