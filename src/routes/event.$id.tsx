@@ -83,6 +83,150 @@ function EventErrorComponent({ error, reset }: { error: Error; reset: () => void
 }
 
 
+function getOutcomeLabel(o: Outcome): string {
+  return o.team?.name ?? o.label;
+}
+
+function getSideLabels(market: SportsMarket): { yes: string; no: string } | undefined {
+  if (market.outcomes.length !== 2) return undefined;
+  return {
+    yes: getOutcomeLabel(market.outcomes[0]),
+    no: getOutcomeLabel(market.outcomes[1]),
+  };
+}
+
+function hashSeed(s: string): number {
+  let h = 0;
+  for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) | 0;
+  return Math.abs(h) % 100;
+}
+
+function clampPct(v: number): number {
+  return Math.max(1, Math.min(99, v));
+}
+
+function leagueKeyFromShort(short: string): PositionRowData["league"] {
+  const s = short.toUpperCase();
+  if (s === "EPL") return "epl";
+  if (s === "LL") return "laliga";
+  if (s === "UCL") return "ucl";
+  if (s === "SA") return "seriea";
+  if (s === "NBA") return "nba";
+  return "epl";
+}
+
+/**
+ * Seed mock positions/orders/history rows tied to the current market so
+ * every visitor sees populated tables on first load. These are deterministic
+ * by market id (same market → same rows) and live alongside any new orders
+ * the user actually places.
+ */
+function buildSeed(
+  market: SportsMarket,
+  league: PositionRowData["league"],
+): {
+  positions: PositionRowData[];
+  orders: OrderRowData[];
+  history: HistoryRowData[];
+} {
+  const first = market.outcomes[0];
+  const second = market.outcomes[1] ?? market.outcomes[0];
+  const firstPx = Math.round(first.price * 100);
+  const secondPx = Math.round(second.price * 100);
+  const firstLabel = first.team?.name ?? first.label;
+  const secondLabel = second.team?.name ?? second.label;
+
+  const positions: PositionRowData[] = [
+    {
+      market: market.title,
+      league,
+      outcome: "yes",
+      outcomeLabel: firstLabel,
+      size: 180,
+      entry: clampPct(firstPx - 4),
+      mark: firstPx,
+      leverage: 3,
+      mode: "cross",
+      margin: 60,
+      liq: clampPct(firstPx - 18),
+      pnl: 0,
+    },
+    {
+      market: market.title,
+      league,
+      outcome: "no",
+      outcomeLabel: secondLabel,
+      size: 90,
+      entry: clampPct(secondPx + 3),
+      mark: secondPx,
+      leverage: 1,
+      mode: "isolated",
+      margin: 27,
+      liq: 99,
+      pnl: 0,
+    },
+  ];
+
+  const orders: OrderRowData[] = [
+    {
+      market: market.title,
+      league,
+      outcome: "yes",
+      outcomeLabel: firstLabel,
+      type: "limit",
+      price: clampPct(firstPx - 6),
+      size: 120,
+      filled: 25,
+    },
+    {
+      market: market.title,
+      league,
+      outcome: "no",
+      outcomeLabel: secondLabel,
+      type: "limit",
+      price: clampPct(secondPx - 4),
+      size: 80,
+      filled: 0,
+    },
+  ];
+
+  const history: HistoryRowData[] = [
+    {
+      market: market.title,
+      league,
+      outcome: "yes",
+      outcomeLabel: firstLabel,
+      action: "fill",
+      price: clampPct(firstPx - 4),
+      size: 180,
+      when: "1h ago",
+    },
+    {
+      market: market.title,
+      league,
+      outcome: "no",
+      outcomeLabel: secondLabel,
+      action: "close",
+      price: clampPct(secondPx + 5),
+      size: 60,
+      pnl: 8.4,
+      when: "Yesterday",
+    },
+    {
+      market: market.title,
+      league,
+      outcome: "yes",
+      outcomeLabel: firstLabel,
+      action: "close",
+      price: clampPct(firstPx - 9),
+      size: 75,
+      pnl: -5.2,
+      when: "2d ago",
+    },
+  ];
+
+  return { positions, orders, history };
+}
 function EventTradePage() {
   const { market } = Route.useLoaderData();
   // For binary 2-outcome markets, treat outcomes[0] = YES, outcomes[1] = NO.
@@ -474,149 +618,4 @@ function Stat({ label, value, icon }: { label: string; value: string; icon?: Rea
       </div>
     </div>
   );
-}
-
-function getOutcomeLabel(o: Outcome): string {
-  return o.team?.name ?? o.label;
-}
-
-function getSideLabels(market: SportsMarket): { yes: string; no: string } | undefined {
-  if (market.outcomes.length !== 2) return undefined;
-  return {
-    yes: getOutcomeLabel(market.outcomes[0]),
-    no: getOutcomeLabel(market.outcomes[1]),
-  };
-}
-
-function hashSeed(s: string): number {
-  let h = 0;
-  for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) | 0;
-  return Math.abs(h) % 100;
-}
-
-function clampPct(v: number): number {
-  return Math.max(1, Math.min(99, v));
-}
-
-function leagueKeyFromShort(short: string): PositionRowData["league"] {
-  const s = short.toUpperCase();
-  if (s === "EPL") return "epl";
-  if (s === "LL") return "laliga";
-  if (s === "UCL") return "ucl";
-  if (s === "SA") return "seriea";
-  if (s === "NBA") return "nba";
-  return "epl";
-}
-
-/**
- * Seed mock positions/orders/history rows tied to the current market so
- * every visitor sees populated tables on first load. These are deterministic
- * by market id (same market → same rows) and live alongside any new orders
- * the user actually places.
- */
-function buildSeed(
-  market: SportsMarket,
-  league: PositionRowData["league"],
-): {
-  positions: PositionRowData[];
-  orders: OrderRowData[];
-  history: HistoryRowData[];
-} {
-  const first = market.outcomes[0];
-  const second = market.outcomes[1] ?? market.outcomes[0];
-  const firstPx = Math.round(first.price * 100);
-  const secondPx = Math.round(second.price * 100);
-  const firstLabel = first.team?.name ?? first.label;
-  const secondLabel = second.team?.name ?? second.label;
-
-  const positions: PositionRowData[] = [
-    {
-      market: market.title,
-      league,
-      outcome: "yes",
-      outcomeLabel: firstLabel,
-      size: 180,
-      entry: clampPct(firstPx - 4),
-      mark: firstPx,
-      leverage: 3,
-      mode: "cross",
-      margin: 60,
-      liq: clampPct(firstPx - 18),
-      pnl: 0,
-    },
-    {
-      market: market.title,
-      league,
-      outcome: "no",
-      outcomeLabel: secondLabel,
-      size: 90,
-      entry: clampPct(secondPx + 3),
-      mark: secondPx,
-      leverage: 1,
-      mode: "isolated",
-      margin: 27,
-      liq: 99,
-      pnl: 0,
-    },
-  ];
-
-  const orders: OrderRowData[] = [
-    {
-      market: market.title,
-      league,
-      outcome: "yes",
-      outcomeLabel: firstLabel,
-      type: "limit",
-      price: clampPct(firstPx - 6),
-      size: 120,
-      filled: 25,
-    },
-    {
-      market: market.title,
-      league,
-      outcome: "no",
-      outcomeLabel: secondLabel,
-      type: "limit",
-      price: clampPct(secondPx - 4),
-      size: 80,
-      filled: 0,
-    },
-  ];
-
-  const history: HistoryRowData[] = [
-    {
-      market: market.title,
-      league,
-      outcome: "yes",
-      outcomeLabel: firstLabel,
-      action: "fill",
-      price: clampPct(firstPx - 4),
-      size: 180,
-      when: "1h ago",
-    },
-    {
-      market: market.title,
-      league,
-      outcome: "no",
-      outcomeLabel: secondLabel,
-      action: "close",
-      price: clampPct(secondPx + 5),
-      size: 60,
-      pnl: 8.4,
-      when: "Yesterday",
-    },
-    {
-      market: market.title,
-      league,
-      outcome: "yes",
-      outcomeLabel: firstLabel,
-      action: "close",
-      price: clampPct(firstPx - 9),
-      size: 75,
-      pnl: -5.2,
-      when: "2d ago",
-    },
-  ];
-
-  return { positions, orders, history };
 }
