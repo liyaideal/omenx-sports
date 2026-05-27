@@ -422,8 +422,8 @@ function Variant({ caption, children }: { caption: string; children: React.React
       <div className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
         {caption}
       </div>
-      <div className="overflow-x-auto rounded-xl border border-dashed border-border/60 bg-background/40 p-4">
-        <div className="min-w-[1280px]">{children}</div>
+      <div className="rounded-xl border border-dashed border-border/60 bg-background/40 p-4">
+        {children}
       </div>
     </div>
   );
