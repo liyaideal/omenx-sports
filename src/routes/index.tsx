@@ -192,21 +192,30 @@ function Index() {
 
       {/* OmenX bridge strip */}
       <div className="border-t border-border px-6 py-4 md:px-8">
-        <div className="flex flex-wrap items-center justify-between gap-3 text-sm">
-          <div className="text-muted-foreground">
-            <span className="text-foreground font-medium">Made a call? Cash it in.</span>
+        <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-3 text-sm">
+          <div className="flex flex-wrap items-center gap-x-5 gap-y-2">
+            <span className="font-display text-base font-medium text-foreground">
+              Made a call? Cash it in.
+            </span>
+            <span className="inline-flex items-center gap-2 font-mono text-[11px] uppercase tracking-wider text-muted-foreground">
+              <span className="inline-flex items-center gap-1.5">
+                <span className="h-1.5 w-1.5 rounded-full bg-primary/70 shadow-[0_0_6px_var(--primary)]" />
+                {ACCOUNT_STATS.openPositions} open
+              </span>
+              <span className="text-border">·</span>
+              <span className="inline-flex items-center gap-1 text-win">
+                {ACCOUNT_STATS.pnlToday} today ↑
+              </span>
+              <span className="text-border">·</span>
+              <span className="text-foreground">{ACCOUNT_STATS.toClaim} to claim</span>
+            </span>
           </div>
-          <div className="flex items-center gap-2">
-            <a href={omenxUrl.wallet()} className="inline-flex items-center gap-1.5 rounded-full bg-white/[0.06] px-3 py-1.5 text-xs font-semibold text-foreground ring-1 ring-white/10 hover:bg-white/10">
-              Wallet <ArrowUpRight className="h-3.5 w-3.5" />
-            </a>
-            <a href={omenxUrl.portfolio()} className="inline-flex items-center gap-1.5 rounded-full bg-white/[0.06] px-3 py-1.5 text-xs font-semibold text-foreground ring-1 ring-white/10 hover:bg-white/10">
-              Open Portfolio <ArrowUpRight className="h-3.5 w-3.5" />
-            </a>
-            <a href={omenxUrl.history()} className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium text-muted-foreground hover:text-foreground">
-              Settled history <ArrowUpRight className="h-3.5 w-3.5" />
-            </a>
-          </div>
+          <a
+            href={omenxUrl.portfolio()}
+            className="inline-flex items-center gap-1.5 rounded-full bg-primary/15 px-4 py-1.5 text-xs font-semibold text-foreground ring-1 ring-primary/30 transition hover:bg-primary/20"
+          >
+            Open Portfolio <ArrowUpRight className="h-3.5 w-3.5" />
+          </a>
         </div>
       </div>
     </AppShell>
