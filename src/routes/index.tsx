@@ -1,6 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
-import { CalendarDays, Users } from "lucide-react";
 import { AppShell } from "@/components/sports/dashboard/AppShell";
 import { AppTopBar } from "@/components/sports/dashboard/AppTopBar";
 import { MatchMarketCard } from "@/components/sports/dashboard/MatchMarketCard";
@@ -16,8 +15,9 @@ import { DayStripCalendar } from "@/components/sports/dashboard/DayStripCalendar
 import { ShowMoreEventsButton } from "@/components/sports/dashboard/ShowMoreEventsButton";
 import { LiveStreamCard } from "@/components/sports/dashboard/LiveStreamCard";
 import { MobileChrome } from "@/components/sports/mobile/MobileChrome";
-import { MobileLiveHero } from "@/components/sports/mobile/MobileLiveHero";
-import { MobileSeeMoreCard } from "@/components/sports/mobile/MobileSeeMoreCard";
+import { MobileHomeHero } from "@/components/sports/mobile/MobileHomeHero";
+import { MobileAccountSnapshot } from "@/components/sports/mobile/MobileAccountSnapshot";
+import { MobileLiveStatusBar } from "@/components/sports/mobile/MobileLiveStatusBar";
 import {
   ACCOUNT_STATS,
   FEATURED_MATCH,
@@ -216,69 +216,31 @@ function Index() {
 
       {/* MOBILE layout (< md) — slim home: live + today preview + section teasers + season */}
       <MobileChrome>
-        {liveStreamMarkets.length > 0 && (
-          <MobileLiveHero markets={liveStreamMarkets} />
-        )}
+        <MobileHomeHero userName={USER_NAME} equity={ACCOUNT_STATS.available} />
+
+        <MobileAccountSnapshot
+          openPositions={ACCOUNT_STATS.openPositions}
+          pnlToday={ACCOUNT_STATS.pnlToday}
+          toClaim={ACCOUNT_STATS.toClaim}
+          portfolioHref={omenxUrl.portfolio()}
+        />
+
+        <MobileLiveStatusBar
+          count={liveStreamMarkets.length}
+          topLabel={liveStreamMarkets[0]?.title.split(" — ")[0]}
+        />
 
         <section className="space-y-3">
           <header className="flex items-baseline justify-between">
             <h2 className="font-display text-2xl font-semibold leading-9">
-              Today's
-              <span className="font-serif-display italic text-neon"> Events</span>
+              Player
+              <span className="font-serif-display italic text-neon"> Spotlight</span>
             </h2>
             <span className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
-              Top {Math.min(3, upcomingMarkets.length)}
+              Picks for you
             </span>
           </header>
-          {upcomingMarkets.length > 0 ? (
-            <div className="grid grid-cols-1 gap-3">
-              {upcomingMarkets.slice(0, 3).map((m) => (
-                <EventMarketTileCard key={m.id} market={m} />
-              ))}
-            </div>
-          ) : (
-            <div className="rounded-2xl border border-dashed border-border bg-surface/40 px-5 py-10 text-center text-sm text-muted-foreground">
-              No events scheduled today.
-            </div>
-          )}
-          <MobileSeeMoreCard
-            to="/events"
-            icon={CalendarDays}
-            label="See all events"
-            hint={`${MATCH_MARKETS.length} markets · day strip + filters`}
-          />
-        </section>
-
-        <section className="space-y-3">
-          <FanZoneHeader
-            followingCount={FOLLOWED_TEAMS.length}
-            suggested={SUGGESTED_TEAMS}
-            followedNames={FOLLOWED_TEAMS.map((t) => t.name)}
-          />
-          <MobileSeeMoreCard
-            to="/fans"
-            icon={Users}
-            label="Open Fans Zone"
-            hint={`${FOLLOWED_TEAMS.length} following · live trades + posts`}
-          />
-        </section>
-
-        <section className="space-y-3">
-          <h2 className="font-display text-2xl font-semibold leading-9">
-            Season
-            <span className="font-serif-display italic text-neon"> Events</span>
-          </h2>
-          <div className="space-y-4">
-            {SEASON_LEAGUE_GROUPS.flatMap((group) => [
-              <LeagueWinnerMarketCard key={`${group.id}-w`} market={group.winner} />,
-              <TopScorerMarketCard
-                key={`${group.id}-t`}
-                market={group.topScorer}
-                photos={group.photos}
-              />,
-            ])}
-            <PlayerPropsSpotlight players={SPOTLIGHTS} />
-          </div>
+          <PlayerPropsSpotlight players={SPOTLIGHTS} />
         </section>
       </MobileChrome>
 

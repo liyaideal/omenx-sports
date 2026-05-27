@@ -1,73 +1,73 @@
-# 移动端 Tab 拆成独立路由
 
-## 现状问题
+## 问题诊断
 
-`MobileBottomNav` 的 Events / Fans 只是 `scrollIntoView` 到 home 页上的 `#events` `#fans` 锚点 —— 点了什么都没"换页"，等于书签。同时 home 页被 Events 网格 + Fans zone 塞得很长。
+底部 tab 已经常驻 Home / Events / Fans / Me，但目前三个页面内容大量重复：
 
-## 新结构
+| 模块 | Home (mobile) | Events | Fans |
+|---|---|---|---|
+| MobileLiveHero（直播） | ✓ | ✓ | – |
+| Today's events 3 张卡 | ✓ | ✓（全量） | – |
+| FanZoneHeader | ✓（teaser） | – | ✓ |
+| Season markets / Spotlight | ✓ | – | – |
+| Live trades / Fan post | – | – | ✓ |
 
-把移动端的 Events 和 Fans 各自抽成独立路由，home 变短，只保留"首屏感"内容。
+Home 几乎是 Events + Fans 的拼接预览，意义不大。
 
-### 路由
+## 重新分工原则
 
-| 文件                      | 路径       | 内容                                                                 |
-|---------------------------|-----------|----------------------------------------------------------------------|
-| `src/routes/index.tsx`    | `/`       | 桌面端 = 现状不变。移动端 = Live hero + Day strip 预览（今天前 3-4 场）+ Season teaser + 两个跳转入口卡（"See all events →" / "Open Fans →"） |
-| `src/routes/events.tsx`   | `/events` | 移动端：完整的 DayStripCalendar + 全部 upcoming 列表（原 home `#events` 那块整段搬过来）。桌面端访问直接 redirect 回 `/`（事件在 home 已经有完整呈现） |
-| `src/routes/fans.tsx`     | `/fans`   | 移动端：FanZoneHeader + 关注/未关注分支 + LiveActivityCard。桌面端同样 redirect 回 `/` |
+底部 nav 已经是跳转入口，**home 不再需要做 "目录页"**。三个 tab 各自承担一类完整内容，零重叠：
 
-桌面端 redirect 用 route 的 `beforeLoad` 配合 `useMediaQuery` 不靠谱（loader 在服务端跑），所以直接的做法：两个新路由的 component 在桌面端用 `hidden md:block` 渲染一个"This page is only available on mobile, [back to home]"占位 + 移动端真实内容。简单、SSR-safe、零 JS gate。或者更干脆——两个路由的 head() 不放 og:image，组件渲染的内容在 desktop 上就用一个回到主页的卡片。
+- **Events** = 所有"市场/赛事"相关（即时 + 未来）
+- **Fans** = 所有"社交/关注"相关
+- **Home** = 个人首屏（账户 + 一句话 live 状态 + 一个明显 CTA），短小精悍
 
-### MobileBottomNav 改造
+## 新内容结构（mobile）
 
-- 删掉 `anchor` 字段和 `scrollIntoView` 逻辑。
-- 用 TanStack `<Link to="/" | "/events" | "/fans">` 替换 `<button onClick>`。
-- `Me` tab 仍然是 button + `onMeClick`（开 Sheet）。
-- active 状态用 `useRouterState({ select: s => s.location.pathname })` 算（不再靠父组件 props）。这样组件自洽，不用 home 维护 `activeTab` state。
-- 触觉反馈保留（`navigator.vibrate(8)`），在 Link 的 `onClick` 里调。
+### `/` Home — 个人化首屏（短）
+1. 顶部问候 + 头像：`Hi, Jeremy` + 账户 chip（available equity）
+2. **Account snapshot 卡**（移动版 BridgeStrip）：Open positions / P&L today / To claim → 链接到 OmenX portfolio
+3. **Live now 状态条**：如果当前有直播比赛，显示极简一行 "🔴 2 matches live · Tap to watch" → 整条点击跳 `/events`（不再渲染完整 LiveHero）
+4. **Player Props Spotlight**（保留，作为"今日推荐"，Events 移除该模块）
+5. 底部留白 + onboarding hint
 
-### home (`index.tsx`) 移动端瘦身
+→ 删除：MobileLiveHero、Today's events 3 张卡、FanZoneHeader teaser、Season markets、所有 SeeMore 卡
 
-新的移动端纵向流：
+### `/events` Events — 完整市场页
+1. **MobileLiveHero**（直播比赛大卡，唯一出现位置）
+2. **Upcoming 区**：DayStripCalendar + 完整事件卡列表（当前已有）
+3. **新增 Season 区**：LeagueWinnerMarketCard + TopScorerMarketCard（从 home 搬过来），作为 "Season futures" 子段
 
-```text
-MobileTopBar
-  ↓
-MobileLiveHero (2 张 16/9)
-  ↓
-"Today" 小标题 + DayStripCalendar (只今天那一格高亮)
-  + 今天的前 3 场 EventMarketTileCard
-  + [See all events →] 大跳转卡 (Link to /events)
-  ↓
-Fans teaser: FanZoneHeader 简化版 (只显示 following count + 头像 row)
-  + [Open Fans →] 跳转卡 (Link to /fans)
-  ↓
-Season Markets (保留，作为 home 的"长尾"内容)
-  ↓
-MobileBottomNav
-```
+→ Spotlight 不放这里（避免与 home 重叠）
 
-桌面端 (`md:block`) 完全不动。
+### `/fans` Fans — 完整社交页（基本保留）
+1. FanZoneHeader（follow/suggested）
+2. FOLLOWED 时：MatchMarketCard（关注队的下一场）+ FanPostCard
+3. LiveActivityCard（实时 trades）
+4. 未关注时：FansZoneEmpty
 
-### style-guide 同步
+→ 这页基本不动，只需要确认无重复
 
-按 memory 规则，`/style-guide` 里的 Mobile Shell 区要加：
-- `/events` 页 PhoneFrame 演示（DayStripCalendar + 列表）。
-- `/fans` 页 PhoneFrame 演示。
-- 把现有 Mobile Shell 区里的 home 演示换成新的"短版" home。
+## 文件改动
 
-## 技术细节
+**编辑：**
+- `src/routes/index.tsx` — 移动端 layout 完全重写为新 Home（保留 desktop 不动）
+- `src/components/sports/mobile/MobileEventsSection.tsx` — 在 Upcoming 之后追加 "Season futures" 段（LeagueWinner + TopScorer）
 
-- 新建 `src/routes/events.tsx`, `src/routes/fans.tsx`，都用 `createFileRoute("/events")` / `("/fans")`。各自 head() 设独立 title + description + og:title/description + canonical。
-- 桌面端占位：在两个新路由的 component 里用 `<div className="hidden md:flex ...">It's a mobile-first page — [Open homepage]</div>` + `<div className="md:hidden">真正内容</div>`，避免 redirect 引起的 SSR 抖动。
-- 把 home 里 `#events` `#fans` 两个 section 的内容抽到新组件：`MobileEventsSection`（接受 day strip props + markets）和 `MobileFansSection`（接受 followed/suggested 数据），分别在新路由和 home 的瘦身版里复用（home 的 Fans teaser 用 FanZoneHeader + 头像 row，不复用 MobileFansSection 整体）。
-- 删 `MobileBottomNav` 的 `active` / `onTabChange` props 改用 router state；同步 home 不再传 `activeTab`。
-- `MobileBottomNav` 仍是 `md:hidden` 全局 fixed，所以新路由也会自动获得底部 tab —— 不需要每个路由单独引入。
-- `routeTree.gen.ts` 由 Vite 插件自动重生，不要手改。
+**新建：**
+- `src/components/sports/mobile/MobileAccountSnapshot.tsx` — 移动版 BridgeStrip（3 个数字 + 跳 portfolio）
+- `src/components/sports/mobile/MobileLiveStatusBar.tsx` — 一行 live 状态条，点击跳 /events
+- `src/components/sports/mobile/MobileHomeHero.tsx` — 顶部问候 + equity chip
 
-## 不改的事情
+**不动：**
+- `MobileFansSection.tsx`、`/fans` 路由、`MobileBottomNav`、`MobileChrome`、desktop 全部布局、数据层、style-guide 之外的组件
 
-- 桌面端 home（`hidden md:block` 分支）。
-- BridgeStrip、AppTopBar、所有 dashboard/* 组件。
-- 数据层 (`sports-markets.ts` 等)。
-- Me Sheet 行为。
+## Style-guide 同步
+
+按 core memory 规则，新建的 3 个 mobile-only 组件（HomeHero / AccountSnapshot / LiveStatusBar）需要在 `/style-guide` 加 demo section "Mobile Home modules"，并更新 Events demo 描述（增加 Season futures 段）。
+
+## 技术要点
+
+- 所有 mobile 模块用 `MobileChrome` 包裹（已有），保证 top bar / bottom nav / safe-area 一致
+- Live 状态条数据源：复用 `MATCH_MARKETS.filter(m => m.isLiveStream)`，0 场时不渲染
+- Account snapshot 三数字直接读 `ACCOUNT_STATS`，跳转用 `omenxUrl.portfolio()`（外链）
+- 不动 SSR / route 配置；只改 component 内容
