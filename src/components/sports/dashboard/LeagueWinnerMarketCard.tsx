@@ -28,7 +28,7 @@ export function LeagueWinnerMarketCard({ market }: { market: SportsMarket }) {
 
       <div className="grid grid-cols-[24px_1fr_auto] items-center gap-3 pb-2 text-[10px] font-mono uppercase tracking-widest text-muted-foreground">
         <span>#</span>
-        <span>Outcome</span>
+        <span>Market</span>
         <span className="text-right">Price</span>
       </div>
 

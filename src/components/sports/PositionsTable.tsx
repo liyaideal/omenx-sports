@@ -115,8 +115,8 @@ function PositionTable({ rows }: { rows: PositionRowData[] }) {
       <table className="w-full text-xs">
         <thead>
           <tr className="text-left font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+            <Th>Event</Th>
             <Th>Market</Th>
-            <Th>Outcome</Th>
             <Th className="text-right">Size</Th>
             <Th className="text-right">Entry</Th>
             <Th className="text-right">Mark</Th>
@@ -178,8 +178,8 @@ function OrderTable({ rows }: { rows: OrderRowData[] }) {
       <table className="w-full text-xs">
         <thead>
           <tr className="text-left font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+            <Th>Event</Th>
             <Th>Market</Th>
-            <Th>Outcome</Th>
             <Th>Type</Th>
             <Th className="text-right">Price</Th>
             <Th className="text-right">Size</Th>
@@ -233,8 +233,8 @@ function HistoryTable({ rows }: { rows: HistoryRowData[] }) {
       <table className="w-full text-xs">
         <thead>
           <tr className="text-left font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+            <Th>Event</Th>
             <Th>Market</Th>
-            <Th>Outcome</Th>
             <Th>Action</Th>
             <Th className="text-right">Price</Th>
             <Th className="text-right">Size</Th>
