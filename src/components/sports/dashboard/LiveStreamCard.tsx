@@ -1,7 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { Play, Users } from "lucide-react";
 import type { SportsMarket } from "@/data/sports-markets";
-import { PricePill } from "./PricePill";
 
 /**
  * Compact "we are streaming this match" tile, sized to drop into the same
@@ -80,36 +79,32 @@ export function LiveStreamCard({ market }: { market: SportsMarket }) {
         </div>
       </div>
 
-      {/* Outcome chips: side-by-side, 2- or 3-up. Keeps card height flat. */}
-      <div
-        className="grid gap-2"
-        style={{ gridTemplateColumns: `repeat(${outcomes.length}, minmax(0, 1fr))` }}
-      >
-        {outcomes.map((o) => {
+      {/* Segmented market bar — single pill split by dividers. Keeps the
+          card flat regardless of 2- or 3-way markets and reads cleanly. */}
+      <div className="flex items-stretch overflow-hidden rounded-2xl bg-white/[0.03] ring-1 ring-white/[0.05] transition group-hover:bg-white/[0.06]">
+        {outcomes.map((o, i) => {
           const isDraw = !o.team && (o.label === "Draw" || o.meta === "X");
+          const cents = Math.round(o.price * 100);
           return (
             <div
               key={o.id}
-              className="flex items-center gap-2 rounded-xl bg-white/[0.03] px-2.5 py-2 ring-1 ring-white/[0.05] transition group-hover:bg-white/[0.06]"
+              className={`flex flex-1 items-center justify-center gap-2 px-3 py-2.5 ${
+                i < outcomes.length - 1 ? "border-r border-white/[0.06]" : ""
+              }`}
             >
               {o.team ? (
-                <div
-                  className="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-white/[0.05] p-1 ring-1 ring-white/10"
-                  style={{ boxShadow: `0 0 14px -4px oklch(0.7 0.22 ${o.team.hue} / 0.55)` }}
-                >
-                  <img src={o.team.logo} alt="" className="h-full w-full object-contain" />
-                </div>
+                <img src={o.team.logo} alt="" className="h-5 w-5 shrink-0 object-contain" />
               ) : (
-                <span className="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-white/[0.06] font-mono text-[10px] text-muted-foreground">
+                <span className="grid h-5 w-5 shrink-0 place-items-center rounded-full bg-white/[0.06] font-mono text-[10px] text-muted-foreground">
                   {isDraw ? "X" : "·"}
                 </span>
               )}
-              <div className="flex min-w-0 flex-1 flex-col gap-0.5">
-                <span className="truncate font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
-                  {o.team?.short ?? o.label}
-                </span>
-                <PricePill price={o.price} delta={o.delta24h} size="sm" />
-              </div>
+              <span className="truncate font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+                {o.team?.short ?? o.label}
+              </span>
+              <span className="font-display text-sm font-semibold tabular-nums text-foreground">
+                {cents}<span className="text-muted-foreground">¢</span>
+              </span>
             </div>
           );
         })}
