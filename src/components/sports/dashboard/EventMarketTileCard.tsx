@@ -1,8 +1,30 @@
-import { Clock, Users } from "lucide-react";
+import { Clock, Flame, TrendingUp, Users } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 import type { Outcome, SportsMarket, TeamLite } from "@/data/sports-markets";
 import { PricePill } from "./PricePill";
 import { LeagueChip } from "../LeagueBadge";
+
+const HOT_PARTICIPANTS = 2000;
+const TRENDING_DELTA = 0.05;
+
+function EventBadge({ market }: { market: SportsMarket }) {
+  if (market.participants >= HOT_PARTICIPANTS) {
+    return (
+      <span className="inline-flex items-center gap-1 rounded-full bg-[oklch(0.7_0.22_25_/_0.12)] px-2 py-0.5 font-mono text-[10px] uppercase tracking-widest text-[oklch(0.78_0.18_45)] ring-1 ring-[oklch(0.7_0.22_25_/_0.25)]">
+        <Flame className="h-3 w-3" /> Hot
+      </span>
+    );
+  }
+  const trending = market.outcomes.some((o) => Math.abs(o.delta24h ?? 0) >= TRENDING_DELTA);
+  if (trending) {
+    return (
+      <span className="inline-flex items-center gap-1 rounded-full bg-[oklch(0.78_0.18_155_/_0.12)] px-2 py-0.5 font-mono text-[10px] uppercase tracking-widest text-[oklch(0.78_0.18_155)] ring-1 ring-[oklch(0.78_0.18_155_/_0.25)]">
+        <TrendingUp className="h-3 w-3" /> Trending
+      </span>
+    );
+  }
+  return null;
+}
 
 /**
  * Universal event market tile — supports two OmenX market shapes:
@@ -22,13 +44,8 @@ export function EventMarketTileCard({ market }: { market: SportsMarket }) {
       className="group flex h-full flex-col gap-4 rounded-3xl border border-border bg-surface p-5 shadow-card transition hover:border-white/15"
     >
       <header className="flex items-center justify-between gap-2">
-        <div className="inline-flex items-center gap-2">
-          <LeagueChip short={market.league.short} />
-          <span className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">· EVENT</span>
-        </div>
-        <span className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
-          {market.shape === "three-way" ? "1 · X · 2" : "YES / NO"}
-        </span>
+        <LeagueChip short={market.league.short} />
+        <EventBadge market={market} />
       </header>
 
       {hasFixture ? (
