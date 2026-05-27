@@ -260,6 +260,11 @@ in the existing top-right user menu, not a bottom bar.
 
 - All section headers share `min-h-9 leading-9` so titles align across columns.
 - All cards in a grid row stretch to equal height via `h-full + mt-auto` footer.
+- Side-rail panels (Spotlight, sticky filters) must use `lg:self-start` plus
+  intrinsic height (`h-fit`, never `h-full`). Pair with `lg:sticky lg:top-4`
+  when the main column can outgrow the viewport. Long-content main columns
+  must wrap into multi-column grids (e.g. `xl:grid-cols-2` for season cards)
+  before they push the side rail past its content.
 
 ## 6. Depth & Elevation
 
@@ -334,6 +339,10 @@ Section 7 is append-only. Every regression the user catches gets pinned here.
   (fixture / title left, outcome rows right) and the stats strip across the
   bottom. Outcome rows are 56px tall with a lavender `ring-1 ring-primary/40`
   selected state.
+- Don't put a tall single-column list next to a stretching `h-full` side
+  panel — the side panel will leak whitespace below its content. Wrap the
+  list in `xl:grid-cols-2` and switch the side panel to `h-fit lg:self-start`
+  (sticky when needed).
 
 ## 8. Responsive Behavior
 

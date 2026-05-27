@@ -27,7 +27,7 @@ export function PlayerPropsSpotlight({ players }: { players: PlayerSpotlight[] }
   };
   const imageFitClass = player.imageFit === "contain" ? "object-contain p-6" : "object-cover object-top";
   return (
-    <section className="relative flex h-full flex-col overflow-hidden rounded-3xl border border-border bg-surface bg-ambient p-5 shadow-card">
+    <section className="relative flex h-fit flex-col overflow-hidden rounded-3xl border border-border bg-surface bg-ambient p-5 shadow-card">
       <header className="relative z-10 flex items-center justify-between">
         <span
           aria-hidden

@@ -180,16 +180,16 @@ function Index() {
             title="Season"
             accent="Events"
           />
-          <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_360px]">
-            <div className="flex flex-col gap-5">
-              {SEASON_LEAGUE_GROUPS.map((group) => (
-                <div key={group.id} className="flex flex-col gap-5">
-                  <LeagueWinnerMarketCard market={group.winner} />
-                  <TopScorerMarketCard market={group.topScorer} photos={group.photos} />
-                </div>
-              ))}
+          <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_320px]">
+            <div className="grid gap-5 xl:grid-cols-2">
+              {SEASON_LEAGUE_GROUPS.flatMap((group) => [
+                <LeagueWinnerMarketCard key={`${group.id}-w`} market={group.winner} />,
+                <TopScorerMarketCard key={`${group.id}-t`} market={group.topScorer} photos={group.photos} />,
+              ])}
             </div>
-            <PlayerPropsSpotlight players={SPOTLIGHTS} />
+            <div className="lg:sticky lg:top-4 lg:self-start">
+              <PlayerPropsSpotlight players={SPOTLIGHTS} />
+            </div>
           </div>
         </section>
       </div>
