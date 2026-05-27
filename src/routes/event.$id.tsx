@@ -253,7 +253,7 @@ function EventDetailHeader({
 
         <div className="min-w-0 lg:pl-2">
           <div className="mb-2 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
-            Outcomes
+            Markets
           </div>
           <div className="flex flex-col gap-1.5">
             {market.outcomes.map((o, idx) => (
