@@ -199,6 +199,24 @@ function HomepagePlayground() {
                 <FanPostCard {...FAN_POST} />
               </div>
             </Variant>
+            <Variant caption="large catalog — World Cup 24 teams · no follows yet (compact card + full-screen picker)">
+              <div className="max-w-[420px]">
+                <FollowTeamsCompact
+                  groups={WORLD_CUP_GROUPS}
+                  description="24 national teams · search by name or country code"
+                  emptyHint="Tap below to pick the squads you'll be cheering for."
+                />
+              </div>
+            </Variant>
+            <Variant caption="large catalog — World Cup, 3 teams pre-followed (manage flow)">
+              <div className="max-w-[420px]">
+                <FollowTeamsCompact
+                  groups={WORLD_CUP_GROUPS}
+                  initialFollowed={WORLD_CUP_PREFOLLOWED}
+                  description="24 national teams · tap Manage to edit your follows"
+                />
+              </div>
+            </Variant>
           </Section>
 
           <Section id="match-card" title="MatchMarketCard" hint="Two crests + outcome list; supports 1X2 or binary.">
