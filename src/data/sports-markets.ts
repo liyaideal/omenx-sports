@@ -269,9 +269,12 @@ export interface PlayerSpotlight {
   club: TeamLite;
   photo: string;
   props: SportsMarket[];
+  /** How to render the portrait image. "cover" for player photos,
+   *  "contain" for crests / trophies. Defaults to "cover". */
+  imageFit?: "cover" | "contain";
 }
 
-export const SPOTLIGHT: PlayerSpotlight = {
+const MBAPPE_SPOTLIGHT: PlayerSpotlight = {
   handle: "MBAPPE_KM",
   firstName: "Kylian",
   lastName: "Mbappé",
@@ -330,6 +333,136 @@ export const SPOTLIGHT: PlayerSpotlight = {
     },
   ],
 };
+
+const CHELSEA_SPOTLIGHT: PlayerSpotlight = {
+  handle: "CHELSEA_FC",
+  firstName: "Chelsea",
+  lastName: "Treble Watch",
+  position: "Premier League · Club futures",
+  club: TEAMS.chelsea,
+  photo: TEAMS.chelsea.logo,
+  imageFit: "contain",
+  props: [
+    {
+      id: "che-epl-win",
+      kind: "league-winner",
+      shape: "binary",
+      title: "Win the Premier League",
+      league: { name: "Premier League", short: "EPL" },
+      endsLabel: "End of season",
+      volume: "$612K",
+      volume24h: "$58K",
+      participants: 1842,
+      outcomes: [
+        { id: "y", label: "Yes", price: 0.18, delta24h: 0.02 },
+        { id: "n", label: "No", price: 0.82, delta24h: -0.02 },
+      ],
+      tradeHref: omenxUrl.markets(),
+    },
+    {
+      id: "che-top4",
+      kind: "league-winner",
+      shape: "binary",
+      title: "Finish top 4",
+      league: { name: "Premier League", short: "EPL" },
+      endsLabel: "End of season",
+      volume: "$840K",
+      volume24h: "$72K",
+      participants: 2410,
+      outcomes: [
+        { id: "y", label: "Yes", price: 0.66, delta24h: 0.03 },
+        { id: "n", label: "No", price: 0.34, delta24h: -0.03 },
+      ],
+      tradeHref: omenxUrl.markets(),
+    },
+    {
+      id: "che-ucl-qual",
+      kind: "league-winner",
+      shape: "binary",
+      title: "Qualify for Champions League",
+      league: { name: "Premier League", short: "EPL" },
+      endsLabel: "End of season",
+      volume: "$520K",
+      volume24h: "$48K",
+      participants: 1604,
+      outcomes: [
+        { id: "y", label: "Yes", price: 0.74, delta24h: 0.01 },
+        { id: "n", label: "No", price: 0.26, delta24h: -0.01 },
+      ],
+      tradeHref: omenxUrl.markets(),
+    },
+  ],
+};
+
+const GROUP_F_SPOTLIGHT: PlayerSpotlight = {
+  handle: "WC26_GROUP_F",
+  firstName: "Group F",
+  lastName: "Winner",
+  position: "World Cup 2026 · Group stage",
+  club: TEAMS.psg,
+  photo:
+    "https://images.unsplash.com/photo-1606925797300-0b35e9d1794e?w=480&h=560&fit=crop&q=80",
+  imageFit: "cover",
+  props: [
+    {
+      id: "wc26-grpf-fra",
+      kind: "league-winner",
+      shape: "binary",
+      title: "France to win Group F",
+      league: { name: "World Cup 2026", short: "WC" },
+      endsLabel: "Group stage",
+      volume: "$1.10M",
+      volume24h: "$140K",
+      participants: 3120,
+      outcomes: [
+        { id: "y", label: "Yes", price: 0.52, delta24h: 0.03 },
+        { id: "n", label: "No", price: 0.48, delta24h: -0.03 },
+      ],
+      tradeHref: omenxUrl.markets(),
+    },
+    {
+      id: "wc26-grpf-ger",
+      kind: "league-winner",
+      shape: "binary",
+      title: "Germany to win Group F",
+      league: { name: "World Cup 2026", short: "WC" },
+      endsLabel: "Group stage",
+      volume: "$680K",
+      volume24h: "$92K",
+      participants: 2010,
+      outcomes: [
+        { id: "y", label: "Yes", price: 0.31, delta24h: -0.02 },
+        { id: "n", label: "No", price: 0.69, delta24h: 0.02 },
+      ],
+      tradeHref: omenxUrl.markets(),
+    },
+    {
+      id: "wc26-grpf-jpn",
+      kind: "league-winner",
+      shape: "binary",
+      title: "Japan to win Group F",
+      league: { name: "World Cup 2026", short: "WC" },
+      endsLabel: "Group stage",
+      volume: "$240K",
+      volume24h: "$36K",
+      participants: 860,
+      outcomes: [
+        { id: "y", label: "Yes", price: 0.12, delta24h: 0.01 },
+        { id: "n", label: "No", price: 0.88, delta24h: -0.01 },
+      ],
+      tradeHref: omenxUrl.markets(),
+    },
+  ],
+};
+
+export const SPOTLIGHTS: PlayerSpotlight[] = [
+  MBAPPE_SPOTLIGHT,
+  CHELSEA_SPOTLIGHT,
+  GROUP_F_SPOTLIGHT,
+];
+
+/** @deprecated use SPOTLIGHTS */
+export const SPOTLIGHT = MBAPPE_SPOTLIGHT;
 
 export const ACCOUNT_STATS = {
   available: "$1,240.50",

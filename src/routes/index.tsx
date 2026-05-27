@@ -19,7 +19,7 @@ import {
   FEATURED_MATCH,
   LEAGUE_WINNER_MARKET,
   MATCH_MARKETS,
-  SPOTLIGHT,
+  SPOTLIGHTS,
   TOP_SCORER_MARKET,
 } from "@/data/sports-markets";
 import {
@@ -99,7 +99,11 @@ function Index() {
       <div className="grid gap-5 px-6 pb-6 pt-8 md:px-8 md:pb-8 md:pt-10 lg:grid-cols-[340px_minmax(0,1fr)_360px]">
         {/* LEFT — Fans zone (spans both rows) */}
         <section className="flex flex-col gap-4 lg:row-span-2">
-          <FanZoneHeader followingCount={FOLLOWED_TEAMS.length} />
+          <FanZoneHeader
+            followingCount={FOLLOWED_TEAMS.length}
+            suggested={SUGGESTED_TEAMS}
+            followedNames={FOLLOWED_TEAMS.map((t) => t.name)}
+          />
           {FOLLOWED_TEAMS.length > 0 ? (
             <>
               <MatchMarketCard market={FEATURED_MATCH} />
@@ -194,7 +198,7 @@ function Index() {
                 }}
               />
             </div>
-            <PlayerPropsSpotlight player={SPOTLIGHT} />
+            <PlayerPropsSpotlight players={SPOTLIGHTS} />
           </div>
         </section>
       </div>

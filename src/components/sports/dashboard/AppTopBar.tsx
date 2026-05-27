@@ -1,6 +1,39 @@
-import { ChevronDown } from "lucide-react";
+import { useState } from "react";
+import {
+  Check,
+  ChevronDown,
+  ExternalLink,
+  Gift,
+  Globe,
+  HelpCircle,
+  LogOut,
+  MessageCircle,
+  Settings as SettingsIcon,
+  Shield,
+  Users,
+} from "lucide-react";
 import { omenxUrl, OMENX_BASE } from "@/lib/omenx";
 import omenxLogo from "@/assets/omenx-logo.svg";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuPortal,
+  DropdownMenuSeparator,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+
+const LANGUAGES = [
+  { code: "EN", label: "English" },
+  { code: "ES", label: "Español" },
+  { code: "FR", label: "Français" },
+  { code: "DE", label: "Deutsch" },
+  { code: "PT", label: "Português" },
+  { code: "JA", label: "日本語" },
+];
 
 const NAV = [
   { label: "Events", href: `${OMENX_BASE}/events` },
@@ -19,6 +52,7 @@ export function AppTopBar({
   equity?: string;
 }) {
   const equityLabel = equity ?? "$0.00";
+  const [language, setLanguage] = useState("EN");
 
   return (
     <header
@@ -104,20 +138,111 @@ export function AppTopBar({
             </span>
           </a>
 
-          <button
-            type="button"
-            className="flex min-w-0 items-center gap-2 rounded-lg px-2 py-1.5 transition-colors hover:bg-white/[0.06] xl:gap-2.5 xl:px-3"
-          >
-            <img
-              src={userAvatar}
-              alt={userName}
-              className="h-9 w-9 rounded-full border-2 border-primary/50 object-cover"
-            />
-            <span className="max-w-[64px] truncate text-sm font-medium text-foreground xl:max-w-[100px]">
-              {userName}
-            </span>
-            <ChevronDown className="h-4 w-4 text-muted-foreground" />
-          </button>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button
+                type="button"
+                className="flex min-w-0 items-center gap-2 rounded-lg px-2 py-1.5 transition-colors hover:bg-white/[0.06] xl:gap-2.5 xl:px-3"
+              >
+                <img
+                  src={userAvatar}
+                  alt={userName}
+                  className="h-9 w-9 rounded-full border-2 border-primary/50 object-cover"
+                />
+                <span className="max-w-[64px] truncate text-sm font-medium text-foreground xl:max-w-[100px]">
+                  {userName}
+                </span>
+                <ChevronDown className="h-4 w-4 text-muted-foreground" />
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-52">
+              <DropdownMenuItem asChild>
+                <a href={omenxUrl.account()}>
+                  <Gift className="mr-2 h-4 w-4 text-primary" />
+                  Rewards
+                </a>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <a href={omenxUrl.account()}>
+                  <Users className="mr-2 h-4 w-4 text-primary" />
+                  Referral
+                </a>
+              </DropdownMenuItem>
+
+              <DropdownMenuSeparator />
+
+              <DropdownMenuItem asChild>
+                <a href={omenxUrl.settings()}>
+                  <SettingsIcon className="mr-2 h-4 w-4 text-muted-foreground" />
+                  Settings
+                </a>
+              </DropdownMenuItem>
+              <DropdownMenuSub>
+                <DropdownMenuSubTrigger>
+                  <Globe className="mr-2 h-4 w-4 text-muted-foreground" />
+                  <span className="flex-1">Language</span>
+                  <span className="ml-2 text-xs text-muted-foreground">{language}</span>
+                </DropdownMenuSubTrigger>
+                <DropdownMenuPortal>
+                  <DropdownMenuSubContent>
+                    {LANGUAGES.map((lang) => (
+                      <DropdownMenuItem
+                        key={lang.code}
+                        onClick={() => setLanguage(lang.code)}
+                      >
+                        <Check
+                          className={`mr-2 h-4 w-4 ${
+                            language === lang.code ? "text-primary" : "opacity-0"
+                          }`}
+                        />
+                        {lang.code} — {lang.label}
+                      </DropdownMenuItem>
+                    ))}
+                  </DropdownMenuSubContent>
+                </DropdownMenuPortal>
+              </DropdownMenuSub>
+
+              <DropdownMenuSeparator />
+
+              <DropdownMenuItem asChild>
+                <a href={omenxUrl.transparency()}>
+                  <Shield className="mr-2 h-4 w-4 text-emerald-400" />
+                  Transparency Audit
+                </a>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <a
+                  href="https://omenx-helpcenter.lovable.app"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <HelpCircle className="mr-2 h-4 w-4 text-muted-foreground" />
+                  <span className="flex-1">Help & Support</span>
+                  <ExternalLink className="ml-2 h-3 w-3 text-muted-foreground" />
+                </a>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <a
+                  href="https://discord.gg/qXssm2crf9"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <MessageCircle className="mr-2 h-4 w-4 text-[#5865F2]" />
+                  <span className="flex-1">Join Discord</span>
+                  <ExternalLink className="ml-2 h-3 w-3 text-muted-foreground" />
+                </a>
+              </DropdownMenuItem>
+
+              <DropdownMenuSeparator />
+
+              <DropdownMenuItem asChild className="text-loss">
+                <a href={OMENX_BASE + "/"}>
+                  <LogOut className="mr-2 h-4 w-4" />
+                  Sign Out
+                </a>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </div>
     </header>

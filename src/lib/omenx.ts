@@ -20,4 +20,6 @@ export const omenxUrl = {
   politics: () => `${OMENX_BASE}/politics`,
   terms: () => `${OMENX_BASE}/terms`,
   help: () => `${OMENX_BASE}/help`,
+  settings: () => `${OMENX_BASE}/settings`,
+  transparency: () => `${OMENX_BASE}/settings/transparency`,
 } as const;

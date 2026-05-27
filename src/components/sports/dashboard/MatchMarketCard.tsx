@@ -1,7 +1,15 @@
-import { Clock, MoreHorizontal, Users } from "lucide-react";
+import { Clock, ExternalLink, MoreHorizontal, Share2, Users } from "lucide-react";
+import { toast } from "sonner";
 import type { SportsMarket, TeamLite } from "@/data/sports-markets";
 import { PricePill } from "./PricePill";
 import { LeagueChip } from "../LeagueBadge";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 /**
  * Featured match market — replaces the old FanPollCard. Two crests, a
@@ -23,9 +31,45 @@ export function MatchMarketCard({ market }: { market: SportsMarket }) {
           <LeagueChip short={market.league.short} />
           <span className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">· MATCH</span>
         </div>
-        <button aria-label="More" className="text-muted-foreground hover:text-foreground">
-          <MoreHorizontal className="h-5 w-5" />
-        </button>
+        <DropdownMenu>
+          <DropdownMenuTrigger
+            asChild
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              aria-label="More"
+              className="rounded-full p-1 text-muted-foreground transition hover:bg-white/[0.06] hover:text-foreground"
+            >
+              <MoreHorizontal className="h-5 w-5" />
+            </button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-48">
+            <DropdownMenuItem
+              onClick={(e) => {
+                e.stopPropagation();
+                const url =
+                  typeof window !== "undefined"
+                    ? new URL(market.tradeHref, window.location.origin).toString()
+                    : market.tradeHref;
+                navigator.clipboard?.writeText(url);
+                toast.success("Link copied");
+              }}
+            >
+              <Share2 className="mr-2 h-4 w-4 text-muted-foreground" />
+              Share market
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem asChild>
+              <a
+                href={market.tradeHref}
+                onClick={(e) => e.stopPropagation()}
+              >
+                <ExternalLink className="mr-2 h-4 w-4 text-muted-foreground" />
+                View on OmenX
+              </a>
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </header>
 
       <h3 className="relative mt-3 font-display text-lg font-semibold text-foreground">{market.title}</h3>
