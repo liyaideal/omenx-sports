@@ -10,6 +10,7 @@ export function FanZoneHeader({
   suggested,
   followedNames,
   groups,
+  onFollowedChange,
 }: {
   title?: string;
   followingCount: number;
@@ -17,11 +18,17 @@ export function FanZoneHeader({
   followedNames?: string[];
   /** Optional grouped catalog. If omitted, `suggested` is wrapped as a single "Suggested" group. */
   groups?: TeamGroup[];
+  /** Notified whenever the user saves a new follow set from the picker. */
+  onFollowedChange?: (names: string[]) => void;
 }) {
   const [open, setOpen] = useState(false);
+  const [followed, setFollowed] = useState<string[]>(followedNames ?? []);
+  // Local picker state is the source of truth once mounted; falls back to the
+  // initial followingCount prop only when the parent didn't pass a list.
+  const effectiveCount = followedNames !== undefined ? followed.length : followingCount;
   const label =
-    followingCount > 0
-      ? `${followingCount} team${followingCount === 1 ? "" : "s"}`
+    effectiveCount > 0
+      ? `${effectiveCount} team${effectiveCount === 1 ? "" : "s"}`
       : "Add team";
   const resolvedGroups: TeamGroup[] =
     groups ?? [{ label: "Suggested", teams: suggested }];
@@ -44,10 +51,12 @@ export function FanZoneHeader({
         onOpenChange={setOpen}
         variant="dialog"
         groups={resolvedGroups}
-        initialFollowed={followedNames ?? []}
+        initialFollowed={followed}
         title="Manage teams you follow"
         description="Tap a crest to follow or unfollow. We'll surface their matches, polls, and fan posts here."
         onSave={(names) => {
+          setFollowed(names);
+          onFollowedChange?.(names);
           toast.success(
             names.length > 0
               ? `Following ${names.length} team${names.length === 1 ? "" : "s"}`

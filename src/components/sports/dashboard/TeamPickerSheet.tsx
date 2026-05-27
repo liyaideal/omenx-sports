@@ -1,7 +1,8 @@
 import { useMemo, useState } from "react";
 import { Check, Plus, Search, X } from "lucide-react";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import * as VisuallyHidden from "@radix-ui/react-visually-hidden";
 import type { TeamLite } from "@/data/sports-mock";
 
 export interface TeamGroup {
@@ -194,6 +195,10 @@ export function TeamPickerSheet({
     return (
       <Dialog open={open} onOpenChange={onOpenChange}>
         <DialogContent className="flex max-h-[80vh] w-[min(640px,92vw)] max-w-none flex-col gap-0 overflow-hidden border-border/60 bg-background p-0 sm:rounded-3xl">
+          <VisuallyHidden.Root>
+            <DialogTitle>{title}</DialogTitle>
+            <DialogDescription>{description}</DialogDescription>
+          </VisuallyHidden.Root>
           {body}
         </DialogContent>
       </Dialog>
