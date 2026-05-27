@@ -1,5 +1,4 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { ArrowUpRight } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { AppShell } from "@/components/sports/dashboard/AppShell";
 import { AppTopBar } from "@/components/sports/dashboard/AppTopBar";
@@ -30,6 +29,8 @@ import {
   type TeamKey,
 } from "@/data/sports-mock";
 import { omenxUrl } from "@/lib/omenx";
+import { BridgeStrip } from "@/components/sports/dashboard/BridgeStrip";
+import { PageSectionHeader } from "@/components/sports/dashboard/PageSectionHeader";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -121,7 +122,7 @@ function Index() {
 
         {/* TOP — Live & upcoming, spans col 2–3, sits above the spotlight */}
         <section className="flex flex-col gap-4 lg:col-span-2 lg:col-start-2 lg:row-start-1">
-          <SectionHeader
+          <PageSectionHeader
             title="Live & upcoming"
             accent=" Events"
             as="h1"
@@ -172,7 +173,7 @@ function Index() {
 
         {/* BOTTOM — Season markets (futures + player props) */}
         <section className="flex flex-col gap-4 lg:col-span-2 lg:col-start-2 lg:row-start-2">
-          <SectionHeader
+          <PageSectionHeader
             title="Season"
             accent="Events"
           />
@@ -190,88 +191,13 @@ function Index() {
         </section>
       </div>
 
-      {/* OmenX bridge strip */}
-      <div className="border-t border-border px-6 py-4 md:px-8">
-        <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-3 text-sm">
-          <div className="flex flex-wrap items-center gap-x-5 gap-y-2">
-            <span className="font-display text-base font-medium text-foreground">
-              Made a call? Cash it in.
-            </span>
-            <span className="inline-flex items-center gap-2 font-mono text-[11px] uppercase tracking-wider text-muted-foreground">
-              <span className="inline-flex items-center gap-1.5">
-                <span className="h-1.5 w-1.5 rounded-full bg-primary/70 shadow-[0_0_6px_var(--primary)]" />
-                {ACCOUNT_STATS.openPositions} open
-              </span>
-              <span className="text-border">·</span>
-              <span className="inline-flex items-center gap-1 text-win">
-                {ACCOUNT_STATS.pnlToday} today ↑
-              </span>
-              <span className="text-border">·</span>
-              <span className="text-foreground">{ACCOUNT_STATS.toClaim} to claim</span>
-            </span>
-          </div>
-          <a
-            href={omenxUrl.portfolio()}
-            className="inline-flex items-center gap-1.5 rounded-full bg-primary/15 px-4 py-1.5 text-xs font-semibold text-foreground ring-1 ring-primary/30 transition hover:bg-primary/20"
-          >
-            Open Portfolio <ArrowUpRight className="h-3.5 w-3.5" />
-          </a>
-        </div>
-      </div>
+      <BridgeStrip
+        openPositions={ACCOUNT_STATS.openPositions}
+        pnlToday={ACCOUNT_STATS.pnlToday}
+        toClaim={ACCOUNT_STATS.toClaim}
+        portfolioHref={omenxUrl.portfolio()}
+      />
     </AppShell>
   );
 }
 
-function SectionHeader({
-  title,
-  accent,
-  right,
-  stats,
-  live,
-  as: As = "h2",
-}: {
-  title: string;
-  accent?: string;
-  right?: React.ReactNode;
-  stats?: { positions: number; pnl: string };
-  live?: boolean;
-  as?: "h1" | "h2";
-}) {
-  const pnlUp = stats?.pnl.trim().startsWith("+");
-  const pnlTone = stats
-    ? pnlUp
-      ? "text-win"
-      : "text-loss"
-    : "";
-  return (
-    <div className="flex min-h-9 flex-wrap items-center justify-between gap-x-5 gap-y-2">
-      <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
-        <As className="inline-flex items-center gap-2.5 font-display text-2xl font-semibold leading-9">
-          {live && (
-            <span
-              aria-label="Live"
-              className="h-2 w-2 animate-pulse rounded-full bg-[oklch(0.7_0.22_25)] shadow-[0_0_8px_oklch(0.7_0.22_25)]"
-            />
-          )}
-          <span>
-            {title}
-            {accent && <span className="font-serif-display italic text-neon"> {accent}</span>}
-          </span>
-        </As>
-        {stats && (
-          <span className="inline-flex items-center gap-2 font-mono text-[11px] uppercase tracking-wider text-muted-foreground">
-            <span className="inline-flex items-center gap-1.5">
-              <span className="h-1.5 w-1.5 rounded-full bg-primary/70 shadow-[0_0_6px_var(--primary)]" />
-              {stats.positions} open
-            </span>
-            <span className="text-border">·</span>
-            <span className={`inline-flex items-center gap-1 ${pnlTone}`}>
-              {stats.pnl} today {pnlUp ? "↑" : "↓"}
-            </span>
-          </span>
-        )}
-      </div>
-      {right}
-    </div>
-  );
-}
