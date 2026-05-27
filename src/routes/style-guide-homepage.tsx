@@ -113,7 +113,7 @@ function HomepagePlayground() {
         </div>
       </header>
 
-      <div className="mx-auto grid max-w-[1400px] grid-cols-[200px_minmax(0,1fr)] gap-8 px-6 py-10">
+      <div className="mx-auto grid max-w-[1400px] grid-cols-[160px_minmax(0,1fr)] gap-8 px-6 py-10">
         {/* Sticky TOC */}
         <nav className="sticky top-20 h-fit self-start text-sm">
           <div className="mb-3 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
