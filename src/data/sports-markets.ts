@@ -468,3 +468,16 @@ export const ACCOUNT_STATS = {
   openPositions: 7,
   pnlToday: "+$142.20",
 };
+
+/** Aggregated index for the /event/$id trade page lookup. */
+export const ALL_MARKETS: SportsMarket[] = [
+  FEATURED_MATCH,
+  ...MATCH_MARKETS,
+  LEAGUE_WINNER_MARKET,
+  TOP_SCORER_MARKET,
+  ...SPOTLIGHTS.flatMap((s) => s.props),
+];
+
+export function getMarketById(id: string): SportsMarket | undefined {
+  return ALL_MARKETS.find((m) => m.id === id);
+}
