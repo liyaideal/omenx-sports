@@ -1029,6 +1029,17 @@ function StyleGuide() {
                 <li>• All section headers (Fans zone / Live &amp; upcoming / Season) share <code className="font-mono text-foreground">min-h-9 leading-9</code> so titles align on the same baseline across columns. Never set <code className="font-mono text-foreground">leading-none</code> on a section h2 — it breaks cross-column alignment.</li>
               </ul>
             </div>
+
+            <div className="mt-6 rounded-2xl border border-[color:var(--accent)]/30 bg-surface p-5 text-xs ring-1 ring-[color:var(--accent)]/15">
+              <div className="mb-2 font-mono text-[10px] uppercase tracking-widest text-[color:var(--accent)]">Live Stream Card</div>
+              <ul className="space-y-1.5 text-muted-foreground">
+                <li>• Driven by <code className="font-mono text-foreground">market.isLiveStream === true</code>. One card per active stream, stacked vertically <em>above</em> the regular event tile grid; never mixed inline with them.</li>
+                <li>• Card spans the full width of the events column at every breakpoint — it is intentionally heavier than <code className="font-mono text-foreground">EventMarketTileCard</code> (poster image, lime LIVE pill, accent ring) so the user can't miss that we're broadcasting.</li>
+                <li>• Anatomy top → bottom: <code className="font-mono text-foreground">LIVE pill + league + CC/cast icons</code> → <code className="font-mono text-foreground">16:9 poster with play overlay</code> → <code className="font-mono text-foreground">team crests + live score + match clock</code> → <code className="font-mono text-foreground">progress bar (clock vs 90′)</code> → <code className="font-mono text-foreground">2 headline outcomes + Trade CTA</code> → meta footer.</li>
+                <li>• Draw outcomes are filtered out of the headline strip — only the two team sides surface, to keep the bar compact.</li>
+                <li>• Trade CTA links to <code className="font-mono text-foreground">/event/$id</code>. Captions / cast buttons are visual placeholders today; promote to real handlers when streaming lands.</li>
+              </ul>
+            </div>
           </Section>
 
           <footer className="mt-12 border-t border-border pt-6 text-center text-xs text-muted-foreground font-mono">
