@@ -1,12 +1,18 @@
+import { Link, useRouterState } from "@tanstack/react-router";
 import { Home, CalendarDays, Users, User } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-export type MobileTab = "home" | "events" | "fans" | "me";
+type Tab = {
+  key: "home" | "events" | "fans" | "me";
+  label: string;
+  icon: typeof Home;
+  to?: "/" | "/events" | "/fans";
+};
 
-const TABS: { key: MobileTab; label: string; icon: typeof Home; anchor?: string }[] = [
-  { key: "home", label: "Home", icon: Home, anchor: "top" },
-  { key: "events", label: "Events", icon: CalendarDays, anchor: "events" },
-  { key: "fans", label: "Fans", icon: Users, anchor: "fans" },
+const TABS: Tab[] = [
+  { key: "home", label: "Home", icon: Home, to: "/" },
+  { key: "events", label: "Events", icon: CalendarDays, to: "/events" },
+  { key: "fans", label: "Fans", icon: Users, to: "/fans" },
   { key: "me", label: "Me", icon: User },
 ];
 
@@ -17,20 +23,14 @@ const triggerHaptic = () => {
 };
 
 /**
- * Fixed bottom navigation for the mobile sports zone. Only 4 tabs — Home,
- * Events, Fans, Me — so the bar reads as a single-zone tool, not a
- * universal app shell. "Me" opens a bottom sheet (account + bridge back
- * to OmenX); the other three scroll-to-section on the homepage.
+ * Fixed bottom navigation for the mobile sports zone. 4 tabs — Home,
+ * Events, Fans, Me. The first three are real TanStack Router routes; "Me"
+ * opens a bottom sheet (account + bridge back to OmenX) owned by the
+ * parent chrome.
  */
-export function MobileBottomNav({
-  active,
-  onTabChange,
-  onMeClick,
-}: {
-  active: MobileTab;
-  onTabChange: (tab: MobileTab) => void;
-  onMeClick: () => void;
-}) {
+export function MobileBottomNav({ onMeClick }: { onMeClick: () => void }) {
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
+
   return (
     <nav
       className="fixed bottom-0 left-0 right-0 z-50 border-t border-border/60 bg-background/95 backdrop-blur-xl md:hidden"
@@ -39,35 +39,10 @@ export function MobileBottomNav({
       <div className="mx-auto flex h-16 max-w-md items-stretch justify-around px-2">
         {TABS.map((tab) => {
           const Icon = tab.icon;
-          const isActive = active === tab.key;
-          const handleClick = () => {
-            triggerHaptic();
-            if (tab.key === "me") {
-              onMeClick();
-              return;
-            }
-            onTabChange(tab.key);
-            if (tab.anchor) {
-              if (tab.anchor === "top") {
-                window.scrollTo({ top: 0, behavior: "smooth" });
-              } else {
-                document
-                  .getElementById(tab.anchor)
-                  ?.scrollIntoView({ behavior: "smooth", block: "start" });
-              }
-            }
-          };
-          return (
-            <button
-              key={tab.key}
-              type="button"
-              onClick={handleClick}
-              aria-current={isActive ? "page" : undefined}
-              className={cn(
-                "relative flex flex-1 flex-col items-center justify-center gap-0.5 px-2 transition-transform active:scale-95",
-                isActive ? "text-foreground" : "text-muted-foreground",
-              )}
-            >
+          const isActive = tab.to ? pathname === tab.to : false;
+
+          const inner = (
+            <>
               {isActive && (
                 <span className="absolute inset-x-4 top-0 h-[2px] rounded-full bg-gradient-to-r from-primary via-accent to-primary shadow-[0_0_8px_var(--primary)]" />
               )}
@@ -85,7 +60,40 @@ export function MobileBottomNav({
               >
                 {tab.label}
               </span>
-            </button>
+            </>
+          );
+
+          const className = cn(
+            "relative flex flex-1 flex-col items-center justify-center gap-0.5 px-2 transition-transform active:scale-95",
+            isActive ? "text-foreground" : "text-muted-foreground",
+          );
+
+          if (tab.key === "me") {
+            return (
+              <button
+                key={tab.key}
+                type="button"
+                onClick={() => {
+                  triggerHaptic();
+                  onMeClick();
+                }}
+                className={className}
+              >
+                {inner}
+              </button>
+            );
+          }
+
+          return (
+            <Link
+              key={tab.key}
+              to={tab.to!}
+              onClick={triggerHaptic}
+              aria-current={isActive ? "page" : undefined}
+              className={className}
+            >
+              {inner}
+            </Link>
           );
         })}
       </div>
