@@ -14,12 +14,6 @@ export function LiveStreamCard({ market }: { market: SportsMarket }) {
   if (!fixture || !market.liveScore) return null;
 
   const headline = market.outcomes.filter((o) => o.label !== "Draw").slice(0, 2);
-  const scoreFor = (short?: string) => {
-    if (!short || !market.liveScore) return null;
-    if (short === fixture.home.short) return market.liveScore.home;
-    if (short === fixture.away.short) return market.liveScore.away;
-    return null;
-  };
 
   return (
     <Link
@@ -28,7 +22,7 @@ export function LiveStreamCard({ market }: { market: SportsMarket }) {
       className="group flex h-full flex-col gap-4 overflow-hidden rounded-3xl border border-[color:var(--accent)]/40 bg-surface p-5 shadow-card ring-1 ring-[color:var(--accent)]/20 transition hover:border-[color:var(--accent)]/60"
     >
       {/* Poster header strip with LIVE pill + play + score */}
-      <div className="relative -mx-5 -mt-5 aspect-[16/7] overflow-hidden">
+      <div className="relative -mx-5 -mt-5 aspect-[16/8] overflow-hidden">
         {market.livePoster ? (
           <img
             src={market.livePoster}
@@ -63,37 +57,48 @@ export function LiveStreamCard({ market }: { market: SportsMarket }) {
         <span className="absolute left-1/2 top-1/2 grid h-10 w-10 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full bg-background/60 ring-1 ring-white/30 backdrop-blur-md transition group-hover:scale-105">
           <Play className="h-4 w-4 translate-x-0.5 fill-foreground text-foreground" />
         </span>
+
+        {/* Scoreboard overlay — broadcast-style score bug */}
+        <div className="absolute bottom-3 left-1/2 -translate-x-1/2">
+          <div className="flex items-center gap-3 rounded-full bg-background/70 px-4 py-1.5 ring-1 ring-white/15 backdrop-blur">
+            <span className="font-mono text-[11px] uppercase tracking-widest text-muted-foreground">
+              {fixture.home.short}
+            </span>
+            <span className="font-display text-xl font-semibold leading-none tabular-nums text-foreground">
+              {market.liveScore.home}
+            </span>
+            <span className="text-muted-foreground">–</span>
+            <span className="font-display text-xl font-semibold leading-none tabular-nums text-foreground">
+              {market.liveScore.away}
+            </span>
+            <span className="font-mono text-[11px] uppercase tracking-widest text-muted-foreground">
+              {fixture.away.short}
+            </span>
+          </div>
+        </div>
       </div>
 
       {/* Unified team rows: logo + name + live score + price */}
       <div className="flex flex-1 flex-col gap-1.5">
-        {headline.map((o) => {
-          const score = scoreFor(o.team?.short);
-          return (
-            <div
-              key={o.id}
-              className="flex items-center gap-3 rounded-xl bg-white/[0.03] px-3 py-2 ring-1 ring-white/[0.05] transition group-hover:bg-white/[0.06]"
-            >
-              {o.team ? (
-                <div
-                  className="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-white/[0.05] p-1 ring-1 ring-white/10"
-                  style={{ boxShadow: `0 0 14px -4px oklch(0.7 0.22 ${o.team.hue} / 0.55)` }}
-                >
-                  <img src={o.team.logo} alt="" className="h-full w-full object-contain" />
-                </div>
-              ) : null}
-              <span className="min-w-0 flex-1 truncate text-sm font-medium text-foreground">
-                {o.team?.name ?? o.label}
-              </span>
-              {score !== null && (
-                <span className="font-display text-xl font-semibold leading-none tabular-nums text-foreground">
-                  {score}
-                </span>
-              )}
-              <PricePill price={o.price} delta={o.delta24h} size="md" />
-            </div>
-          );
-        })}
+        {headline.map((o) => (
+          <div
+            key={o.id}
+            className="flex items-center gap-3 rounded-xl bg-white/[0.03] px-3 py-2 ring-1 ring-white/[0.05] transition group-hover:bg-white/[0.06]"
+          >
+            {o.team ? (
+              <div
+                className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-white/[0.05] p-1 ring-1 ring-white/10"
+                style={{ boxShadow: `0 0 16px -4px oklch(0.7 0.22 ${o.team.hue} / 0.55)` }}
+              >
+                <img src={o.team.logo} alt="" className="h-full w-full object-contain" />
+              </div>
+            ) : null}
+            <span className="min-w-0 flex-1 truncate text-sm font-medium text-foreground">
+              {o.team?.name ?? o.label}
+            </span>
+            <PricePill price={o.price} delta={o.delta24h} size="md" />
+          </div>
+        ))}
       </div>
 
       <footer className="mt-auto flex items-center justify-between border-t border-border pt-3 font-mono text-[11px] text-muted-foreground">
