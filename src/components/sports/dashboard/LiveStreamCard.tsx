@@ -1,7 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { Play, Users } from "lucide-react";
 import type { SportsMarket } from "@/data/sports-markets";
-import { PricePill } from "./PricePill";
 
 /**
  * Compact "we are streaming this match" tile, sized to drop into the same
