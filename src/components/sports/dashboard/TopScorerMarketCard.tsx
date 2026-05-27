@@ -19,7 +19,7 @@ export function TopScorerMarketCard({
 }) {
   const rows = [...market.outcomes].sort((a, b) => b.price - a.price);
   return (
-    <section className="rounded-3xl border border-border bg-surface p-5 shadow-card">
+    <section className="flex h-full flex-col rounded-3xl border border-border bg-surface p-5 shadow-card">
       <header className="flex items-center justify-between pb-3">
         <div>
           <div className="inline-flex items-center gap-2">
@@ -39,7 +39,7 @@ export function TopScorerMarketCard({
         <span className="text-right">Price</span>
       </div>
 
-      <div className="flex flex-col divide-y divide-white/[0.04]">
+      <div className="flex flex-1 flex-col divide-y divide-white/[0.04]">
         {rows.map((o, i) => {
           const hue = o.team?.hue ?? 305;
           const photo = photos?.[o.id] ?? o.team?.logo;
