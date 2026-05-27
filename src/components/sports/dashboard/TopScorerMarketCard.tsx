@@ -1,4 +1,3 @@
-import { ArrowUpRight } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 import type { SportsMarket } from "@/data/sports-markets";
 import { PricePill } from "./PricePill";
@@ -28,9 +27,6 @@ export function TopScorerMarketCard({
           </div>
           <h3 className="mt-1.5 font-display text-base font-semibold text-foreground">{market.title}</h3>
         </div>
-        <Link to="/event/$id" params={{ id: market.id }} className="inline-flex items-center gap-1 text-xs font-medium text-muted-foreground hover:text-foreground">
-          Trade <ArrowUpRight className="h-3.5 w-3.5" />
-        </Link>
       </header>
 
       <div className="grid grid-cols-[24px_1fr_auto] items-center gap-3 pb-2 text-[10px] font-mono uppercase tracking-widest text-muted-foreground">
