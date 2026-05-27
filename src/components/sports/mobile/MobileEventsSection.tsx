@@ -1,8 +1,10 @@
 import { useEffect, useMemo, useState } from "react";
 import { EventMarketTileCard } from "@/components/sports/dashboard/EventMarketTileCard";
 import { DayStripCalendar } from "@/components/sports/dashboard/DayStripCalendar";
+import { LeagueWinnerMarketCard } from "@/components/sports/dashboard/LeagueWinnerMarketCard";
+import { TopScorerMarketCard } from "@/components/sports/dashboard/TopScorerMarketCard";
 import { MobileLiveHero } from "@/components/sports/mobile/MobileLiveHero";
-import { MATCH_MARKETS } from "@/data/sports-markets";
+import { MATCH_MARKETS, SEASON_LEAGUE_GROUPS } from "@/data/sports-markets";
 
 /**
  * Full mobile Events page section. Owns its own day-strip state so the
@@ -89,6 +91,31 @@ export function MobileEventsSection() {
             No events scheduled for {dayLabel}.
           </div>
         )}
+      </section>
+
+      <section className="space-y-3">
+        <header className="flex items-baseline justify-between">
+          <h2 className="font-display text-2xl font-semibold leading-9">
+            Season
+            <span className="font-serif-display italic text-neon"> Futures</span>
+          </h2>
+          <span className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+            Winner · Top scorer
+          </span>
+        </header>
+        <div className="space-y-4">
+          {SEASON_LEAGUE_GROUPS.flatMap((group) => [
+            <LeagueWinnerMarketCard
+              key={`${group.id}-w`}
+              market={group.winner}
+            />,
+            <TopScorerMarketCard
+              key={`${group.id}-t`}
+              market={group.topScorer}
+              photos={group.photos}
+            />,
+          ])}
+        </div>
       </section>
     </div>
   );
