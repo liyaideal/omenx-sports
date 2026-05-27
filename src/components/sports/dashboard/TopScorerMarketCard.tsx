@@ -15,7 +15,7 @@ export function TopScorerMarketCard({
   photos,
 }: {
   market: SportsMarket;
-  photos: Record<string, string>;
+  photos?: Record<string, string>;
 }) {
   const rows = [...market.outcomes].sort((a, b) => b.price - a.price);
   return (
@@ -42,7 +42,14 @@ export function TopScorerMarketCard({
       <div className="flex flex-col divide-y divide-white/[0.04]">
         {rows.map((o, i) => {
           const hue = o.team?.hue ?? 305;
-          const photo = photos[o.id];
+          const photo = photos?.[o.id] ?? o.team?.logo;
+          const initials = o.label
+            .split(/\s+/)
+            .map((p) => p.replace(/[^A-Za-z]/g, "").charAt(0))
+            .filter(Boolean)
+            .slice(0, 2)
+            .join("")
+            .toUpperCase();
           return (
             <Link
               key={o.id}
