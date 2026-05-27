@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { Play, Users } from "lucide-react";
-import type { SportsMarket, TeamLite } from "@/data/sports-markets";
+import type { SportsMarket } from "@/data/sports-markets";
 import { PricePill } from "./PricePill";
 
 /**
@@ -14,6 +14,12 @@ export function LiveStreamCard({ market }: { market: SportsMarket }) {
   if (!fixture || !market.liveScore) return null;
 
   const headline = market.outcomes.filter((o) => o.label !== "Draw").slice(0, 2);
+  const scoreFor = (short?: string) => {
+    if (!short || !market.liveScore) return null;
+    if (short === fixture.home.short) return market.liveScore.home;
+    if (short === fixture.away.short) return market.liveScore.away;
+    return null;
+  };
 
   return (
     <Link
@@ -59,31 +65,35 @@ export function LiveStreamCard({ market }: { market: SportsMarket }) {
         </span>
       </div>
 
-      {/* Score row */}
-      <div className="flex items-center justify-between gap-3">
-        <TeamScore team={fixture.home} score={market.liveScore.home} align="left" />
-        <span className="font-serif-display text-sm italic text-muted-foreground">vs</span>
-        <TeamScore team={fixture.away} score={market.liveScore.away} align="right" />
-      </div>
-
-      {/* Outcome rows */}
+      {/* Unified team rows: logo + name + live score + price */}
       <div className="flex flex-1 flex-col gap-1.5">
-        {headline.map((o) => (
-          <div
-            key={o.id}
-            className="flex items-center justify-between gap-3 rounded-xl bg-white/[0.03] px-3 py-2 ring-1 ring-white/[0.05] transition group-hover:bg-white/[0.06]"
-          >
-            <div className="flex min-w-0 items-center gap-2">
-              {o.team && (
-                <img src={o.team.logo} alt="" className="h-5 w-5 shrink-0 object-contain" />
-              )}
-              <span className="truncate text-sm font-medium text-foreground">
+        {headline.map((o) => {
+          const score = scoreFor(o.team?.short);
+          return (
+            <div
+              key={o.id}
+              className="flex items-center gap-3 rounded-xl bg-white/[0.03] px-3 py-2 ring-1 ring-white/[0.05] transition group-hover:bg-white/[0.06]"
+            >
+              {o.team ? (
+                <div
+                  className="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-white/[0.05] p-1 ring-1 ring-white/10"
+                  style={{ boxShadow: `0 0 14px -4px oklch(0.7 0.22 ${o.team.hue} / 0.55)` }}
+                >
+                  <img src={o.team.logo} alt="" className="h-full w-full object-contain" />
+                </div>
+              ) : null}
+              <span className="min-w-0 flex-1 truncate text-sm font-medium text-foreground">
                 {o.team?.name ?? o.label}
               </span>
+              {score !== null && (
+                <span className="font-display text-xl font-semibold leading-none tabular-nums text-foreground">
+                  {score}
+                </span>
+              )}
+              <PricePill price={o.price} delta={o.delta24h} size="md" />
             </div>
-            <PricePill price={o.price} delta={o.delta24h} size="md" />
-          </div>
-        ))}
+          );
+        })}
       </div>
 
       <footer className="mt-auto flex items-center justify-between border-t border-border pt-3 font-mono text-[11px] text-muted-foreground">
@@ -100,36 +110,5 @@ export function LiveStreamCard({ market }: { market: SportsMarket }) {
         </span>
       </footer>
     </Link>
-  );
-}
-
-function TeamScore({
-  team,
-  score,
-  align,
-}: {
-  team: TeamLite;
-  score: number;
-  align: "left" | "right";
-}) {
-  return (
-    <div
-      className={`flex min-w-0 flex-1 items-center gap-2 ${
-        align === "right" ? "flex-row-reverse text-right" : ""
-      }`}
-    >
-      <div
-        className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-white/[0.05] p-1 ring-1 ring-white/10"
-        style={{ boxShadow: `0 0 16px -4px oklch(0.7 0.22 ${team.hue} / 0.55)` }}
-      >
-        <img src={team.logo} alt={team.name} className="h-full w-full object-contain" />
-      </div>
-      <div className={`flex min-w-0 flex-col ${align === "right" ? "items-end" : "items-start"}`}>
-        <span className="truncate text-[11px] font-medium text-muted-foreground">{team.short}</span>
-        <span className="font-display text-xl font-semibold leading-none tabular-nums text-foreground">
-          {score}
-        </span>
-      </div>
-    </div>
   );
 }
