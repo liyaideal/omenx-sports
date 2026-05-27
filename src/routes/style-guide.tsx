@@ -34,6 +34,11 @@ import { TeamName } from "@/components/sports/TeamName";
 import { teams } from "@/lib/teams";
 import { LiveStreamCard } from "@/components/sports/dashboard/LiveStreamCard";
 import { MATCH_MARKETS } from "@/data/sports-markets";
+import { MobileTopBar } from "@/components/sports/mobile/MobileTopBar";
+import { MobileBottomNav } from "@/components/sports/mobile/MobileBottomNav";
+import { MobileLiveHero } from "@/components/sports/mobile/MobileLiveHero";
+import { MeSheet } from "@/components/sports/mobile/MeSheet";
+import { ACCOUNT_STATS } from "@/data/sports-markets";
 import { PriceChart } from "@/components/sports/PriceChart";
 import { OrderBook } from "@/components/sports/OrderBook";
 import { TradeForm } from "@/components/sports/TradeForm";
@@ -69,6 +74,7 @@ const SECTIONS = [
   ["spacing", "Spacing & Radius"],
   ["fans", "Personalized Zone"],
   ["events-grid", "Events Grid"],
+  ["mobile-shell", "Mobile Shell"],
 ] as const;
 
 function Section({ id, title, kicker, children }: { id: string; title: string; kicker?: string; children: React.ReactNode }) {
