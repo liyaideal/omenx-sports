@@ -1,6 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
-import { CalendarDays, Users } from "lucide-react";
 import { AppShell } from "@/components/sports/dashboard/AppShell";
 import { AppTopBar } from "@/components/sports/dashboard/AppTopBar";
 import { MatchMarketCard } from "@/components/sports/dashboard/MatchMarketCard";
@@ -16,8 +15,9 @@ import { DayStripCalendar } from "@/components/sports/dashboard/DayStripCalendar
 import { ShowMoreEventsButton } from "@/components/sports/dashboard/ShowMoreEventsButton";
 import { LiveStreamCard } from "@/components/sports/dashboard/LiveStreamCard";
 import { MobileChrome } from "@/components/sports/mobile/MobileChrome";
-import { MobileLiveHero } from "@/components/sports/mobile/MobileLiveHero";
-import { MobileSeeMoreCard } from "@/components/sports/mobile/MobileSeeMoreCard";
+import { MobileHomeHero } from "@/components/sports/mobile/MobileHomeHero";
+import { MobileAccountSnapshot } from "@/components/sports/mobile/MobileAccountSnapshot";
+import { MobileLiveStatusBar } from "@/components/sports/mobile/MobileLiveStatusBar";
 import {
   ACCOUNT_STATS,
   FEATURED_MATCH,
