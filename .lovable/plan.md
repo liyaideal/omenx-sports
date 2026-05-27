@@ -1,51 +1,44 @@
 ## 目标
 
-删除首页 Season Events 区块右上角的 "Browse all" 链接，并在当前 section 内直接展示「全部」 season events——通过补充其它联赛（LaLiga、UCL）的 Winner / Top scorer mock 数据，让区块自然扩展为多联赛分组。
+Season Events 区块在多联赛数据下左列变得很长，右侧 Spotlight 被拉伸出现大片空白。重排版让左列以 2 列卡片网格铺开，右侧 Spotlight 不再被拉伸而是 sticky 跟随。
 
-不新增独立列表页，不动右侧 PlayerPropsSpotlight。
+## 改动
 
-## 数据层改动 — `src/data/sports-markets.ts`
+### `src/routes/index.tsx` — Season section（约第 177-194 行）
 
-在现有 `LEAGUE_WINNER_MARKET` / `TOP_SCORER_MARKET` 下方新增 4 个 mock market（均复用现有 `TEAMS`，不动 sports-mock）：
+把内层 `<div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_360px]">` 改为：
 
-- `LALIGA_WINNER_MARKET` — id `laliga-winner-25-26`，4 个 outcome：Real Madrid 46¢、Barcelona 39¢、Atlético（暂用 Real Madrid hue+短名 fallback「ATM」纯字母 glyph，team 字段省略，用 `label`+`meta`）、Sevilla 同上。为避免扩 TEAMS，第 3/4 行不带 team 字段，只用 label 文本行（card 已能渲染无 team 的行 — 需快速确认）。
-- `UCL_WINNER_MARKET` — id `ucl-winner-25-26`，outcomes：Man City、Real Madrid、PSG、Liverpool（全部有 team）。
-- `LALIGA_TOP_SCORER_MARKET` — id `laliga-top-scorer-25-26`，outcomes：Mbappé / Real Madrid、Lewandowski / Barcelona。
-- `UCL_TOP_SCORER_MARKET` — id `ucl-top-scorer-25-26`，outcomes：Haaland / Man City、Mbappé / Real Madrid。
+- 外层网格仍是 `lg:grid-cols-[minmax(0,1fr)_320px]`（右栏缩到 320 给左栏更多呼吸空间，仍能容纳现有 Spotlight 视觉）。
+- 左列容器从 `flex flex-col gap-5` 改为 `grid gap-5 xl:grid-cols-2`，并把 `SEASON_LEAGUE_GROUPS.map` 的每个 group 拍平成两个独立 card（不再 group 嵌套），按 Winner、Top scorer、Winner、Top scorer… 顺序写入网格。
+  - 在 `< xl`（含当前 1021px 视口）保持单列堆叠，外观与现状一致但 Spotlight 不再拉伸。
+  - 在 `≥ xl (1280)` 自动变成 2 列，6 张卡 = 3 行，整体高度砍掉 50%。
+- 右列 `<PlayerPropsSpotlight ...>` 包一层 `<div className="lg:sticky lg:top-4 lg:self-start">`，让 Spotlight 跟随滚动且不被左列高度拉伸。
 
-新增数组导出：
+### `src/components/sports/dashboard/PlayerPropsSpotlight.tsx`
 
-```ts
-export const SEASON_LEAGUE_GROUPS = [
-  { league: "EPL",    winner: LEAGUE_WINNER_MARKET,        topScorer: TOP_SCORER_MARKET,        photos: { messi, haaland } },
-  { league: "UCL",    winner: UCL_WINNER_MARKET,           topScorer: UCL_TOP_SCORER_MARKET,    photos: { haaland, mbappe } },
-  { league: "LaLiga", winner: LALIGA_WINNER_MARKET,        topScorer: LALIGA_TOP_SCORER_MARKET, photos: { mbappe, lewandowski } },
-];
-```
+`<section className="... h-full ...">` 改为 `h-fit`（或去掉 `h-full`）。h-full 让组件吃满父容器高度，是当前空白的根因；改成自适应自身内容高度后，sticky + self-start 才能正确生效。
 
-photos 用现有 Unsplash / spotlight 头像复用；不新增图片依赖。
+### `DESIGN.md`
 
-把 4 个新 market 追加进底部 `MARKETS` 数组，让 `/event/$id` 也能命中。
+§5 Layout Principles 末尾新增 1 条规则：
 
-## 组件层改动
+> Side-rail panels (Spotlight, sticky filters) must use `self-start` + intrinsic height, never `h-full`. 长内容栏要么 wrap 成多列网格 (≥xl 2 col)，要么用 tab/分页收敛高度，避免侧栏被拉出空白。
 
-### `src/components/sports/dashboard/TopScorerMarketCard.tsx`
-- `photos` prop 改为 optional。渲染时若 `photos[o.id]` 缺失，退化为 `o.team?.logo`，再缺失则显示首字母 glyph。这样新加的 top scorer 市场可以零额外配置工作。
+§7 Do's and Don'ts 加 1 条 Don't：
 
-### `src/routes/index.tsx`
-- 删掉 `SectionHeader` 的 `right={...}` Browse all 链接（仅删该 prop，header 其它不动）。
-- 将左侧列从「写死两个 card」改为：`SEASON_LEAGUE_GROUPS.map(group => <LeagueWinnerMarketCard /> + <TopScorerMarketCard />)`，外面用一个垂直 `flex flex-col gap-5` 容器。右侧 PlayerPropsSpotlight 不变（保持 `lg:sticky lg:top-4 lg:self-start` 行为，如果当前没有则不引入新滚动状态）。
-- 移除 `ArrowUpRight` 在该 section 的依赖（若文件别处仍在用则保留）。
-- 移除已不再使用的局部 import：`LEAGUE_WINNER_MARKET`、`TOP_SCORER_MARKET`、`TOP_SCORERS`，改为 `SEASON_LEAGUE_GROUPS`。
+> Don't put a tall single-column list next to a stretching `h-full` side panel — the side panel will leak whitespace. Wrap the list in a `xl:grid-cols-2` grid and switch the side panel to `self-start`.
 
-## 不动的部分
-- AppShell / AppTopBar / SectionHeader 组件本身；
-- PlayerPropsSpotlight；
-- LeagueWinnerMarketCard（已能处理 3-4 个 outcome）；
-- `/event/$id` 路由代码（自动从 MARKETS 取数）；
-- 样式 token、settings 文件。
+### `mem://design/section-side-rail`
+
+新增 memory 记录：sticky 侧栏必须 self-start + h-fit；多卡 season 列表 ≥ xl 转 2 列。
+
+### 不动
+- LeagueWinnerMarketCard / TopScorerMarketCard 内部样式。
+- 数据层 SEASON_LEAGUE_GROUPS。
+- 左侧 Fans zone、上方 Live & upcoming、底部 OmenX bridge。
+- /style-guide（本次仅 layout 规则，不新增组件 demo）。
 
 ## 验证
-- 首页 EPL / UCL / LaLiga 三组 Winner+Top scorer 自上而下渲染，右上角无 "Browse all"。
-- 点击任一新 card 的 Trade / 行链接能打开 `/event/<新 id>`，header 数据正确。
-- 视口 1021px 下右侧 Spotlight 仍正常对齐第一组卡片高度，多组卡片在左侧滚动堆叠不溢出。
+- 1021px 视口：左列保持单列，Spotlight 不再拉伸到底，下方空白消失。
+- 1280+ 视口：左列变 2 列，6 张卡均匀分布；右侧 Spotlight 仍 sticky 在顶部。
+- 滚动时 Spotlight 跟随到 `top-4` 后吸顶。
