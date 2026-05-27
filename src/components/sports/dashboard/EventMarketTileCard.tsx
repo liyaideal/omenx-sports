@@ -178,7 +178,11 @@ function TeamSide({ team, align }: { team: TeamLite; align: "left" | "right" }) 
       >
         <img src={team.logo} alt={team.name} className="h-full w-full object-contain" />
       </div>
-      <span className="truncate text-xs font-medium text-foreground">{team.short}</span>
+      <TeamName
+        short={team.short}
+        full={team.name}
+        className="truncate text-xs font-medium text-foreground"
+      />
     </div>
   );
 }
