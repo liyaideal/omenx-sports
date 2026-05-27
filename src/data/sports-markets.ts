@@ -38,6 +38,16 @@ export interface SportsMarket {
   tradeHref: string;
   /** Calendar day offset from today (today=0, tomorrow=1, yesterday=-1). */
   dayOffset?: number;
+  /** When true, this match is being streamed live on the platform right now.
+   *  Rendered as a prominent LiveStreamCard at the top of the events grid. */
+  isLiveStream?: boolean;
+  /** Poster / stream still image for the live card (16:9). */
+  livePoster?: string;
+  /** Current in-match score (home — away). */
+  liveScore?: { home: number; away: number };
+  /** Match clock as `MM:SS` or `HH:MM:SS`, used both as a label and to
+   *  drive the progress bar (assuming a 90-minute regulation match). */
+  liveClock?: string;
 }
 
 export const FEATURED_MATCH: SportsMarket = {
