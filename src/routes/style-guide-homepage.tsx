@@ -417,21 +417,19 @@ function Section({
           #{id}
         </a>
       </header>
-      <div className="flex flex-wrap gap-6">{children}</div>
+      <div className="grid gap-4 md:grid-cols-2">{children}</div>
     </section>
   );
 }
 
 function Variant({ caption, children }: { caption: string; children: React.ReactNode }) {
   return (
-    <div className="flex w-[390px] shrink-0 flex-col gap-2">
+    <div className="flex flex-col gap-2">
       <div className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
         {caption}
       </div>
-      <div className="rounded-[28px] border border-dashed border-border/60 bg-background/40 p-3">
-        <div className="overflow-hidden rounded-[20px] bg-background ring-1 ring-white/5">
-          <div className="w-[390px] p-4">{children}</div>
-        </div>
+      <div className="rounded-xl border border-dashed border-border/60 bg-background/40 p-4">
+        {children}
       </div>
     </div>
   );
