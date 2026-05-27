@@ -1134,7 +1134,7 @@ function StyleGuide() {
                   />
                 </div>
                 <div className="pointer-events-none sticky bottom-0">
-                  <MobileBottomNav active="home" onTabChange={() => {}} onMeClick={() => {}} />
+                  <MobileBottomNav onMeClick={() => {}} />
                 </div>
               </PhoneFrame>
 
