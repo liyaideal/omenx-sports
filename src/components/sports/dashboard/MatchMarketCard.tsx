@@ -1,16 +1,9 @@
-import { ArrowUpRight, Clock, MoreHorizontal, Share2, Users } from "lucide-react";
+import { Clock, Share2, Users } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 import { toast } from "sonner";
 import type { SportsMarket, TeamLite } from "@/data/sports-markets";
 import { PricePill } from "./PricePill";
 import { LeagueChip } from "../LeagueBadge";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 
 /**
  * Featured match market — replaces the old FanPollCard. Two crests, a
@@ -32,46 +25,22 @@ export function MatchMarketCard({ market }: { market: SportsMarket }) {
           <LeagueChip short={market.league.short} />
           <span className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">· MATCH</span>
         </div>
-        <DropdownMenu>
-          <DropdownMenuTrigger
-            asChild
-            onClick={(e) => e.stopPropagation()}
-          >
-            <button
-              aria-label="More"
-              className="rounded-full p-1 text-muted-foreground transition hover:bg-white/[0.06] hover:text-foreground"
-            >
-              <MoreHorizontal className="h-5 w-5" />
-            </button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-48">
-            <DropdownMenuItem
-              onClick={(e) => {
-                e.stopPropagation();
-                const url =
-                  typeof window !== "undefined"
-                    ? new URL(market.tradeHref, window.location.origin).toString()
-                    : market.tradeHref;
-                navigator.clipboard?.writeText(url);
-                toast.success("Link copied");
-              }}
-            >
-              <Share2 className="mr-2 h-4 w-4 text-muted-foreground" />
-              Share market
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem asChild>
-              <Link
-                to="/event/$id"
-                params={{ id: market.id }}
-                onClick={(e) => e.stopPropagation()}
-              >
-                <ArrowUpRight className="mr-2 h-4 w-4 text-muted-foreground" />
-                Open event
-              </Link>
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+        <button
+          type="button"
+          aria-label="Share market"
+          onClick={(e) => {
+            e.stopPropagation();
+            const url =
+              typeof window !== "undefined"
+                ? new URL(market.tradeHref, window.location.origin).toString()
+                : market.tradeHref;
+            navigator.clipboard?.writeText(url);
+            toast.success("Link copied");
+          }}
+          className="rounded-full p-1 text-muted-foreground transition hover:bg-white/[0.06] hover:text-foreground"
+        >
+          <Share2 className="h-4 w-4" />
+        </button>
       </header>
 
       <h3 className="relative mt-3 font-display text-lg font-semibold text-foreground">{market.title}</h3>
