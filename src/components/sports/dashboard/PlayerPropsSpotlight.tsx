@@ -1,4 +1,6 @@
-import { ArrowUpRight, ChevronLeft, ChevronRight, X } from "lucide-react";
+import { useState } from "react";
+import { ChevronLeft, ChevronRight, Share2 } from "lucide-react";
+import { toast } from "sonner";
 import type { PlayerSpotlight } from "@/data/sports-markets";
 import { PricePill } from "./PricePill";
 
@@ -7,25 +9,48 @@ import { PricePill } from "./PricePill";
  * panel is a stack of binary player-prop markets (anytime scorer, 2+
  * goals, shots o/u). Each row is a tradeable OmenX market.
  */
-export function PlayerPropsSpotlight({ player }: { player: PlayerSpotlight }) {
+export function PlayerPropsSpotlight({ players }: { players: PlayerSpotlight[] }) {
+  const [index, setIndex] = useState(0);
+  const count = players.length;
+  const player = players[index % count];
+  const goPrev = () => setIndex((i) => (i - 1 + count) % count);
+  const goNext = () => setIndex((i) => (i + 1) % count);
+  const shareCurrent = () => {
+    const href = player.props[0]?.tradeHref ?? "#";
+    const url =
+      typeof window !== "undefined"
+        ? new URL(href, window.location.origin).toString()
+        : href;
+    navigator.clipboard?.writeText(url);
+    toast.success("Link copied");
+  };
+  const imageFitClass = player.imageFit === "contain" ? "object-contain p-6" : "object-cover object-top";
   return (
     <section className="relative flex h-full flex-col overflow-hidden rounded-3xl border border-border bg-surface bg-ambient p-5 shadow-card">
       <header className="relative z-10 flex items-center justify-between">
-        <button aria-label="Close" className="grid h-9 w-9 place-items-center rounded-full border border-border bg-white/[0.04] text-muted-foreground hover:text-foreground">
-          <X className="h-4 w-4" />
-        </button>
+        <span
+          aria-hidden
+          className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground"
+        >
+          {index + 1} / {count}
+        </span>
         <div className="text-center">
           <div className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
-            Player props · {player.props.length} markets
+            Spotlight · {player.props.length} markets
           </div>
           <div className="font-display text-base font-semibold text-foreground">
             <span className="text-neon">@</span>
             {player.handle}
           </div>
         </div>
-        <a href={player.props[0]?.tradeHref ?? "#"} aria-label="Open" className="grid h-9 w-9 place-items-center rounded-full border border-border bg-white/[0.04] text-muted-foreground hover:text-foreground">
-          <ArrowUpRight className="h-4 w-4" />
-        </a>
+        <button
+          type="button"
+          aria-label="Share"
+          onClick={shareCurrent}
+          className="grid h-9 w-9 place-items-center rounded-full border border-border bg-white/[0.04] text-muted-foreground transition hover:text-foreground"
+        >
+          <Share2 className="h-4 w-4" />
+        </button>
       </header>
 
       {/* portrait */}
@@ -41,11 +66,27 @@ export function PlayerPropsSpotlight({ player }: { player: PlayerSpotlight }) {
           className="pointer-events-none absolute left-1/2 top-1/2 h-[230px] w-[230px] -translate-x-1/2 -translate-y-1/2 rounded-full"
           style={{ boxShadow: "0 0 70px 10px oklch(0.7 0.28 340 / 0.4) inset, 0 0 100px 20px oklch(0.55 0.2 295 / 0.3)" }}
         />
-        <img src={player.photo} alt={`${player.firstName} ${player.lastName}`} loading="lazy" className="relative z-10 h-[240px] w-[200px] rounded-[110px] object-cover object-top" />
-        <button aria-label="Previous" className="absolute left-1 top-1/2 z-20 grid h-9 w-9 -translate-y-1/2 place-items-center rounded-full border border-border bg-surface/80 text-muted-foreground backdrop-blur hover:text-foreground">
+        <img
+          key={player.handle}
+          src={player.photo}
+          alt={`${player.firstName} ${player.lastName}`}
+          loading="lazy"
+          className={`relative z-10 h-[240px] w-[200px] rounded-[110px] bg-white/[0.04] ${imageFitClass}`}
+        />
+        <button
+          type="button"
+          aria-label="Previous"
+          onClick={goPrev}
+          className="absolute left-1 top-1/2 z-20 grid h-9 w-9 -translate-y-1/2 place-items-center rounded-full border border-border bg-surface/80 text-muted-foreground backdrop-blur transition hover:text-foreground"
+        >
           <ChevronLeft className="h-4 w-4" />
         </button>
-        <button aria-label="Next" className="absolute right-1 top-1/2 z-20 grid h-9 w-9 -translate-y-1/2 place-items-center rounded-full border border-border bg-surface/80 text-muted-foreground backdrop-blur hover:text-foreground">
+        <button
+          type="button"
+          aria-label="Next"
+          onClick={goNext}
+          className="absolute right-1 top-1/2 z-20 grid h-9 w-9 -translate-y-1/2 place-items-center rounded-full border border-border bg-surface/80 text-muted-foreground backdrop-blur transition hover:text-foreground"
+        >
           <ChevronRight className="h-4 w-4" />
         </button>
       </div>
