@@ -61,8 +61,8 @@ export function LiveStreamCard({ market }: { market: SportsMarket }) {
 
         {/* Scoreboard overlay — broadcast-style score bug */}
         <div className="absolute bottom-3 left-1/2 -translate-x-1/2">
-          <div className="flex items-center gap-3 rounded-full bg-background/70 px-4 py-1.5 ring-1 ring-white/15 backdrop-blur">
-            <img src={fixture.home.logo} alt="" className="h-4 w-4 shrink-0 object-contain" />
+          <div className="flex items-center gap-3 rounded-full bg-background/70 px-3 py-1.5 ring-1 ring-white/15 backdrop-blur">
+            <img src={fixture.home.logo} alt="" className="h-7 w-7 shrink-0 object-contain" />
             <span className="font-mono text-[11px] uppercase tracking-widest text-muted-foreground">
               {fixture.home.short}
             </span>
@@ -76,7 +76,7 @@ export function LiveStreamCard({ market }: { market: SportsMarket }) {
             <span className="font-mono text-[11px] uppercase tracking-widest text-muted-foreground">
               {fixture.away.short}
             </span>
-            <img src={fixture.away.logo} alt="" className="h-4 w-4 shrink-0 object-contain" />
+            <img src={fixture.away.logo} alt="" className="h-7 w-7 shrink-0 object-contain" />
           </div>
         </div>
       </div>
