@@ -1115,14 +1115,14 @@ function StyleGuide() {
 
           <Section id="mobile-shell" title="Mobile Shell" kicker="18 — Mobile homepage">
             <p className="mb-6 max-w-3xl text-sm text-muted-foreground">
-              Mobile splits into three independent tabs with zero content overlap:
-              <b className="text-foreground"> Home</b> = personal landing (greeting,
-              account snapshot, live status, spotlight);
-              <b className="text-foreground"> Events</b> = every match market (live hero +
-              day strip + season futures);
-              <b className="text-foreground"> Fans</b> = social feed (follow, trades, posts).
-              The bottom nav is the single permanent entry point — pages don't
-              cross-promote each other with teaser cards.
+              Mobile has no Home tab. <code className="font-mono text-foreground">/</code> redirects
+              to <code className="font-mono text-foreground">/events</code> on mobile viewports;
+              account data lives only in <code className="font-mono text-foreground">MeSheet</code> to
+              avoid duplication. Three tabs, zero content overlap:
+              <b className="text-foreground"> Events</b> (default) = live hero + day strip + season
+              futures + spotlight;
+              <b className="text-foreground"> Fans</b> = social feed (follow, trades, posts);
+              <b className="text-foreground"> Me</b> = bottom sheet with account + OmenX shortcuts.
             </p>
 
             <div className="grid gap-6 lg:grid-cols-[360px_minmax(0,1fr)]">
@@ -1133,19 +1133,8 @@ function StyleGuide() {
                   onAvatarClick={() => {}}
                 />
                 <div className="space-y-5 px-4 py-5">
-                  <MobileHomeHero userName="Jeremy" equity={ACCOUNT_STATS.available} />
-                  <MobileAccountSnapshot
-                    openPositions={ACCOUNT_STATS.openPositions}
-                    pnlToday={ACCOUNT_STATS.pnlToday}
-                    toClaim={ACCOUNT_STATS.toClaim}
-                    portfolioHref="#"
-                  />
-                  <MobileLiveStatusBar
-                    count={MATCH_MARKETS.filter((m) => m.isLiveStream).length}
-                    topLabel={MATCH_MARKETS.find((m) => m.isLiveStream)?.title.split(" — ")[0]}
-                  />
                   <div className="rounded-2xl border border-dashed border-border bg-surface/40 px-4 py-6 text-center text-xs text-muted-foreground">
-                    Event Spotlight section here
+                    /events page preview — see MobileEventsSection
                   </div>
                 </div>
                 <div className="pointer-events-none sticky bottom-0">
@@ -1160,11 +1149,8 @@ function StyleGuide() {
                   </div>
                   <ul className="space-y-1.5 text-xs text-muted-foreground">
                     <li>• <code className="font-mono text-foreground">MobileTopBar</code> — OmenX logo + Sports lockup (left), bell + avatar (right). Hidden ≥ md.</li>
-                    <li>• <code className="font-mono text-foreground">MobileHomeHero</code> — greeting card with available equity. Home-only.</li>
-                    <li>• <code className="font-mono text-foreground">MobileAccountSnapshot</code> — 3-stat card (open / today P&amp;L / to claim) linking to OmenX portfolio. Mobile equivalent of the desktop BridgeStrip.</li>
-                    <li>• <code className="font-mono text-foreground">MobileLiveStatusBar</code> — one-line "X live now" indicator linking to /events. Renders nothing when count is 0.</li>
                     <li>• <code className="font-mono text-foreground">MobileLiveHero</code> — full live-stream card stack. Lives only on /events.</li>
-                    <li>• <code className="font-mono text-foreground">MobileBottomNav</code> — fixed bottom, 4 tabs (Home / Events / Fans / Me), safe-area aware. Tabs are real routes via TanStack `Link`; Me opens the sheet.</li>
+                    <li>• <code className="font-mono text-foreground">MobileBottomNav</code> — fixed bottom, 3 tabs (Events / Fans / Me), safe-area aware. Tabs are real routes via TanStack `Link`; Me opens the sheet.</li>
                     <li>• <code className="font-mono text-foreground">MeSheet</code> — bottom sheet: user + Equity → 3 stats (BridgeStrip) → Open Portfolio CTA → 2×2 Explore OmenX grid → menu → Sign out. All routes that left the sports zone live in here.</li>
                   </ul>
                 </div>
@@ -1173,9 +1159,9 @@ function StyleGuide() {
                     Rules
                   </div>
                   <ul className="space-y-1.5 text-muted-foreground">
-                    <li>• Desktop and mobile branches both render in `/` via Tailwind `hidden md:block` / `md:hidden` — no JS gate, no SSR flash.</li>
-                    <li>• Zero overlap across tabs: live hero lives ONLY on /events, FanZoneHeader ONLY on /fans, account snapshot ONLY on /. No teaser/SeeMore cards between tabs.</li>
-                    <li>• `BridgeStrip` is desktop-only; its data appears as `MobileAccountSnapshot` on Home and inside `MeSheet`.</li>
+                    <li>• `/` is desktop-only. On mobile viewports, `/` redirects to `/events` in a useEffect (no Home tab in bottom nav).</li>
+                    <li>• Zero overlap across tabs: live hero + spotlight live ONLY on /events, FanZoneHeader ONLY on /fans. No teaser/SeeMore cards between tabs.</li>
+                    <li>• Account data (equity / positions / PnL) appears ONLY in `MeSheet` on mobile; `BridgeStrip` is desktop-only.</li>
                     <li>• Bottom tabs never include cross-OmenX destinations — those belong in `MeSheet`.</li>
                     <li>• Mobile event grid collapses to single column; live cards become the dedicated `MobileLiveHero`, not `LiveStreamCard`.</li>
                   </ul>
