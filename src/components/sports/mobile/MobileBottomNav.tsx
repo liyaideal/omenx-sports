@@ -1,11 +1,11 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { Home, CalendarDays, Users, User } from "lucide-react";
+import { CalendarDays, Users, User, type LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 type Tab = {
   key: "events" | "fans" | "me";
   label: string;
-  icon: typeof Home;
+  icon: LucideIcon;
   to?: "/events" | "/fans";
 };
 
