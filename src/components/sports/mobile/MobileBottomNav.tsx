@@ -1,16 +1,15 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { Home, CalendarDays, Users, User } from "lucide-react";
+import { CalendarDays, Users, User, type LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 type Tab = {
-  key: "home" | "events" | "fans" | "me";
+  key: "events" | "fans" | "me";
   label: string;
-  icon: typeof Home;
-  to?: "/" | "/events" | "/fans";
+  icon: LucideIcon;
+  to?: "/events" | "/fans";
 };
 
 const TABS: Tab[] = [
-  { key: "home", label: "Home", icon: Home, to: "/" },
   { key: "events", label: "Events", icon: CalendarDays, to: "/events" },
   { key: "fans", label: "Fans", icon: Users, to: "/fans" },
   { key: "me", label: "Me", icon: User },

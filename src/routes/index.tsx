@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
+import { useNavigate } from "@tanstack/react-router";
 import { AppShell } from "@/components/sports/dashboard/AppShell";
 import { AppTopBar } from "@/components/sports/dashboard/AppTopBar";
 import { MatchMarketCard } from "@/components/sports/dashboard/MatchMarketCard";
@@ -14,10 +15,6 @@ import { LiveActivityCard } from "@/components/sports/dashboard/LiveActivityCard
 import { DayStripCalendar } from "@/components/sports/dashboard/DayStripCalendar";
 import { ShowMoreEventsButton } from "@/components/sports/dashboard/ShowMoreEventsButton";
 import { LiveStreamCard } from "@/components/sports/dashboard/LiveStreamCard";
-import { MobileChrome } from "@/components/sports/mobile/MobileChrome";
-import { MobileHomeHero } from "@/components/sports/mobile/MobileHomeHero";
-import { MobileAccountSnapshot } from "@/components/sports/mobile/MobileAccountSnapshot";
-import { MobileLiveStatusBar } from "@/components/sports/mobile/MobileLiveStatusBar";
 import {
   ACCOUNT_STATS,
   FEATURED_MATCH,
@@ -64,6 +61,16 @@ const USER_AVATAR =
   "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=120&h=120&fit=crop&crop=faces&q=80";
 
 function Index() {
+  // Mobile: there is no Home tab — redirect to /events (the default mobile entry).
+  // Desktop home stays intact.
+  const navigate = useNavigate();
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    if (window.matchMedia("(max-width: 767px)").matches) {
+      navigate({ to: "/events", replace: true });
+    }
+  }, [navigate]);
+
   const followedKeys = (Object.keys(TEAMS) as TeamKey[]).filter((k) =>
     FOLLOWED_TEAMS.includes(TEAMS[k]),
   );
@@ -213,36 +220,6 @@ function Index() {
           </div>
         </section>
       </div>
-
-      {/* MOBILE layout (< md) — slim home: live + today preview + section teasers + season */}
-      <MobileChrome>
-        <MobileHomeHero userName={USER_NAME} equity={ACCOUNT_STATS.available} />
-
-        <MobileAccountSnapshot
-          openPositions={ACCOUNT_STATS.openPositions}
-          pnlToday={ACCOUNT_STATS.pnlToday}
-          toClaim={ACCOUNT_STATS.toClaim}
-          portfolioHref={omenxUrl.portfolio()}
-        />
-
-        <MobileLiveStatusBar
-          count={liveStreamMarkets.length}
-          topLabel={liveStreamMarkets[0]?.title.split(" — ")[0]}
-        />
-
-        <section className="space-y-3">
-          <header className="flex items-baseline justify-between">
-            <h2 className="font-display text-2xl font-semibold leading-9">
-              Event
-              <span className="font-serif-display italic text-neon"> Spotlight</span>
-            </h2>
-            <span className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
-              Picks for you
-            </span>
-          </header>
-          <PlayerPropsSpotlight players={SPOTLIGHTS} />
-        </section>
-      </MobileChrome>
 
       {/* Desktop bridge strip */}
       <div className="hidden md:block">
