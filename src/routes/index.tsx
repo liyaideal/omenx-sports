@@ -233,7 +233,7 @@ function Index() {
         <section className="space-y-3">
           <header className="flex items-baseline justify-between">
             <h2 className="font-display text-2xl font-semibold leading-9">
-              Player
+              Event
               <span className="font-serif-display italic text-neon"> Spotlight</span>
             </h2>
             <span className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
