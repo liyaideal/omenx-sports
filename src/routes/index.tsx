@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
+import { useNavigate } from "@tanstack/react-router";
 import { AppShell } from "@/components/sports/dashboard/AppShell";
 import { AppTopBar } from "@/components/sports/dashboard/AppTopBar";
 import { MatchMarketCard } from "@/components/sports/dashboard/MatchMarketCard";
@@ -14,10 +15,6 @@ import { LiveActivityCard } from "@/components/sports/dashboard/LiveActivityCard
 import { DayStripCalendar } from "@/components/sports/dashboard/DayStripCalendar";
 import { ShowMoreEventsButton } from "@/components/sports/dashboard/ShowMoreEventsButton";
 import { LiveStreamCard } from "@/components/sports/dashboard/LiveStreamCard";
-import { MobileChrome } from "@/components/sports/mobile/MobileChrome";
-import { MobileHomeHero } from "@/components/sports/mobile/MobileHomeHero";
-import { MobileAccountSnapshot } from "@/components/sports/mobile/MobileAccountSnapshot";
-import { MobileLiveStatusBar } from "@/components/sports/mobile/MobileLiveStatusBar";
 import {
   ACCOUNT_STATS,
   FEATURED_MATCH,
@@ -64,6 +61,16 @@ const USER_AVATAR =
   "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=120&h=120&fit=crop&crop=faces&q=80";
 
 function Index() {
+  // Mobile: there is no Home tab — redirect to /events (the default mobile entry).
+  // Desktop home stays intact.
+  const navigate = useNavigate();
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    if (window.matchMedia("(max-width: 767px)").matches) {
+      navigate({ to: "/events", replace: true });
+    }
+  }, [navigate]);
+
   const followedKeys = (Object.keys(TEAMS) as TeamKey[]).filter((k) =>
     FOLLOWED_TEAMS.includes(TEAMS[k]),
   );
