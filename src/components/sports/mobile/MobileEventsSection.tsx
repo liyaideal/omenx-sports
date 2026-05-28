@@ -4,7 +4,8 @@ import { DayStripCalendar } from "@/components/sports/dashboard/DayStripCalendar
 import { LeagueWinnerMarketCard } from "@/components/sports/dashboard/LeagueWinnerMarketCard";
 import { TopScorerMarketCard } from "@/components/sports/dashboard/TopScorerMarketCard";
 import { MobileLiveHero } from "@/components/sports/mobile/MobileLiveHero";
-import { MATCH_MARKETS, SEASON_LEAGUE_GROUPS } from "@/data/sports-markets";
+import { PlayerPropsSpotlight } from "@/components/sports/dashboard/PlayerPropsSpotlight";
+import { MATCH_MARKETS, SEASON_LEAGUE_GROUPS, SPOTLIGHTS } from "@/data/sports-markets";
 
 /**
  * Full mobile Events page section. Owns its own day-strip state so the
@@ -116,6 +117,19 @@ export function MobileEventsSection() {
             />,
           ])}
         </div>
+      </section>
+
+      <section className="space-y-3">
+        <header className="flex items-baseline justify-between">
+          <h2 className="font-display text-2xl font-semibold leading-9">
+            Event
+            <span className="font-serif-display italic text-neon"> Spotlight</span>
+          </h2>
+          <span className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+            Picks for you
+          </span>
+        </header>
+        <PlayerPropsSpotlight players={SPOTLIGHTS} />
       </section>
     </div>
   );
