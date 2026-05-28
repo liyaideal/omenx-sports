@@ -474,7 +474,7 @@ function StyleGuide() {
               </div>
 
               <div className="lg:col-span-1">
-                <h3 className="mb-4 text-xs font-mono uppercase tracking-widest text-muted-foreground">Player Spotlight</h3>
+                <h3 className="mb-4 text-xs font-mono uppercase tracking-widest text-muted-foreground">Event Spotlight</h3>
                 <PlayerSpotlightCard
                   handle="KIL_SEBGEY_B"
                   name="Kylian Mbappé"
@@ -1148,7 +1148,7 @@ function StyleGuide() {
                     topLabel={MATCH_MARKETS.find((m) => m.isLiveStream)?.title.split(" — ")[0]}
                   />
                   <div className="rounded-2xl border border-dashed border-border bg-surface/40 px-4 py-6 text-center text-xs text-muted-foreground">
-                    Player Spotlight section here
+                    Event Spotlight section here
                   </div>
                 </div>
                 <div className="pointer-events-none sticky bottom-0">
