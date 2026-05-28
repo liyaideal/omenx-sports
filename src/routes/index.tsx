@@ -221,36 +221,6 @@ function Index() {
         </section>
       </div>
 
-      {/* MOBILE layout (< md) — slim home: live + today preview + section teasers + season */}
-      <MobileChrome>
-        <MobileHomeHero userName={USER_NAME} equity={ACCOUNT_STATS.available} />
-
-        <MobileAccountSnapshot
-          openPositions={ACCOUNT_STATS.openPositions}
-          pnlToday={ACCOUNT_STATS.pnlToday}
-          toClaim={ACCOUNT_STATS.toClaim}
-          portfolioHref={omenxUrl.portfolio()}
-        />
-
-        <MobileLiveStatusBar
-          count={liveStreamMarkets.length}
-          topLabel={liveStreamMarkets[0]?.title.split(" — ")[0]}
-        />
-
-        <section className="space-y-3">
-          <header className="flex items-baseline justify-between">
-            <h2 className="font-display text-2xl font-semibold leading-9">
-              Event
-              <span className="font-serif-display italic text-neon"> Spotlight</span>
-            </h2>
-            <span className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
-              Picks for you
-            </span>
-          </header>
-          <PlayerPropsSpotlight players={SPOTLIGHTS} />
-        </section>
-      </MobileChrome>
-
       {/* Desktop bridge strip */}
       <div className="hidden md:block">
         <BridgeStrip
