@@ -145,6 +145,12 @@ export const WC26_GROUPS: GroupMarket[] = [
     standings: [
       { team: ESP, price: 0.17, delta24h: 0.01 },
       { team: FRA, price: 0.17, delta24h: 0 },
+      { team: ARG, price: 0.12, delta24h: -0.01 },
+      { team: BRA, price: 0.11, delta24h: 0.01 },
+      { team: ENG2, price: 0.09, delta24h: 0 },
+      { team: GER, price: 0.07, delta24h: 0 },
+      { team: POR2, price: 0.06, delta24h: 0.01 },
+      { team: NED, price: 0.05, delta24h: -0.01 },
     ],
   },
   {
@@ -156,6 +162,8 @@ export const WC26_GROUPS: GroupMarket[] = [
     standings: [
       { team: MEX, price: 0.52, delta24h: 0.02 },
       { team: CZE, price: 0.22, delta24h: -0.01 },
+      { team: NZL, price: 0.15, delta24h: 0 },
+      { team: HAI, price: 0.11, delta24h: -0.01 },
     ],
   },
   {
@@ -167,6 +175,8 @@ export const WC26_GROUPS: GroupMarket[] = [
     standings: [
       { team: SUIX, price: 0.55, delta24h: 0.02 },
       { team: CANX, price: 0.29, delta24h: 0 },
+      { team: ALG, price: 0.10, delta24h: -0.01 },
+      { team: PAN, price: 0.06, delta24h: 0 },
     ],
   },
   {
@@ -178,6 +188,8 @@ export const WC26_GROUPS: GroupMarket[] = [
     standings: [
       { team: BRA, price: 0.73, delta24h: 0.03 },
       { team: MOR, price: 0.19, delta24h: -0.01 },
+      { team: KOR2, price: 0.05, delta24h: 0 },
+      { team: PAR, price: 0.03, delta24h: -0.01 },
     ],
   },
   {
@@ -189,6 +201,8 @@ export const WC26_GROUPS: GroupMarket[] = [
     standings: [
       { team: USAX, price: 0.39, delta24h: 0.02 },
       { team: TURK, price: 0.36, delta24h: -0.01 },
+      { team: SEN2, price: 0.15, delta24h: 0 },
+      { team: CRC, price: 0.10, delta24h: -0.01 },
     ],
   },
   {
@@ -200,6 +214,8 @@ export const WC26_GROUPS: GroupMarket[] = [
     standings: [
       { team: GER, price: 0.68, delta24h: 0.02 },
       { team: ECUA, price: 0.21, delta24h: -0.01 },
+      { team: DEN2, price: 0.07, delta24h: 0 },
+      { team: QAT, price: 0.04, delta24h: -0.01 },
     ],
   },
   {
@@ -211,6 +227,8 @@ export const WC26_GROUPS: GroupMarket[] = [
     standings: [
       { team: NEDX, price: 0.55, delta24h: 0.02 },
       { team: JAP, price: 0.26, delta24h: 0 },
+      { team: COL2, price: 0.13, delta24h: -0.01 },
+      { team: IRN, price: 0.06, delta24h: 0 },
     ],
   },
   {
@@ -222,6 +240,8 @@ export const WC26_GROUPS: GroupMarket[] = [
     standings: [
       { team: BELX, price: 0.67, delta24h: 0.02 },
       { team: EGYX, price: 0.19, delta24h: -0.01 },
+      { team: CIV, price: 0.09, delta24h: 0 },
+      { team: FIN, price: 0.05, delta24h: -0.01 },
     ],
   },
   {
@@ -233,6 +253,8 @@ export const WC26_GROUPS: GroupMarket[] = [
     standings: [
       { team: ESP, price: 0.78, delta24h: 0.03 },
       { team: URUX, price: 0.19, delta24h: -0.01 },
+      { team: POR2, price: 0.02, delta24h: 0 },
+      { team: CHL, price: 0.01, delta24h: 0 },
     ],
   },
   {
@@ -244,6 +266,8 @@ export const WC26_GROUPS: GroupMarket[] = [
     standings: [
       { team: FRA, price: 0.69, delta24h: 0.02 },
       { team: NORX, price: 0.22, delta24h: 0 },
+      { team: ITA2, price: 0.06, delta24h: -0.01 },
+      { team: KSA, price: 0.03, delta24h: 0 },
     ],
   },
   {
@@ -255,6 +279,8 @@ export const WC26_GROUPS: GroupMarket[] = [
     standings: [
       { team: ARG, price: 0.73, delta24h: 0.02 },
       { team: AUT, price: 0.19, delta24h: -0.01 },
+      { team: URU2, price: 0.05, delta24h: 0 },
+      { team: PAR, price: 0.03, delta24h: -0.01 },
     ],
   },
 ];
