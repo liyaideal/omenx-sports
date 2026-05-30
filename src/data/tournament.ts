@@ -245,13 +245,13 @@ export function outcomeMarketIdFor(groupId: string, teamShort: string): string {
 
 /** Synthetic per-candidate YES/NO markets generated from WC26_GROUPS. Each
  *  card row in `GroupWinnerCard` opens one of these in the trade drawer. */
-export const GROUP_OUTCOME_MARKETS: SportsMarket[] = WC26_GROUPS.flatMap((g) =>
-  g.standings.map<SportsMarket>((s) => {
+export const GROUP_OUTCOME_MARKETS = WC26_GROUPS.flatMap((g) =>
+  g.standings.map((s) => {
     const yesPrice = Math.round(s.price * 100) / 100;
     return {
       id: outcomeMarketIdFor(g.id, s.team.short),
-      kind: "league-winner",
-      shape: "binary",
+      kind: "league-winner" as const,
+      shape: "binary" as const,
       title: `Will ${s.team.name} win ${g.title.replace(" — Winner", "")}?`,
       league: { name: "World Cup 2026", short: "WC" },
       endsLabel: g.endsLabel,
