@@ -30,6 +30,14 @@ export interface LeagueHub {
   accent: string;
   /** ESPN crest reused from `LeagueBadge` presets. */
   logo: string;
+  /**
+   * Rollout status. `featured` = primary push, gets the spotlight card on
+   * the homepage. `coming-soon` = hub exists but markets are not live yet,
+   * gets the compact secondary treatment.
+   */
+  status: "featured" | "coming-soon";
+  /** Optional short label for the coming-soon state, e.g. "Aug 15". */
+  startsLabel?: string;
 }
 
 export const LEAGUES: LeagueHub[] = [
@@ -41,6 +49,7 @@ export const LEAGUES: LeagueHub[] = [
     tagline: "48 nations · USA, Canada & Mexico · June 11 – July 19",
     accent: "0.7 0.18 145",
     logo: "https://a.espncdn.com/i/leaguelogos/soccer/500/9.png",
+    status: "featured",
   },
   {
     slug: "ucl",
@@ -50,6 +59,8 @@ export const LEAGUES: LeagueHub[] = [
     tagline: "Europe's elite · league phase to Wembley final",
     accent: "0.65 0.2 250",
     logo: "https://a.espncdn.com/i/leaguelogos/soccer/500/2.png",
+    status: "coming-soon",
+    startsLabel: "Sep 16",
   },
   {
     slug: "epl",
@@ -59,6 +70,8 @@ export const LEAGUES: LeagueHub[] = [
     tagline: "38 matchdays · 25/26 season title race",
     accent: "0.55 0.2 295",
     logo: "https://a.espncdn.com/i/leaguelogos/soccer/500/23.png",
+    status: "coming-soon",
+    startsLabel: "Aug 15",
   },
   {
     slug: "laliga",
@@ -68,6 +81,8 @@ export const LEAGUES: LeagueHub[] = [
     tagline: "El Clásico, Vinícius, Lewandowski · Spain's top flight",
     accent: "0.7 0.22 25",
     logo: "https://a.espncdn.com/i/leaguelogos/soccer/500/15.png",
+    status: "coming-soon",
+    startsLabel: "Aug 22",
   },
 ];
 
