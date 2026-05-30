@@ -5,7 +5,8 @@ import { AppShell } from "@/components/sports/dashboard/AppShell";
 import { AppTopBar } from "@/components/sports/dashboard/AppTopBar";
 import { MatchMarketCard } from "@/components/sports/dashboard/MatchMarketCard";
 import { EventMarketTileCard } from "@/components/sports/dashboard/EventMarketTileCard";
-import { LeagueEntryCard } from "@/components/sports/league/LeagueEntryCard";
+import { LeagueSpotlightCard } from "@/components/sports/league/LeagueSpotlightCard";
+import { LeagueComingSoonCard } from "@/components/sports/league/LeagueComingSoonCard";
 import { FanZoneHeader } from "@/components/sports/dashboard/FanZoneHeader";
 import { FanPostCard } from "@/components/sports/dashboard/FanPostCard";
 import { FansZoneEmpty } from "@/components/sports/dashboard/FansZoneEmpty";
@@ -18,7 +19,12 @@ import {
   FEATURED_MATCH,
   MATCH_MARKETS,
 } from "@/data/sports-markets";
-import { LEAGUES, getMatchMarketsByLeagueSlug } from "@/data/leagues";
+import {
+  LEAGUES,
+  getMatchMarketsByLeagueSlug,
+  getSpotlightsByLeagueSlug,
+  getBinaryQuestionsByLeagueSlug,
+} from "@/data/leagues";
 import {
   FAN_POST,
   FOLLOWED_TEAMS,
