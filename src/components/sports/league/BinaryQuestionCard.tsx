@@ -1,6 +1,6 @@
-import { Link } from "@tanstack/react-router";
 import type { SportsMarket } from "@/data/sports-markets";
 import { LeagueChip } from "@/components/sports/LeagueBadge";
+import { useTradeDrawer } from "@/components/sports/trade/TradeDrawerProvider";
 
 /**
  * Polymarket-style YES/NO gauge card for a single binary question. The
@@ -13,6 +13,7 @@ import { LeagueChip } from "@/components/sports/LeagueBadge";
  */
 export function BinaryQuestionCard({ market }: { market: SportsMarket }) {
   const [yes, no] = market.outcomes;
+  const { openTrade } = useTradeDrawer();
   if (!yes || !no) return null;
   const yesPct = Math.round(yes.price * 100);
   const noPct = 100 - yesPct;
@@ -51,9 +52,9 @@ export function BinaryQuestionCard({ market }: { market: SportsMarket }) {
 
       {/* buy buttons */}
       <div className="mt-3 grid flex-1 grid-cols-2 items-end gap-2">
-        <Link
-          to="/event/$id"
-          params={{ id: market.id }}
+        <button
+          type="button"
+          onClick={() => openTrade({ marketId: market.id, outcomeId: yes.id })}
           className="inline-flex items-center justify-between gap-2 rounded-xl bg-[oklch(0.78_0.18_155_/_0.12)] px-3 py-2 ring-1 ring-[oklch(0.78_0.18_155_/_0.3)] transition hover:bg-[oklch(0.78_0.18_155_/_0.2)]"
         >
           <span className="font-mono text-[10px] uppercase tracking-widest text-[oklch(0.85_0.16_155)]">
@@ -62,10 +63,10 @@ export function BinaryQuestionCard({ market }: { market: SportsMarket }) {
           <span className="font-display text-sm font-semibold text-foreground tabular-nums">
             {yesPct}¢
           </span>
-        </Link>
-        <Link
-          to="/event/$id"
-          params={{ id: market.id }}
+        </button>
+        <button
+          type="button"
+          onClick={() => openTrade({ marketId: market.id, outcomeId: no.id })}
           className="inline-flex items-center justify-between gap-2 rounded-xl bg-[oklch(0.7_0.22_25_/_0.12)] px-3 py-2 ring-1 ring-[oklch(0.7_0.22_25_/_0.3)] transition hover:bg-[oklch(0.7_0.22_25_/_0.2)]"
         >
           <span className="font-mono text-[10px] uppercase tracking-widest text-[oklch(0.82_0.16_25)]">
@@ -74,7 +75,7 @@ export function BinaryQuestionCard({ market }: { market: SportsMarket }) {
           <span className="font-display text-sm font-semibold text-foreground tabular-nums">
             {noPct}¢
           </span>
-        </Link>
+        </button>
       </div>
 
       <footer className="mt-3 flex items-center justify-between border-t border-border pt-2 font-mono text-[10px] text-muted-foreground">

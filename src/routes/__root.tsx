@@ -10,6 +10,7 @@ import {
 
 import appCss from "../styles.css?url";
 import { Toaster } from "@/components/ui/sonner";
+import { TradeDrawerProvider } from "@/components/sports/trade/TradeDrawerProvider";
 
 function NotFoundComponent() {
   return (
@@ -124,8 +125,10 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <Outlet />
-      <Toaster />
+      <TradeDrawerProvider>
+        <Outlet />
+        <Toaster />
+      </TradeDrawerProvider>
     </QueryClientProvider>
   );
 }

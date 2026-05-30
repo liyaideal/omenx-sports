@@ -33,7 +33,7 @@ import { OutcomeSelector } from "@/components/sports/OutcomeSelector";
 import { TeamName } from "@/components/sports/TeamName";
 import { teams } from "@/lib/teams";
 import { LiveStreamCard } from "@/components/sports/dashboard/LiveStreamCard";
-import { MATCH_MARKETS } from "@/data/sports-markets";
+import { MATCH_MARKETS, FEATURED_MATCH } from "@/data/sports-markets";
 import { MobileTopBar } from "@/components/sports/mobile/MobileTopBar";
 import { MobileBottomNav } from "@/components/sports/mobile/MobileBottomNav";
 import { MobileLiveHero } from "@/components/sports/mobile/MobileLiveHero";
@@ -47,6 +47,7 @@ import { GroupWinnerCard } from "@/components/sports/league/GroupWinnerCard";
 import { BinaryQuestionCard } from "@/components/sports/league/BinaryQuestionCard";
 import { BracketView } from "@/components/sports/league/BracketView";
 import { PropsGrid } from "@/components/sports/league/PropsGrid";
+import { useTradeDrawer } from "@/components/sports/trade/TradeDrawerProvider";
 import {
   WC26_GROUPS,
   WC26_BRACKET,
@@ -97,6 +98,7 @@ const SECTIONS = [
   ["league-hub", "League Hub"],
   ["hub-props", "Hub · Props"],
   ["hub-bracket", "Hub · Bracket"],
+  ["trade-drawer", "Sticky Trade Drawer"],
 ] as const;
 
 function Section({ id, title, kicker, children }: { id: string; title: string; kicker?: string; children: React.ReactNode }) {
@@ -1375,10 +1377,67 @@ function StyleGuide() {
             </div>
           </Section>
 
+          <Section id="trade-drawer" title="Sticky Trade Drawer" kicker="22 — P3 / global">
+            <p className="mb-6 max-w-3xl text-sm text-muted-foreground">
+              A global right-edge sliding sheet that opens via the <code className="font-mono text-foreground">useTradeDrawer()</code> hook
+              from anywhere in the app. Picks an outcome and renders the full <code className="font-mono text-foreground">TradeForm</code>
+              without navigating away from the current page — so users can keep browsing markets while a trade ticket stays in context.
+              Wired into <code className="font-mono text-foreground">__root.tsx</code>, so it persists across route changes.
+            </p>
+
+            <div className="space-y-6">
+              <TradeDrawerDemo />
+
+              <div className="rounded-2xl border border-dashed border-white/15 bg-white/[0.02] p-5 text-xs">
+                <div className="mb-2 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+                  Rules
+                </div>
+                <ul className="space-y-1.5 text-muted-foreground">
+                  <li>• Open via <code className="font-mono text-foreground">openTrade({"{ marketId, outcomeId? }"})</code> from the hook.</li>
+                  <li>• <code className="font-mono text-foreground">BinaryQuestionCard</code>'s YES / NO buy buttons trigger the drawer with the matching outcome pre-selected.</li>
+                  <li>• Marker for "drawer is sticky": closing it preserves nothing — every open call replaces the selection, but the drawer DOM survives navigation so animations don't flash.</li>
+                  <li>• Outcomes are rendered as a 2- or 3-column chooser depending on the market shape; deep-link to <code className="font-mono text-foreground">/event/$id</code> is always available in the header for the full market page.</li>
+                  <li>• Always reuses the shared <code className="font-mono text-foreground">TradeForm</code> — leverage, PRO toggle, TP/SL all work identically to <code className="font-mono text-foreground">/event/$id</code>.</li>
+                </ul>
+              </div>
+            </div>
+          </Section>
+
           <footer className="mt-12 border-t border-border pt-6 text-center text-xs text-muted-foreground font-mono">
             Stadium Neon · v0.1 · sports prediction design system
           </footer>
         </main>
+      </div>
+    </div>
+  );
+}
+
+function TradeDrawerDemo() {
+  const { openTrade } = useTradeDrawer();
+  const threeWay = MATCH_MARKETS.find((m) => m.shape === "three-way") ?? FEATURED_MATCH;
+  const binary = MATCH_MARKETS.find((m) => m.shape === "binary");
+  return (
+    <div className="rounded-2xl border border-border bg-surface p-5 shadow-card">
+      <div className="mb-3 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+        Trigger from anywhere
+      </div>
+      <div className="flex flex-wrap gap-2">
+        <button
+          type="button"
+          onClick={() => openTrade({ marketId: threeWay.id })}
+          className="rounded-xl bg-foreground px-4 py-2 font-mono text-[11px] uppercase tracking-widest text-background transition hover:opacity-90"
+        >
+          Open 1X2 · {threeWay.title}
+        </button>
+        {binary && (
+          <button
+            type="button"
+            onClick={() => openTrade({ marketId: binary.id, outcomeId: binary.outcomes[1]?.id })}
+            className="rounded-xl bg-white/[0.06] px-4 py-2 font-mono text-[11px] uppercase tracking-widest text-foreground ring-1 ring-white/10 transition hover:bg-white/[0.1]"
+          >
+            Open binary · pre-pick 2nd outcome
+          </button>
+        )}
       </div>
     </div>
   );
