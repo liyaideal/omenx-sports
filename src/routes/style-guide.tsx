@@ -47,6 +47,7 @@ import { GroupWinnerCard } from "@/components/sports/league/GroupWinnerCard";
 import { BinaryQuestionCard } from "@/components/sports/league/BinaryQuestionCard";
 import { BracketView } from "@/components/sports/league/BracketView";
 import { PropsGrid } from "@/components/sports/league/PropsGrid";
+import { SpotlightPropsCardHorizontal } from "@/components/sports/league/SpotlightPropsCardHorizontal";
 import { useTradeDrawer } from "@/components/sports/trade/TradeDrawerProvider";
 import {
   WC26_GROUPS,
@@ -1311,6 +1312,17 @@ function StyleGuide() {
                     .map((m) => (
                       <BinaryQuestionCard key={m.id} market={m} />
                     ))}
+                </div>
+              </div>
+
+              <div>
+                <div className="mb-3 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+                  SpotlightPropsCardHorizontal — featured player/team prop bundle (horizontal)
+                </div>
+                <div className="grid gap-3 md:grid-cols-1 xl:grid-cols-2">
+                  {getSpotlightsByLeagueSlug("world-cup-2026").slice(0, 2).map((s) => (
+                    <SpotlightPropsCardHorizontal key={s.handle} player={s} />
+                  ))}
                 </div>
               </div>
 
