@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ChevronDown, Clock, Users, Flame } from "lucide-react";
+import { ChevronDown, Clock, Users } from "lucide-react";
 import type { PlayerSpotlight } from "@/data/sports-markets";
 import { useTradeDrawer } from "@/components/sports/trade/TradeDrawerProvider";
 
@@ -12,8 +12,6 @@ import { useTradeDrawer } from "@/components/sports/trade/TradeDrawerProvider";
  * The vertical {@link PlayerPropsSpotlight} carousel variant is kept
  * intact for the homepage dashboard.
  */
-const HOT_PARTICIPANT_THRESHOLD = 2000;
-
 function parseDollars(v: string): number {
   // accepts "$1.10M" / "$680K" / "$420" → number
   const m = v.replace(/[$,]/g, "").trim().match(/^([\d.]+)\s*([KMB]?)$/i);
@@ -49,7 +47,6 @@ export function SpotlightPropsCardHorizontal({
   const totalVol = player.props.reduce((s, m) => s + parseDollars(m.volume), 0);
   const total24h = player.props.reduce((s, m) => s + parseDollars(m.volume24h ?? "0"), 0);
   const endsLabel = player.props[0]?.endsLabel ?? "";
-  const isHot = totalTraders >= HOT_PARTICIPANT_THRESHOLD;
 
   return (
     <section className="relative flex h-full overflow-hidden rounded-2xl border border-border bg-surface bg-ambient shadow-card">
@@ -74,18 +71,13 @@ export function SpotlightPropsCardHorizontal({
           loading="lazy"
           className={`relative z-10 h-[160px] w-[136px] rounded-[72px] bg-white/[0.04] sm:h-[184px] sm:w-[156px] ${imageFitClass}`}
         />
-        {/* hot/24h volume badge */}
-        <div className="absolute bottom-3 left-1/2 z-20 -translate-x-1/2">
-          {isHot ? (
-            <span className="inline-flex items-center gap-1 rounded-full bg-[oklch(0.7_0.22_25_/_0.18)] px-2 py-0.5 font-mono text-[9px] uppercase tracking-widest text-[oklch(0.85_0.18_45)] ring-1 ring-[oklch(0.7_0.22_25_/_0.35)] backdrop-blur">
-              <Flame className="h-3 w-3" /> Hot
-            </span>
-          ) : total24h > 0 ? (
+        {total24h > 0 && (
+          <div className="absolute bottom-3 left-1/2 z-20 -translate-x-1/2">
             <span className="inline-flex items-center gap-1 rounded-full bg-black/40 px-2 py-0.5 font-mono text-[9px] uppercase tracking-widest text-foreground ring-1 ring-white/15 backdrop-blur">
               24h · {formatDollars(total24h)}
             </span>
-          ) : null}
-        </div>
+          </div>
+        )}
         {/* right edge fade into content column */}
         <div
           aria-hidden
