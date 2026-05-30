@@ -133,7 +133,7 @@ export const WC26_GROUPS: GroupMarket[] = [
   },
 ];
 
-/* ---------------- World Cup 2026 — bracket (QF → SF → F) ---------------- */
+/* ------------ World Cup 2026 — bracket (R32 → R16 → QF → SF → F) ------------ */
 
 export const WC26_BRACKET: BracketRound[] = [
   {
