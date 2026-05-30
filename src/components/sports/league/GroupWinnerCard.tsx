@@ -1,3 +1,5 @@
+import { useState } from "react";
+import { ChevronDown } from "lucide-react";
 import type { GroupMarket } from "@/data/tournament";
 import { outcomeMarketIdFor } from "@/data/tournament";
 import { useTradeDrawer } from "@/components/sports/trade/TradeDrawerProvider";
@@ -11,6 +13,10 @@ import { useTradeDrawer } from "@/components/sports/trade/TradeDrawerProvider";
 export function GroupWinnerCard({ market }: { market: GroupMarket }) {
   const sorted = [...market.standings].sort((a, b) => b.price - a.price);
   const { openTrade } = useTradeDrawer();
+  const MAX_VISIBLE = 3;
+  const [expanded, setExpanded] = useState(false);
+  const hasMore = sorted.length > MAX_VISIBLE;
+  const visible = expanded || !hasMore ? sorted : sorted.slice(0, MAX_VISIBLE);
   return (
     <section className="flex h-full flex-col rounded-2xl border border-border bg-surface p-4 shadow-card">
       <header className="flex items-center justify-between pb-3">
@@ -33,7 +39,7 @@ export function GroupWinnerCard({ market }: { market: GroupMarket }) {
       </header>
 
       <div className="flex flex-1 flex-col divide-y divide-white/[0.04]">
-        {sorted.map((row, i) => {
+        {visible.map((row, i) => {
           const hue = row.team.hue ?? 220;
           const marketId = row.marketId ?? outcomeMarketIdFor(market.id, row.team.short);
           const yesPct = Math.round(row.price * 100);
@@ -82,6 +88,20 @@ export function GroupWinnerCard({ market }: { market: GroupMarket }) {
             </div>
           );
         })}
+        {hasMore && (
+          <button
+            type="button"
+            onClick={() => setExpanded((v) => !v)}
+            className="mt-1 flex items-center justify-center gap-1.5 rounded-md py-2 font-mono text-[10px] uppercase tracking-widest text-muted-foreground transition hover:bg-white/[0.04] hover:text-foreground"
+          >
+            <span>
+              {expanded ? "Show less" : `Show all ${sorted.length}`}
+            </span>
+            <ChevronDown
+              className={`h-3 w-3 transition-transform ${expanded ? "rotate-180" : ""}`}
+            />
+          </button>
+        )}
       </div>
 
       <footer className="mt-2 border-t border-border pt-2 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
