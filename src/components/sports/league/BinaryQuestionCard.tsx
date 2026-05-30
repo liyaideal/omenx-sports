@@ -1,3 +1,4 @@
+import { Clock, Users } from "lucide-react";
 import type { SportsMarket } from "@/data/sports-markets";
 import { LeagueChip } from "@/components/sports/LeagueBadge";
 import { useTradeDrawer } from "@/components/sports/trade/TradeDrawerProvider";
@@ -22,9 +23,6 @@ export function BinaryQuestionCard({ market }: { market: SportsMarket }) {
     <section className="flex h-full flex-col rounded-2xl border border-border bg-surface p-4 shadow-card">
       <header className="flex items-center gap-2 pb-3">
         <LeagueChip short={market.league.short} />
-        <span className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
-          · {market.endsLabel}
-        </span>
       </header>
 
       <h3 className="font-display text-sm font-semibold leading-snug text-foreground">
@@ -78,9 +76,16 @@ export function BinaryQuestionCard({ market }: { market: SportsMarket }) {
         </button>
       </div>
 
-      <footer className="mt-3 flex items-center justify-between border-t border-border pt-2 font-mono text-[10px] text-muted-foreground">
-        <span>{market.participants.toLocaleString()} traders</span>
-        <span className="text-foreground">Vol {market.volume}</span>
+      <footer className="mt-auto flex items-center justify-between border-t border-border pt-3 font-mono text-[11px] text-muted-foreground">
+        <span className="inline-flex items-center gap-1.5">
+          <Clock className="h-3 w-3" /> {market.endsLabel}
+        </span>
+        <span className="inline-flex items-center gap-3">
+          <span className="inline-flex items-center gap-1">
+            <Users className="h-3 w-3" /> {market.participants.toLocaleString()}
+          </span>
+          <span className="text-foreground">Vol {market.volume}</span>
+        </span>
       </footer>
     </section>
   );
