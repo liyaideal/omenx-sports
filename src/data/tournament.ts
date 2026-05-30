@@ -5,12 +5,17 @@
  * mock); season leagues skip these.
  */
 import { TEAMS, type TeamLite } from "@/data/sports-mock";
+import type { SportsMarket } from "@/data/sports-markets";
 
 export interface GroupTeamStanding {
   team: TeamLite | { name: string; short: string; logo?: string; hue?: number };
   /** Implied probability to win the group (0..1). */
   price: number;
   delta24h?: number;
+  /** Per-candidate binary market id ("YES = this team wins"). Auto-generated
+   *  from the parent GroupMarket id + team short. Wires each row's
+   *  YES / NO pills to the global trade drawer. */
+  marketId: string;
 }
 
 export interface GroupMarket {
