@@ -28,6 +28,9 @@ export interface GroupMarket {
   kicker?: string;
   endsLabel: string;
   volume: string;
+  /** Optional trader count — mirrors SportsMarket.participants so the
+   *  card footer can match EventMarketTileCard. */
+  participants?: number;
   standings: GroupTeamStanding[];
 }
 
