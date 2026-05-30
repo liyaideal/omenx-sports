@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ChevronDown } from "lucide-react";
+import { ChevronDown, Clock, Users } from "lucide-react";
 import type { GroupMarket } from "@/data/tournament";
 import { outcomeMarketIdFor } from "@/data/tournament";
 import { useTradeDrawer } from "@/components/sports/trade/TradeDrawerProvider";
@@ -33,9 +33,6 @@ export function GroupWinnerCard({ market }: { market: GroupMarket }) {
             </h3>
           </div>
         </div>
-        <span className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
-          Vol {market.volume}
-        </span>
       </header>
 
       <div className="flex flex-1 flex-col divide-y divide-white/[0.04]">
@@ -104,8 +101,18 @@ export function GroupWinnerCard({ market }: { market: GroupMarket }) {
         )}
       </div>
 
-      <footer className="mt-2 border-t border-border pt-2 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
-        {market.endsLabel}
+      <footer className="mt-auto flex items-center justify-between border-t border-border pt-3 font-mono text-[11px] text-muted-foreground">
+        <span className="inline-flex items-center gap-1.5">
+          <Clock className="h-3 w-3" /> {market.endsLabel}
+        </span>
+        <span className="inline-flex items-center gap-3">
+          {typeof market.participants === "number" && market.participants > 0 && (
+            <span className="inline-flex items-center gap-1">
+              <Users className="h-3 w-3" /> {market.participants.toLocaleString()}
+            </span>
+          )}
+          <span className="text-foreground">Vol {market.volume}</span>
+        </span>
       </footer>
     </section>
   );
