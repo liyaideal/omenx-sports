@@ -43,6 +43,21 @@ import { LEAGUES, getMatchMarketsByLeagueSlug } from "@/data/leagues";
 import { LeagueEntryCard } from "@/components/sports/league/LeagueEntryCard";
 import { LeagueHubHero } from "@/components/sports/league/LeagueHubHero";
 import { HubTabs } from "@/components/sports/league/HubTabs";
+import { GroupWinnerCard } from "@/components/sports/league/GroupWinnerCard";
+import { BinaryQuestionCard } from "@/components/sports/league/BinaryQuestionCard";
+import { BracketView } from "@/components/sports/league/BracketView";
+import { PropsGrid } from "@/components/sports/league/PropsGrid";
+import {
+  WC26_GROUPS,
+  WC26_BRACKET,
+  getGroupsByLeagueSlug,
+  getBracketByLeagueSlug,
+} from "@/data/tournament";
+import {
+  getBinaryQuestionsByLeagueSlug,
+  getSeasonGroupByLeagueSlug,
+  getSpotlightsByLeagueSlug,
+} from "@/data/leagues";
 import { PriceChart } from "@/components/sports/PriceChart";
 import { OrderBook } from "@/components/sports/OrderBook";
 import { TradeForm } from "@/components/sports/TradeForm";
@@ -80,6 +95,8 @@ const SECTIONS = [
   ["events-grid", "Events Grid"],
   ["mobile-shell", "Mobile Shell"],
   ["league-hub", "League Hub"],
+  ["hub-props", "Hub · Props"],
+  ["hub-bracket", "Hub · Bracket"],
 ] as const;
 
 function Section({ id, title, kicker, children }: { id: string; title: string; kicker?: string; children: React.ReactNode }) {
@@ -1258,6 +1275,101 @@ function StyleGuide() {
                   <li>• `Bracket` tab only renders for `league.kind === "tournament"`. Season leagues get Games + Props only.</li>
                   <li>• Props + Bracket are intentional `ComingSoon` placeholders in P0 — Props ships P1 (futures, group winners, player props, binary gauges), Bracket ships P2.</li>
                   <li>• Season Futures + Player Spotlight no longer live on `/events` or the desktop home Season block — they are migrating into each hub's Props tab in P1.</li>
+                </ul>
+              </div>
+            </div>
+          </Section>
+
+          <Section id="hub-props" title="Hub · Props" kicker="20 — P1 / ?view=props">
+            <p className="mb-6 max-w-3xl text-sm text-muted-foreground">
+              The <b className="text-foreground">Props</b> tab orchestrates every non-1X2 market for a league: group winners (tournament only),
+              season futures (winner + top scorer), player spotlights, and standalone YES/NO binary questions.
+              All bundled by <code className="font-mono text-foreground">PropsGrid</code>.
+            </p>
+
+            <div className="space-y-8">
+              <div>
+                <div className="mb-3 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+                  GroupWinnerCard — single tournament group, ranked by implied prob
+                </div>
+                <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+                  {WC26_GROUPS.map((g) => (
+                    <GroupWinnerCard key={g.id} market={g} />
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                <div className="mb-3 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+                  BinaryQuestionCard — YES/NO gauge + dual buy buttons
+                </div>
+                <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+                  {getBinaryQuestionsByLeagueSlug("epl")
+                    .slice(0, 3)
+                    .map((m) => (
+                      <BinaryQuestionCard key={m.id} market={m} />
+                    ))}
+                </div>
+              </div>
+
+              <div>
+                <div className="mb-3 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+                  PropsGrid — full Props tab composition (World Cup 2026)
+                </div>
+                <PropsGrid
+                  league={LEAGUES[0]}
+                  groups={getGroupsByLeagueSlug("world-cup-2026")}
+                  winner={getSeasonGroupByLeagueSlug("world-cup-2026")?.winner}
+                  topScorer={getSeasonGroupByLeagueSlug("world-cup-2026")?.topScorer}
+                  spotlights={getSpotlightsByLeagueSlug("world-cup-2026")}
+                  binaryQuestions={getBinaryQuestionsByLeagueSlug("world-cup-2026")}
+                />
+              </div>
+
+              <div className="rounded-2xl border border-dashed border-white/15 bg-white/[0.02] p-5 text-xs">
+                <div className="mb-2 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+                  Rules
+                </div>
+                <ul className="space-y-1.5 text-muted-foreground">
+                  <li>• Group winners only render for <code className="font-mono text-foreground">kind === "tournament"</code> leagues that have group-stage data.</li>
+                  <li>• Season futures pull from <code className="font-mono text-foreground">SEASON_LEAGUE_GROUPS</code> via slug match — keeps the legacy winner / top-scorer cards reusable.</li>
+                  <li>• Binary questions are auto-collected: any <code className="font-mono text-foreground">shape: "binary"</code> non-match market or spotlight prop tagged for this league shows up.</li>
+                  <li>• PropsGrid hides each section when its source array is empty — no placeholder noise.</li>
+                </ul>
+              </div>
+            </div>
+          </Section>
+
+          <Section id="hub-bracket" title="Hub · Bracket" kicker="21 — P2 / ?view=bracket">
+            <p className="mb-6 max-w-3xl text-sm text-muted-foreground">
+              Knockout tree for tournament-kind leagues. Columns are rounds; each matchup is a pair of team pills with
+              their advance-probability. Mobile horizontally scrolls — bracket integrity beats wrapping.
+            </p>
+
+            <div className="space-y-6">
+              <div>
+                <div className="mb-3 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+                  BracketView — QF → SF → F (World Cup 2026 mock)
+                </div>
+                <BracketView rounds={WC26_BRACKET} />
+              </div>
+
+              <div>
+                <div className="mb-3 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+                  Empty state — season leagues / pre-seed
+                </div>
+                <BracketView rounds={[]} />
+              </div>
+
+              <div className="rounded-2xl border border-dashed border-white/15 bg-white/[0.02] p-5 text-xs">
+                <div className="mb-2 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+                  Rules
+                </div>
+                <ul className="space-y-1.5 text-muted-foreground">
+                  <li>• Only rendered when <code className="font-mono text-foreground">league.kind === "tournament"</code>.</li>
+                  <li>• Matchups deep-link to <code className="font-mono text-foreground">/event/$id</code> using the matchup id as the market id.</li>
+                  <li>• TBD slots render as a dashed circle — bracket is always a complete tree, never collapsed rows.</li>
+                  <li>• Each column past the first gets progressively larger vertical gaps to visually converge toward the final.</li>
                 </ul>
               </div>
             </div>

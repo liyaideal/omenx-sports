@@ -104,3 +104,33 @@ export function getSpotlightsByLeagueSlug(slug: string): PlayerSpotlight[] {
     ),
   );
 }
+
+/**
+ * Loose binary YES/NO markets attached to this league. Pulls from
+ * `MATCH_MARKETS` (e.g. "Messi hat-trick", "Haaland 2+ goals") and from
+ * any spotlight prop tagged for this league. Three-way match cards are
+ * excluded — those belong in the Games tab.
+ */
+export function getBinaryQuestionsByLeagueSlug(slug: string): SportsMarket[] {
+  const hub = getLeagueBySlug(slug);
+  if (!hub) return [];
+  const short = hub.short.toLowerCase();
+  const fromMatches = MATCH_MARKETS.filter(
+    (m) =>
+      m.shape === "binary" &&
+      m.kind !== "match" &&
+      m.league.short.toLowerCase() === short,
+  );
+  const fromSpotlights = SPOTLIGHTS.flatMap((s) =>
+    s.props.filter(
+      (p) => p.shape === "binary" && p.league.short.toLowerCase() === short,
+    ),
+  );
+  // Dedupe by id.
+  const seen = new Set<string>();
+  return [...fromMatches, ...fromSpotlights].filter((m) => {
+    if (seen.has(m.id)) return false;
+    seen.add(m.id);
+    return true;
+  });
+}
