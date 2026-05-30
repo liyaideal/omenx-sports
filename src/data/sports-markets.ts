@@ -325,6 +325,24 @@ export const MATCH_MARKETS: SportsMarket[] = [
     tradeHref: `/event/wc26-usa-par`,
     dayOffset: 13,
   },
+  {
+    // Polymarket: "Will Lionel Messi play in the World Cup?" — binary prop
+    id: "wc26-messi-plays",
+    kind: "player-prop",
+    shape: "binary",
+    title: "Messi plays at the World Cup",
+    league: { name: "World Cup 2026", short: "WC" },
+    endsLabel: "Settles Jun 11, 2026",
+    volume: "$176K",
+    volume24h: "$3.2K",
+    participants: 612,
+    outcomes: [
+      { id: "y", label: "YES", price: 0.97, delta24h: 0 },
+      { id: "n", label: "NO", price: 0.03, delta24h: 0 },
+    ],
+    tradeHref: `/event/wc26-messi-plays`,
+    dayOffset: 12,
+  },
 ];
 
 export const LEAGUE_WINNER_MARKET: SportsMarket = {
