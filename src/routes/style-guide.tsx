@@ -39,8 +39,15 @@ import { MobileBottomNav } from "@/components/sports/mobile/MobileBottomNav";
 import { MobileLiveHero } from "@/components/sports/mobile/MobileLiveHero";
 import { MeSheet } from "@/components/sports/mobile/MeSheet";
 import { ACCOUNT_STATS } from "@/data/sports-markets";
-import { LEAGUES, getMatchMarketsByLeagueSlug } from "@/data/leagues";
+import {
+  LEAGUES,
+  getMatchMarketsByLeagueSlug,
+  getSpotlightsByLeagueSlug,
+  getBinaryQuestionsByLeagueSlug,
+} from "@/data/leagues";
 import { LeagueEntryCard } from "@/components/sports/league/LeagueEntryCard";
+import { LeagueSpotlightCard } from "@/components/sports/league/LeagueSpotlightCard";
+import { LeagueComingSoonCard } from "@/components/sports/league/LeagueComingSoonCard";
 import { LeagueHubHero } from "@/components/sports/league/LeagueHubHero";
 import { HubTabs } from "@/components/sports/league/HubTabs";
 import { GroupWinnerCard } from "@/components/sports/league/GroupWinnerCard";
