@@ -33,7 +33,7 @@ import { OutcomeSelector } from "@/components/sports/OutcomeSelector";
 import { TeamName } from "@/components/sports/TeamName";
 import { teams } from "@/lib/teams";
 import { LiveStreamCard } from "@/components/sports/dashboard/LiveStreamCard";
-import { MATCH_MARKETS } from "@/data/sports-markets";
+import { MATCH_MARKETS, FEATURED_MATCH } from "@/data/sports-markets";
 import { MobileTopBar } from "@/components/sports/mobile/MobileTopBar";
 import { MobileBottomNav } from "@/components/sports/mobile/MobileBottomNav";
 import { MobileLiveHero } from "@/components/sports/mobile/MobileLiveHero";
