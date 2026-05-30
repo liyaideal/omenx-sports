@@ -1280,6 +1280,101 @@ function StyleGuide() {
             </div>
           </Section>
 
+          <Section id="hub-props" title="Hub · Props" kicker="20 — P1 / ?view=props">
+            <p className="mb-6 max-w-3xl text-sm text-muted-foreground">
+              The <b className="text-foreground">Props</b> tab orchestrates every non-1X2 market for a league: group winners (tournament only),
+              season futures (winner + top scorer), player spotlights, and standalone YES/NO binary questions.
+              All bundled by <code className="font-mono text-foreground">PropsGrid</code>.
+            </p>
+
+            <div className="space-y-8">
+              <div>
+                <div className="mb-3 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+                  GroupWinnerCard — single tournament group, ranked by implied prob
+                </div>
+                <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+                  {WC26_GROUPS.map((g) => (
+                    <GroupWinnerCard key={g.id} market={g} />
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                <div className="mb-3 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+                  BinaryQuestionCard — YES/NO gauge + dual buy buttons
+                </div>
+                <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+                  {getBinaryQuestionsByLeagueSlug("epl")
+                    .slice(0, 3)
+                    .map((m) => (
+                      <BinaryQuestionCard key={m.id} market={m} />
+                    ))}
+                </div>
+              </div>
+
+              <div>
+                <div className="mb-3 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+                  PropsGrid — full Props tab composition (World Cup 2026)
+                </div>
+                <PropsGrid
+                  league={LEAGUES[0]}
+                  groups={getGroupsByLeagueSlug("world-cup-2026")}
+                  winner={getSeasonGroupByLeagueSlug("world-cup-2026")?.winner}
+                  topScorer={getSeasonGroupByLeagueSlug("world-cup-2026")?.topScorer}
+                  spotlights={getSpotlightsByLeagueSlug("world-cup-2026")}
+                  binaryQuestions={getBinaryQuestionsByLeagueSlug("world-cup-2026")}
+                />
+              </div>
+
+              <div className="rounded-2xl border border-dashed border-white/15 bg-white/[0.02] p-5 text-xs">
+                <div className="mb-2 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+                  Rules
+                </div>
+                <ul className="space-y-1.5 text-muted-foreground">
+                  <li>• Group winners only render for <code className="font-mono text-foreground">kind === "tournament"</code> leagues that have group-stage data.</li>
+                  <li>• Season futures pull from <code className="font-mono text-foreground">SEASON_LEAGUE_GROUPS</code> via slug match — keeps the legacy winner / top-scorer cards reusable.</li>
+                  <li>• Binary questions are auto-collected: any <code className="font-mono text-foreground">shape: "binary"</code> non-match market or spotlight prop tagged for this league shows up.</li>
+                  <li>• PropsGrid hides each section when its source array is empty — no placeholder noise.</li>
+                </ul>
+              </div>
+            </div>
+          </Section>
+
+          <Section id="hub-bracket" title="Hub · Bracket" kicker="21 — P2 / ?view=bracket">
+            <p className="mb-6 max-w-3xl text-sm text-muted-foreground">
+              Knockout tree for tournament-kind leagues. Columns are rounds; each matchup is a pair of team pills with
+              their advance-probability. Mobile horizontally scrolls — bracket integrity beats wrapping.
+            </p>
+
+            <div className="space-y-6">
+              <div>
+                <div className="mb-3 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+                  BracketView — QF → SF → F (World Cup 2026 mock)
+                </div>
+                <BracketView rounds={WC26_BRACKET} />
+              </div>
+
+              <div>
+                <div className="mb-3 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+                  Empty state — season leagues / pre-seed
+                </div>
+                <BracketView rounds={[]} />
+              </div>
+
+              <div className="rounded-2xl border border-dashed border-white/15 bg-white/[0.02] p-5 text-xs">
+                <div className="mb-2 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+                  Rules
+                </div>
+                <ul className="space-y-1.5 text-muted-foreground">
+                  <li>• Only rendered when <code className="font-mono text-foreground">league.kind === "tournament"</code>.</li>
+                  <li>• Matchups deep-link to <code className="font-mono text-foreground">/event/$id</code> using the matchup id as the market id.</li>
+                  <li>• TBD slots render as a dashed circle — bracket is always a complete tree, never collapsed rows.</li>
+                  <li>• Each column past the first gets progressively larger vertical gaps to visually converge toward the final.</li>
+                </ul>
+              </div>
+            </div>
+          </Section>
+
           <footer className="mt-12 border-t border-border pt-6 text-center text-xs text-muted-foreground font-mono">
             Stadium Neon · v0.1 · sports prediction design system
           </footer>
