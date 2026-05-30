@@ -53,8 +53,8 @@ export function PropsGrid({
     <div className="space-y-6">
       {spotlights.length > 0 && (
         <PropsSection
-          title="Featured props"
-          subtitle="Hand-picked player & team prop bundles"
+          title="Top storylines"
+          subtitle="The biggest bets traders are watching right now"
         >
           <div className="grid gap-3 md:grid-cols-1 xl:grid-cols-2">
             {spotlights.map((s) => (
@@ -66,8 +66,8 @@ export function PropsGrid({
 
       {(groups.length > 0 || binaryQuestions.length > 0) && (
         <PropsSection
-          title="Markets"
-          subtitle="Group winners and standalone questions"
+          title="More markets"
+          subtitle="Group stages, milestones, and standout questions"
         >
           <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
             {groups.map((g) => (
