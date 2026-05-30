@@ -12,10 +12,10 @@ export interface GroupTeamStanding {
   /** Implied probability to win the group (0..1). */
   price: number;
   delta24h?: number;
-  /** Per-candidate binary market id ("YES = this team wins"). Auto-generated
-   *  from the parent GroupMarket id + team short. Wires each row's
-   *  YES / NO pills to the global trade drawer. */
-  marketId: string;
+  /** Optional per-candidate binary market id ("YES = this team wins").
+   *  When omitted, GroupWinnerCard derives one as `<group.id>-<team.short>`
+   *  and the matching SportsMarket is auto-registered in ALL_MARKETS. */
+  marketId?: string;
 }
 
 export interface GroupMarket {
