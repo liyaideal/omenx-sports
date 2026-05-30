@@ -1,5 +1,3 @@
-import { ArrowLeft } from "lucide-react";
-import { Link } from "@tanstack/react-router";
 import type { LeagueHub } from "@/data/leagues";
 
 /**
@@ -25,15 +23,7 @@ export function LeagueHubHero({
         `,
       }}
     >
-      {/* Back link */}
-      <Link
-        to="/events"
-        className="inline-flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-widest text-muted-foreground transition hover:text-foreground"
-      >
-        <ArrowLeft className="h-3 w-3" /> All events
-      </Link>
-
-      <div className="mt-5 flex items-center gap-5 md:gap-7">
+      <div className="flex items-center gap-5 md:gap-7">
         <span
           className="grid h-16 w-16 shrink-0 place-items-center overflow-hidden rounded-2xl bg-white/[0.06] p-2 ring-1 ring-white/15 md:h-20 md:w-20"
           style={{ boxShadow: `0 0 32px -8px oklch(${accent} / 0.6)` }}
@@ -53,7 +43,7 @@ export function LeagueHubHero({
               {league.kind === "tournament" ? "Tournament" : "Season league"}
             </span>
             <span className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
-              {matchCount} {matchCount === 1 ? "market" : "markets"}
+              {matchCount} {matchCount === 1 ? "event" : "events"}
             </span>
           </div>
           <h1 className="mt-2 font-display text-3xl font-semibold leading-tight text-foreground md:text-4xl">
