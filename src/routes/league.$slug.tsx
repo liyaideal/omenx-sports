@@ -10,9 +10,18 @@ import { HubTabs, type HubTab, type HubView } from "@/components/sports/league/H
 import {
   getLeagueBySlug,
   getMatchMarketsByLeagueSlug,
+  getSeasonGroupByLeagueSlug,
+  getSpotlightsByLeagueSlug,
+  getBinaryQuestionsByLeagueSlug,
   LEAGUES,
   type LeagueHub,
 } from "@/data/leagues";
+import {
+  getGroupsByLeagueSlug,
+  getBracketByLeagueSlug,
+} from "@/data/tournament";
+import { PropsGrid } from "@/components/sports/league/PropsGrid";
+import { BracketView } from "@/components/sports/league/BracketView";
 import { ACCOUNT_STATS, type SportsMarket } from "@/data/sports-markets";
 
 const USER_NAME = "Jeremy";
@@ -96,12 +105,33 @@ function LeagueHubPage() {
   );
   const liveStream = useMemo(() => matches.filter((m) => m.isLiveStream), [matches]);
   const grid = useMemo(() => matches.filter((m) => !m.isLiveStream), [matches]);
+  const seasonGroup = useMemo(
+    () => getSeasonGroupByLeagueSlug(league.slug),
+    [league.slug],
+  );
+  const groups = useMemo(() => getGroupsByLeagueSlug(league.slug), [league.slug]);
+  const spotlights = useMemo(
+    () => getSpotlightsByLeagueSlug(league.slug),
+    [league.slug],
+  );
+  const binaryQuestions = useMemo(
+    () => getBinaryQuestionsByLeagueSlug(league.slug),
+    [league.slug],
+  );
+  const bracket = useMemo(() => getBracketByLeagueSlug(league.slug), [league.slug]);
+
+  const propsCount =
+    groups.length +
+    (seasonGroup?.winner ? 1 : 0) +
+    (seasonGroup?.topScorer ? 1 : 0) +
+    spotlights.length +
+    binaryQuestions.length;
 
   const tabs: HubTab[] = [
     { view: "games", label: "Games", count: matches.length },
-    { view: "props", label: "Props" },
+    { view: "props", label: "Props", count: propsCount || undefined },
     ...(league.kind === "tournament"
-      ? [{ view: "bracket" as const, label: "Bracket" }]
+      ? [{ view: "bracket" as const, label: "Bracket", count: bracket.length || undefined }]
       : []),
   ];
 
@@ -112,11 +142,35 @@ function LeagueHubPage() {
       </div>
 
       <MobileChrome>
-        <HubContent league={league} view={view} matches={matches} liveStream={liveStream} grid={grid} tabs={tabs} />
+        <HubContent
+          league={league}
+          view={view}
+          matches={matches}
+          liveStream={liveStream}
+          grid={grid}
+          tabs={tabs}
+          groups={groups}
+          seasonGroup={seasonGroup}
+          spotlights={spotlights}
+          binaryQuestions={binaryQuestions}
+          bracket={bracket}
+        />
       </MobileChrome>
 
       <div className="hidden flex-col gap-5 px-6 pb-10 pt-8 md:flex md:px-8 md:pt-10">
-        <HubContent league={league} view={view} matches={matches} liveStream={liveStream} grid={grid} tabs={tabs} />
+        <HubContent
+          league={league}
+          view={view}
+          matches={matches}
+          liveStream={liveStream}
+          grid={grid}
+          tabs={tabs}
+          groups={groups}
+          seasonGroup={seasonGroup}
+          spotlights={spotlights}
+          binaryQuestions={binaryQuestions}
+          bracket={bracket}
+        />
       </div>
     </AppShell>
   );
@@ -129,6 +183,11 @@ function HubContent({
   liveStream,
   grid,
   tabs,
+  groups,
+  seasonGroup,
+  spotlights,
+  binaryQuestions,
+  bracket,
 }: {
   league: LeagueHub;
   view: HubView;
@@ -136,6 +195,11 @@ function HubContent({
   liveStream: SportsMarket[];
   grid: SportsMarket[];
   tabs: HubTab[];
+  groups: ReturnType<typeof getGroupsByLeagueSlug>;
+  seasonGroup: ReturnType<typeof getSeasonGroupByLeagueSlug>;
+  spotlights: ReturnType<typeof getSpotlightsByLeagueSlug>;
+  binaryQuestions: SportsMarket[];
+  bracket: ReturnType<typeof getBracketByLeagueSlug>;
 }) {
   return (
     <div className="space-y-5">
@@ -166,17 +230,19 @@ function HubContent({
       )}
 
       {view === "props" && (
-        <ComingSoon
-          title="Props coming next"
-          body="Player props, group winners, season futures and binary questions will live here. Shipping in the next iteration."
+        <PropsGrid
+          league={league}
+          groups={groups}
+          winner={seasonGroup?.winner}
+          topScorer={seasonGroup?.topScorer}
+          scorerPhotos={seasonGroup?.photos}
+          spotlights={spotlights}
+          binaryQuestions={binaryQuestions}
         />
       )}
 
       {view === "bracket" && (
-        <ComingSoon
-          title="Bracket coming soon"
-          body="The knockout tree from Round of 32 to the final — interactive odds at every round. Shipping in P2."
-        />
+        <BracketView rounds={bracket} />
       )}
     </div>
   );
@@ -186,15 +252,6 @@ function EmptyState({ children }: { children: React.ReactNode }) {
   return (
     <div className="rounded-2xl border border-dashed border-border bg-surface/40 px-5 py-10 text-center text-sm text-muted-foreground">
       {children}
-    </div>
-  );
-}
-
-function ComingSoon({ title, body }: { title: string; body: string }) {
-  return (
-    <div className="rounded-2xl border border-dashed border-border bg-surface/40 px-6 py-10 text-center">
-      <div className="font-display text-lg font-semibold text-foreground">{title}</div>
-      <p className="mx-auto mt-2 max-w-md text-sm text-muted-foreground">{body}</p>
     </div>
   );
 }
