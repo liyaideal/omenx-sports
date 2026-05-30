@@ -1,6 +1,5 @@
 import { Clock, Users } from "lucide-react";
 import type { SportsMarket } from "@/data/sports-markets";
-import { LeagueChip } from "@/components/sports/LeagueBadge";
 import { useTradeDrawer } from "@/components/sports/trade/TradeDrawerProvider";
 
 /**
@@ -21,59 +20,83 @@ export function BinaryQuestionCard({ market }: { market: SportsMarket }) {
 
   return (
     <section className="flex h-full flex-col rounded-2xl border border-border bg-surface p-4 shadow-card">
-      <header className="flex items-center gap-2 pb-3">
-        <LeagueChip short={market.league.short} />
+      <header className="flex items-center justify-between pb-3">
+        <div className="flex min-w-0 items-center gap-3">
+          <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-white/[0.05] font-display text-lg font-bold text-foreground ring-1 ring-white/10">
+            ?
+          </span>
+          <div className="min-w-0">
+            <div className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+              {market.league.short} · Yes / No
+            </div>
+            <h3 className="truncate font-display text-sm font-semibold text-foreground">
+              {market.title}
+            </h3>
+          </div>
+        </div>
       </header>
 
-      <h3 className="font-display text-sm font-semibold leading-snug text-foreground">
-        {market.title}
-      </h3>
-
-      {/* gauge */}
-      <div className="mt-4">
-        <div className="flex items-baseline justify-between font-mono text-[11px] uppercase tracking-widest">
-          <span className="text-[oklch(0.78_0.18_155)]">{yes.label} {yesPct}¢</span>
-          <span className="text-[oklch(0.7_0.22_25)]">{no.label} {noPct}¢</span>
+      {/* gauge — slim, matches the rhythm of group standings */}
+      <div className="pt-1 pb-3">
+        <div className="mb-1 flex items-baseline justify-between font-mono text-[10px] uppercase tracking-widest">
+          <span className="text-[oklch(0.85_0.16_155)]">{yes.label} {yesPct}%</span>
+          <span className="text-[oklch(0.82_0.16_25)]">{no.label} {noPct}%</span>
         </div>
-        <div className="mt-1.5 h-2 overflow-hidden rounded-full bg-white/[0.04] ring-1 ring-white/[0.06]">
+        <div className="h-1.5 overflow-hidden rounded-full bg-[oklch(0.7_0.22_25_/_0.18)] ring-1 ring-white/[0.04]">
           <div
             className="h-full"
             style={{
               width: `${yesPct}%`,
               background:
                 "linear-gradient(90deg, oklch(0.78 0.18 155 / 0.95), oklch(0.78 0.18 155 / 0.7))",
-              boxShadow: "0 0 14px -2px oklch(0.78 0.18 155 / 0.6)",
+              boxShadow: "0 0 12px -2px oklch(0.78 0.18 155 / 0.55)",
             }}
           />
         </div>
       </div>
 
-      {/* buy buttons */}
-      <div className="mt-3 grid flex-1 grid-cols-2 items-end gap-2">
-        <button
-          type="button"
-          onClick={() => openTrade({ marketId: market.id, outcomeId: yes.id })}
-          className="inline-flex items-center justify-between gap-2 rounded-xl bg-[oklch(0.78_0.18_155_/_0.12)] px-3 py-2 ring-1 ring-[oklch(0.78_0.18_155_/_0.3)] transition hover:bg-[oklch(0.78_0.18_155_/_0.2)]"
-        >
-          <span className="font-mono text-[10px] uppercase tracking-widest text-[oklch(0.85_0.16_155)]">
-            Buy {yes.label}
-          </span>
-          <span className="font-display text-sm font-semibold text-foreground tabular-nums">
-            {yesPct}¢
-          </span>
-        </button>
-        <button
-          type="button"
-          onClick={() => openTrade({ marketId: market.id, outcomeId: no.id })}
-          className="inline-flex items-center justify-between gap-2 rounded-xl bg-[oklch(0.7_0.22_25_/_0.12)] px-3 py-2 ring-1 ring-[oklch(0.7_0.22_25_/_0.3)] transition hover:bg-[oklch(0.7_0.22_25_/_0.2)]"
-        >
-          <span className="font-mono text-[10px] uppercase tracking-widest text-[oklch(0.82_0.16_25)]">
-            Buy {no.label}
-          </span>
-          <span className="font-display text-sm font-semibold text-foreground tabular-nums">
-            {noPct}¢
-          </span>
-        </button>
+      {/* YES / NO action rows — mirror GroupWinnerCard row styling */}
+      <div className="flex flex-1 flex-col divide-y divide-white/[0.04]">
+        {[
+          { o: yes, pct: yesPct, kind: "y" as const },
+          { o: no, pct: noPct, kind: "n" as const },
+        ].map(({ o, pct, kind }) => {
+          const isYes = kind === "y";
+          return (
+            <div
+              key={o.id}
+              className="grid grid-cols-[1fr_auto] items-center gap-2.5 py-2.5"
+            >
+              <div className="flex min-w-0 items-center gap-2.5">
+                <span
+                  className={`grid h-6 w-6 shrink-0 place-items-center rounded-full font-mono text-[10px] font-bold ${
+                    isYes
+                      ? "bg-[oklch(0.78_0.18_155_/_0.18)] text-[oklch(0.85_0.16_155)]"
+                      : "bg-[oklch(0.7_0.22_25_/_0.18)] text-[oklch(0.82_0.16_25)]"
+                  }`}
+                >
+                  {isYes ? "Y" : "N"}
+                </span>
+                <span className="truncate text-sm font-medium text-foreground">
+                  {o.label}
+                </span>
+              </div>
+              <button
+                type="button"
+                onClick={() => openTrade({ marketId: market.id, outcomeId: o.id })}
+                className={`inline-flex items-center gap-1 rounded-md px-2.5 py-1 font-mono text-[11px] font-semibold tabular-nums ring-1 transition ${
+                  isYes
+                    ? "bg-[oklch(0.78_0.18_155_/_0.12)] text-[oklch(0.85_0.16_155)] ring-[oklch(0.78_0.18_155_/_0.3)] hover:bg-[oklch(0.78_0.18_155_/_0.22)]"
+                    : "bg-[oklch(0.7_0.22_25_/_0.12)] text-[oklch(0.82_0.16_25)] ring-[oklch(0.7_0.22_25_/_0.3)] hover:bg-[oklch(0.7_0.22_25_/_0.22)]"
+                }`}
+                aria-label={`Buy ${o.label}`}
+              >
+                <span>Buy</span>
+                <span>{pct}¢</span>
+              </button>
+            </div>
+          );
+        })}
       </div>
 
       <footer className="mt-auto flex items-center justify-between border-t border-border pt-3 font-mono text-[11px] text-muted-foreground">
