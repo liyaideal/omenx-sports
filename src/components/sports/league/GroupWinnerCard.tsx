@@ -1,6 +1,6 @@
-import { Link } from "@tanstack/react-router";
-import { PricePill } from "@/components/sports/dashboard/PricePill";
 import type { GroupMarket } from "@/data/tournament";
+import { outcomeMarketIdFor } from "@/data/tournament";
+import { useTradeDrawer } from "@/components/sports/trade/TradeDrawerProvider";
 
 /**
  * Compact card for a tournament group's "winner" market. Header shows
@@ -10,6 +10,7 @@ import type { GroupMarket } from "@/data/tournament";
  */
 export function GroupWinnerCard({ market }: { market: GroupMarket }) {
   const sorted = [...market.standings].sort((a, b) => b.price - a.price);
+  const { openTrade } = useTradeDrawer();
   return (
     <section className="flex h-full flex-col rounded-2xl border border-border bg-surface p-4 shadow-card">
       <header className="flex items-center justify-between pb-3">
@@ -34,12 +35,13 @@ export function GroupWinnerCard({ market }: { market: GroupMarket }) {
       <div className="flex flex-1 flex-col divide-y divide-white/[0.04]">
         {sorted.map((row, i) => {
           const hue = row.team.hue ?? 220;
+          const marketId = row.marketId ?? outcomeMarketIdFor(market.id, row.team.short);
+          const yesPct = Math.round(row.price * 100);
+          const noPct = 100 - yesPct;
           return (
-            <Link
+            <div
               key={`${market.id}-${i}`}
-              to="/event/$id"
-              params={{ id: market.id }}
-              className="grid grid-cols-[20px_1fr_auto] items-center gap-3 py-2 transition hover:bg-white/[0.02]"
+              className="grid grid-cols-[18px_1fr_auto] items-center gap-2.5 py-2.5"
             >
               <span className="font-mono text-[11px] tabular-nums text-muted-foreground">
                 {i + 1}
@@ -57,8 +59,27 @@ export function GroupWinnerCard({ market }: { market: GroupMarket }) {
                   {row.team.name}
                 </span>
               </div>
-              <PricePill price={row.price} delta={row.delta24h} size="sm" />
-            </Link>
+              <div className="flex items-center gap-1.5">
+                <button
+                  type="button"
+                  onClick={() => openTrade({ marketId, outcomeId: "y" })}
+                  className="inline-flex items-center gap-1 rounded-md bg-[oklch(0.78_0.18_155_/_0.12)] px-2 py-1 font-mono text-[11px] font-semibold tabular-nums text-[oklch(0.85_0.16_155)] ring-1 ring-[oklch(0.78_0.18_155_/_0.3)] transition hover:bg-[oklch(0.78_0.18_155_/_0.22)]"
+                  aria-label={`Buy YES on ${row.team.name}`}
+                >
+                  <span className="opacity-70">Y</span>
+                  <span>{yesPct}¢</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => openTrade({ marketId, outcomeId: "n" })}
+                  className="inline-flex items-center gap-1 rounded-md bg-[oklch(0.7_0.22_25_/_0.12)] px-2 py-1 font-mono text-[11px] font-semibold tabular-nums text-[oklch(0.82_0.16_25)] ring-1 ring-[oklch(0.7_0.22_25_/_0.3)] transition hover:bg-[oklch(0.7_0.22_25_/_0.22)]"
+                  aria-label={`Buy NO on ${row.team.name}`}
+                >
+                  <span className="opacity-70">N</span>
+                  <span>{noPct}¢</span>
+                </button>
+              </div>
+            </div>
           );
         })}
       </div>
