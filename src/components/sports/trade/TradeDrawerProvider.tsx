@@ -54,7 +54,7 @@ export function TradeDrawerProvider({ children }: { children: React.ReactNode })
     [open, selection, openTrade, closeTrade, setOutcome],
   );
 
-  const market = selection ? getMarketById(selection.marketId) : null;
+  const market = selection ? getMarketById(selection.marketId) ?? null : null;
 
   return (
     <Ctx.Provider value={value}>
