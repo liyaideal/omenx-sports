@@ -3,9 +3,9 @@ import type { LeagueHub } from "@/data/leagues";
 import type { GroupMarket } from "@/data/tournament";
 import { LeagueWinnerMarketCard } from "@/components/sports/dashboard/LeagueWinnerMarketCard";
 import { TopScorerMarketCard } from "@/components/sports/dashboard/TopScorerMarketCard";
-import { PlayerPropsSpotlight } from "@/components/sports/dashboard/PlayerPropsSpotlight";
 import { GroupWinnerCard } from "./GroupWinnerCard";
 import { BinaryQuestionCard } from "./BinaryQuestionCard";
+import { SpotlightPropsCardHorizontal } from "./SpotlightPropsCardHorizontal";
 import type { PlayerSpotlight } from "@/data/sports-markets";
 
 /**
@@ -51,14 +51,30 @@ export function PropsGrid({
 
   return (
     <div className="space-y-6">
-      {groups.length > 0 && (
+      {spotlights.length > 0 && (
         <PropsSection
-          title="Group winners"
-          subtitle="Pick the team that finishes top of each group"
+          title="Featured props"
+          subtitle="Hand-picked player & team prop bundles"
+        >
+          <div className="grid gap-3 md:grid-cols-1 xl:grid-cols-2">
+            {spotlights.map((s) => (
+              <SpotlightPropsCardHorizontal key={s.handle} player={s} />
+            ))}
+          </div>
+        </PropsSection>
+      )}
+
+      {(groups.length > 0 || binaryQuestions.length > 0) && (
+        <PropsSection
+          title="Markets"
+          subtitle="Group winners and standalone questions"
         >
           <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
             {groups.map((g) => (
               <GroupWinnerCard key={g.id} market={g} />
+            ))}
+            {binaryQuestions.map((m) => (
+              <BinaryQuestionCard key={m.id} market={m} />
             ))}
           </div>
         </PropsSection>
@@ -69,26 +85,6 @@ export function PropsGrid({
           <div className="grid gap-3 md:grid-cols-2">
             {winner && <LeagueWinnerMarketCard market={winner} />}
             {topScorer && <TopScorerMarketCard market={topScorer} photos={scorerPhotos} />}
-          </div>
-        </PropsSection>
-      )}
-
-      {spotlights.length > 0 && (
-        <PropsSection title="Player spotlights" subtitle="Bundled prop markets per player">
-          <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
-            {spotlights.map((s) => (
-              <PlayerPropsSpotlight key={s.handle} players={[s]} />
-            ))}
-          </div>
-        </PropsSection>
-      )}
-
-      {binaryQuestions.length > 0 && (
-        <PropsSection title="Binary questions" subtitle="Single YES/NO markets">
-          <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
-            {binaryQuestions.map((m) => (
-              <BinaryQuestionCard key={m.id} market={m} />
-            ))}
           </div>
         </PropsSection>
       )}
