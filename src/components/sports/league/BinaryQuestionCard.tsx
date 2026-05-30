@@ -91,7 +91,6 @@ export function BinaryQuestionCard({ market }: { market: SportsMarket }) {
                 }`}
                 aria-label={`Buy ${o.label}`}
               >
-                <span>Buy</span>
                 <span>{pct}¢</span>
               </button>
             </div>
