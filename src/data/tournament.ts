@@ -5,7 +5,6 @@
  * mock); season leagues skip these.
  */
 import { TEAMS, type TeamLite } from "@/data/sports-mock";
-import type { SportsMarket } from "@/data/sports-markets";
 
 export interface GroupTeamStanding {
   team: TeamLite | { name: string; short: string; logo?: string; hue?: number };
