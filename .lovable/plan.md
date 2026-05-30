@@ -1,52 +1,61 @@
-## 目标
+## 问题诊断
 
-调整 `/league/$slug?view=props` 页面：
-1. 取消 "Group winners" 和 "Binary questions" 的分区，统一成一个 "Markets" 网格 — 用户不需要看到多选/二元的区别。
-2. Spotlights 模块从竖版人物卡改成横版卡片，仍作为"重点 props 推荐"在 Props 顶部展示。
-3. Season futures（赛季冠军 / 最佳射手）仍保留独立分区。
+截图里的 `SpotlightPropsCardHorizontal`（Featured props 区段第三张卡）信息有大量重复：
+
+- `@WC26_GROUP_F` — 来自 `PlayerSpotlight.handle`，在球员卡（Mbappé）有意义，套到 group 上就是噪音。
+- `World Cup 2026 · Group stage` — 来自 `position` 字段，但当前页就是 WC 2026 专题页。
+- 每个 row 重复 `Vol $X · Group stage` — `Group stage` 在 3 行里出现 3 次；卡片标题已经是 "Group F Winner"，rows 又是 "France **to win Group F**"、"Germany **to win Group F**"、"Japan **to win Group F**"，"to win Group F" 也是 3 次重复。
+- 整体没有"featured / 营销"的视觉钩子 — 只是个普通的列表卡。
 
 ---
 
-## 改动清单
+## 改动方案
 
-### 1. `src/components/sports/league/PropsGrid.tsx`
-- 删除原 "Group winners" 和 "Binary questions" 两个 section。
-- 新增一个统一 section `"Markets"`：把 `GroupWinnerCard`（多选）和 `BinaryQuestionCard`（二元）渲染到同一个 grid（`md:grid-cols-2 xl:grid-cols-3`）。顺序：先 groups，后 binary。
-- Spotlights 区段保留，标题改为 "Featured props"，位置放到 Markets **上面**（作为重点推荐）。
-- Season futures 保持原位置（Markets 之后）。
+### 1. `SpotlightPropsCardHorizontal.tsx` — 去噪 + 加营销感
 
-### 2. 新建 `src/components/sports/league/SpotlightPropsCardHorizontal.tsx`
-横版卡片，替换 PropsGrid 里的 `PlayerPropsSpotlight` 用法（PlayerPropsSpotlight 原组件用于首页 carousel，保留不动）。
+**Header 简化**：
+- 删掉 `@handle` 那一行。
+- 删掉 `position` 副标题。
+- 标题左侧加一个发光的 **"Featured" 徽章**（Sparkles 图标 + 高亮渐变背景），右上角的 `N markets` 改成更醒目的小 chip。
+- 标题下面加一行 **tagline**（新字段 `tagline?: string`，例如 "Pick who tops Group F before the final whistle."），如果没有则不渲染。
 
-布局（约 height 180–200px）：
-```
-┌───────────────────────────────────────────────────────────┐
-│ [Portrait 140×]   @handle · POS              Vol · ends   │
-│  (neon ring,      Firstname Lastname                       │
-│   half size)      ─────────────────────────────────────    │
-│                   • Anytime scorer        Y 62¢  N 38¢    │
-│                   • 2+ goals              Y 24¢  N 76¢    │
-│                   • Shots o2.5            Y 51¢  N 49¢    │
-└───────────────────────────────────────────────────────────┘
-```
-- 左列固定宽度（~140px）放头像 + neon ring（缩小版，复用 PlayerPropsSpotlight 的渐变蒙版思路但更紧凑）。
-- 右列：顶部 handle/名字/POS，下面纵向列出 prop 行；每行 title + 两个小 Y/N 按钮，复用 `useTradeDrawer` 打开交易抽屉。
-- 显示前 3 条 props，多余的折叠为 "+N more"。
+**Portrait 列加营销感**：
+- 头像区右侧加一条从左到右淡出的彩色渐变蒙版，让头像和内容自然过渡（不再是硬切左右两栏）。
+- 头像下方叠一个小角标，例如 "🔥 Hot" 或 "+24h Vol $268K"（来自 `player.props` 聚合 volume24h），让用户感到这是被推荐的热门 bundle。
 
-### 3. `PropsGrid` 的 Spotlights grid
-- 从 `md:grid-cols-2 xl:grid-cols-3`（竖版）改为 `md:grid-cols-1 xl:grid-cols-2`（横版更宽）。
-- 标题文案改为 "Featured props · 重点关注"。
+**Rows 简化**：
+- 删除每行的 `endsLabel`（卡片只有一个截止时间，统一展示到 footer）。
+- meta 行只留 `Vol $X · ↗ +Δ% 24h`（用 outcome[0].delta24h 算 24h 涨跌指示），更像交易卡片。
+
+**新增 Footer**：
+- 增加一个 footer：`Clock + 单一 endsLabel`（取 `player.props[0].endsLabel`） + 右侧 `Users + 聚合 traders + Vol 聚合`。
+- 这样和 GroupWinnerCard / BinaryQuestionCard 的 footer 风格一致。
+
+### 2. `sports-markets.ts` — 清理 GROUP_F_SPOTLIGHT 数据
+
+- 新增可选字段 `tagline?: string` 到 `PlayerSpotlight` 接口。
+- `GROUP_F_SPOTLIGHT`：
+  - `position` 改成简短的 `"Group F · 16 nations"`（不再重复 World Cup 2026）。
+  - 新增 `tagline: "Pick who tops Group F before the knockouts."`。
+  - 三条 prop 的 `title` 简化为 `"France"`、`"Germany"`、`"Japan"`（去掉 "to win Group F"）。
+  - `endsLabel` 由 `"Group stage"` 改成 `"Settles Jun 27, 2026"`（和 group 卡片对齐）。
+- 同样地，`MBAPPE_SPOTLIGHT` 和 `CHELSEA_SPOTLIGHT`：把 `position` 留作球员位置（本来就是球员信息，合理），可选添加 tagline 营销文案。
+
+### 3. `/style-guide` 同步
+
+`SpotlightPropsCardHorizontal` 已经有 demo 区段，更新数据驱动展示自动反映；无需额外结构改动。
 
 ---
 
 ## 不改动
-- `PlayerPropsSpotlight`（首页 dashboard 用的竖版 carousel）保留。
-- `GroupWinnerCard` 和 `BinaryQuestionCard` 内部样式不动，仅改 PropsGrid 里的分组。
-- 数据层（`tournament.ts` / `sports-markets.ts`）不动。
-- `/style-guide` 同步加一个 `SpotlightPropsCardHorizontal` 的 demo（按项目核心 memory 要求）。
+
+- `PlayerPropsSpotlight`（首页竖版 carousel）保留，position/handle 在球员场景下仍合适。
+- GroupWinnerCard / BinaryQuestionCard 不动。
+- 数据层只动 3 个 SPOTLIGHT 常量 + 1 个 interface 字段。
 
 ---
 
 ## 风险
-- 把 groups（4–6 个）和 binary（若干）放到同一 grid，密度增加；MAX_VISIBLE=3 的折叠机制已经能压住卡片高度，xl 三列下排版正常。
-- 横版卡在窄屏（< md）会变成单列竖排，内部仍是左右布局 — 需要在 < sm 时把左列头像缩到 96px 避免挤压；会在组件里加 responsive class。
+
+- `tagline` 是新字段；老的 spotlight 没填会回退为不渲染该行，header 自动收紧。
+- 移除 `@handle` 和 `position` 是这张卡的视觉变化；如果未来想保留它们，可以做成 `variant: "player" | "promo"`，但目前 3 张 spotlight 都更适合 "promo" 形态 — 这次先统一成 promo 风格。

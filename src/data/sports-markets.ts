@@ -549,6 +549,9 @@ export interface PlayerSpotlight {
   /** How to render the portrait image. "cover" for player photos,
    *  "contain" for crests / trophies. Defaults to "cover". */
   imageFit?: "cover" | "contain";
+  /** Optional marketing tagline rendered under the title in
+   *  the horizontal "Featured props" card. */
+  tagline?: string;
 }
 
 const MBAPPE_SPOTLIGHT: PlayerSpotlight = {
@@ -557,6 +560,7 @@ const MBAPPE_SPOTLIGHT: PlayerSpotlight = {
   lastName: "Mbappé",
   position: "Forward · Real Madrid",
   club: TEAMS.realMadrid,
+  tagline: "Stack his shooting props before kickoff.",
   photo:
     mbappePhoto,
   props: [
@@ -617,6 +621,7 @@ const CHELSEA_SPOTLIGHT: PlayerSpotlight = {
   lastName: "Treble Watch",
   position: "Premier League · Club futures",
   club: TEAMS.chelsea,
+  tagline: "Three season-long futures, one bundle.",
   photo: TEAMS.chelsea.logo,
   imageFit: "contain",
   props: [
@@ -675,7 +680,8 @@ const GROUP_F_SPOTLIGHT: PlayerSpotlight = {
   handle: "WC26_GROUP_F",
   firstName: "Group F",
   lastName: "Winner",
-  position: "World Cup 2026 · Group stage",
+  position: "Group F · 4 nations",
+  tagline: "Pick who tops Group F before the knockouts.",
   club: TEAMS.psg,
   photo:
     "https://images.unsplash.com/photo-1606925797300-0b35e9d1794e?w=480&h=560&fit=crop&q=80",
@@ -685,9 +691,9 @@ const GROUP_F_SPOTLIGHT: PlayerSpotlight = {
       id: "wc26-grpf-fra",
       kind: "league-winner",
       shape: "binary",
-      title: "France to win Group F",
+      title: "France",
       league: { name: "World Cup 2026", short: "WC" },
-      endsLabel: "Group stage",
+      endsLabel: "Settles Jun 27, 2026",
       volume: "$1.10M",
       volume24h: "$140K",
       participants: 3120,
@@ -701,9 +707,9 @@ const GROUP_F_SPOTLIGHT: PlayerSpotlight = {
       id: "wc26-grpf-ger",
       kind: "league-winner",
       shape: "binary",
-      title: "Germany to win Group F",
+      title: "Germany",
       league: { name: "World Cup 2026", short: "WC" },
-      endsLabel: "Group stage",
+      endsLabel: "Settles Jun 27, 2026",
       volume: "$680K",
       volume24h: "$92K",
       participants: 2010,
@@ -717,9 +723,9 @@ const GROUP_F_SPOTLIGHT: PlayerSpotlight = {
       id: "wc26-grpf-jpn",
       kind: "league-winner",
       shape: "binary",
-      title: "Japan to win Group F",
+      title: "Japan",
       league: { name: "World Cup 2026", short: "WC" },
-      endsLabel: "Group stage",
+      endsLabel: "Settles Jun 27, 2026",
       volume: "$240K",
       volume24h: "$36K",
       participants: 860,
