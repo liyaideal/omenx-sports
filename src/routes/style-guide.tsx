@@ -95,6 +95,8 @@ const SECTIONS = [
   ["events-grid", "Events Grid"],
   ["mobile-shell", "Mobile Shell"],
   ["league-hub", "League Hub"],
+  ["hub-props", "Hub · Props"],
+  ["hub-bracket", "Hub · Bracket"],
 ] as const;
 
 function Section({ id, title, kicker, children }: { id: string; title: string; kicker?: string; children: React.ReactNode }) {
