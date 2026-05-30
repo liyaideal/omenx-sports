@@ -47,6 +47,8 @@ import { GroupWinnerCard } from "@/components/sports/league/GroupWinnerCard";
 import { BinaryQuestionCard } from "@/components/sports/league/BinaryQuestionCard";
 import { BracketView } from "@/components/sports/league/BracketView";
 import { PropsGrid } from "@/components/sports/league/PropsGrid";
+import { useTradeDrawer } from "@/components/sports/trade/TradeDrawerProvider";
+import { FEATURED_MATCH, MATCH_MARKETS } from "@/data/sports-markets";
 import {
   WC26_GROUPS,
   WC26_BRACKET,
@@ -97,6 +99,7 @@ const SECTIONS = [
   ["league-hub", "League Hub"],
   ["hub-props", "Hub · Props"],
   ["hub-bracket", "Hub · Bracket"],
+  ["trade-drawer", "Sticky Trade Drawer"],
 ] as const;
 
 function Section({ id, title, kicker, children }: { id: string; title: string; kicker?: string; children: React.ReactNode }) {
