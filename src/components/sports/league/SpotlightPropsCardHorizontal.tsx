@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ChevronDown, Clock, Users, Flame } from "lucide-react";
+import { ChevronDown, Clock, Users } from "lucide-react";
 import type { PlayerSpotlight } from "@/data/sports-markets";
 import { useTradeDrawer } from "@/components/sports/trade/TradeDrawerProvider";
 
@@ -12,8 +12,6 @@ import { useTradeDrawer } from "@/components/sports/trade/TradeDrawerProvider";
  * The vertical {@link PlayerPropsSpotlight} carousel variant is kept
  * intact for the homepage dashboard.
  */
-const HOT_PARTICIPANT_THRESHOLD = 2000;
-
 function parseDollars(v: string): number {
   // accepts "$1.10M" / "$680K" / "$420" → number
   const m = v.replace(/[$,]/g, "").trim().match(/^([\d.]+)\s*([KMB]?)$/i);
