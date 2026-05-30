@@ -66,7 +66,7 @@ export function PropsGrid({
 
       {(groups.length > 0 || binaryQuestions.length > 0) && (
         <PropsSection
-          title="More markets"
+          title="More events"
           subtitle="Group stages, milestones, and standout questions"
         >
           <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
