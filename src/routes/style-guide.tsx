@@ -1411,3 +1411,34 @@ function StyleGuide() {
     </div>
   );
 }
+
+function TradeDrawerDemo() {
+  const { openTrade } = useTradeDrawer();
+  const threeWay = MATCH_MARKETS.find((m) => m.shape === "three-way") ?? FEATURED_MATCH;
+  const binary = MATCH_MARKETS.find((m) => m.shape === "binary");
+  return (
+    <div className="rounded-2xl border border-border bg-surface p-5 shadow-card">
+      <div className="mb-3 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+        Trigger from anywhere
+      </div>
+      <div className="flex flex-wrap gap-2">
+        <button
+          type="button"
+          onClick={() => openTrade({ marketId: threeWay.id })}
+          className="rounded-xl bg-foreground px-4 py-2 font-mono text-[11px] uppercase tracking-widest text-background transition hover:opacity-90"
+        >
+          Open 1X2 · {threeWay.title}
+        </button>
+        {binary && (
+          <button
+            type="button"
+            onClick={() => openTrade({ marketId: binary.id, outcomeId: binary.outcomes[1]?.id })}
+            className="rounded-xl bg-white/[0.06] px-4 py-2 font-mono text-[11px] uppercase tracking-widest text-foreground ring-1 ring-white/10 transition hover:bg-white/[0.1]"
+          >
+            Open binary · pre-pick 2nd outcome
+          </button>
+        )}
+      </div>
+    </div>
+  );
+}
