@@ -39,6 +39,10 @@ import { MobileBottomNav } from "@/components/sports/mobile/MobileBottomNav";
 import { MobileLiveHero } from "@/components/sports/mobile/MobileLiveHero";
 import { MeSheet } from "@/components/sports/mobile/MeSheet";
 import { ACCOUNT_STATS } from "@/data/sports-markets";
+import { LEAGUES, getMatchMarketsByLeagueSlug } from "@/data/leagues";
+import { LeagueEntryCard } from "@/components/sports/league/LeagueEntryCard";
+import { LeagueHubHero } from "@/components/sports/league/LeagueHubHero";
+import { HubTabs } from "@/components/sports/league/HubTabs";
 import { PriceChart } from "@/components/sports/PriceChart";
 import { OrderBook } from "@/components/sports/OrderBook";
 import { TradeForm } from "@/components/sports/TradeForm";
@@ -75,6 +79,7 @@ const SECTIONS = [
   ["fans", "Personalized Zone"],
   ["events-grid", "Events Grid"],
   ["mobile-shell", "Mobile Shell"],
+  ["league-hub", "League Hub"],
 ] as const;
 
 function Section({ id, title, kicker, children }: { id: string; title: string; kicker?: string; children: React.ReactNode }) {
@@ -1119,8 +1124,8 @@ function StyleGuide() {
               to <code className="font-mono text-foreground">/events</code> on mobile viewports;
               account data lives only in <code className="font-mono text-foreground">MeSheet</code> to
               avoid duplication. Three tabs, zero content overlap:
-              <b className="text-foreground"> Events</b> (default) = live hero + day strip + season
-              futures + spotlight;
+              <b className="text-foreground"> Events</b> (default) = live hero + day strip + upcoming
+              grid + "Explore tournaments" hub entries;
               <b className="text-foreground"> Fans</b> = social feed (follow, trades, posts);
               <b className="text-foreground"> Me</b> = bottom sheet with account + OmenX shortcuts.
             </p>
@@ -1167,6 +1172,93 @@ function StyleGuide() {
                   </ul>
                 </div>
                 <MeSheetPreviewLauncher />
+              </div>
+            </div>
+          </Section>
+
+          <Section id="league-hub" title="League Hub" kicker="19 — /league/$slug">
+            <p className="mb-6 max-w-3xl text-sm text-muted-foreground">
+              Each league has its own hub at <code className="font-mono text-foreground">/league/$slug</code>
+              with sub-tabs driven by the <code className="font-mono text-foreground">?view=</code> search param:
+              <b className="text-foreground"> Games</b> (1X2 cards),
+              <b className="text-foreground"> Props</b> (futures, group winners, player props — P1),
+              <b className="text-foreground"> Bracket</b> (knockout tree, tournament-kind leagues only — P2).
+              <code className="font-mono text-foreground">/events</code> is the cross-league time-based lobby;
+              hub is the single-tournament depth view. Zero overlap.
+            </p>
+
+            <div className="space-y-6">
+              <div>
+                <div className="mb-3 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+                  LeagueEntryCard — `/events` row + desktop home grid
+                </div>
+                <div className="grid gap-3 md:grid-cols-2">
+                  {LEAGUES.map((league) => (
+                    <LeagueEntryCard
+                      key={league.slug}
+                      league={league}
+                      matchCount={getMatchMarketsByLeagueSlug(league.slug).length}
+                    />
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                <div className="mb-3 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+                  LeagueHubHero — accent gradient driven by `league.accent` (OKLCH triplet)
+                </div>
+                <LeagueHubHero
+                  league={LEAGUES[0]}
+                  matchCount={getMatchMarketsByLeagueSlug(LEAGUES[0].slug).length}
+                />
+              </div>
+
+              <div>
+                <div className="mb-3 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+                  HubTabs — tournament (Games / Props / Bracket) vs season league (Games / Props)
+                </div>
+                <div className="space-y-3">
+                  <div className="rounded-2xl border border-border bg-surface p-4">
+                    <div className="mb-2 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+                      Tournament
+                    </div>
+                    <HubTabs
+                      slug="world-cup-2026"
+                      current="games"
+                      tabs={[
+                        { view: "games", label: "Games", count: 64 },
+                        { view: "props", label: "Props" },
+                        { view: "bracket", label: "Bracket" },
+                      ]}
+                    />
+                  </div>
+                  <div className="rounded-2xl border border-border bg-surface p-4">
+                    <div className="mb-2 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+                      Season league (no Bracket)
+                    </div>
+                    <HubTabs
+                      slug="epl"
+                      current="props"
+                      tabs={[
+                        { view: "games", label: "Games", count: 5 },
+                        { view: "props", label: "Props" },
+                      ]}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div className="rounded-2xl border border-dashed border-white/15 bg-white/[0.02] p-5 text-xs">
+                <div className="mb-2 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+                  Rules
+                </div>
+                <ul className="space-y-1.5 text-muted-foreground">
+                  <li>• `/events` answers "when can I trade?" — time-based, cross-league lobby. `/league/$slug` answers "what's the whole picture of this tournament?" — single-league depth.</li>
+                  <li>• Sub-tab state lives in `?view=` so URLs are shareable. Default is `games`. Unknown values fall back to `games` via `validateSearch`.</li>
+                  <li>• `Bracket` tab only renders for `league.kind === "tournament"`. Season leagues get Games + Props only.</li>
+                  <li>• Props + Bracket are intentional `ComingSoon` placeholders in P0 — Props ships P1 (futures, group winners, player props, binary gauges), Bracket ships P2.</li>
+                  <li>• Season Futures + Player Spotlight no longer live on `/events` or the desktop home Season block — they are migrating into each hub's Props tab in P1.</li>
+                </ul>
               </div>
             </div>
           </Section>

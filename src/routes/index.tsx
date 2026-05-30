@@ -5,9 +5,7 @@ import { AppShell } from "@/components/sports/dashboard/AppShell";
 import { AppTopBar } from "@/components/sports/dashboard/AppTopBar";
 import { MatchMarketCard } from "@/components/sports/dashboard/MatchMarketCard";
 import { EventMarketTileCard } from "@/components/sports/dashboard/EventMarketTileCard";
-import { LeagueWinnerMarketCard } from "@/components/sports/dashboard/LeagueWinnerMarketCard";
-import { TopScorerMarketCard } from "@/components/sports/dashboard/TopScorerMarketCard";
-import { PlayerPropsSpotlight } from "@/components/sports/dashboard/PlayerPropsSpotlight";
+import { LeagueEntryCard } from "@/components/sports/league/LeagueEntryCard";
 import { FanZoneHeader } from "@/components/sports/dashboard/FanZoneHeader";
 import { FanPostCard } from "@/components/sports/dashboard/FanPostCard";
 import { FansZoneEmpty } from "@/components/sports/dashboard/FansZoneEmpty";
@@ -19,9 +17,8 @@ import {
   ACCOUNT_STATS,
   FEATURED_MATCH,
   MATCH_MARKETS,
-  SEASON_LEAGUE_GROUPS,
-  SPOTLIGHTS,
 } from "@/data/sports-markets";
+import { LEAGUES, getMatchMarketsByLeagueSlug } from "@/data/leagues";
 import {
   FAN_POST,
   FOLLOWED_TEAMS,
@@ -201,22 +198,20 @@ function Index() {
         </section>
 
         {/* BOTTOM — Season markets (futures + player props) */}
+        {/* BOTTOM — League hub entry cards (props/bracket/futures live inside each hub) */}
         <section className="flex flex-col gap-4 lg:col-span-2 lg:col-start-2 lg:row-start-2">
-          <PageSectionHeader title="Season" accent="Events" />
-          <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_320px]">
-            <div className="grid gap-5 xl:grid-cols-2">
-              {SEASON_LEAGUE_GROUPS.flatMap((group) => [
-                <LeagueWinnerMarketCard key={`${group.id}-w`} market={group.winner} />,
-                <TopScorerMarketCard
-                  key={`${group.id}-t`}
-                  market={group.topScorer}
-                  photos={group.photos}
-                />,
-              ])}
-            </div>
-            <div className="lg:sticky lg:top-4 lg:self-start">
-              <PlayerPropsSpotlight players={SPOTLIGHTS} />
-            </div>
+          <PageSectionHeader title="Explore" accent="Tournaments" />
+          <p className="-mt-1 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+            Each league has its own hub — games, props, and (for tournaments) the bracket.
+          </p>
+          <div className="grid gap-3 md:grid-cols-2">
+            {LEAGUES.map((league) => (
+              <LeagueEntryCard
+                key={league.slug}
+                league={league}
+                matchCount={getMatchMarketsByLeagueSlug(league.slug).length}
+              />
+            ))}
           </div>
         </section>
       </div>

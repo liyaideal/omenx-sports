@@ -1,11 +1,10 @@
 import { useEffect, useMemo, useState } from "react";
 import { EventMarketTileCard } from "@/components/sports/dashboard/EventMarketTileCard";
 import { DayStripCalendar } from "@/components/sports/dashboard/DayStripCalendar";
-import { LeagueWinnerMarketCard } from "@/components/sports/dashboard/LeagueWinnerMarketCard";
-import { TopScorerMarketCard } from "@/components/sports/dashboard/TopScorerMarketCard";
 import { MobileLiveHero } from "@/components/sports/mobile/MobileLiveHero";
-import { PlayerPropsSpotlight } from "@/components/sports/dashboard/PlayerPropsSpotlight";
-import { MATCH_MARKETS, SEASON_LEAGUE_GROUPS, SPOTLIGHTS } from "@/data/sports-markets";
+import { LeagueEntryCard } from "@/components/sports/league/LeagueEntryCard";
+import { MATCH_MARKETS } from "@/data/sports-markets";
+import { LEAGUES, getMatchMarketsByLeagueSlug } from "@/data/leagues";
 
 /**
  * Full mobile Events page section. Owns its own day-strip state so the
@@ -56,6 +55,15 @@ export function MobileEventsSection() {
     });
   }, [selectedOffset]);
 
+  const leagueEntries = useMemo(
+    () =>
+      LEAGUES.map((l) => ({
+        league: l,
+        matchCount: getMatchMarketsByLeagueSlug(l.slug).length,
+      })),
+    [],
+  );
+
   return (
     <div className="space-y-6">
       {liveStreamMarkets.length > 0 && (
@@ -97,39 +105,18 @@ export function MobileEventsSection() {
       <section className="space-y-3">
         <header className="flex items-baseline justify-between">
           <h2 className="font-display text-2xl font-semibold leading-9">
-            Season
-            <span className="font-serif-display italic text-neon"> Futures</span>
+            Explore
+            <span className="font-serif-display italic text-neon"> Tournaments</span>
           </h2>
           <span className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
-            Winner · Top scorer
+            Hubs
           </span>
         </header>
-        <div className="space-y-4">
-          {SEASON_LEAGUE_GROUPS.flatMap((group) => [
-            <LeagueWinnerMarketCard
-              key={`${group.id}-w`}
-              market={group.winner}
-            />,
-            <TopScorerMarketCard
-              key={`${group.id}-t`}
-              market={group.topScorer}
-              photos={group.photos}
-            />,
-          ])}
+        <div className="grid grid-cols-1 gap-3">
+          {leagueEntries.map(({ league, matchCount }) => (
+            <LeagueEntryCard key={league.slug} league={league} matchCount={matchCount} />
+          ))}
         </div>
-      </section>
-
-      <section className="space-y-3">
-        <header className="flex items-baseline justify-between">
-          <h2 className="font-display text-2xl font-semibold leading-9">
-            Event
-            <span className="font-serif-display italic text-neon"> Spotlight</span>
-          </h2>
-          <span className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
-            Picks for you
-          </span>
-        </header>
-        <PlayerPropsSpotlight players={SPOTLIGHTS} />
       </section>
     </div>
   );
