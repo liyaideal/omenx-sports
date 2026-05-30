@@ -1317,6 +1317,17 @@ function StyleGuide() {
 
               <div>
                 <div className="mb-3 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+                  SpotlightPropsCardHorizontal — featured player/team prop bundle (horizontal)
+                </div>
+                <div className="grid gap-3 md:grid-cols-1 xl:grid-cols-2">
+                  {getSpotlightsByLeagueSlug("world-cup-2026").slice(0, 2).map((s) => (
+                    <SpotlightPropsCardHorizontal key={s.handle} player={s} />
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                <div className="mb-3 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
                   PropsGrid — full Props tab composition (World Cup 2026)
                 </div>
                 <PropsGrid
