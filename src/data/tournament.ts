@@ -113,6 +113,27 @@ const USAX = nation("us", "United States", 250);
 const SUIX = nation("ch", "Switzerland", 0);
 const CANX = nation("ca", "Canada", 10);
 
+// Additional candidates used as 3rd/4th group entrants below.
+const IRN = nation("ir", "Iran", 145);
+const PAR = nation("py", "Paraguay", 200);
+const NZL = nation("nz", "New Zealand", 230);
+const CIV = nation("ci", "Ivory Coast", 30);
+const PAN = nation("pa", "Panama", 220);
+const ALG = nation("dz", "Algeria", 145);
+const HAI = nation("ht", "Haiti", 220);
+const FIN = nation("fi", "Finland", 230);
+const CRC = nation("cr", "Costa Rica", 220);
+const QAT = nation("qa", "Qatar", 0);
+const CHL = nation("cl", "Chile", 5);
+const ITA2 = nation("it", "Italy", 230);
+const ENG2 = nation("gb-eng", "England", 230);
+const POR2 = nation("pt", "Portugal", 145);
+const COL2 = nation("co", "Colombia", 50);
+const URU2 = nation("uy", "Uruguay", 200);
+const KOR2 = nation("kr", "South Korea", 250);
+const SEN2 = nation("sn", "Senegal", 120);
+const DEN2 = nation("dk", "Denmark", 0);
+
 export const WC26_GROUPS: GroupMarket[] = [
   {
     id: "wc26-winner",
