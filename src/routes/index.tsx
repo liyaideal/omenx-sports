@@ -5,7 +5,8 @@ import { AppShell } from "@/components/sports/dashboard/AppShell";
 import { AppTopBar } from "@/components/sports/dashboard/AppTopBar";
 import { MatchMarketCard } from "@/components/sports/dashboard/MatchMarketCard";
 import { EventMarketTileCard } from "@/components/sports/dashboard/EventMarketTileCard";
-import { LeagueEntryCard } from "@/components/sports/league/LeagueEntryCard";
+import { LeagueSpotlightCard } from "@/components/sports/league/LeagueSpotlightCard";
+import { LeagueComingSoonCard } from "@/components/sports/league/LeagueComingSoonCard";
 import { FanZoneHeader } from "@/components/sports/dashboard/FanZoneHeader";
 import { FanPostCard } from "@/components/sports/dashboard/FanPostCard";
 import { FansZoneEmpty } from "@/components/sports/dashboard/FansZoneEmpty";
@@ -18,7 +19,12 @@ import {
   FEATURED_MATCH,
   MATCH_MARKETS,
 } from "@/data/sports-markets";
-import { LEAGUES, getMatchMarketsByLeagueSlug } from "@/data/leagues";
+import {
+  LEAGUES,
+  getMatchMarketsByLeagueSlug,
+  getSpotlightsByLeagueSlug,
+  getBinaryQuestionsByLeagueSlug,
+} from "@/data/leagues";
 import {
   FAN_POST,
   FOLLOWED_TEAMS,
@@ -202,17 +208,46 @@ function Index() {
         <section className="flex flex-col gap-4 lg:col-span-2 lg:col-start-2 lg:row-start-2">
           <PageSectionHeader title="Explore" accent="Tournaments" />
           <p className="-mt-1 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
-            Each league has its own hub — games, props, and (for tournaments) the bracket.
+            One league live now, more rolling out soon — each gets its own hub.
           </p>
-          <div className="grid gap-3 md:grid-cols-2">
-            {LEAGUES.map((league) => (
-              <LeagueEntryCard
-                key={league.slug}
-                league={league}
-                matchCount={getMatchMarketsByLeagueSlug(league.slug).length}
-              />
-            ))}
-          </div>
+          {(() => {
+            const featured = LEAGUES.filter((l) => l.status === "featured");
+            const comingSoon = LEAGUES.filter((l) => l.status === "coming-soon");
+            return (
+              <div className="flex flex-col gap-4">
+                {featured.map((league) => {
+                  const matches = getMatchMarketsByLeagueSlug(league.slug);
+                  const spotlights = getSpotlightsByLeagueSlug(league.slug);
+                  const binaries = getBinaryQuestionsByLeagueSlug(league.slug);
+                  const eventCount = matches.length + spotlights.length + binaries.length;
+                  const highlights = [
+                    ...spotlights
+                      .slice(0, 3)
+                      .map((s) => s.tagline ?? `${s.firstName} ${s.lastName}`),
+                    ...binaries.slice(0, 3).map((b) => b.title),
+                  ]
+                    .filter(Boolean)
+                    .slice(0, 4) as string[];
+                  return (
+                    <LeagueSpotlightCard
+                      key={league.slug}
+                      league={league}
+                      eventCount={eventCount}
+                      highlights={highlights}
+                      kickoffLabel="Kicks off June 11"
+                    />
+                  );
+                })}
+                {comingSoon.length > 0 && (
+                  <div className="grid gap-2.5 md:grid-cols-3">
+                    {comingSoon.map((league) => (
+                      <LeagueComingSoonCard key={league.slug} league={league} />
+                    ))}
+                  </div>
+                )}
+              </div>
+            );
+          })()}
         </section>
       </div>
 

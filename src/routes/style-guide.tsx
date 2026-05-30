@@ -41,6 +41,8 @@ import { MeSheet } from "@/components/sports/mobile/MeSheet";
 import { ACCOUNT_STATS } from "@/data/sports-markets";
 import { LEAGUES, getMatchMarketsByLeagueSlug } from "@/data/leagues";
 import { LeagueEntryCard } from "@/components/sports/league/LeagueEntryCard";
+import { LeagueSpotlightCard } from "@/components/sports/league/LeagueSpotlightCard";
+import { LeagueComingSoonCard } from "@/components/sports/league/LeagueComingSoonCard";
 import { LeagueHubHero } from "@/components/sports/league/LeagueHubHero";
 import { HubTabs } from "@/components/sports/league/HubTabs";
 import { GroupWinnerCard } from "@/components/sports/league/GroupWinnerCard";
@@ -1220,6 +1222,43 @@ function StyleGuide() {
                       matchCount={getMatchMarketsByLeagueSlug(league.slug).length}
                     />
                   ))}
+                </div>
+              </div>
+
+              <div>
+                <div className="mb-3 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+                  LeagueSpotlightCard + LeagueComingSoonCard — homepage "Explore Tournaments" rollout layout
+                </div>
+                <div className="flex flex-col gap-4">
+                  {LEAGUES.filter((l) => l.status === "featured").map((league) => {
+                    const matches = getMatchMarketsByLeagueSlug(league.slug);
+                    const spotlights = getSpotlightsByLeagueSlug(league.slug);
+                    const binaries = getBinaryQuestionsByLeagueSlug(league.slug);
+                    const highlights = [
+                      ...spotlights
+                        .slice(0, 3)
+                        .map((s) => s.tagline ?? `${s.firstName} ${s.lastName}`),
+                      ...binaries.slice(0, 3).map((b) => b.title),
+                    ]
+                      .filter(Boolean)
+                      .slice(0, 4) as string[];
+                    return (
+                      <LeagueSpotlightCard
+                        key={league.slug}
+                        league={league}
+                        eventCount={matches.length + spotlights.length + binaries.length}
+                        highlights={highlights}
+                        kickoffLabel="Kicks off June 11"
+                      />
+                    );
+                  })}
+                  <div className="grid gap-2.5 md:grid-cols-3">
+                    {LEAGUES.filter((l) => l.status === "coming-soon").map(
+                      (league) => (
+                        <LeagueComingSoonCard key={league.slug} league={league} />
+                      ),
+                    )}
+                  </div>
                 </div>
               </div>
 
