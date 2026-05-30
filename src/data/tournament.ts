@@ -99,14 +99,6 @@ const TUR = nation("tr", "Türkiye", 0);
 const EGY = nation("eg", "Egypt", 0);
 const KSA = nation("sa", "Saudi Arabia", 145);
 
-/** "Rest of the field" placeholder row so each group card has a tidy 3-row
- *  rank list even when only the top two contenders have meaningful prices. */
-const field = (price: number): GroupTeamStanding => ({
-  team: { name: "Field", short: "—", hue: 220 },
-  price,
-  delta24h: 0,
-});
-
 const CZE = nation("cz", "Czechia", 5);
 const MOR = nation("ma", "Morocco", 0);
 const TURK = nation("tr", "Türkiye", 0);
@@ -133,7 +125,6 @@ export const WC26_GROUPS: GroupMarket[] = [
     standings: [
       { team: ESP, price: 0.17, delta24h: 0.01 },
       { team: FRA, price: 0.17, delta24h: 0 },
-      field(0.66),
     ],
   },
   {
@@ -145,7 +136,6 @@ export const WC26_GROUPS: GroupMarket[] = [
     standings: [
       { team: MEX, price: 0.52, delta24h: 0.02 },
       { team: CZE, price: 0.22, delta24h: -0.01 },
-      field(0.26),
     ],
   },
   {
@@ -157,7 +147,6 @@ export const WC26_GROUPS: GroupMarket[] = [
     standings: [
       { team: SUIX, price: 0.55, delta24h: 0.02 },
       { team: CANX, price: 0.29, delta24h: 0 },
-      field(0.16),
     ],
   },
   {
@@ -169,7 +158,6 @@ export const WC26_GROUPS: GroupMarket[] = [
     standings: [
       { team: BRA, price: 0.73, delta24h: 0.03 },
       { team: MOR, price: 0.19, delta24h: -0.01 },
-      field(0.08),
     ],
   },
   {
@@ -181,7 +169,6 @@ export const WC26_GROUPS: GroupMarket[] = [
     standings: [
       { team: USAX, price: 0.39, delta24h: 0.02 },
       { team: TURK, price: 0.36, delta24h: -0.01 },
-      field(0.25),
     ],
   },
   {
@@ -193,7 +180,6 @@ export const WC26_GROUPS: GroupMarket[] = [
     standings: [
       { team: GER, price: 0.68, delta24h: 0.02 },
       { team: ECUA, price: 0.21, delta24h: -0.01 },
-      field(0.11),
     ],
   },
   {
@@ -205,7 +191,6 @@ export const WC26_GROUPS: GroupMarket[] = [
     standings: [
       { team: NEDX, price: 0.55, delta24h: 0.02 },
       { team: JAP, price: 0.26, delta24h: 0 },
-      field(0.19),
     ],
   },
   {
@@ -217,7 +202,6 @@ export const WC26_GROUPS: GroupMarket[] = [
     standings: [
       { team: BELX, price: 0.67, delta24h: 0.02 },
       { team: EGYX, price: 0.19, delta24h: -0.01 },
-      field(0.14),
     ],
   },
   {
@@ -229,7 +213,6 @@ export const WC26_GROUPS: GroupMarket[] = [
     standings: [
       { team: ESP, price: 0.78, delta24h: 0.03 },
       { team: URUX, price: 0.19, delta24h: -0.01 },
-      field(0.03),
     ],
   },
   {
@@ -241,7 +224,6 @@ export const WC26_GROUPS: GroupMarket[] = [
     standings: [
       { team: FRA, price: 0.69, delta24h: 0.02 },
       { team: NORX, price: 0.22, delta24h: 0 },
-      field(0.09),
     ],
   },
   {
@@ -253,10 +235,38 @@ export const WC26_GROUPS: GroupMarket[] = [
     standings: [
       { team: ARG, price: 0.73, delta24h: 0.02 },
       { team: AUT, price: 0.19, delta24h: -0.01 },
-      field(0.08),
     ],
   },
 ];
+
+/** Build a deterministic per-candidate binary market id for a standing row. */
+export function outcomeMarketIdFor(groupId: string, teamShort: string): string {
+  return `${groupId}--${teamShort.toLowerCase()}`;
+}
+
+/** Synthetic per-candidate YES/NO markets generated from WC26_GROUPS. Each
+ *  card row in `GroupWinnerCard` opens one of these in the trade drawer. */
+export const GROUP_OUTCOME_MARKETS: SportsMarket[] = WC26_GROUPS.flatMap((g) =>
+  g.standings.map<SportsMarket>((s) => {
+    const yesPrice = Math.round(s.price * 100) / 100;
+    return {
+      id: outcomeMarketIdFor(g.id, s.team.short),
+      kind: "league-winner",
+      shape: "binary",
+      title: `Will ${s.team.name} win ${g.title.replace(" — Winner", "")}?`,
+      league: { name: "World Cup 2026", short: "WC" },
+      endsLabel: g.endsLabel,
+      volume: g.volume,
+      volume24h: "$0",
+      participants: 0,
+      outcomes: [
+        { id: "y", label: "YES", price: yesPrice, delta24h: s.delta24h ?? 0 },
+        { id: "n", label: "NO", price: Math.round((1 - yesPrice) * 100) / 100, delta24h: -(s.delta24h ?? 0) },
+      ],
+      tradeHref: `/event/${outcomeMarketIdFor(g.id, s.team.short)}`,
+    };
+  }),
+);
 
 /* ------------ World Cup 2026 — bracket (R32 → R16 → QF → SF → F) ------------ */
 
