@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ChevronDown, Clock, Sparkles, Users, Flame } from "lucide-react";
+import { ChevronDown, Clock, Users, Flame } from "lucide-react";
 import type { PlayerSpotlight } from "@/data/sports-markets";
 import { useTradeDrawer } from "@/components/sports/trade/TradeDrawerProvider";
 
@@ -54,14 +54,14 @@ export function SpotlightPropsCardHorizontal({
   return (
     <section className="relative flex h-full overflow-hidden rounded-2xl border border-border bg-surface bg-ambient shadow-card">
       {/* portrait column */}
-      <div className="relative grid w-[124px] shrink-0 place-items-center sm:w-[156px]">
+      <div className="relative grid w-[160px] shrink-0 place-items-center sm:w-[200px]">
         <div
           aria-hidden
           className="pointer-events-none absolute inset-0 bg-gradient-to-br from-[oklch(0.55_0.2_295_/_0.18)] via-transparent to-transparent"
         />
         <div
           aria-hidden
-          className="pointer-events-none absolute left-1/2 top-1/2 h-[140px] w-[140px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[conic-gradient(from_120deg,oklch(0.7_0.28_340/0.85),oklch(0.55_0.2_295/0.4),oklch(0.7_0.28_340/0.85))] blur-[2px]"
+          className="pointer-events-none absolute left-1/2 top-1/2 h-[190px] w-[190px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[conic-gradient(from_120deg,oklch(0.7_0.28_340/0.85),oklch(0.55_0.2_295/0.4),oklch(0.7_0.28_340/0.85))] blur-[2px]"
           style={{
             WebkitMask:
               "radial-gradient(circle, transparent 44%, black 47%, black 52%, transparent 55%)",
@@ -72,7 +72,7 @@ export function SpotlightPropsCardHorizontal({
           src={player.photo}
           alt={`${player.firstName} ${player.lastName}`}
           loading="lazy"
-          className={`relative z-10 h-[124px] w-[104px] rounded-[60px] bg-white/[0.04] sm:h-[140px] sm:w-[120px] ${imageFitClass}`}
+          className={`relative z-10 h-[160px] w-[136px] rounded-[72px] bg-white/[0.04] sm:h-[184px] sm:w-[156px] ${imageFitClass}`}
         />
         {/* hot/24h volume badge */}
         <div className="absolute bottom-3 left-1/2 z-20 -translate-x-1/2">
@@ -95,28 +95,10 @@ export function SpotlightPropsCardHorizontal({
 
       {/* content column */}
       <div className="flex min-w-0 flex-1 flex-col p-4">
-        <header className="flex items-start justify-between gap-3">
-          <div className="min-w-0">
-            <div className="flex items-center gap-2">
-              <span className="inline-flex items-center gap-1 rounded-full bg-gradient-to-r from-[oklch(0.7_0.28_340_/_0.25)] to-[oklch(0.55_0.2_295_/_0.25)] px-2 py-0.5 font-mono text-[9px] font-semibold uppercase tracking-widest text-[oklch(0.9_0.12_320)] ring-1 ring-[oklch(0.7_0.28_340_/_0.35)]">
-                <Sparkles className="h-3 w-3" /> Featured
-              </span>
-              <span className="truncate font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
-                {player.position}
-              </span>
-            </div>
-            <h3 className="mt-1 truncate font-display text-lg font-semibold leading-tight text-foreground">
-              {player.firstName} {player.lastName}
-            </h3>
-            {player.tagline && (
-              <p className="mt-0.5 truncate text-[12px] text-muted-foreground">
-                {player.tagline}
-              </p>
-            )}
-          </div>
-          <span className="shrink-0 rounded-md bg-white/[0.04] px-2 py-0.5 font-mono text-[9px] uppercase tracking-widest text-muted-foreground ring-1 ring-white/[0.06]">
-            {player.props.length} markets
-          </span>
+        <header className="min-w-0">
+          <h3 className="truncate font-display text-lg font-semibold leading-tight text-foreground">
+            {player.firstName} {player.lastName}
+          </h3>
         </header>
 
         <div className="mt-3 flex flex-1 flex-col divide-y divide-white/[0.04] border-t border-white/[0.04]">
