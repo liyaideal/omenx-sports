@@ -19,10 +19,10 @@ export function GroupWinnerCard({ market }: { market: GroupMarket }) {
           </span>
           <div>
             <div className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
-              Group winner
+              {market.kicker ?? "Group winner"}
             </div>
             <h3 className="font-display text-sm font-semibold text-foreground">
-              Group {market.group}
+              {market.title}
             </h3>
           </div>
         </div>
