@@ -221,7 +221,9 @@ function Index() {
                   const binaries = getBinaryQuestionsByLeagueSlug(league.slug);
                   const eventCount = matches.length + spotlights.length + binaries.length;
                   const highlights = [
-                    ...spotlights.slice(0, 3).map((s) => s.headline ?? s.name),
+                    ...spotlights
+                      .slice(0, 3)
+                      .map((s) => s.tagline ?? `${s.firstName} ${s.lastName}`),
                     ...binaries.slice(0, 3).map((b) => b.title),
                   ]
                     .filter(Boolean)
