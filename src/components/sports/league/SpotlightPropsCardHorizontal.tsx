@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ChevronDown } from "lucide-react";
+import { ChevronDown, Clock, Sparkles, Users, Flame } from "lucide-react";
 import type { PlayerSpotlight } from "@/data/sports-markets";
 import { useTradeDrawer } from "@/components/sports/trade/TradeDrawerProvider";
 
@@ -12,6 +12,25 @@ import { useTradeDrawer } from "@/components/sports/trade/TradeDrawerProvider";
  * The vertical {@link PlayerPropsSpotlight} carousel variant is kept
  * intact for the homepage dashboard.
  */
+const HOT_PARTICIPANT_THRESHOLD = 2000;
+
+function parseDollars(v: string): number {
+  // accepts "$1.10M" / "$680K" / "$420" → number
+  const m = v.replace(/[$,]/g, "").trim().match(/^([\d.]+)\s*([KMB]?)$/i);
+  if (!m) return 0;
+  const n = parseFloat(m[1]);
+  const unit = (m[2] || "").toUpperCase();
+  const mult = unit === "B" ? 1e9 : unit === "M" ? 1e6 : unit === "K" ? 1e3 : 1;
+  return n * mult;
+}
+
+function formatDollars(n: number): string {
+  if (n >= 1e9) return `$${(n / 1e9).toFixed(2)}B`;
+  if (n >= 1e6) return `$${(n / 1e6).toFixed(2)}M`;
+  if (n >= 1e3) return `$${(n / 1e3).toFixed(0)}K`;
+  return `$${Math.round(n)}`;
+}
+
 export function SpotlightPropsCardHorizontal({
   player,
 }: {
@@ -25,10 +44,21 @@ export function SpotlightPropsCardHorizontal({
   const imageFitClass =
     player.imageFit === "contain" ? "object-contain p-3" : "object-cover object-top";
 
+  // aggregates for footer + hot badge
+  const totalTraders = player.props.reduce((s, m) => s + (m.participants ?? 0), 0);
+  const totalVol = player.props.reduce((s, m) => s + parseDollars(m.volume), 0);
+  const total24h = player.props.reduce((s, m) => s + parseDollars(m.volume24h ?? "0"), 0);
+  const endsLabel = player.props[0]?.endsLabel ?? "";
+  const isHot = totalTraders >= HOT_PARTICIPANT_THRESHOLD;
+
   return (
-    <section className="flex h-full overflow-hidden rounded-2xl border border-border bg-surface bg-ambient shadow-card">
+    <section className="relative flex h-full overflow-hidden rounded-2xl border border-border bg-surface bg-ambient shadow-card">
       {/* portrait column */}
-      <div className="relative grid w-[120px] shrink-0 place-items-center bg-white/[0.02] sm:w-[150px]">
+      <div className="relative grid w-[124px] shrink-0 place-items-center sm:w-[156px]">
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-0 bg-gradient-to-br from-[oklch(0.55_0.2_295_/_0.18)] via-transparent to-transparent"
+        />
         <div
           aria-hidden
           className="pointer-events-none absolute left-1/2 top-1/2 h-[140px] w-[140px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[conic-gradient(from_120deg,oklch(0.7_0.28_340/0.85),oklch(0.55_0.2_295/0.4),oklch(0.7_0.28_340/0.85))] blur-[2px]"
@@ -42,7 +72,24 @@ export function SpotlightPropsCardHorizontal({
           src={player.photo}
           alt={`${player.firstName} ${player.lastName}`}
           loading="lazy"
-          className={`relative z-10 h-[120px] w-[100px] rounded-[60px] bg-white/[0.04] sm:h-[140px] sm:w-[116px] ${imageFitClass}`}
+          className={`relative z-10 h-[124px] w-[104px] rounded-[60px] bg-white/[0.04] sm:h-[140px] sm:w-[120px] ${imageFitClass}`}
+        />
+        {/* hot/24h volume badge */}
+        <div className="absolute bottom-3 left-1/2 z-20 -translate-x-1/2">
+          {isHot ? (
+            <span className="inline-flex items-center gap-1 rounded-full bg-[oklch(0.7_0.22_25_/_0.18)] px-2 py-0.5 font-mono text-[9px] uppercase tracking-widest text-[oklch(0.85_0.18_45)] ring-1 ring-[oklch(0.7_0.22_25_/_0.35)] backdrop-blur">
+              <Flame className="h-3 w-3" /> Hot
+            </span>
+          ) : total24h > 0 ? (
+            <span className="inline-flex items-center gap-1 rounded-full bg-black/40 px-2 py-0.5 font-mono text-[9px] uppercase tracking-widest text-foreground ring-1 ring-white/15 backdrop-blur">
+              24h · {formatDollars(total24h)}
+            </span>
+          ) : null}
+        </div>
+        {/* right edge fade into content column */}
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-y-0 right-0 w-10 bg-gradient-to-r from-transparent to-[var(--surface,oklch(0.18_0.02_290))]/40"
         />
       </div>
 
@@ -50,16 +97,22 @@ export function SpotlightPropsCardHorizontal({
       <div className="flex min-w-0 flex-1 flex-col p-4">
         <header className="flex items-start justify-between gap-3">
           <div className="min-w-0">
-            <div className="truncate font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
-              <span className="text-neon">@</span>
-              {player.handle}
+            <div className="flex items-center gap-2">
+              <span className="inline-flex items-center gap-1 rounded-full bg-gradient-to-r from-[oklch(0.7_0.28_340_/_0.25)] to-[oklch(0.55_0.2_295_/_0.25)] px-2 py-0.5 font-mono text-[9px] font-semibold uppercase tracking-widest text-[oklch(0.9_0.12_320)] ring-1 ring-[oklch(0.7_0.28_340_/_0.35)]">
+                <Sparkles className="h-3 w-3" /> Featured
+              </span>
+              <span className="truncate font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+                {player.position}
+              </span>
             </div>
-            <h3 className="truncate font-display text-base font-semibold leading-tight text-foreground">
+            <h3 className="mt-1 truncate font-display text-lg font-semibold leading-tight text-foreground">
               {player.firstName} {player.lastName}
             </h3>
-            <div className="mt-0.5 truncate text-[11px] text-muted-foreground">
-              {player.position}
-            </div>
+            {player.tagline && (
+              <p className="mt-0.5 truncate text-[12px] text-muted-foreground">
+                {player.tagline}
+              </p>
+            )}
           </div>
           <span className="shrink-0 rounded-md bg-white/[0.04] px-2 py-0.5 font-mono text-[9px] uppercase tracking-widest text-muted-foreground ring-1 ring-white/[0.06]">
             {player.props.length} markets
@@ -73,6 +126,10 @@ export function SpotlightPropsCardHorizontal({
             if (!yes || !no) return null;
             const yesPct = Math.round(yes.price * 100);
             const noPct = Math.round(no.price * 100);
+            const delta = yes.delta24h ?? 0;
+            const deltaPts = Math.round(delta * 100);
+            const deltaUp = deltaPts > 0;
+            const deltaDown = deltaPts < 0;
             return (
               <div
                 key={m.id}
@@ -82,8 +139,20 @@ export function SpotlightPropsCardHorizontal({
                   <div className="truncate text-[13px] font-medium text-foreground">
                     {m.title}
                   </div>
-                  <div className="font-mono text-[10px] text-muted-foreground">
-                    Vol {m.volume} · {m.endsLabel}
+                  <div className="flex items-center gap-2 font-mono text-[10px] text-muted-foreground">
+                    <span>Vol {m.volume}</span>
+                    {deltaPts !== 0 && (
+                      <span
+                        className={
+                          deltaUp
+                            ? "text-[oklch(0.85_0.16_155)]"
+                            : "text-[oklch(0.82_0.16_25)]"
+                        }
+                      >
+                        {deltaUp ? "↗" : deltaDown ? "↘" : "·"}{" "}
+                        {deltaUp ? `+${deltaPts}` : `−${Math.abs(deltaPts)}`}¢
+                      </span>
+                    )}
                   </div>
                 </div>
                 <div className="flex shrink-0 items-center gap-1.5">
@@ -126,6 +195,18 @@ export function SpotlightPropsCardHorizontal({
             </button>
           )}
         </div>
+
+        <footer className="mt-auto flex items-center justify-between border-t border-border pt-3 font-mono text-[11px] text-muted-foreground">
+          <span className="inline-flex items-center gap-1.5">
+            <Clock className="h-3 w-3" /> {endsLabel}
+          </span>
+          <span className="inline-flex items-center gap-3">
+            <span className="inline-flex items-center gap-1">
+              <Users className="h-3 w-3" /> {totalTraders.toLocaleString()}
+            </span>
+            <span className="text-foreground">Vol {formatDollars(totalVol)}</span>
+          </span>
+        </footer>
       </div>
     </section>
   );
