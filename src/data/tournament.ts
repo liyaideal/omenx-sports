@@ -16,9 +16,12 @@ export interface GroupTeamStanding {
 export interface GroupMarket {
   /** Stable id, also used as /event/$id slug. */
   id: string;
-  /** Group letter, e.g. "A". */
+  /** Monogram shown in the card header (letter, icon, etc.). */
   group: string;
+  /** Title rendered as the h3 — e.g. "Group A" or "World Cup Winner". */
   title: string;
+  /** Small kicker above the title — defaults to "Group winner". */
+  kicker?: string;
   endsLabel: string;
   volume: string;
   standings: GroupTeamStanding[];
