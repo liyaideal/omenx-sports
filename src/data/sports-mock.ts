@@ -68,6 +68,55 @@ export const TEAMS = {
     logo: "https://a.espncdn.com/i/teamlogos/soccer/500/20232.png",
     hue: 340,
   },
+  // ----- World Cup 2026 national teams (country flags via flagcdn) -----
+  mexico: {
+    name: "Mexico",
+    short: "MEX",
+    logo: "https://flagcdn.com/w160/mx.png",
+    hue: 145,
+  },
+  southAfrica: {
+    name: "South Africa",
+    short: "RSA",
+    logo: "https://flagcdn.com/w160/za.png",
+    hue: 150,
+  },
+  koreaRep: {
+    name: "Korea Republic",
+    short: "KOR",
+    logo: "https://flagcdn.com/w160/kr.png",
+    hue: 215,
+  },
+  czechia: {
+    name: "Czechia",
+    short: "CZE",
+    logo: "https://flagcdn.com/w160/cz.png",
+    hue: 5,
+  },
+  canada: {
+    name: "Canada",
+    short: "CAN",
+    logo: "https://flagcdn.com/w160/ca.png",
+    hue: 15,
+  },
+  bosnia: {
+    name: "Bosnia-Herzegovina",
+    short: "BIH",
+    logo: "https://flagcdn.com/w160/ba.png",
+    hue: 230,
+  },
+  usa: {
+    name: "United States",
+    short: "USA",
+    logo: "https://flagcdn.com/w160/us.png",
+    hue: 220,
+  },
+  paraguay: {
+    name: "Paraguay",
+    short: "PAR",
+    logo: "https://flagcdn.com/w160/py.png",
+    hue: 10,
+  },
 } as const satisfies Record<string, TeamLite>;
 
 export const FAN_POST = {
