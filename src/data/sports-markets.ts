@@ -5,6 +5,7 @@
  */
 import { TEAMS, type TeamLite } from "@/data/sports-mock";
 import mbappePhoto from "@/assets/mbappe.png";
+import { GROUP_OUTCOME_MARKETS } from "@/data/tournament";
 
 export type { TeamLite } from "@/data/sports-mock";
 export { TEAMS } from "@/data/sports-mock";
