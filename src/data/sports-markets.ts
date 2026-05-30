@@ -758,6 +758,7 @@ export const ALL_MARKETS: SportsMarket[] = [
   LALIGA_TOP_SCORER_MARKET,
   UCL_TOP_SCORER_MARKET,
   ...SPOTLIGHTS.flatMap((s) => s.props),
+  ...GROUP_OUTCOME_MARKETS,
 ];
 
 export function getMarketById(id: string): SportsMarket | undefined {
