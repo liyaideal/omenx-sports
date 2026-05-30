@@ -1124,8 +1124,8 @@ function StyleGuide() {
               to <code className="font-mono text-foreground">/events</code> on mobile viewports;
               account data lives only in <code className="font-mono text-foreground">MeSheet</code> to
               avoid duplication. Three tabs, zero content overlap:
-              <b className="text-foreground"> Events</b> (default) = live hero + day strip + season
-              futures + spotlight;
+              <b className="text-foreground"> Events</b> (default) = live hero + day strip + upcoming
+              grid + "Explore tournaments" hub entries;
               <b className="text-foreground"> Fans</b> = social feed (follow, trades, posts);
               <b className="text-foreground"> Me</b> = bottom sheet with account + OmenX shortcuts.
             </p>
