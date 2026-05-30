@@ -48,7 +48,6 @@ import { BinaryQuestionCard } from "@/components/sports/league/BinaryQuestionCar
 import { BracketView } from "@/components/sports/league/BracketView";
 import { PropsGrid } from "@/components/sports/league/PropsGrid";
 import { useTradeDrawer } from "@/components/sports/trade/TradeDrawerProvider";
-import { FEATURED_MATCH, MATCH_MARKETS } from "@/data/sports-markets";
 import {
   WC26_GROUPS,
   WC26_BRACKET,
