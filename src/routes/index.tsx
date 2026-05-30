@@ -144,7 +144,7 @@ function Index() {
           ) : (
             <FansZoneEmpty editorPick={FEATURED_MATCH} suggested={SUGGESTED_TEAMS} />
           )}
-          <div className="flex-1 [&>*]:h-full">
+          <div className="flex-1 [&>*]:h-full [&>*]:max-h-[560px]">
             <LiveActivityCard
               trades={LIVE_TRADES}
               followedTeams={FOLLOWED_TEAMS}
