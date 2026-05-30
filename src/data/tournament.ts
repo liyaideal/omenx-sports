@@ -94,18 +94,53 @@ const TUR = nation("tr", "Türkiye", 0);
 const EGY = nation("eg", "Egypt", 0);
 const KSA = nation("sa", "Saudi Arabia", 145);
 
+/** "Rest of the field" placeholder row so each group card has a tidy 3-row
+ *  rank list even when only the top two contenders have meaningful prices. */
+const field = (price: number): GroupTeamStanding => ({
+  team: { name: "Field", short: "—", hue: 220 },
+  price,
+  delta24h: 0,
+});
+
+const CZE = nation("cz", "Czechia", 5);
+const MOR = nation("ma", "Morocco", 0);
+const TURK = nation("tr", "Türkiye", 0);
+const ECUA = nation("ec", "Ecuador", 50);
+const NEDX = nation("nl", "Netherlands", 35);
+const JAP = nation("jp", "Japan", 0);
+const BELX = nation("be", "Belgium", 25);
+const EGYX = nation("eg", "Egypt", 0);
+const URUX = nation("uy", "Uruguay", 200);
+const NORX = nation("no", "Norway", 230);
+const AUT = nation("at", "Austria", 0);
+const USAX = nation("us", "United States", 250);
+const SUIX = nation("ch", "Switzerland", 0);
+const CANX = nation("ca", "Canada", 10);
+
 export const WC26_GROUPS: GroupMarket[] = [
+  {
+    id: "wc26-winner",
+    group: "🏆",
+    title: "World Cup Winner",
+    kicker: "Tournament champion",
+    endsLabel: "Settles Jul 19, 2026",
+    volume: "$1.00B",
+    standings: [
+      { team: ESP, price: 0.17, delta24h: 0.01 },
+      { team: FRA, price: 0.17, delta24h: 0 },
+      field(0.66),
+    ],
+  },
   {
     id: "wc26-grpa-winner",
     group: "A",
     title: "Group A — Winner",
     endsLabel: "Group stage",
-    volume: "$1.42M",
+    volume: "$336K",
     standings: [
-      { team: ARG, price: 0.58, delta24h: 0.02 },
-      { team: MEX, price: 0.24, delta24h: -0.01 },
-      { team: CAN, price: 0.12, delta24h: 0 },
-      { team: { name: "Saudi Arabia", short: "sa", logo: "https://flagcdn.com/w160/sa.png" }, price: 0.06, delta24h: -0.01 },
+      { team: MEX, price: 0.52, delta24h: 0.02 },
+      { team: CZE, price: 0.22, delta24h: -0.01 },
+      field(0.26),
     ],
   },
   {
@@ -113,12 +148,47 @@ export const WC26_GROUPS: GroupMarket[] = [
     group: "B",
     title: "Group B — Winner",
     endsLabel: "Group stage",
-    volume: "$1.18M",
+    volume: "$127K",
     standings: [
-      { team: BRA, price: 0.52, delta24h: 0.03 },
-      { team: POR, price: 0.28, delta24h: 0.01 },
-      { team: { name: "Switzerland", short: "ch", logo: "https://flagcdn.com/w160/ch.png" }, price: 0.13, delta24h: -0.02 },
-      { team: { name: "Senegal", short: "sn", logo: "https://flagcdn.com/w160/sn.png" }, price: 0.07, delta24h: -0.02 },
+      { team: SUIX, price: 0.55, delta24h: 0.02 },
+      { team: CANX, price: 0.29, delta24h: 0 },
+      field(0.16),
+    ],
+  },
+  {
+    id: "wc26-grpc-winner",
+    group: "C",
+    title: "Group C — Winner",
+    endsLabel: "Group stage",
+    volume: "$292K",
+    standings: [
+      { team: BRA, price: 0.73, delta24h: 0.03 },
+      { team: MOR, price: 0.19, delta24h: -0.01 },
+      field(0.08),
+    ],
+  },
+  {
+    id: "wc26-grpd-winner",
+    group: "D",
+    title: "Group D — Winner",
+    endsLabel: "Group stage",
+    volume: "$74K",
+    standings: [
+      { team: USAX, price: 0.39, delta24h: 0.02 },
+      { team: TURK, price: 0.36, delta24h: -0.01 },
+      field(0.25),
+    ],
+  },
+  {
+    id: "wc26-grpe-winner",
+    group: "E",
+    title: "Group E — Winner",
+    endsLabel: "Group stage",
+    volume: "$59K",
+    standings: [
+      { team: GER, price: 0.68, delta24h: 0.02 },
+      { team: ECUA, price: 0.21, delta24h: -0.01 },
+      field(0.11),
     ],
   },
   {
@@ -126,12 +196,59 @@ export const WC26_GROUPS: GroupMarket[] = [
     group: "F",
     title: "Group F — Winner",
     endsLabel: "Group stage",
-    volume: "$2.01M",
+    volume: "$192K",
     standings: [
-      { team: FRA, price: 0.52, delta24h: 0.03 },
-      { team: GER, price: 0.31, delta24h: -0.02 },
-      { team: JPN, price: 0.12, delta24h: 0.01 },
-      { team: { name: "Ecuador", short: "ec", logo: "https://flagcdn.com/w160/ec.png" }, price: 0.05, delta24h: -0.02 },
+      { team: NEDX, price: 0.55, delta24h: 0.02 },
+      { team: JAP, price: 0.26, delta24h: 0 },
+      field(0.19),
+    ],
+  },
+  {
+    id: "wc26-grpg-winner",
+    group: "G",
+    title: "Group G — Winner",
+    endsLabel: "Group stage",
+    volume: "$80K",
+    standings: [
+      { team: BELX, price: 0.67, delta24h: 0.02 },
+      { team: EGYX, price: 0.19, delta24h: -0.01 },
+      field(0.14),
+    ],
+  },
+  {
+    id: "wc26-grph-winner",
+    group: "H",
+    title: "Group H — Winner",
+    endsLabel: "Group stage",
+    volume: "$203K",
+    standings: [
+      { team: ESP, price: 0.78, delta24h: 0.03 },
+      { team: URUX, price: 0.19, delta24h: -0.01 },
+      field(0.03),
+    ],
+  },
+  {
+    id: "wc26-grpi-winner",
+    group: "I",
+    title: "Group I — Winner",
+    endsLabel: "Group stage",
+    volume: "$191K",
+    standings: [
+      { team: FRA, price: 0.69, delta24h: 0.02 },
+      { team: NORX, price: 0.22, delta24h: 0 },
+      field(0.09),
+    ],
+  },
+  {
+    id: "wc26-grpj-winner",
+    group: "J",
+    title: "Group J — Winner",
+    endsLabel: "Group stage",
+    volume: "$148K",
+    standings: [
+      { team: ARG, price: 0.73, delta24h: 0.02 },
+      { team: AUT, price: 0.19, delta24h: -0.01 },
+      field(0.08),
     ],
   },
 ];
