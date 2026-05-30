@@ -160,7 +160,7 @@ export const WC26_GROUPS: GroupMarket[] = [
     id: "wc26-grpa-winner",
     group: "A",
     title: "Group A — Winner",
-    endsLabel: "Group stage",
+    endsLabel: "Settles Jun 27, 2026",
     volume: "$336K",
     standings: [
       { team: MEX, price: 0.52, delta24h: 0.02 },
@@ -173,7 +173,7 @@ export const WC26_GROUPS: GroupMarket[] = [
     id: "wc26-grpb-winner",
     group: "B",
     title: "Group B — Winner",
-    endsLabel: "Group stage",
+    endsLabel: "Settles Jun 27, 2026",
     volume: "$127K",
     standings: [
       { team: SUIX, price: 0.55, delta24h: 0.02 },
@@ -186,7 +186,7 @@ export const WC26_GROUPS: GroupMarket[] = [
     id: "wc26-grpc-winner",
     group: "C",
     title: "Group C — Winner",
-    endsLabel: "Group stage",
+    endsLabel: "Settles Jun 27, 2026",
     volume: "$292K",
     standings: [
       { team: BRA, price: 0.73, delta24h: 0.03 },
@@ -199,7 +199,7 @@ export const WC26_GROUPS: GroupMarket[] = [
     id: "wc26-grpd-winner",
     group: "D",
     title: "Group D — Winner",
-    endsLabel: "Group stage",
+    endsLabel: "Settles Jun 27, 2026",
     volume: "$74K",
     standings: [
       { team: USAX, price: 0.39, delta24h: 0.02 },
@@ -212,7 +212,7 @@ export const WC26_GROUPS: GroupMarket[] = [
     id: "wc26-grpe-winner",
     group: "E",
     title: "Group E — Winner",
-    endsLabel: "Group stage",
+    endsLabel: "Settles Jun 27, 2026",
     volume: "$59K",
     standings: [
       { team: GER, price: 0.68, delta24h: 0.02 },
@@ -225,7 +225,7 @@ export const WC26_GROUPS: GroupMarket[] = [
     id: "wc26-grpf-winner",
     group: "F",
     title: "Group F — Winner",
-    endsLabel: "Group stage",
+    endsLabel: "Settles Jun 27, 2026",
     volume: "$192K",
     standings: [
       { team: NEDX, price: 0.55, delta24h: 0.02 },
@@ -238,7 +238,7 @@ export const WC26_GROUPS: GroupMarket[] = [
     id: "wc26-grpg-winner",
     group: "G",
     title: "Group G — Winner",
-    endsLabel: "Group stage",
+    endsLabel: "Settles Jun 27, 2026",
     volume: "$80K",
     standings: [
       { team: BELX, price: 0.67, delta24h: 0.02 },
@@ -251,7 +251,7 @@ export const WC26_GROUPS: GroupMarket[] = [
     id: "wc26-grph-winner",
     group: "H",
     title: "Group H — Winner",
-    endsLabel: "Group stage",
+    endsLabel: "Settles Jun 27, 2026",
     volume: "$203K",
     standings: [
       { team: ESP, price: 0.78, delta24h: 0.03 },
@@ -264,7 +264,7 @@ export const WC26_GROUPS: GroupMarket[] = [
     id: "wc26-grpi-winner",
     group: "I",
     title: "Group I — Winner",
-    endsLabel: "Group stage",
+    endsLabel: "Settles Jun 27, 2026",
     volume: "$191K",
     standings: [
       { team: FRA, price: 0.69, delta24h: 0.02 },
@@ -277,7 +277,7 @@ export const WC26_GROUPS: GroupMarket[] = [
     id: "wc26-grpj-winner",
     group: "J",
     title: "Group J — Winner",
-    endsLabel: "Group stage",
+    endsLabel: "Settles Jun 27, 2026",
     volume: "$148K",
     standings: [
       { team: ARG, price: 0.73, delta24h: 0.02 },
