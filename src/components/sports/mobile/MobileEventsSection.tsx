@@ -2,9 +2,15 @@ import { useEffect, useMemo, useState } from "react";
 import { EventMarketTileCard } from "@/components/sports/dashboard/EventMarketTileCard";
 import { DayStripCalendar } from "@/components/sports/dashboard/DayStripCalendar";
 import { MobileLiveHero } from "@/components/sports/mobile/MobileLiveHero";
-import { LeagueEntryCard } from "@/components/sports/league/LeagueEntryCard";
+import { LeagueSpotlightCard } from "@/components/sports/league/LeagueSpotlightCard";
+import { LeagueComingSoonCard } from "@/components/sports/league/LeagueComingSoonCard";
 import { MATCH_MARKETS } from "@/data/sports-markets";
-import { LEAGUES, getMatchMarketsByLeagueSlug } from "@/data/leagues";
+import {
+  LEAGUES,
+  getMatchMarketsByLeagueSlug,
+  getSpotlightsByLeagueSlug,
+  getBinaryQuestionsByLeagueSlug,
+} from "@/data/leagues";
 
 /**
  * Full mobile Events page section. Owns its own day-strip state so the
@@ -63,6 +69,12 @@ export function MobileEventsSection() {
       })),
     [],
   );
+  const featuredLeagues = leagueEntries.filter(
+    ({ league }) => league.status === "featured",
+  );
+  const comingSoonLeagues = leagueEntries.filter(
+    ({ league }) => league.status === "coming-soon",
+  );
 
   return (
     <div className="space-y-6">
@@ -112,10 +124,36 @@ export function MobileEventsSection() {
             Hubs
           </span>
         </header>
-        <div className="grid grid-cols-1 gap-3">
-          {leagueEntries.map(({ league, matchCount }) => (
-            <LeagueEntryCard key={league.slug} league={league} matchCount={matchCount} />
-          ))}
+        <div className="flex flex-col gap-3">
+          {featuredLeagues.map(({ league, matchCount }) => {
+            const spotlights = getSpotlightsByLeagueSlug(league.slug);
+            const binaries = getBinaryQuestionsByLeagueSlug(league.slug);
+            const eventCount = matchCount + spotlights.length + binaries.length;
+            const highlights = [
+              ...spotlights
+                .slice(0, 3)
+                .map((s) => s.tagline ?? `${s.firstName} ${s.lastName}`),
+              ...binaries.slice(0, 3).map((b) => b.title),
+            ]
+              .filter(Boolean)
+              .slice(0, 4) as string[];
+            return (
+              <LeagueSpotlightCard
+                key={league.slug}
+                league={league}
+                eventCount={eventCount}
+                highlights={highlights}
+                kickoffLabel="Kicks off June 11"
+              />
+            );
+          })}
+          {comingSoonLeagues.length > 0 && (
+            <div className="grid grid-cols-1 gap-2.5">
+              {comingSoonLeagues.map(({ league }) => (
+                <LeagueComingSoonCard key={league.slug} league={league} />
+              ))}
+            </div>
+          )}
         </div>
       </section>
     </div>
