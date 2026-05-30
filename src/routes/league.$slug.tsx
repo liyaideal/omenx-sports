@@ -11,8 +11,9 @@ import {
   getLeagueBySlug,
   getMatchMarketsByLeagueSlug,
   LEAGUES,
+  type LeagueHub,
 } from "@/data/leagues";
-import { ACCOUNT_STATS } from "@/data/sports-markets";
+import { ACCOUNT_STATS, type SportsMarket } from "@/data/sports-markets";
 
 const USER_NAME = "Jeremy";
 const USER_AVATAR =
@@ -129,11 +130,11 @@ function HubContent({
   grid,
   tabs,
 }: {
-  league: ReturnType<typeof getLeagueBySlug> & object;
+  league: LeagueHub;
   view: HubView;
-  matches: ReturnType<typeof getMatchMarketsByLeagueSlug>;
-  liveStream: ReturnType<typeof getMatchMarketsByLeagueSlug>;
-  grid: ReturnType<typeof getMatchMarketsByLeagueSlug>;
+  matches: SportsMarket[];
+  liveStream: SportsMarket[];
+  grid: SportsMarket[];
   tabs: HubTab[];
 }) {
   return (
