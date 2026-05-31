@@ -1,4 +1,4 @@
-import { Trophy, CalendarDays } from "lucide-react";
+import { CalendarDays } from "lucide-react";
 import type { LeagueHub } from "@/data/leagues";
 
 /**
@@ -56,13 +56,6 @@ export function LeagueHubHero({
           className="relative grid h-16 w-16 shrink-0 place-items-center overflow-hidden rounded-2xl bg-white/[0.06] p-2 ring-1 ring-white/15 md:h-20 md:w-20"
           style={{ boxShadow: `0 0 32px -8px oklch(${accent} / 0.6)` }}
         >
-          {isTournament && (
-            <Trophy
-              aria-hidden
-              className="absolute -right-2 -top-2 h-8 w-8 text-amber-300/80"
-              style={{ filter: "drop-shadow(0 0 8px rgba(252,211,77,0.7))" }}
-            />
-          )}
           <img src={league.logo} alt="" className="h-full w-full object-contain" loading="eager" />
         </span>
         <div className="min-w-0 flex-1">
