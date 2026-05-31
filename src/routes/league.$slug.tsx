@@ -22,10 +22,7 @@ import {
 } from "@/data/tournament";
 import { PropsGrid } from "@/components/sports/league/PropsGrid";
 import { BracketView } from "@/components/sports/league/BracketView";
-import {
-  WorldCupBackdrop,
-  RoadToFinalStrip,
-} from "@/components/sports/league/WorldCupAmbience";
+import { WorldCupBackdrop } from "@/components/sports/league/WorldCupAmbience";
 import { ACCOUNT_STATS, type SportsMarket } from "@/data/sports-markets";
 
 const USER_NAME = "Jeremy";
@@ -216,9 +213,9 @@ function HubContent({
   const heroStats = isWorldCup
     ? [
         { label: "Nations", value: "48" },
-        { label: "Matches", value: String(matches.length || 104) },
-        { label: "Groups", value: String(groups.length || 12) },
-        { label: "Volume", value: "$1.00B" },
+        { label: "Matches", value: "104" },
+        { label: "Groups", value: "12" },
+        { label: "Host cities", value: "16" },
       ]
     : undefined;
 
@@ -234,12 +231,10 @@ function HubContent({
     <div className="space-y-5">
       <LeagueHubHero
         league={league}
-        matchCount={matches.length}
         kickoffLabel={isWorldCup ? "Jun 11, 2026" : undefined}
         hostFlags={hostFlags}
         stats={heroStats}
       />
-      {isWorldCup && <RoadToFinalStrip />}
       <HubTabs slug={league.slug} current={view} tabs={tabs} />
 
       {view === "games" && (

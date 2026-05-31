@@ -1,19 +1,43 @@
+## 问题
+
+`/league/world-cup-2026` 头部三处需要清理:
+
+1. **"5 EVENTS" chip** —— 跟下方 `HubTabs` 的 "Games · 5" 重复,而且只反映当前 mock 数据条数。
+2. **stats 条数字失真** —— "5 Matches" 用的是 mock `matches.length`(实际 104),"$1.00B Volume" 是凭空编的假数据。
+3. **`RoadToFinalStrip`** —— kickoff 日期、host 国家、tournament 标签 hero 里已经全说过,整条横幅重复。
+
 ## 改动
 
-把用户上传的真实 FIFA World Cup 2026 logo (`user-uploads://2026-FIFA-Logo.png`) 复制到 `src/assets/leagues/world-cup-2026.png`,把全站对旧 `world-cup-2026.svg` 的引用全部切到这个新 PNG,并在 `/style-guide` 里专门加一块"品牌资产"展示位强调这是唯一正确的 WC2026 logo 来源。
+### `src/components/sports/league/LeagueHubHero.tsx`
+- 删掉 `{matchCount} events` chip 及对应 `matchCount` prop。
+- `stats` 渲染块**保留**。
 
-### 文件改动
+### `src/routes/league.$slug.tsx`
+把 `heroStats` 改成真实静态数据(不再依赖 mock `matches.length` / `groups.length`),并去掉假的 volume,补一个真实的第四项:
 
-1. **新增** `src/assets/leagues/world-cup-2026.png` —— 用户上传的真实 logo(深绿"26"+金奖杯+FIFA 字样)。
-2. **`src/data/leagues.ts`** —— `import` 路径从 `.svg` 改为 `.png`。
-3. **`src/components/sports/LeagueBadge.tsx`** —— `PRESETS.wc.logo` 指向新 PNG。
-4. **`src/data/tournament.ts`** —— 同上。
-5. **`src/routes/league.$slug.tsx`** —— 同上。
-6. **`src/components/sports/league/WorldCupAmbience.tsx`** —— 同上。
-7. **`src/routes/style-guide.tsx`** —— ①已有的 svg 引用切到新 PNG;②**新增**一个 "Brand assets — League logos" 小节,把 WC2026 logo 用三种尺寸(crest 24px / hero 80px / coming-soon 40px)摆出来,并在标题下写一行强调:**"FIFA World Cup 2026 — 全站只能使用这张真实 logo(`@/assets/leagues/world-cup-2026.png`),不要再生成或替换占位图。"** 顺手把 EPL / UCL / La Liga 几个 preset crest 也放一排,作为"league logo source of truth"的总览,避免以后又出现"重画一个奖杯叠加"那种事。
-8. **删除** `src/assets/leagues/world-cup-2026.svg` —— 旧占位资产不再使用,清理掉避免误用。
+```ts
+const heroStats = isWorldCup
+  ? [
+      { label: "Nations", value: "48" },
+      { label: "Matches", value: "104" },
+      { label: "Groups", value: "12" },
+      { label: "Host cities", value: "16" },
+    ]
+  : undefined;
+```
 
-### 不动
+其它改动:
+- 删除 `matchCount={matches.length}` 传参。
+- 删除 `{isWorldCup && <RoadToFinalStrip />}` 这一行。
 
-- 不改 logo 容器的尺寸 / 圆角 / ring 样式 —— `LeagueBadge` 现有的 `object-contain` + 透明容器对新 PNG 同样适用。
-- 不改 `LeagueHubHero`、`LeagueComingSoonCard` 等消费方,它们都通过 `league.logo` / preset 读取,自动跟着切。
+### `src/components/sports/league/WorldCupAmbience.tsx`
+- 移除 `RoadToFinalStrip` 导出(及未再用到的 `Trophy` 引入)。`WorldCupBackdrop` 保留。
+
+### `src/routes/style-guide.tsx`
+- `LeagueHubHero` 演示位:`matchCount` 参数删掉;`stats` 换成上面那组真实数据。
+- 删除 `RoadToFinalStrip` 演示块及其 import。
+
+## 不动
+
+- Hero 的 `kickoffLabel`、`hostFlags`、tagline。
+- `WorldCupBackdrop` 全页氛围。

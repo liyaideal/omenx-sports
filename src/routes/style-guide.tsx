@@ -47,10 +47,7 @@ import { LeagueSpotlightCard } from "@/components/sports/league/LeagueSpotlightC
 import { LeagueComingSoonCard } from "@/components/sports/league/LeagueComingSoonCard";
 import { LeagueHubHero } from "@/components/sports/league/LeagueHubHero";
 import { HubTabs } from "@/components/sports/league/HubTabs";
-import {
-  WorldCupBackdrop,
-  RoadToFinalStrip,
-} from "@/components/sports/league/WorldCupAmbience";
+import { WorldCupBackdrop } from "@/components/sports/league/WorldCupAmbience";
 import { GroupWinnerCard } from "@/components/sports/league/GroupWinnerCard";
 import { BinaryQuestionCard } from "@/components/sports/league/BinaryQuestionCard";
 import { BracketView } from "@/components/sports/league/BracketView";
@@ -1339,7 +1336,6 @@ function StyleGuide() {
                 </div>
                 <LeagueHubHero
                   league={LEAGUES[0]}
-                  matchCount={getMatchMarketsByLeagueSlug(LEAGUES[0].slug).length}
                   kickoffLabel="Jun 11, 2026"
                   hostFlags={[
                     { code: "us", name: "USA" },
@@ -1350,16 +1346,9 @@ function StyleGuide() {
                     { label: "Nations", value: "48" },
                     { label: "Matches", value: "104" },
                     { label: "Groups", value: "12" },
-                    { label: "Volume", value: "$1.00B" },
+                    { label: "Host cities", value: "16" },
                   ]}
                 />
-              </div>
-
-              <div>
-                <div className="mb-3 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
-                  RoadToFinalStrip — tournament marquee placed above HubTabs
-                </div>
-                <RoadToFinalStrip />
               </div>
 
               <div>
