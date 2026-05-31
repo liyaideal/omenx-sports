@@ -12,13 +12,11 @@ import type { LeagueHub } from "@/data/leagues";
  */
 export function LeagueHubHero({
   league,
-  matchCount,
   kickoffLabel,
   hostFlags,
   stats,
 }: {
   league: LeagueHub;
-  matchCount: number;
   /** Tournament-only: short kickoff/venue label, e.g. "Jun 11 · MetLife". */
   kickoffLabel?: string;
   /** Tournament-only: ISO-2 codes for host flags, rendered as chips. */
@@ -69,9 +67,6 @@ export function LeagueHubHero({
               }}
             >
               {league.kind === "tournament" ? "Tournament" : "Season league"}
-            </span>
-            <span className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
-              {matchCount} {matchCount === 1 ? "event" : "events"}
             </span>
             {isTournament && kickoffLabel && (
               <span className="inline-flex items-center gap-1 rounded-full bg-amber-300/10 px-2 py-0.5 font-mono text-[10px] uppercase tracking-widest text-amber-200 ring-1 ring-amber-300/30">

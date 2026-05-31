@@ -1,13 +1,8 @@
-import { Trophy } from "lucide-react";
-
 /**
  * Tournament-only page atmosphere for the World Cup 2026 hub.
- * Renders two pieces:
- *  - `WorldCupBackdrop` — a fixed, page-wide decorative layer with
- *    radial accent glows and floating confetti dots. `pointer-events-none`,
- *    sits behind all content.
- *  - `RoadToFinalStrip` — a slim marquee placed above HubTabs that
- *    announces the final destination and date.
+ * Renders `WorldCupBackdrop` — a fixed, page-wide decorative layer with
+ * radial accent glows and floating confetti dots. `pointer-events-none`,
+ * sits behind all content.
  *
  * Isolated in a single file so removing the World Cup atmosphere
  * post-tournament is a single delete.
@@ -69,32 +64,6 @@ export function WorldCupBackdrop() {
           />
         );
       })}
-    </div>
-  );
-}
-
-export function RoadToFinalStrip() {
-  return (
-    <div
-      className="relative overflow-hidden rounded-full border border-amber-300/20 bg-gradient-to-r from-amber-300/10 via-white/[0.03] to-emerald-400/10 px-4 py-1.5"
-      style={{ boxShadow: `inset 0 0 0 1px rgba(255,255,255,0.04)` }}
-    >
-      <div className="flex items-center gap-2.5">
-        <span className="relative inline-flex h-2 w-2">
-          <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-amber-300/60" />
-          <span className="relative inline-flex h-2 w-2 rounded-full bg-amber-300" />
-        </span>
-        <Trophy className="h-3.5 w-3.5 text-amber-300" />
-        <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-foreground/90">
-          Road to MetLife
-        </span>
-        <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
-          Final · Jul 19, 2026
-        </span>
-        <span className="ml-auto hidden font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground md:inline">
-          Kickoff Jun 11 · USA · CAN · MEX
-        </span>
-      </div>
     </div>
   );
 }
