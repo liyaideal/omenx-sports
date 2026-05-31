@@ -144,7 +144,7 @@ export function TradeDrawer({
         {/* Side chooser — only for 3+ outcome markets, where each outcome is
             its own binary sub-market with YES/NO sides. */}
         {needsSideToggle && (
-          <div className="border-b border-border px-5 py-4">
+          <div className="border-b border-border px-5 py-3">
             <div className="mb-2 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
               Pick side · {selected.team?.short ?? selected.label}
             </div>
@@ -178,7 +178,7 @@ export function TradeDrawer({
         )}
 
         {/* Trade form */}
-        <div className="px-5 py-4">
+        <div className="px-5 py-3 pb-0">
           <TradeForm
             key={`${market.id}-${selected.id}-${needsSideToggle ? side : "single"}`}
             outcome={formOutcome}
