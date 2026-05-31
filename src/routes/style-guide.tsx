@@ -54,6 +54,7 @@ import { BinaryQuestionCard } from "@/components/sports/league/BinaryQuestionCar
 import { BracketView } from "@/components/sports/league/BracketView";
 import { PropsGrid } from "@/components/sports/league/PropsGrid";
 import { SpotlightPropsCardHorizontal } from "@/components/sports/league/SpotlightPropsCardHorizontal";
+import { EventMarketTileCard } from "@/components/sports/dashboard/EventMarketTileCard";
 import { useTradeDrawer } from "@/components/sports/trade/TradeDrawerProvider";
 import {
   WC26_GROUPS,
@@ -1293,6 +1294,34 @@ function StyleGuide() {
                   RoadToFinalStrip — tournament marquee placed above HubTabs
                 </div>
                 <RoadToFinalStrip />
+              </div>
+
+              <div>
+                <div className="mb-3 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+                  EventMarketTileCard — league chip vs stage chip (inside tournament hub)
+                </div>
+                <div className="grid gap-3 md:grid-cols-2">
+                  <div>
+                    <div className="mb-2 font-mono text-[9px] uppercase tracking-widest text-muted-foreground">
+                      Default — homepage / cross-league lobby (league chip)
+                    </div>
+                    {getMatchMarketsByLeagueSlug("world-cup-2026")
+                      .slice(0, 1)
+                      .map((m) => (
+                        <EventMarketTileCard key={m.id} market={m} />
+                      ))}
+                  </div>
+                  <div>
+                    <div className="mb-2 font-mono text-[9px] uppercase tracking-widest text-muted-foreground">
+                      showStage — inside `/league/$slug` (Group A · MD1)
+                    </div>
+                    {getMatchMarketsByLeagueSlug("world-cup-2026")
+                      .slice(0, 1)
+                      .map((m) => (
+                        <EventMarketTileCard key={m.id} market={m} showStage />
+                      ))}
+                  </div>
+                </div>
               </div>
 
               <div>

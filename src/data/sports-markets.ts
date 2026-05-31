@@ -49,6 +49,11 @@ export interface SportsMarket {
   /** Match clock as `MM:SS` or `HH:MM:SS`, used both as a label and to
    *  drive the progress bar (assuming a 90-minute regulation match). */
   liveClock?: string;
+  /** Tournament context label (e.g. "Group A · MD1", "Round of 32",
+   *  "Quarter-final", "Player prop"). When the card is rendered inside
+   *  a tournament hub the league chip is replaced by this stage chip —
+   *  league is implied by the hub, stage is the useful axis. */
+  stage?: string;
 }
 
 export const FEATURED_MATCH: SportsMarket = {
@@ -253,6 +258,7 @@ export const MATCH_MARKETS: SportsMarket[] = [
     ],
     tradeHref: `/event/wc26-mex-rsa`,
     dayOffset: 12,
+    stage: "Group A · MD1",
   },
   {
     id: "wc26-kor-cze",
@@ -277,6 +283,7 @@ export const MATCH_MARKETS: SportsMarket[] = [
     ],
     tradeHref: `/event/wc26-kor-cze`,
     dayOffset: 12,
+    stage: "Group F · MD1",
   },
   {
     id: "wc26-can-bih",
@@ -301,6 +308,7 @@ export const MATCH_MARKETS: SportsMarket[] = [
     ],
     tradeHref: `/event/wc26-can-bih`,
     dayOffset: 13,
+    stage: "Group B · MD1",
   },
   {
     id: "wc26-usa-par",
@@ -325,6 +333,7 @@ export const MATCH_MARKETS: SportsMarket[] = [
     ],
     tradeHref: `/event/wc26-usa-par`,
     dayOffset: 13,
+    stage: "Group D · MD1",
   },
   {
     // Polymarket: "Will Lionel Messi play in the World Cup?" — binary prop
@@ -343,6 +352,7 @@ export const MATCH_MARKETS: SportsMarket[] = [
     ],
     tradeHref: `/event/wc26-messi-plays`,
     dayOffset: 12,
+    stage: "Player prop",
   },
 ];
 

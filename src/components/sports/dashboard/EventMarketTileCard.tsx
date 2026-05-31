@@ -1,4 +1,4 @@
-import { Clock, Flame, TrendingUp, Users } from "lucide-react";
+import { Clock, Flame, TrendingUp, Trophy, Users } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 import type { Outcome, SportsMarket, TeamLite } from "@/data/sports-markets";
 import { PricePill } from "./PricePill";
@@ -35,9 +35,19 @@ function EventBadge({ market }: { market: SportsMarket }) {
  * Layout adapts to outcome count and presence of a fixture. Designed to
  * sit in a wide grid (2-3 tiles per row at lg+).
  */
-export function EventMarketTileCard({ market }: { market: SportsMarket }) {
+export function EventMarketTileCard({
+  market,
+  showStage = false,
+}: {
+  market: SportsMarket;
+  /** When true, render `market.stage` ("Group A · MD1", "Round of 32",
+   *  "Player prop") in place of the league chip. Use inside a league /
+   *  tournament hub where the league is already implied by the page. */
+  showStage?: boolean;
+}) {
   const hasFixture = Boolean(market.fixture);
   const isBinary = market.shape === "binary";
+  const stage = showStage && market.stage ? market.stage : null;
   return (
     <Link
       to="/event/$id"
@@ -45,7 +55,7 @@ export function EventMarketTileCard({ market }: { market: SportsMarket }) {
       className="group flex h-full flex-col gap-4 rounded-3xl border border-border bg-surface p-5 shadow-card transition hover:border-white/15"
     >
       <header className="flex items-center justify-between gap-2">
-        <LeagueChip short={market.league.short} />
+        {stage ? <StageChip label={stage} /> : <LeagueChip short={market.league.short} />}
         <EventBadge market={market} />
       </header>
 
@@ -185,5 +195,14 @@ function TeamSide({ team, align }: { team: TeamLite; align: "left" | "right" }) 
         className="truncate text-xs font-medium text-foreground"
       />
     </div>
+  );
+}
+
+function StageChip({ label }: { label: string }) {
+  return (
+    <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-300/10 px-2.5 py-1 font-mono text-[10px] uppercase tracking-widest text-amber-200 ring-1 ring-amber-300/25">
+      <Trophy className="h-3 w-3" />
+      {label}
+    </span>
   );
 }
