@@ -1273,7 +1273,40 @@ function StyleGuide() {
                 <LeagueHubHero
                   league={LEAGUES[0]}
                   matchCount={getMatchMarketsByLeagueSlug(LEAGUES[0].slug).length}
+                  kickoffLabel="Jun 11, 2026"
+                  hostFlags={[
+                    { code: "us", name: "USA" },
+                    { code: "ca", name: "Canada" },
+                    { code: "mx", name: "Mexico" },
+                  ]}
+                  stats={[
+                    { label: "Nations", value: "48" },
+                    { label: "Matches", value: "104" },
+                    { label: "Groups", value: "12" },
+                    { label: "Volume", value: "$1.00B" },
+                  ]}
                 />
+              </div>
+
+              <div>
+                <div className="mb-3 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+                  RoadToFinalStrip — tournament marquee placed above HubTabs
+                </div>
+                <RoadToFinalStrip />
+              </div>
+
+              <div>
+                <div className="mb-3 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+                  WorldCupBackdrop — fixed page atmosphere (framed preview)
+                </div>
+                <div className="relative h-40 overflow-hidden rounded-2xl border border-border bg-background">
+                  <div className="absolute inset-0">
+                    <WorldCupBackdrop />
+                  </div>
+                  <div className="relative z-10 grid h-full place-items-center font-mono text-[11px] uppercase tracking-widest text-muted-foreground">
+                    Page content sits above this layer
+                  </div>
+                </div>
               </div>
 
               <div>
