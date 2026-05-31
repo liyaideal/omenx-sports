@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { ChevronDown, Clock, Users } from "lucide-react";
+import { Link } from "@tanstack/react-router";
 import type { GroupMarket } from "@/data/tournament";
 import { outcomeMarketIdFor } from "@/data/tournament";
 import { useTradeDrawer } from "@/components/sports/trade/TradeDrawerProvider";
@@ -19,7 +20,13 @@ export function GroupWinnerCard({ market }: { market: GroupMarket }) {
   const hasMore = sorted.length > MAX_VISIBLE;
   const visible = expanded || !hasMore ? sorted : sorted.slice(0, MAX_VISIBLE);
   return (
-    <section className="flex h-full flex-col rounded-2xl border border-border bg-surface p-4 shadow-card">
+    <section className="relative flex h-full flex-col rounded-2xl border border-border bg-surface p-4 shadow-card transition hover:bg-white/[0.02]">
+      <Link
+        to="/event/$id"
+        params={{ id: market.id }}
+        aria-label={`Open Group ${market.group} winner market`}
+        className="absolute inset-0 z-0 rounded-2xl"
+      />
       <CardHeader
         className="pb-3"
         chip={<TypeChip icon={Users} label="Group winner" tone="amber" />}
@@ -27,7 +34,7 @@ export function GroupWinnerCard({ market }: { market: GroupMarket }) {
         titleSize="base"
       />
 
-      <div className="flex flex-1 flex-col divide-y divide-white/[0.04]">
+      <div className="relative z-10 flex flex-1 flex-col divide-y divide-white/[0.04]">
         {visible.map((row, i) => {
           const hue = row.team.hue ?? 220;
           const marketId = row.marketId ?? outcomeMarketIdFor(market.id, row.team.short);

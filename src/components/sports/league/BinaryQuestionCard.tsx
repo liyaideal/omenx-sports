@@ -1,5 +1,6 @@
 import type { LucideIcon } from "lucide-react";
 import { Clock, Users, Trophy, Target, HelpCircle, Swords } from "lucide-react";
+import { Link } from "@tanstack/react-router";
 import type { SportsMarket } from "@/data/sports-markets";
 import { useTradeDrawer } from "@/components/sports/trade/TradeDrawerProvider";
 import { CardHeader, TypeChip, type CardChipTone } from "@/components/sports/CardChip";
@@ -45,7 +46,13 @@ export function BinaryQuestionCard({ market }: { market: SportsMarket }) {
   const chip = getBinaryChip(market);
 
   return (
-    <section className="flex h-full flex-col rounded-2xl border border-border bg-surface p-4 shadow-card">
+    <section className="relative flex h-full flex-col rounded-2xl border border-border bg-surface p-4 shadow-card transition hover:bg-white/[0.02]">
+      <Link
+        to="/event/$id"
+        params={{ id: market.id }}
+        aria-label={`Open ${market.title}`}
+        className="absolute inset-0 z-0 rounded-2xl"
+      />
       <CardHeader
         className="pb-3"
         chip={<TypeChip icon={chip.icon} label={chip.label} tone={chip.tone} />}
@@ -76,7 +83,7 @@ export function BinaryQuestionCard({ market }: { market: SportsMarket }) {
       </div>
 
       {/* YES / NO action rows — mirror GroupWinnerCard row styling */}
-      <div className="flex flex-1 flex-col divide-y divide-white/[0.04]">
+      <div className="relative z-10 flex flex-1 flex-col divide-y divide-white/[0.04]">
         {[
           { o: yes, pct: yesPct, kind: "y" as const },
           { o: no, pct: noPct, kind: "n" as const },
