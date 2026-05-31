@@ -252,9 +252,11 @@ function HubContent({
                       <span className="h-px flex-1 bg-border" />
                     </div>
                   )}
-                  {liveStream.map((m) => (
-                    <LiveStreamCard key={m.id} market={m} />
-                  ))}
+                  <div className="grid gap-3 md:grid-cols-2">
+                    {liveStream.map((m) => (
+                      <LiveStreamCard key={m.id} market={m} />
+                    ))}
+                  </div>
                 </div>
               )}
               {isTournament && (
