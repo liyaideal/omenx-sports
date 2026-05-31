@@ -47,9 +47,6 @@ export function LiveStreamCard({ market }: { market: SportsMarket }) {
             </span>
             LIVE
           </span>
-          <span className="font-mono text-[10px] uppercase tracking-widest text-white/80">
-            {market.league.short}
-          </span>
         </div>
 
         {market.liveClock && (
