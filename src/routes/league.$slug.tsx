@@ -22,6 +22,10 @@ import {
 } from "@/data/tournament";
 import { PropsGrid } from "@/components/sports/league/PropsGrid";
 import { BracketView } from "@/components/sports/league/BracketView";
+import {
+  WorldCupBackdrop,
+  RoadToFinalStrip,
+} from "@/components/sports/league/WorldCupAmbience";
 import { ACCOUNT_STATS, type SportsMarket } from "@/data/sports-markets";
 
 const USER_NAME = "Jeremy";
@@ -135,8 +139,12 @@ function LeagueHubPage() {
       : []),
   ];
 
+  const isWorldCup = league.slug === "world-cup-2026";
+
   return (
     <AppShell>
+      {isWorldCup && <WorldCupBackdrop />}
+      <div className="relative z-10">
       <div className="hidden md:block">
         <AppTopBar userName={USER_NAME} userAvatar={USER_AVATAR} equity={ACCOUNT_STATS.available} />
       </div>
@@ -172,6 +180,7 @@ function LeagueHubPage() {
           bracket={bracket}
         />
       </div>
+      </div>
     </AppShell>
   );
 }
@@ -201,9 +210,36 @@ function HubContent({
   binaryQuestions: SportsMarket[];
   bracket: ReturnType<typeof getBracketByLeagueSlug>;
 }) {
+  const isTournament = league.kind === "tournament";
+  const isWorldCup = league.slug === "world-cup-2026";
+
+  const heroStats = isWorldCup
+    ? [
+        { label: "Nations", value: "48" },
+        { label: "Matches", value: String(matches.length || 104) },
+        { label: "Groups", value: String(groups.length || 12) },
+        { label: "Volume", value: "$1.00B" },
+      ]
+    : undefined;
+
+  const hostFlags = isWorldCup
+    ? [
+        { code: "us", name: "USA" },
+        { code: "ca", name: "Canada" },
+        { code: "mx", name: "Mexico" },
+      ]
+    : undefined;
+
   return (
     <div className="space-y-5">
-      <LeagueHubHero league={league} matchCount={matches.length} />
+      <LeagueHubHero
+        league={league}
+        matchCount={matches.length}
+        kickoffLabel={isWorldCup ? "Jun 11, 2026" : undefined}
+        hostFlags={hostFlags}
+        stats={heroStats}
+      />
+      {isWorldCup && <RoadToFinalStrip />}
       <HubTabs slug={league.slug} current={view} tabs={tabs} />
 
       {view === "games" && (
@@ -214,9 +250,23 @@ function HubContent({
             <>
               {liveStream.length > 0 && (
                 <div className="space-y-3">
+                  {isTournament && (
+                    <div className="flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
+                      <span className="h-px flex-1 bg-border" />
+                      Featured kickoff
+                      <span className="h-px flex-1 bg-border" />
+                    </div>
+                  )}
                   {liveStream.map((m) => (
                     <LiveStreamCard key={m.id} market={m} />
                   ))}
+                </div>
+              )}
+              {isTournament && (
+                <div className="flex items-center gap-2 pt-1 font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
+                  <span className="h-px flex-1 bg-border" />
+                  Group stage · Jun 11 – 27
+                  <span className="h-px flex-1 bg-border" />
                 </div>
               )}
               <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
