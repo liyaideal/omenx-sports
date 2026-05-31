@@ -1,4 +1,4 @@
-import { Clock, Users } from "lucide-react";
+import { Clock, Users, Trophy, Target, HelpCircle } from "lucide-react";
 import type { SportsMarket } from "@/data/sports-markets";
 import { useTradeDrawer } from "@/components/sports/trade/TradeDrawerProvider";
 
@@ -17,15 +17,21 @@ export function BinaryQuestionCard({ market }: { market: SportsMarket }) {
   if (!yes || !no) return null;
   const yesPct = Math.round(yes.price * 100);
   const noPct = 100 - yesPct;
+  const Icon =
+    market.kind === "league-winner"
+      ? Trophy
+      : market.kind === "player-prop" || market.kind === "top-scorer"
+        ? Target
+        : HelpCircle;
 
   return (
     <section className="flex h-full flex-col rounded-2xl border border-border bg-surface p-4 shadow-card">
       <header className="flex items-center justify-between pb-3">
         <div className="flex min-w-0 items-center gap-3">
-          <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-white/[0.05] font-display text-lg font-bold text-foreground ring-1 ring-white/10">
-            ?
+          <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-white/[0.05] text-foreground/80 ring-1 ring-white/10">
+            <Icon className="h-4 w-4" />
           </span>
-          <h3 className="truncate font-display text-sm font-semibold text-foreground">
+          <h3 className="line-clamp-2 font-display text-sm font-semibold leading-tight text-foreground">
             {market.title}
           </h3>
         </div>
