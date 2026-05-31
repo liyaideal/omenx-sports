@@ -4,7 +4,6 @@ import { toast } from "sonner";
 import type { SportsMarket, TeamLite } from "@/data/sports-markets";
 import { PricePill } from "./PricePill";
 import { LeagueChip } from "../LeagueBadge";
-import { DrawIcon } from "@/components/sports/draw";
 
 /**
  * Featured match market — replaces the old FanPollCard. Two crests, a
@@ -76,16 +75,10 @@ export function MatchMarketCard({ market }: { market: SportsMarket }) {
             const chroma = isDraw ? "0.04" : "0.2";
             return (
               <div key={o.id} className="flex items-center gap-3">
-                {isDraw ? (
-                  <span className="grid h-2.5 w-2.5 shrink-0 place-items-center text-muted-foreground">
-                    <DrawIcon className="h-2.5 w-2.5" />
-                  </span>
-                ) : (
-                  <span
-                    className="h-2.5 w-2.5 shrink-0 rounded-full"
-                    style={{ background: `oklch(0.68 ${chroma} ${hue})` }}
-                  />
-                )}
+                <span
+                  className="h-2.5 w-2.5 shrink-0 rounded-full"
+                  style={{ background: `oklch(0.68 ${chroma} ${hue})` }}
+                />
                 <span className="min-w-0 flex-1 truncate font-display text-sm font-medium text-foreground">
                   {o.team?.name ?? o.label}
                 </span>
