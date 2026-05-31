@@ -1,6 +1,6 @@
 import { cn } from "@/lib/utils";
 import eplLogo from "@/assets/leagues/epl.png";
-import worldCup2026Logo from "@/assets/leagues/world-cup-2026.svg";
+import worldCup2026Logo from "@/assets/leagues/world-cup-2026.png";
 
 /**
  * Real league logos sourced from ESPN's public CDN. PNGs with transparent
