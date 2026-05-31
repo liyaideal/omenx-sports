@@ -12,6 +12,12 @@ import { EventLiveStage, useStageOffscreen } from "@/components/sports/event/Eve
 import { StreamMiniPlayer } from "@/components/sports/event/StreamMiniPlayer";
 import { StageTabs, type StageTab } from "@/components/sports/event/StageTabs";
 import { MobileTradeBar } from "@/components/sports/event/MobileTradeBar";
+import { RelatedMarketsBar } from "@/components/sports/event/RelatedMarketsBar";
+import { LiveTape } from "@/components/sports/event/LiveTape";
+import { DepthBar } from "@/components/sports/event/DepthBar";
+import { PreMatchStrip } from "@/components/sports/event/PreMatchStrip";
+import { ShareButton } from "@/components/sports/event/ShareButton";
+import { getRelatedMarkets } from "@/components/sports/event/related-markets";
 import {
   PositionsTable,
   type PositionRowData,
