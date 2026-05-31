@@ -1634,6 +1634,8 @@ function StyleGuide() {
                 <ul className="space-y-1.5 text-muted-foreground">
                   <li>• Open via <code className="font-mono text-foreground">openTrade({"{ marketId, outcomeId? }"})</code> from the hook.</li>
                   <li>• <code className="font-mono text-foreground">BinaryQuestionCard</code>'s YES / NO buy buttons trigger the drawer with the matching outcome pre-selected.</li>
+                  <li>• <code className="font-mono text-foreground">EventMarketTileCard</code> uses a two-step interaction: the card itself links to <code className="font-mono text-foreground">/event/$id</code>, while each outcome block / row opens the drawer with that outcome pre-selected (inner buttons <code className="font-mono text-foreground">preventDefault</code> the parent link).</li>
+                  <li>• <code className="font-mono text-foreground">LiveStreamCard</code>'s segmented odds bar follows the same pattern — poster/score area goes to the event page, each segment fires <code className="font-mono text-foreground">openTrade</code>.</li>
                   <li>• Marker for "drawer is sticky": closing it preserves nothing — every open call replaces the selection, but the drawer DOM survives navigation so animations don't flash.</li>
                   <li>• Outcomes are rendered as a 2- or 3-column chooser depending on the market shape; deep-link to <code className="font-mono text-foreground">/event/$id</code> is always available in the header for the full market page.</li>
                   <li>• Always reuses the shared <code className="font-mono text-foreground">TradeForm</code> — leverage, PRO toggle, TP/SL all work identically to <code className="font-mono text-foreground">/event/$id</code>.</li>
