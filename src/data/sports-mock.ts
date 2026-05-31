@@ -125,7 +125,7 @@ export const FAN_POST = {
   authorName: "Alex",
   authorHandle: "@alexio_98",
   postedAgo: "2 minutes ago",
-  title: "PSG in the Champions League!",
+  title: "USA back in the World Cup spotlight!",
   image:
     "https://images.unsplash.com/photo-1522778119026-d647f0596c20?w=900&h=520&fit=crop&q=80",
   href: omenxUrl.markets(),
@@ -177,15 +177,15 @@ export const STANDINGS: StandingRow[] = [
  * Mock user follow state. Toggle to `[]` to preview the Fans Zone
  * empty / onboarding state in the left column of the home page.
  */
-export const FOLLOWED_TEAMS: TeamLite[] = [TEAMS.chelsea, TEAMS.manCity];
+export const FOLLOWED_TEAMS: TeamLite[] = [TEAMS.usa, TEAMS.mexico];
 
 /** Surfaced in the Fans Zone empty state as one-tap follow chips. */
 export const SUGGESTED_TEAMS: TeamLite[] = [
-  TEAMS.realMadrid,
-  TEAMS.barcelona,
-  TEAMS.liverpool,
-  TEAMS.arsenal,
-  TEAMS.psg,
+  TEAMS.koreaRep,
+  TEAMS.canada,
+  TEAMS.czechia,
+  TEAMS.bosnia,
+  TEAMS.paraguay,
 ];
 
 /** Team keys used to filter LIVE_TRADES against FOLLOWED_TEAMS. */
