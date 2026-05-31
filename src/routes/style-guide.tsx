@@ -1840,6 +1840,57 @@ function MobileTradeBarDemo() {
   );
 }
 
+function GlobalLiveStreamDemo() {
+  // We can't easily render the portaled mini player inside the guide
+  // without polluting the rest of the page, so this demo offers a button
+  // that starts a global watching session — the mini player then appears
+  // bottom-right of the screen and follows the user as they browse.
+  const live =
+    MATCH_MARKETS.find((m) => m.isLiveStream && m.liveScore && m.fixture) ??
+    FEATURED_MATCH;
+  const { startWatching, stopWatching, openFullscreen, setMinimized, active } =
+    useLiveStream();
+  const watching = active?.marketId === live.id;
+  return (
+    <div className="flex flex-wrap items-center gap-2 rounded-2xl border border-border bg-surface/40 p-4 text-xs">
+      <span className="font-mono uppercase tracking-widest text-muted-foreground">
+        {live.title}
+      </span>
+      <div className="ml-auto flex flex-wrap items-center gap-2">
+        <button
+          type="button"
+          onClick={() => {
+            startWatching(live.id, live.outcomes[0]?.id);
+            setMinimized(true);
+          }}
+          className="rounded-md bg-primary px-3 py-1.5 font-mono text-[10px] font-semibold uppercase tracking-widest text-primary-foreground hover:bg-primary/90"
+        >
+          Start watching
+        </button>
+        <button
+          type="button"
+          onClick={() => {
+            startWatching(live.id, live.outcomes[0]?.id);
+            openFullscreen();
+          }}
+          className="rounded-md bg-white/[0.06] px-3 py-1.5 font-mono text-[10px] font-semibold uppercase tracking-widest text-foreground hover:bg-white/[0.12]"
+        >
+          Open fullscreen
+        </button>
+        {watching && (
+          <button
+            type="button"
+            onClick={stopWatching}
+            className="rounded-md bg-white/[0.04] px-3 py-1.5 font-mono text-[10px] font-semibold uppercase tracking-widest text-muted-foreground hover:bg-white/[0.1]"
+          >
+            Stop
+          </button>
+        )}
+      </div>
+    </div>
+  );
+}
+
 function EventExtrasDemo() {
   const base =
     MATCH_MARKETS.find((m) => m.isLiveStream && m.fixture) ?? FEATURED_MATCH;
