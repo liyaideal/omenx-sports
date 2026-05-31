@@ -127,39 +127,6 @@ export function GlobalStreamMiniPlayer({
   );
 }
 
-function OutcomeChip({
-  label,
-  cents,
-  selected,
-  onClick,
-}: {
-  label: string;
-  cents: number;
-  selected: boolean;
-  onClick: () => void;
-}) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className={cn(
-        "flex min-w-0 flex-1 items-center justify-between gap-1.5 rounded-md px-2 py-1.5 text-left ring-1 transition",
-        selected
-          ? "bg-primary/15 ring-primary/50"
-          : "bg-white/[0.04] ring-white/10 hover:bg-white/[0.08]",
-      )}
-    >
-      <span className="truncate font-mono text-[9px] uppercase tracking-widest text-white/70">
-        {label}
-      </span>
-      <span className="font-display text-xs font-semibold tabular-nums text-white">
-        {cents}
-        <span className="text-white/50">¢</span>
-      </span>
-    </button>
-  );
-}
-
 function IconBtn({
   label,
   onClick,
