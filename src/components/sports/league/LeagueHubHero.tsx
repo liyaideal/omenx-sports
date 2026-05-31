@@ -51,10 +51,10 @@ export function LeagueHubHero({
         </>
       )}
 
-      <div className="flex items-stretch gap-5 md:gap-7">
+      <div className="flex items-center gap-5 md:gap-7">
         <span
-          className="relative grid aspect-square shrink-0 place-items-center self-stretch overflow-hidden rounded-2xl bg-white/[0.06] ring-1 ring-white/15"
-          style={{ boxShadow: `0 0 40px -10px oklch(${accent} / 0.6)`, minHeight: "8rem" }}
+          className="relative grid h-32 w-32 shrink-0 place-items-center overflow-hidden rounded-2xl bg-white/[0.06] ring-1 ring-white/15 md:h-44 md:w-44"
+          style={{ boxShadow: `0 0 40px -10px oklch(${accent} / 0.6)` }}
         >
           <img src={league.logo} alt="" className="h-full w-full object-contain" loading="eager" />
         </span>
