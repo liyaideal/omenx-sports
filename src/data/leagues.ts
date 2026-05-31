@@ -14,6 +14,7 @@ import {
   type SportsMarket,
   type PlayerSpotlight,
 } from "@/data/sports-markets";
+import worldCup2026Logo from "@/assets/leagues/world-cup-2026.svg";
 
 export type LeagueKind = "tournament" | "season-league";
 
@@ -48,7 +49,7 @@ export const LEAGUES: LeagueHub[] = [
     kind: "tournament",
     tagline: "48 nations · USA, Canada & Mexico · June 11 – July 19",
     accent: "0.7 0.18 145",
-    logo: "https://a.espncdn.com/i/leaguelogos/soccer/500/9.png",
+    logo: worldCup2026Logo,
     status: "featured",
   },
   {
