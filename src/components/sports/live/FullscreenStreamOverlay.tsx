@@ -134,9 +134,14 @@ export function FullscreenStreamOverlay({
           </div>
           <button
             type="button"
-            onClick={() =>
-              openTrade({ marketId: market.id, outcomeId: selectedId })
-            }
+            onClick={() => {
+              // Close fullscreen first — TradeDrawer (Sheet) renders at
+              // z-50, which would otherwise sit behind this overlay
+              // (z-60). Drop back to the floating mini player and open
+              // the drawer on top.
+              onClose();
+              openTrade({ marketId: market.id, outcomeId: selectedId });
+            }}
             className="shrink-0 rounded-xl bg-primary px-5 py-3 font-display text-sm font-semibold text-primary-foreground transition hover:bg-primary/90"
           >
             Trade
