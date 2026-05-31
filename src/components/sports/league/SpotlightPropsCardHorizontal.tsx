@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { ChevronDown, Clock, Flame, Users } from "lucide-react";
+import { Link } from "@tanstack/react-router";
 import type { PlayerSpotlight } from "@/data/sports-markets";
 import { useTradeDrawer } from "@/components/sports/trade/TradeDrawerProvider";
 import { CardHeader, TypeChip } from "@/components/sports/CardChip";
@@ -48,9 +49,18 @@ export function SpotlightPropsCardHorizontal({
   const totalVol = player.props.reduce((s, m) => s + parseDollars(m.volume), 0);
   const total24h = player.props.reduce((s, m) => s + parseDollars(m.volume24h ?? "0"), 0);
   const endsLabel = player.props[0]?.endsLabel ?? "";
+  const primaryMarketId = player.props[0]?.id;
 
   return (
     <section className="relative flex h-full overflow-hidden rounded-2xl border border-border bg-surface bg-ambient shadow-card">
+      {primaryMarketId && (
+        <Link
+          to="/event/$id"
+          params={{ id: primaryMarketId }}
+          aria-label={`Open ${player.firstName} ${player.lastName} props`}
+          className="absolute inset-0 z-0 rounded-2xl"
+        />
+      )}
       {/* portrait column */}
       <div className="relative grid w-[160px] shrink-0 place-items-center sm:w-[200px]">
         <div
@@ -94,7 +104,7 @@ export function SpotlightPropsCardHorizontal({
           titleSize="lg"
         />
 
-        <div className="mt-3 flex flex-1 flex-col divide-y divide-white/[0.04] border-t border-white/[0.04]">
+        <div className="relative z-10 mt-3 flex flex-1 flex-col divide-y divide-white/[0.04] border-t border-white/[0.04]">
           {visible.map((m) => {
             const yes = m.outcomes[0];
             const no = m.outcomes[1];
