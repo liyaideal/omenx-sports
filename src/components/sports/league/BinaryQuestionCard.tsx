@@ -25,14 +25,9 @@ export function BinaryQuestionCard({ market }: { market: SportsMarket }) {
           <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-white/[0.05] font-display text-lg font-bold text-foreground ring-1 ring-white/10">
             ?
           </span>
-          <div className="min-w-0">
-            <div className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
-              {market.league.short} · Yes / No
-            </div>
-            <h3 className="truncate font-display text-sm font-semibold text-foreground">
-              {market.title}
-            </h3>
-          </div>
+          <h3 className="truncate font-display text-sm font-semibold text-foreground">
+            {market.title}
+          </h3>
         </div>
       </header>
 

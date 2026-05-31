@@ -1298,12 +1298,12 @@ function StyleGuide() {
 
               <div>
                 <div className="mb-3 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
-                  EventMarketTileCard — league chip vs stage chip (inside tournament hub)
+                  Card chip taxonomy — league chip (cross-league) vs TypeChip (inside hub)
                 </div>
                 <div className="grid gap-3 md:grid-cols-2">
                   <div>
                     <div className="mb-2 font-mono text-[9px] uppercase tracking-widest text-muted-foreground">
-                      Default — homepage / cross-league lobby (league chip)
+                      Default — homepage / cross-league lobby (LeagueChip)
                     </div>
                     {getMatchMarketsByLeagueSlug("world-cup-2026")
                       .slice(0, 1)
@@ -1313,12 +1313,12 @@ function StyleGuide() {
                   </div>
                   <div>
                     <div className="mb-2 font-mono text-[9px] uppercase tracking-widest text-muted-foreground">
-                      showStage — inside `/league/$slug` (Group A · MD1)
+                      hubContext — inside `/league/$slug` (TypeChip stage)
                     </div>
                     {getMatchMarketsByLeagueSlug("world-cup-2026")
                       .slice(0, 1)
                       .map((m) => (
-                        <EventMarketTileCard key={m.id} market={m} showStage />
+                        <EventMarketTileCard key={m.id} market={m} hubContext />
                       ))}
                   </div>
                 </div>

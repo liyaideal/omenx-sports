@@ -1,7 +1,8 @@
 import { Link } from "@tanstack/react-router";
+import { Target } from "lucide-react";
 import type { SportsMarket } from "@/data/sports-markets";
 import { PricePill } from "./PricePill";
-import { LeagueChip } from "../LeagueBadge";
+import { TypeChip } from "@/components/sports/CardChip";
 
 /**
  * Multi-outcome futures market for top scorer awards. Visually identical
@@ -21,10 +22,7 @@ export function TopScorerMarketCard({
     <section className="flex h-full flex-col rounded-3xl border border-border bg-surface p-5 shadow-card">
       <header className="flex items-center justify-between pb-3">
         <div>
-          <div className="inline-flex items-center gap-2">
-            <LeagueChip short={market.league.short} />
-            <span className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">· TOP SCORER</span>
-          </div>
+          <TypeChip icon={Target} label="Top scorer" tone="amber" />
           <h3 className="mt-1.5 font-display text-base font-semibold text-foreground">{market.title}</h3>
         </div>
       </header>
