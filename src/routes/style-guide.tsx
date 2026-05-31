@@ -35,6 +35,9 @@ import { OutcomeSelector } from "@/components/sports/OutcomeSelector";
 import { TeamName } from "@/components/sports/TeamName";
 import { teams } from "@/lib/teams";
 import { LiveStreamCard } from "@/components/sports/dashboard/LiveStreamCard";
+import { EventLiveStage } from "@/components/sports/event/EventLiveStage";
+import { StageTabs } from "@/components/sports/event/StageTabs";
+import { MobileTradeBar } from "@/components/sports/event/MobileTradeBar";
 import { MATCH_MARKETS, FEATURED_MATCH } from "@/data/sports-markets";
 import { MobileTopBar } from "@/components/sports/mobile/MobileTopBar";
 import { MobileBottomNav } from "@/components/sports/mobile/MobileBottomNav";
@@ -1644,6 +1647,48 @@ function StyleGuide() {
             </div>
           </Section>
 
+          <Section id="event-live-stage" title="Event live stage" kicker="23 — P0 / event detail">
+            <p className="mb-6 max-w-3xl text-sm text-muted-foreground">
+              16:9 broadcast surface used at the top of <code className="font-mono text-foreground">/event/$id</code> when the underlying
+              market is being streamed (<code className="font-mono text-foreground">market.isLiveStream</code>). Combines the live poster,
+              LIVE pill, broadcast scoreboard, match clock and player controls with an inline market ticker so the user keeps the selected
+              outcome price in view while watching. Lives inside <code className="font-mono text-foreground">StageTabs</code> below so the
+              page shares one vertical slot between Stream · Chart · Order book.
+            </p>
+
+            <EventLiveStageDemo />
+
+            <div className="mt-6 rounded-2xl border border-dashed border-white/15 bg-white/[0.02] p-5 text-xs">
+              <div className="mb-2 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+                Rules
+              </div>
+              <ul className="space-y-1.5 text-muted-foreground">
+                <li>• Only rendered when the market has <code className="font-mono text-foreground">isLiveStream</code> + <code className="font-mono text-foreground">liveScore</code>; otherwise the StageTabs default to <code className="font-mono text-foreground">chart</code>.</li>
+                <li>• Stream tab is always the default when present — users land on the broadcast, not the chart.</li>
+                <li>• Stage exposes a <code className="font-mono text-foreground">stageRef</code> so the page can run an IntersectionObserver and trigger the floating <code className="font-mono text-foreground">StreamMiniPlayer</code> when it scrolls out of view.</li>
+                <li>• Selected outcome label + cents + Δ24h appear in the ticker bar so the user always sees the price for the side they're about to trade.</li>
+              </ul>
+            </div>
+          </Section>
+
+          <Section id="event-trade-bar" title="Mobile sticky trade bar" kicker="24 — P0 / event detail mobile">
+            <p className="mb-6 max-w-3xl text-sm text-muted-foreground">
+              Fixed bottom action bar shown on <code className="font-mono text-foreground">&lt;lg</code> screens of the event detail page.
+              Desktop already has the sticky right-column <code className="font-mono text-foreground">TradeForm</code>; on mobile the form
+              falls below the fold, so this bar gives a one-thumb path to either pop the global <code className="font-mono text-foreground">TradeDrawer</code>
+              (Quick buy) or scroll to the full form (tap the price block).
+            </p>
+
+            <div className="relative h-32 overflow-hidden rounded-2xl border border-border bg-background/40 p-0">
+              <div className="pointer-events-none absolute inset-x-0 top-0 px-4 py-4 text-xs text-muted-foreground">
+                Mocked content above the bar…
+              </div>
+              <div className="absolute inset-x-0 bottom-0">
+                <MobileTradeBarDemo />
+              </div>
+            </div>
+          </Section>
+
           <footer className="mt-12 border-t border-border pt-6 text-center text-xs text-muted-foreground font-mono">
             Stadium Neon · v0.1 · sports prediction design system
           </footer>
@@ -1679,6 +1724,61 @@ function TradeDrawerDemo() {
             Open binary · pre-pick 2nd outcome
           </button>
         )}
+      </div>
+    </div>
+  );
+}
+
+function EventLiveStageDemo() {
+  const live =
+    MATCH_MARKETS.find((m) => m.isLiveStream && m.liveScore && m.fixture) ??
+    FEATURED_MATCH;
+  const selected = live.outcomes[0] ?? live.outcomes[0];
+  return (
+    <StageTabs
+      defaultTabId="stream"
+      tabs={[
+        {
+          id: "stream",
+          label: "Stream",
+          badge: (
+            <span className="ml-1 inline-flex h-1.5 w-1.5 rounded-full bg-[color:var(--accent)] shadow-[0_0_8px_var(--accent)]" />
+          ),
+          content: <EventLiveStage market={live} selected={selected} />,
+        },
+        {
+          id: "chart",
+          label: "Chart",
+          content: (
+            <div className="rounded-2xl border border-dashed border-white/15 bg-white/[0.02] p-10 text-center text-xs text-muted-foreground">
+              PriceChart slot
+            </div>
+          ),
+        },
+        {
+          id: "book",
+          label: "Order book",
+          content: (
+            <div className="rounded-2xl border border-dashed border-white/15 bg-white/[0.02] p-10 text-center text-xs text-muted-foreground">
+              OrderBook slot
+            </div>
+          ),
+        },
+      ]}
+    />
+  );
+}
+
+function MobileTradeBarDemo() {
+  const live =
+    MATCH_MARKETS.find((m) => m.isLiveStream && m.fixture) ?? FEATURED_MATCH;
+  const selected = live.outcomes[0];
+  return (
+    <div className="relative">
+      {/* Locally override the lg:hidden rule by wrapping in a smaller, static
+          frame — only used to demo the bar inside the style-guide. */}
+      <div className="[&_.fixed]:!relative [&_.fixed]:!inset-auto [&_.fixed]:!bottom-auto">
+        <MobileTradeBar market={live} selected={selected} />
       </div>
     </div>
   );
