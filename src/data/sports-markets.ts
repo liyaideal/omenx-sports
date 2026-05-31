@@ -258,6 +258,7 @@ export const MATCH_MARKETS: SportsMarket[] = [
     ],
     tradeHref: `/event/wc26-mex-rsa`,
     dayOffset: 12,
+    stage: "Group A · MD1",
   },
   {
     id: "wc26-kor-cze",
@@ -282,6 +283,7 @@ export const MATCH_MARKETS: SportsMarket[] = [
     ],
     tradeHref: `/event/wc26-kor-cze`,
     dayOffset: 12,
+    stage: "Group F · MD1",
   },
   {
     id: "wc26-can-bih",
@@ -306,6 +308,7 @@ export const MATCH_MARKETS: SportsMarket[] = [
     ],
     tradeHref: `/event/wc26-can-bih`,
     dayOffset: 13,
+    stage: "Group B · MD1",
   },
   {
     id: "wc26-usa-par",
@@ -330,6 +333,7 @@ export const MATCH_MARKETS: SportsMarket[] = [
     ],
     tradeHref: `/event/wc26-usa-par`,
     dayOffset: 13,
+    stage: "Group D · MD1",
   },
   {
     // Polymarket: "Will Lionel Messi play in the World Cup?" — binary prop
@@ -348,6 +352,7 @@ export const MATCH_MARKETS: SportsMarket[] = [
     ],
     tradeHref: `/event/wc26-messi-plays`,
     dayOffset: 12,
+    stage: "Player prop",
   },
 ];
 
