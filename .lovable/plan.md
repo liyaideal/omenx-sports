@@ -1,53 +1,102 @@
+# 全局直播 MiniPlayer + Trade 入口
 
-# 交易详情页 (/event/$id) 改造计划
+## 现状
 
-## 现状速览
+- `StreamMiniPlayer` 当前只在 `src/routes/event.$id.tsx` 内挂载，靠 `useStageOffscreen` 触发显隐。一旦用户跳到首页 / `/events` / `/league/...`，组件被卸载，浮窗消失。
+- 浮窗底栏只展示当前选中那一队的价格 + 单边 `Buy` 按钮，进入的是 `TradeDrawer` 并预选了一边，体验上像"快速下注"，不像"交易入口"。
+- 没有返回原事件详情页的入口（只在 Stage 还在视口时有"Back to stream"，跨页时无意义），也没有全屏播放。
 
-- 左列：`EventDetailHeader`（队徽 + 三选项 outcome list） → `PriceChart` → `OrderBook`
-- 右列：sticky `TradeForm`（lg+ 才 sticky）
-- 底部全宽：`PositionsTable`
-- 直播信号只在卡片里出现（`isLiveStream` + `livePoster` + `liveScore` + `liveClock`），详情页完全没用到
+## 目标
 
-## P0 — 直播 LiveTrade 模块（你点名要的）
+1. 用户在事件详情页开始看直播后，切到其他页面，右下角浮窗继续播 / 继续显示比分。
+2. 浮窗提供 3 个明确入口：① 回到事件详情页 ② 全屏播放 ③ 打开 Trade 抽屉（双边选项，不是单边 Buy）。
+3. 用户点 × 关闭后，本次会话内不再自动弹出（除非主动在另一场直播里"开始观看"）。
 
-**目标**：直播中的 event 让用户边看边下单，鼠标不离开页面。
+## 方案
 
-新增组件 `EventLiveStage`（替换/前置于 PriceChart）：
+### 1) 新建全局 LiveStreamProvider（src/components/sports/live/LiveStreamProvider.tsx）
 
-- 容器 16:9，复用 `livePoster` 作为视频海报，中间放大号 Play 按钮（mock 播放，点击切到"已播放"态加伪播放动画 + 字幕条；真接入留 props 口子）。
-- 顶部叠加：左 LIVE 红胶囊（呼吸点），中央比分 bug（沿用 LiveStreamCard 的样式），右 `liveClock`。
-- 右下角浮动控件：Mute / PIP / Fullscreen / Theatre。
-- 下方一行 "Streaming now · N watching · 同步行情 · Δ24h"。
-- 在 PriceChart 上方 Tab 切换：`Stream | Chart | Order book`，三者占同一卡槽，用户随时切，避免页面被拉长。直播事件默认落在 Stream。
+Context 形态：
 
-**Sticky mini player**（关键体验）：
+```ts
+interface LiveStreamCtx {
+  active: { marketId: string; outcomeId?: string } | null;
+  startWatching: (marketId: string, outcomeId?: string) => void;
+  stopWatching: () => void;
+  setOutcome: (outcomeId: string) => void;
+  // UI 状态
+  minimized: boolean;            // 是否处于浮窗状态（false = 在事件详情页 Stage 上）
+  setMinimized: (v: boolean) => void;
+  fullscreen: boolean;
+  openFullscreen: () => void;
+  closeFullscreen: () => void;
+}
+```
 
-- 用户向下滚动越过 Stage 阈值后，把播放器收成右下角 320×180 浮窗（broadcast 比分条 + 关闭/还原按钮），始终可见。
-- 浮窗里的 outcome cents + 一键 Buy 复用 `useTradeDrawer().openTrade`，让用户在看 PositionsTable 时也能下单。
+挂载位置：`src/routes/__root.tsx`（在 `TradeDrawerProvider` 内层即可），这样浮窗能跨路由存在并能调 `useTradeDrawer()`。
 
-非直播 event 不渲染该模块，详情页保持现状。
+### 2) 把 MiniPlayer 改成全局浮窗（GlobalStreamMiniPlayer）
 
-## P1 — 其他建议（建议同期做的，优先级从高到低）
+- 由 `LiveStreamProvider` 直接渲染（portal 到 body），不再由 `event.$id.tsx` 控制。
+- 显示条件：`active != null && minimized && !fullscreen && !dismissedThisSession`。
+- 自动 `minimized`：
+  - 在 `/event/$id` 且 id === active.marketId 时，由该页面通过 `useStageOffscreen` 控制 `setMinimized(true/false)`（保留现有"Stage 离开视口→浮"的体验）。
+  - 路由变化到其它路径时，统一 `setMinimized(true)`。
+- 关闭（×）→ 同会话内 `dismissed=true`；切换到新的 `marketId` 时重置。
 
-挑你想要的我一并落地：
+### 3) 底栏改成 Trade 而非单边 Buy
 
-1. **Related markets 侧栏 / 抽屉条**：同一 fixture 的其他 market（Anytime scorer / Total goals / BTTS / Cards）做一排横向 chip，点 chip 在当前页内切换 market，无需返回上一级。
-2. **Live tape（最近成交）**：PriceChart 下面 8 行滚动公共成交（用户名 + Y/N + cents + size + 时间），社交证明 + 真实感。
-3. **Order book + Trade form 双列折叠**：屏幕窄时 OrderBook 可折叠成"深度条"（绿/红堆叠 bar），把垂直空间还给直播 + 图表。
-4. **Mobile sticky 下单条**：移动端把 TradeForm 收到底部固定 bar：当前 outcome cents + 数量 + Buy 大按钮，点开展开全屏 sheet。当前 `lg:sticky` 在 md 以下完全失效，体验断档。
-5. **Header 简化**：上方 "Markets" 三选项列表 + 下方 Volume/24h/Traders 数字条挤在 header 里有点重，建议把 stats 移到 PriceChart 顶部一行 inline metric，让 header 只承担"这是哪场比赛 + 选哪个 outcome"。
-6. **Countdown / 阵容 strip**（非直播 + 未开赛事件）：kickoff 倒计时 + 首发预测 + 天气，给 pre-match 用户内容补给。
-7. **Share 深链**：右上加分享按钮，复制当前 URL 带 `?outcome=...`，落地页自动选中。
-8. **Comments / Chat tab**：直播时尤其重要，可挂在 Stage 右侧 docked 面板，桌面端 lg+ 显示。
+新的底栏布局：
 
-## 技术细节
+```text
+┌────────────────────────────────────────────────┐
+│ [video poster + LIVE + clock + score]          │
+├────────────────────────────────────────────────┤
+│ USA 48¢   PAR 27¢            [⛶] [↗] [Trade] × │
+└────────────────────────────────────────────────┘
+```
 
-- 新建 `src/components/sports/event/EventLiveStage.tsx`、`StreamMiniPlayer.tsx`、`StageTabs.tsx`。
-- mini player 用 `position: fixed` + `IntersectionObserver` 检测 Stage 是否离开视口；用 React portal 挂到 `<body>`，避免被 AppShell padding 截断。
-- 视频源先用 `<video poster muted loop autoPlay playsInline>` + 一段循环短片 placeholder（或就用 poster + 伪播放动效），留 `streamSrc?: string` 字段在 SportsMarket 上以后接真源。
-- `/style-guide` 同步加 EventLiveStage / StreamMiniPlayer 的 demo（按你 memory 里的规则）。
-- 改完去 `/event/wc26-usa-par`（直播态 fixture）和一个非直播 event 双向回归。
+- 两个 chip 展示双方价格，点击选中那一边并写回 `active.outcomeId`。
+- `Trade` 按钮：调 `openTrade({ marketId: active.marketId, outcomeId: active.outcomeId })`，由用户在抽屉里再决定 Buy/Sell + 数量。文案用 `Trade`，颜色用 primary 而不是当前的绿色 buy 色。
+- `↗` 图标按钮：`router.navigate({ to: '/event/$id', params: { id: active.marketId } })`，自动滚到顶部恢复 Stage。
+- `⛶` 图标按钮：`openFullscreen()` → 渲染一个全屏覆盖层（见 4）。
 
-## 建议本轮先做
+### 4) 全屏播放层（FullscreenStreamOverlay）
 
-P0（直播 Stage + sticky mini player + Stream/Chart/Orderbook tab）+ P4（移动端 sticky 下单条），其他 P1 你挑。
+- 一个 `fixed inset-0 z-[60]` 的黑色背景层，由 `LiveStreamProvider` 渲染。
+- 内容：16:9 居中视频区（沿用 `EventLiveStage` 的 poster + 比分 + clock），底部叠一行迷你 Trade 条（双边 chip + Trade 按钮），右上 ✕ 关全屏（回到浮窗或 Stage）。
+- 触发：浮窗 ⛶、或事件详情页 Stage 右上新增 ⛶ 按钮。
+- `Esc` 关闭，滚动锁定 body。
+
+### 5) event.$id.tsx 接线
+
+- 移除本地 `StreamMiniPlayer` 渲染。
+- 进入页面时若 `market.isLiveStream`，自动 `startWatching(market.id, currentSelected.id)`；Stage 在视口内时 `setMinimized(false)`，离开视口 `setMinimized(true)`。
+- 离开路由时 **不** stop（保持播放）；只有用户在浮窗按 × 才停。
+- Stage 组件加 ⛶ 全屏按钮，调 `openFullscreen()`。
+
+### 6) 选中态同步
+
+- `event.$id.tsx` 内 `selectedOutcome` 变化时 `setOutcome(id)`，浮窗 / 全屏层共享同一个选中态。
+- 反过来，浮窗里切换 chip 也会更新 ctx；回到事件详情页时初始 `selected` 优先取 ctx 里的值。
+
+## 文件变更
+
+新增：
+- `src/components/sports/live/LiveStreamProvider.tsx`
+- `src/components/sports/live/GlobalStreamMiniPlayer.tsx`（取代旧 `StreamMiniPlayer` 的渲染职责）
+- `src/components/sports/live/FullscreenStreamOverlay.tsx`
+
+修改：
+- `src/routes/__root.tsx`：包裹 `LiveStreamProvider`。
+- `src/routes/event.$id.tsx`：用 ctx 替代本地 MiniPlayer；Stage 加全屏按钮；进入页面自动 startWatching。
+- `src/components/sports/event/EventLiveStage.tsx`：右上加 ⛶ 按钮（props 透传 onFullscreen）。
+- `src/components/sports/event/StreamMiniPlayer.tsx`：保留作为视觉组件，由 Global 版本调用；底栏从「单边 Buy」改为「双边价格 + Trade + 全屏 + 返回 + ×」。
+
+不动：`TradeDrawerProvider`、`TradeDrawer`、`MobileTradeBar` 逻辑保持。
+
+## 边界 / 取舍
+
+- 移动端（<sm）继续不显示浮窗，避免和 `MobileTradeBar` 抢底部空间；移动端的"全屏"通过事件详情页 Stage 的 ⛶ 按钮触发。
+- 目前没有真实视频流，全屏层用 `livePoster` 静帧 + 比分作占位；接入真流时只换 `<video>` 节点即可。
+- 关闭浮窗后跨会话不持久（不写 localStorage），刷新即重置。
