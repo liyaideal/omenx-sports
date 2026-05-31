@@ -197,3 +197,12 @@ function TeamSide({ team, align }: { team: TeamLite; align: "left" | "right" }) 
     </div>
   );
 }
+
+function StageChip({ label }: { label: string }) {
+  return (
+    <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-300/10 px-2.5 py-1 font-mono text-[10px] uppercase tracking-widest text-amber-200 ring-1 ring-amber-300/25">
+      <Trophy className="h-3 w-3" />
+      {label}
+    </span>
+  );
+}
