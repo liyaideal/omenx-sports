@@ -1,9 +1,10 @@
-import { Clock, Flame, TrendingUp, Trophy, Users } from "lucide-react";
+import { Clock, Flame, Sparkles, TrendingUp, Trophy, Users } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 import type { Outcome, SportsMarket, TeamLite } from "@/data/sports-markets";
 import { PricePill } from "./PricePill";
 import { LeagueChip } from "../LeagueBadge";
 import { TeamName } from "@/components/sports/TeamName";
+import { TypeChip } from "@/components/sports/CardChip";
 
 const HOT_PARTICIPANTS = 2000;
 const TRENDING_DELTA = 0.05;
@@ -37,17 +38,26 @@ function EventBadge({ market }: { market: SportsMarket }) {
  */
 export function EventMarketTileCard({
   market,
-  showStage = false,
+  hubContext = false,
 }: {
   market: SportsMarket;
-  /** When true, render `market.stage` ("Group A · MD1", "Round of 32",
-   *  "Player prop") in place of the league chip. Use inside a league /
-   *  tournament hub where the league is already implied by the page. */
-  showStage?: boolean;
+  /** When true (inside a league / tournament hub), swap the league
+   *  chip for a TypeChip describing the card's role:
+   *    • `market.stage` (amber, Trophy) — "Group A · MD1", "Round of 32"
+   *    • "Player prop" (violet, Sparkles) — binary markets w/o a stage
+   *    • nothing — otherwise
+   *  Off by default; cross-league lobbies keep the league chip. */
+  hubContext?: boolean;
 }) {
   const hasFixture = Boolean(market.fixture);
   const isBinary = market.shape === "binary";
-  const stage = showStage && market.stage ? market.stage : null;
+  const hubChip = hubContext
+    ? market.stage
+      ? { label: market.stage, tone: "amber" as const, icon: Trophy }
+      : isBinary
+        ? { label: "Player prop", tone: "violet" as const, icon: Sparkles }
+        : null
+    : null;
   return (
     <Link
       to="/event/$id"
@@ -55,7 +65,11 @@ export function EventMarketTileCard({
       className="group flex h-full flex-col gap-4 rounded-3xl border border-border bg-surface p-5 shadow-card transition hover:border-white/15"
     >
       <header className="flex items-center justify-between gap-2">
-        {stage ? <StageChip label={stage} /> : <LeagueChip short={market.league.short} />}
+        {hubContext ? (
+          hubChip ? <TypeChip icon={hubChip.icon} label={hubChip.label} tone={hubChip.tone} /> : <span />
+        ) : (
+          <LeagueChip short={market.league.short} />
+        )}
         <EventBadge market={market} />
       </header>
 
@@ -195,14 +209,5 @@ function TeamSide({ team, align }: { team: TeamLite; align: "left" | "right" }) 
         className="truncate text-xs font-medium text-foreground"
       />
     </div>
-  );
-}
-
-function StageChip({ label }: { label: string }) {
-  return (
-    <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-300/10 px-2.5 py-1 font-mono text-[10px] uppercase tracking-widest text-amber-200 ring-1 ring-amber-300/25">
-      <Trophy className="h-3 w-3" />
-      {label}
-    </span>
   );
 }
