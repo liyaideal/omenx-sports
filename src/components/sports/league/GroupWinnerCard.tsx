@@ -3,7 +3,7 @@ import { ChevronDown, Clock, Users } from "lucide-react";
 import type { GroupMarket } from "@/data/tournament";
 import { outcomeMarketIdFor } from "@/data/tournament";
 import { useTradeDrawer } from "@/components/sports/trade/TradeDrawerProvider";
-import { TypeChip } from "@/components/sports/CardChip";
+import { CardHeader, TypeChip } from "@/components/sports/CardChip";
 
 /**
  * Compact card for a tournament group's "winner" market. Header shows
@@ -20,17 +20,12 @@ export function GroupWinnerCard({ market }: { market: GroupMarket }) {
   const visible = expanded || !hasMore ? sorted : sorted.slice(0, MAX_VISIBLE);
   return (
     <section className="flex h-full flex-col rounded-2xl border border-border bg-surface p-4 shadow-card">
-      <header className="flex items-center justify-between pb-3">
-        <div className="flex items-center gap-3">
-          <span className="grid h-10 w-10 place-items-center rounded-xl bg-white/[0.05] font-display text-lg font-bold text-foreground ring-1 ring-white/10">
-            {market.group}
-          </span>
-          <h3 className="font-display text-sm font-semibold text-foreground">
-            {market.title}
-          </h3>
-        </div>
-        <TypeChip icon={Users} label="Group winner" tone="amber" />
-      </header>
+      <CardHeader
+        className="pb-3"
+        chip={<TypeChip icon={Users} label="Group winner" tone="amber" />}
+        title={`Group ${market.group} · Winner`}
+        titleSize="base"
+      />
 
       <div className="flex flex-1 flex-col divide-y divide-white/[0.04]">
         {visible.map((row, i) => {

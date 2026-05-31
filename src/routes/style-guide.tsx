@@ -22,6 +22,8 @@ import { RatioBar } from "@/components/sports/RatioBar";
 import { NeonRing } from "@/components/sports/NeonRing";
 import { TeamCrest } from "@/components/sports/TeamCrest";
 import { LeagueBadge, LeagueChip, LEAGUE_KEYS } from "@/components/sports/LeagueBadge";
+import { CardHeader, TypeChip } from "@/components/sports/CardChip";
+import { Flame, Trophy as TrophyIcon, Users as UsersIcon } from "lucide-react";
 import { PricePill } from "@/components/sports/dashboard/PricePill";
 import { OutcomePill } from "@/components/sports/OutcomePill";
 import { CountdownPill } from "@/components/sports/CountdownPill";
@@ -1320,6 +1322,73 @@ function StyleGuide() {
                       .map((m) => (
                         <EventMarketTileCard key={m.id} market={m} hubContext />
                       ))}
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                <div className="mb-3 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+                  Card header anatomy — single source of truth via &lt;CardHeader /&gt;
+                </div>
+                <div className="grid gap-3 md:grid-cols-3">
+                  <div className="rounded-2xl border border-border bg-surface p-4">
+                    <div className="mb-2 font-mono text-[9px] uppercase tracking-widest text-muted-foreground">
+                      ✓ kicker chip + title
+                    </div>
+                    <CardHeader
+                      chip={<TypeChip icon={UsersIcon} label="Group winner" tone="amber" />}
+                      title="Group I · Winner"
+                    />
+                  </div>
+                  <div className="rounded-2xl border border-border bg-surface p-4">
+                    <div className="mb-2 font-mono text-[9px] uppercase tracking-widest text-muted-foreground">
+                      ✓ chip + status + title
+                    </div>
+                    <CardHeader
+                      chip={<TypeChip icon={TrophyIcon} label="Round of 32" tone="amber" />}
+                      status={
+                        <span className="inline-flex items-center gap-1 rounded-full bg-[oklch(0.7_0.22_25_/_0.12)] px-2 py-0.5 font-mono text-[10px] uppercase tracking-widest text-[oklch(0.78_0.18_45)] ring-1 ring-[oklch(0.7_0.22_25_/_0.25)]">
+                          <Flame className="h-3 w-3" /> Hot
+                        </span>
+                      }
+                      title="Mexico vs Canada"
+                    />
+                  </div>
+                  <div className="rounded-2xl border border-border bg-surface p-4">
+                    <div className="mb-2 font-mono text-[9px] uppercase tracking-widest text-muted-foreground">
+                      ✓ title only (no chip)
+                    </div>
+                    <CardHeader title="Will Messi play in WC26?" />
+                  </div>
+                  <div className="rounded-2xl border border-dashed border-[oklch(0.7_0.22_25_/_0.35)] bg-surface p-4 opacity-70">
+                    <div className="mb-2 font-mono text-[9px] uppercase tracking-widest text-[oklch(0.82_0.16_25)]">
+                      ✗ chip on the right
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <h3 className="font-display text-base font-semibold text-foreground">Group I · Winner</h3>
+                      <TypeChip icon={UsersIcon} label="Group winner" tone="amber" />
+                    </div>
+                  </div>
+                  <div className="rounded-2xl border border-dashed border-[oklch(0.7_0.22_25_/_0.35)] bg-surface p-4 opacity-70">
+                    <div className="mb-2 font-mono text-[9px] uppercase tracking-widest text-[oklch(0.82_0.16_25)]">
+                      ✗ chip centered above title
+                    </div>
+                    <div className="grid place-items-center">
+                      <TypeChip icon={Flame} label="Featured props" tone="violet" />
+                      <h3 className="mt-1 font-display text-base font-semibold text-foreground">Group A Winner</h3>
+                    </div>
+                  </div>
+                  <div className="rounded-2xl border border-dashed border-[oklch(0.7_0.22_25_/_0.35)] bg-surface p-4 opacity-70">
+                    <div className="mb-2 font-mono text-[9px] uppercase tracking-widest text-[oklch(0.82_0.16_25)]">
+                      ✗ left glyph block competing with chip
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <span className="grid h-10 w-10 place-items-center rounded-xl bg-white/[0.05] font-display text-lg font-bold text-foreground ring-1 ring-white/10">I</span>
+                        <h3 className="font-display text-sm font-semibold text-foreground">Group I — Winner</h3>
+                      </div>
+                      <TypeChip icon={UsersIcon} label="Group winner" tone="amber" />
+                    </div>
                   </div>
                 </div>
               </div>
