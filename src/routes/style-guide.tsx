@@ -54,6 +54,7 @@ import { BinaryQuestionCard } from "@/components/sports/league/BinaryQuestionCar
 import { BracketView } from "@/components/sports/league/BracketView";
 import { PropsGrid } from "@/components/sports/league/PropsGrid";
 import { SpotlightPropsCardHorizontal } from "@/components/sports/league/SpotlightPropsCardHorizontal";
+import { EventMarketTileCard } from "@/components/sports/dashboard/EventMarketTileCard";
 import { useTradeDrawer } from "@/components/sports/trade/TradeDrawerProvider";
 import {
   WC26_GROUPS,
