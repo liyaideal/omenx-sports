@@ -49,9 +49,6 @@ export function LeagueSpotlightCard({
         >
           <Flame className="h-3 w-3" /> Now trading
         </span>
-        <span className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
-          {eventCount} {eventCount === 1 ? "event" : "events"} live
-        </span>
         {kickoffLabel && (
           <span className="inline-flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
             <CalendarDays className="h-3 w-3" /> {kickoffLabel}
