@@ -1,5 +1,6 @@
 import { cn } from "@/lib/utils";
 import eplLogo from "@/assets/leagues/epl.png";
+import worldCup2026Logo from "@/assets/leagues/world-cup-2026.svg";
 
 /**
  * Real league logos sourced from ESPN's public CDN. PNGs with transparent
@@ -53,6 +54,13 @@ const PRESETS: Record<
     mono: "NBA",
     logo: "https://a.espncdn.com/i/leaguelogos/nba/500/nba.png",
   },
+  wc: {
+    label: "World Cup",
+    from: "oklch(0.7 0.18 145)",
+    to: "oklch(0.45 0.14 160)",
+    mono: "WC",
+    logo: worldCup2026Logo,
+  },
 };
 
 const FALLBACK = { from: "oklch(0.55 0.12 295)", to: "oklch(0.35 0.08 290)" } as const;
@@ -70,6 +78,7 @@ function resolvePreset(short: string): { label: string; from: string; to: string
   if (norm === "seriea") return PRESETS.seriea;
   if (norm === "mls") return PRESETS.mls;
   if (norm === "nba") return PRESETS.nba;
+  if (norm === "wc" || norm === "worldcup" || norm === "worldcup2026") return PRESETS.wc;
   return {
     label: short,
     from: FALLBACK.from,
