@@ -271,7 +271,7 @@ function HubContent({
               )}
               <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
                 {grid.map((m) => (
-                  <EventMarketTileCard key={m.id} market={m} />
+                  <EventMarketTileCard key={m.id} market={m} showStage={isTournament} />
                 ))}
               </div>
             </>
