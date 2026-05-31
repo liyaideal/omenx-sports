@@ -2,7 +2,7 @@ import { useState } from "react";
 import { ChevronDown, Clock, Flame, Users } from "lucide-react";
 import type { PlayerSpotlight } from "@/data/sports-markets";
 import { useTradeDrawer } from "@/components/sports/trade/TradeDrawerProvider";
-import { TypeChip } from "@/components/sports/CardChip";
+import { CardHeader, TypeChip } from "@/components/sports/CardChip";
 
 /**
  * Horizontal variant of the player spotlight bundle. Used inside the
@@ -88,12 +88,11 @@ export function SpotlightPropsCardHorizontal({
 
       {/* content column */}
       <div className="flex min-w-0 flex-1 flex-col p-4">
-        <header className="min-w-0">
-          <TypeChip icon={Flame} label="Featured props" tone="violet" />
-          <h3 className="truncate font-display text-lg font-semibold leading-tight text-foreground">
-            {player.firstName} {player.lastName}
-          </h3>
-        </header>
+        <CardHeader
+          chip={<TypeChip icon={Flame} label="Featured props" tone="violet" />}
+          title={`${player.firstName} ${player.lastName}`}
+          titleSize="lg"
+        />
 
         <div className="mt-3 flex flex-1 flex-col divide-y divide-white/[0.04] border-t border-white/[0.04]">
           {visible.map((m) => {
