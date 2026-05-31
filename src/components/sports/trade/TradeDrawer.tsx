@@ -5,6 +5,7 @@ import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { TradeForm } from "@/components/sports/TradeForm";
 import { cn } from "@/lib/utils";
 import type { SportsMarket } from "@/data/sports-markets";
+import { DrawIcon, isDrawOutcome } from "@/components/sports/draw";
 
 /**
  * Right-edge sliding trade drawer. On mobile (< md) it fills the screen
@@ -117,6 +118,7 @@ export function TradeDrawer({
             {market.outcomes.map((o) => {
               const active = o.id === selected.id;
               const cents = Math.round(o.price * 100);
+              const draw = isDrawOutcome(o);
               return (
                 <button
                   key={o.id}
@@ -129,8 +131,9 @@ export function TradeDrawer({
                       : "bg-white/[0.04] text-foreground ring-1 ring-white/[0.06] hover:bg-white/[0.08]",
                   )}
                 >
-                  <span className="truncate font-mono text-[10px] uppercase tracking-widest">
-                    {o.team?.short ?? o.label}
+                  <span className="inline-flex items-center gap-1 truncate font-mono text-[10px] uppercase tracking-widest">
+                    {draw && <DrawIcon className="h-3 w-3" />}
+                    {o.team?.short ?? (draw ? "Draw" : o.label)}
                   </span>
                   <span className="font-display text-lg font-semibold tabular-nums">
                     {cents}¢
