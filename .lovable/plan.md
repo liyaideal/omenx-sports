@@ -1,31 +1,43 @@
 ## Goal
 
-`GroupWinnerCard` shows a `TypeChip` (e.g. "Group winner", amber). `BinaryQuestionCard` doesn't — it just stacks an icon + title. Add a matching `TypeChip` so the binary cards in the Props grid feel consistent with the rest of the section.
+Currently the Draw outcome (1X2 markets) is rendered inconsistently across cards:
 
-## Category mapping
+| Card | What it shows for Draw today |
+|---|---|
+| `EventMarketTileCard` OutcomeRow | Circle with text `X` |
+| `MatchMarketCard` | Neutral-hue dot, no symbol |
+| `LiveStreamCard` segmented bar | Just the label `Draw`, no glyph |
+| `TradeDrawer` outcome chooser | Just the label `Draw`, no glyph |
 
-Pick the chip label from `market.kind` plus a small heuristic on the id/league so the right label shows for the three flavors we ship today:
+Ship one Draw glyph everywhere: the Lucide **`Equal`** icon (visually neutral `=`, the standard "tie/draw" mark). Provide a tiny shared helper so any future card uses the same thing.
 
-- `kind === "league-winner"` and id starts with `wc26-grpa-`/`wc26-grpb-`/… → `Group winner` (icon: `Users`, tone: `amber`)
-- `kind === "league-winner"` otherwise → `Tournament winner` (icon: `Trophy`, tone: `amber`)
-- `kind === "top-scorer"` → `Top scorer` (icon: `Target`, tone: `amber`)
-- `kind === "player-prop"` → `Player prop` (icon: `Target`, tone: `violet`)
-- `kind === "match"` (rare here — match-binary like "Liverpool to beat Newcastle") → `Match prop` (icon: `Swords` or skip the chip)
+## New shared util
 
-A tiny helper `getBinaryChip(market)` inside `BinaryQuestionCard.tsx` returns `{ label, icon, tone }`. No new shared util needed.
+**`src/components/sports/draw.tsx`** (new — ~15 LOC)
+
+```ts
+import { Equal, type LucideIcon } from "lucide-react";
+import type { Outcome } from "@/data/sports-markets";
+
+export const DrawIcon: LucideIcon = Equal;
+
+export function isDrawOutcome(o: Outcome): boolean {
+  return !o.team && (o.label === "Draw" || o.meta === "X");
+}
+```
 
 ## Changes
 
-**`src/components/sports/league/BinaryQuestionCard.tsx`**
+1. **`src/components/sports/dashboard/EventMarketTileCard.tsx`** — replace the `<span>X</span>` block (line 200–201) with the same 5×5 muted circle wrapper but render `<DrawIcon className="h-3 w-3" />` inside. Use `isDrawOutcome(outcome)` instead of the inline check.
 
-- Import `CardHeader`, `TypeChip` from `@/components/sports/CardChip`; drop the local `HelpCircle`/`Trophy`/`Target` avatar block.
-- Replace the current `<header>` (avatar square + title) with `CardHeader` so we get the same chip-above-title rhythm as `GroupWinnerCard`:
-  - `chip={<TypeChip icon={chipIcon} label={chipLabel} tone={chipTone} />}`
-  - `title={market.title}` with `titleSize="sm"` and allow 2-line wrap (override the default `truncate` by passing the title as a node when needed — simplest: pass a `<span className="line-clamp-2 ...">` node).
-- Keep the existing gauge + YES/NO rows + footer untouched.
+2. **`src/components/sports/dashboard/MatchMarketCard.tsx`** — in the row list (around line 77–87), when `isDraw` is true, render a small muted circle holding `<DrawIcon className="h-3 w-3" />` in place of the 10px hue dot. Keep the hue dot for team outcomes so the visual rhythm stays the same; only the Draw row swaps in the icon.
 
-No data changes; no other components touched. `GroupWinnerCard`'s own "Group winner" chip is unchanged.
+3. **`src/components/sports/dashboard/LiveStreamCard.tsx`** — in the segmented outcome bar (around line 109–119), when `isDrawOutcome(o)` is true, render `<DrawIcon className="h-3 w-3 ...muted..." />` immediately before the price, replacing the bare "Draw" text. (Bar is tight, icon-only reads cleaner than text + icon.)
 
-## Style guide sync
+4. **`src/components/sports/trade/TradeDrawer.tsx`** — in the "Pick outcome" grid (line 117–140), when `isDrawOutcome(o)` is true, render `<DrawIcon className="h-3 w-3" />` next to the label inside the small uppercase row. Team outcomes keep their `team.short`; Draw shows the icon plus a short `DRAW` label so the button still has a clear caption.
 
-`/style-guide` already renders `BinaryQuestionCard` via the PropsGrid demo (uses `getBinaryQuestionsByLeagueSlug("world-cup-2026")`), so the chip shows up automatically — no extra edit needed.
+That's all. `GroupWinnerCard` / `BinaryQuestionCard` / `SpotlightPropsCardHorizontal` never render Draw, so they're untouched.
+
+## Style-guide sync
+
+`/style-guide` already imports `EventMarketTileCard`, `MatchMarketCard`, and `LiveStreamCard`, and renders them against real 1X2 markets (USA-Paraguay, Mexico-South Africa, etc.). The new draw glyph will appear automatically in those demos — no extra edit needed there.
