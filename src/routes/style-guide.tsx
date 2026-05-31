@@ -36,6 +36,7 @@ import { TeamName } from "@/components/sports/TeamName";
 import { teams } from "@/lib/teams";
 import { LiveStreamCard } from "@/components/sports/dashboard/LiveStreamCard";
 import { EventLiveStage } from "@/components/sports/event/EventLiveStage";
+import { useLiveStream } from "@/components/sports/live/LiveStreamProvider";
 import { StageTabs } from "@/components/sports/event/StageTabs";
 import { MobileTradeBar } from "@/components/sports/event/MobileTradeBar";
 import { RelatedMarketsBar } from "@/components/sports/event/RelatedMarketsBar";
@@ -1671,8 +1672,34 @@ function StyleGuide() {
               <ul className="space-y-1.5 text-muted-foreground">
                 <li>• Only rendered when the market has <code className="font-mono text-foreground">isLiveStream</code> + <code className="font-mono text-foreground">liveScore</code>; otherwise the StageTabs default to <code className="font-mono text-foreground">chart</code>.</li>
                 <li>• Stream tab is always the default when present — users land on the broadcast, not the chart.</li>
-                <li>• Stage exposes a <code className="font-mono text-foreground">stageRef</code> so the page can run an IntersectionObserver and trigger the floating <code className="font-mono text-foreground">StreamMiniPlayer</code> when it scrolls out of view.</li>
+                <li>• Stage exposes a <code className="font-mono text-foreground">stageRef</code>; once it scrolls out of view the page calls <code className="font-mono text-foreground">useLiveStream().setMinimized(true)</code> and the global <code className="font-mono text-foreground">GlobalStreamMiniPlayer</code> takes over — including across route navigation.</li>
+                <li>• Stage's Fullscreen control calls <code className="font-mono text-foreground">openFullscreen()</code> on the provider; same overlay can be triggered from the mini player.</li>
                 <li>• Selected outcome label + cents + Δ24h appear in the ticker bar so the user always sees the price for the side they're about to trade.</li>
+              </ul>
+            </div>
+          </Section>
+
+          <Section id="global-live-stream" title="Global live stream session" kicker="23b — P0 / cross-route">
+            <p className="mb-6 max-w-3xl text-sm text-muted-foreground">
+              <code className="font-mono text-foreground">LiveStreamProvider</code> holds one global live-watching session
+              and renders the bottom-right <code className="font-mono text-foreground">GlobalStreamMiniPlayer</code> + the
+              full-viewport <code className="font-mono text-foreground">FullscreenStreamOverlay</code>. The mini player
+              persists across route navigation so users can keep an eye on the match while browsing other pages, and the
+              action bar surfaces both outcomes plus a neutral <strong>Trade</strong> CTA (not a one-sided Buy).
+            </p>
+
+            <GlobalLiveStreamDemo />
+
+            <div className="mt-6 rounded-2xl border border-dashed border-white/15 bg-white/[0.02] p-5 text-xs">
+              <div className="mb-2 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+                Rules
+              </div>
+              <ul className="space-y-1.5 text-muted-foreground">
+                <li>• Auto-starts when the user lands on a live <code className="font-mono text-foreground">/event/$id</code>. Stays alive when they navigate away; only an explicit ✕ stops it (per session).</li>
+                <li>• On the event page, the mini player is suppressed while the in-page Stage is in view; navigating to any other route force-minimizes immediately.</li>
+                <li>• Three exits: ⛶ fullscreen, ↗ back to the event detail page, <strong>Trade</strong> opens the global <code className="font-mono text-foreground">TradeDrawer</code> pre-selected on the chip the user picked.</li>
+                <li>• Outcome chips are mirrored into provider state so selecting a side here syncs with the event page's selection and vice versa.</li>
+                <li>• Hidden on <code className="font-mono text-foreground">&lt;sm</code> to avoid colliding with <code className="font-mono text-foreground">MobileTradeBar</code>; mobile users hit Fullscreen from the in-page Stage instead.</li>
               </ul>
             </div>
           </Section>
@@ -1809,6 +1836,57 @@ function MobileTradeBarDemo() {
           frame — only used to demo the bar inside the style-guide. */}
       <div className="[&_.fixed]:!relative [&_.fixed]:!inset-auto [&_.fixed]:!bottom-auto">
         <MobileTradeBar market={live} selected={selected} />
+      </div>
+    </div>
+  );
+}
+
+function GlobalLiveStreamDemo() {
+  // We can't easily render the portaled mini player inside the guide
+  // without polluting the rest of the page, so this demo offers a button
+  // that starts a global watching session — the mini player then appears
+  // bottom-right of the screen and follows the user as they browse.
+  const live =
+    MATCH_MARKETS.find((m) => m.isLiveStream && m.liveScore && m.fixture) ??
+    FEATURED_MATCH;
+  const { startWatching, stopWatching, openFullscreen, setMinimized, active } =
+    useLiveStream();
+  const watching = active?.marketId === live.id;
+  return (
+    <div className="flex flex-wrap items-center gap-2 rounded-2xl border border-border bg-surface/40 p-4 text-xs">
+      <span className="font-mono uppercase tracking-widest text-muted-foreground">
+        {live.title}
+      </span>
+      <div className="ml-auto flex flex-wrap items-center gap-2">
+        <button
+          type="button"
+          onClick={() => {
+            startWatching(live.id, live.outcomes[0]?.id);
+            setMinimized(true);
+          }}
+          className="rounded-md bg-primary px-3 py-1.5 font-mono text-[10px] font-semibold uppercase tracking-widest text-primary-foreground hover:bg-primary/90"
+        >
+          Start watching
+        </button>
+        <button
+          type="button"
+          onClick={() => {
+            startWatching(live.id, live.outcomes[0]?.id);
+            openFullscreen();
+          }}
+          className="rounded-md bg-white/[0.06] px-3 py-1.5 font-mono text-[10px] font-semibold uppercase tracking-widest text-foreground hover:bg-white/[0.12]"
+        >
+          Open fullscreen
+        </button>
+        {watching && (
+          <button
+            type="button"
+            onClick={stopWatching}
+            className="rounded-md bg-white/[0.04] px-3 py-1.5 font-mono text-[10px] font-semibold uppercase tracking-widest text-muted-foreground hover:bg-white/[0.1]"
+          >
+            Stop
+          </button>
+        )}
       </div>
     </div>
   );

@@ -10,6 +10,8 @@ interface EventLiveStageProps {
   /** Forwarded to the wrapper so the page can observe viewport visibility
    *  and decide when to show the floating mini player. */
   stageRef?: React.RefObject<HTMLDivElement | null>;
+  /** Callback for the bottom-right Fullscreen button. */
+  onFullscreen?: () => void;
   className?: string;
 }
 
@@ -21,7 +23,13 @@ interface EventLiveStageProps {
  * as a TODO — `streamSrc` will be added on `SportsMarket` later and the
  * `<video>` element below can swap from poster-only to `src={streamSrc}`.
  */
-export function EventLiveStage({ market, selected, stageRef, className }: EventLiveStageProps) {
+export function EventLiveStage({
+  market,
+  selected,
+  stageRef,
+  onFullscreen,
+  className,
+}: EventLiveStageProps) {
   const fixture = market.fixture;
   const [playing, setPlaying] = useState(true);
   const [muted, setMuted] = useState(true);
@@ -135,7 +143,7 @@ export function EventLiveStage({ market, selected, stageRef, className }: EventL
           <ControlBtn label="Picture in picture" onClick={() => {}}>
             <PictureInPicture2 className="h-3.5 w-3.5" />
           </ControlBtn>
-          <ControlBtn label="Fullscreen" onClick={() => {}}>
+          <ControlBtn label="Fullscreen" onClick={() => onFullscreen?.()}>
             <Maximize2 className="h-3.5 w-3.5" />
           </ControlBtn>
         </div>

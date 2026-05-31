@@ -9,9 +9,9 @@ import { PriceChart } from "@/components/sports/PriceChart";
 import { OrderBook } from "@/components/sports/OrderBook";
 import { TradeForm, type PlacedOrder } from "@/components/sports/TradeForm";
 import { EventLiveStage, useStageOffscreen } from "@/components/sports/event/EventLiveStage";
-import { StreamMiniPlayer } from "@/components/sports/event/StreamMiniPlayer";
 import { StageTabs, type StageTab } from "@/components/sports/event/StageTabs";
 import { MobileTradeBar } from "@/components/sports/event/MobileTradeBar";
+import { useLiveStream } from "@/components/sports/live/LiveStreamProvider";
 import { RelatedMarketsBar } from "@/components/sports/event/RelatedMarketsBar";
 import { LiveTape } from "@/components/sports/event/LiveTape";
 import { DepthBar } from "@/components/sports/event/DepthBar";
@@ -318,12 +318,33 @@ function EventTradePage() {
   const stageRef = useRef<HTMLDivElement | null>(null);
   const tradeFormRef = useRef<HTMLDivElement | null>(null);
   const offscreen = useStageOffscreen(stageRef);
-  const scrollToStage = useCallback(() => {
-    stageRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
-  }, []);
   const scrollToTradeForm = useCallback(() => {
     tradeFormRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
   }, []);
+
+  // Global live-stream session — keeps the floating player + fullscreen
+  // overlay alive across route navigation.
+  const live = useLiveStream();
+  // Start watching whenever we land on a live event page.
+  useEffect(() => {
+    if (isLive) {
+      live.startWatching(market.id, selected?.id);
+    }
+    // We intentionally don't stop on unmount — the mini player should keep
+    // following the user. Users dismiss it explicitly from the player UI.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isLive, market.id]);
+  // Keep outcome selection synced both ways.
+  useEffect(() => {
+    if (isLive && selected?.id) live.setOutcome(selected.id);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selected?.id, isLive]);
+  // Mirror Stage visibility into the provider's `minimized` flag so the
+  // mini player only shows once the Stage has scrolled out of view.
+  useEffect(() => {
+    if (!isLive) return;
+    live.setMinimized(offscreen);
+  }, [offscreen, isLive, live]);
 
   const handlePlaceOrder = (order: PlacedOrder) => {
     if (order.type === "limit" && order.side === "buy" && order.price !== currentPx) {
@@ -400,6 +421,7 @@ function EventTradePage() {
                           market={market}
                           selected={selected}
                           stageRef={stageRef}
+                          onFullscreen={live.openFullscreen}
                         />
                       ),
                     },
@@ -446,17 +468,6 @@ function EventTradePage() {
       <div className="px-6 pb-28 md:px-8 lg:pb-12">
         <PositionsTable positions={livePositions} orders={allOrders} history={history} />
       </div>
-
-      {/* Floating mini player — only when the in-page stage has scrolled
-          out of view, only for live streams. */}
-      {isLive && (
-        <StreamMiniPlayer
-          market={market}
-          selected={selected}
-          visible={offscreen}
-          onRestore={scrollToStage}
-        />
-      )}
 
       {/* Mobile-only sticky trade bar — desktop already has the
           right-column sticky TradeForm. */}
