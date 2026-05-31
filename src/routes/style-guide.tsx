@@ -36,6 +36,7 @@ import { TeamName } from "@/components/sports/TeamName";
 import { teams } from "@/lib/teams";
 import { LiveStreamCard } from "@/components/sports/dashboard/LiveStreamCard";
 import { EventLiveStage } from "@/components/sports/event/EventLiveStage";
+import { useLiveStream } from "@/components/sports/live/LiveStreamProvider";
 import { StageTabs } from "@/components/sports/event/StageTabs";
 import { MobileTradeBar } from "@/components/sports/event/MobileTradeBar";
 import { RelatedMarketsBar } from "@/components/sports/event/RelatedMarketsBar";
