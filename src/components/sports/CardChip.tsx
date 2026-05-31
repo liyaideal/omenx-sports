@@ -1,4 +1,5 @@
 import type { LucideIcon } from "lucide-react";
+import type { ReactNode } from "react";
 
 /**
  * Unified "type" chip used at the top-left of every card inside a
@@ -34,5 +35,72 @@ export function TypeChip({
       {Icon ? <Icon className="h-3 w-3" /> : null}
       {label}
     </span>
+  );
+}
+
+/**
+ * Canonical card header. Locks the "kicker row + title (+ optional
+ * subtitle)" anatomy across every market card so chips never end up
+ * in the top-right or floating centered above the title.
+ *
+ *   ┌──────────────────────────────────────────────┐
+ *   │ [chip]                              [status] │  kicker row
+ *   │ Title goes here                              │
+ *   │ optional subtitle                            │
+ *   └──────────────────────────────────────────────┘
+ *
+ * • chip   — left-aligned TypeChip (or any kicker node). Omit for none.
+ * • status — right-aligned status badge (Hot / Trending). Omit for none.
+ * • title  — required. Pass a string for the default `font-display` heading,
+ *            or a node for richer layouts (e.g. fixture rows).
+ */
+export function CardHeader({
+  chip,
+  status,
+  title,
+  subtitle,
+  titleSize = "base",
+  className = "",
+}: {
+  chip?: ReactNode;
+  status?: ReactNode;
+  title: ReactNode;
+  subtitle?: ReactNode;
+  /** Controls the default text size when `title` is a string. */
+  titleSize?: "sm" | "base" | "lg";
+  className?: string;
+}) {
+  const hasKicker = Boolean(chip || status);
+  const titleClass =
+    titleSize === "lg"
+      ? "text-lg"
+      : titleSize === "sm"
+        ? "text-sm"
+        : "text-base";
+  return (
+    <header className={`min-w-0 ${className}`}>
+      {hasKicker && (
+        <div className="flex min-h-[22px] items-center justify-between gap-2">
+          <div className="min-w-0">{chip}</div>
+          <div className="shrink-0">{status}</div>
+        </div>
+      )}
+      {typeof title === "string" ? (
+        <h3
+          className={`truncate font-display ${titleClass} font-semibold leading-tight text-foreground ${
+            hasKicker ? "mt-2" : ""
+          }`}
+        >
+          {title}
+        </h3>
+      ) : (
+        <div className={hasKicker ? "mt-2" : ""}>{title}</div>
+      )}
+      {subtitle && (
+        <div className="mt-1 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+          {subtitle}
+        </div>
+      )}
+    </header>
   );
 }
