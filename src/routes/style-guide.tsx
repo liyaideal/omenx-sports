@@ -1297,6 +1297,34 @@ function StyleGuide() {
 
               <div>
                 <div className="mb-3 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+                  EventMarketTileCard — league chip vs stage chip (inside tournament hub)
+                </div>
+                <div className="grid gap-3 md:grid-cols-2">
+                  <div>
+                    <div className="mb-2 font-mono text-[9px] uppercase tracking-widest text-muted-foreground">
+                      Default — homepage / cross-league lobby (league chip)
+                    </div>
+                    {getMatchMarketsByLeagueSlug("world-cup-2026")
+                      .slice(0, 1)
+                      .map((m) => (
+                        <EventMarketTileCard key={m.id} market={m} />
+                      ))}
+                  </div>
+                  <div>
+                    <div className="mb-2 font-mono text-[9px] uppercase tracking-widest text-muted-foreground">
+                      showStage — inside `/league/$slug` (Group A · MD1)
+                    </div>
+                    {getMatchMarketsByLeagueSlug("world-cup-2026")
+                      .slice(0, 1)
+                      .map((m) => (
+                        <EventMarketTileCard key={m.id} market={m} showStage />
+                      ))}
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                <div className="mb-3 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
                   WorldCupBackdrop — fixed page atmosphere (framed preview)
                 </div>
                 <div className="relative h-40 overflow-hidden rounded-2xl border border-border bg-background">
