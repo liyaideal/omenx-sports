@@ -1,5 +1,6 @@
-import { Link } from "@tanstack/react-router";
-import { Bell } from "lucide-react";
+import { Bell, BellRing } from "lucide-react";
+import { useState } from "react";
+import { toast } from "sonner";
 import type { LeagueHub } from "@/data/leagues";
 
 /**
@@ -15,12 +16,25 @@ export function LeagueComingSoonCard({
   league: LeagueHub;
 }) {
   const startsLabel = league.startsLabel;
+  const [subscribed, setSubscribed] = useState(false);
   return (
-    <Link
-      to="/league/$slug"
-      params={{ slug: league.slug }}
-      search={{ view: "games" }}
-      className="group relative flex items-center gap-3 overflow-hidden rounded-2xl border border-dashed border-border/80 bg-surface/60 p-3.5 transition hover:border-white/15 hover:bg-surface"
+    <button
+      type="button"
+      onClick={() => {
+        if (subscribed) {
+          setSubscribed(false);
+          toast(`Unsubscribed from ${league.name}`);
+          return;
+        }
+        setSubscribed(true);
+        toast.success(`You're on the list for ${league.name}`, {
+          description: `We'll email you the moment it goes live${
+            startsLabel ? ` — opens ${startsLabel}.` : "."
+          }`,
+        });
+      }}
+      aria-pressed={subscribed}
+      className="group relative flex w-full items-center gap-3 overflow-hidden rounded-2xl border border-dashed border-border/80 bg-surface/60 p-3.5 text-left transition hover:border-white/15 hover:bg-surface"
     >
       <span className="grid h-10 w-10 shrink-0 place-items-center overflow-hidden rounded-xl bg-white/[0.04] p-1.5 ring-1 ring-white/10">
         <img
@@ -38,11 +52,23 @@ export function LeagueComingSoonCard({
         </div>
       </div>
       <span
-        className="inline-flex shrink-0 items-center gap-1 rounded-full bg-white/[0.05] px-2 py-1 font-mono text-[10px] uppercase tracking-widest text-muted-foreground ring-1 ring-white/10 transition group-hover:text-foreground"
+        className={
+          subscribed
+            ? "inline-flex shrink-0 items-center gap-1 rounded-full bg-primary/15 px-2 py-1 font-mono text-[10px] uppercase tracking-widest text-primary ring-1 ring-primary/40 transition"
+            : "inline-flex shrink-0 items-center gap-1 rounded-full bg-white/[0.05] px-2 py-1 font-mono text-[10px] uppercase tracking-widest text-muted-foreground ring-1 ring-white/10 transition group-hover:text-foreground"
+        }
         aria-hidden
       >
-        <Bell className="h-3 w-3" /> Notify
+        {subscribed ? (
+          <>
+            <BellRing className="h-3 w-3" /> Notifying
+          </>
+        ) : (
+          <>
+            <Bell className="h-3 w-3" /> Notify
+          </>
+        )}
       </span>
-    </Link>
+    </button>
   );
 }
