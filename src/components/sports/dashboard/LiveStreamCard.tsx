@@ -2,6 +2,7 @@ import { Link } from "@tanstack/react-router";
 import { Play, Users } from "lucide-react";
 import type { SportsMarket } from "@/data/sports-markets";
 import { TeamName } from "@/components/sports/TeamName";
+import { useTradeDrawer } from "@/components/sports/trade/TradeDrawerProvider";
 
 /**
  * Compact "we are streaming this match" tile, sized to drop into the same
@@ -12,6 +13,7 @@ import { TeamName } from "@/components/sports/TeamName";
 export function LiveStreamCard({ market }: { market: SportsMarket }) {
   const fixture = market.fixture;
   if (!fixture || !market.liveScore) return null;
+  const { openTrade } = useTradeDrawer();
 
   // Show every outcome (including Draw for 1X2) horizontally so the card
   // stays the same height regardless of 2- or 3-way markets.
@@ -92,9 +94,15 @@ export function LiveStreamCard({ market }: { market: SportsMarket }) {
         {outcomes.map((o, i) => {
           const cents = Math.round(o.price * 100);
           return (
-            <div
+            <button
               key={o.id}
-              className={`flex min-w-0 flex-1 items-baseline justify-center gap-1.5 px-2 py-2.5 ${
+              type="button"
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                openTrade({ marketId: market.id, outcomeId: o.id });
+              }}
+              className={`flex min-w-0 flex-1 items-baseline justify-center gap-1.5 px-2 py-2.5 transition hover:bg-white/[0.06] ${
                 i < outcomes.length - 1 ? "border-r border-white/[0.06]" : ""
               }`}
             >
@@ -112,7 +120,7 @@ export function LiveStreamCard({ market }: { market: SportsMarket }) {
               <span className="shrink-0 font-display text-sm font-semibold tabular-nums text-foreground">
                 {cents}<span className="text-muted-foreground">¢</span>
               </span>
-            </div>
+            </button>
           );
         })}
       </div>
