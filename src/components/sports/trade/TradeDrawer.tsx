@@ -3,7 +3,6 @@ import { Link } from "@tanstack/react-router";
 import { ExternalLink, X } from "lucide-react";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { TradeForm } from "@/components/sports/TradeForm";
-import { LeagueChip } from "@/components/sports/LeagueBadge";
 import { cn } from "@/lib/utils";
 import type { SportsMarket } from "@/data/sports-markets";
 
@@ -81,32 +80,19 @@ export function TradeDrawer({
         side="right"
         className="flex w-full flex-col gap-0 overflow-y-auto border-l-border bg-background p-0 sm:max-w-md"
       >
-        {/* Custom header — replace the default sheet padding */}
-        <header className="sticky top-0 z-10 flex items-start justify-between gap-3 border-b border-border bg-background/95 px-5 py-4 backdrop-blur">
-          <div className="min-w-0 flex-1">
-            <div className="flex items-center gap-2">
-              <LeagueChip short={market.league.short} />
-              <span className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
-                · {market.endsLabel}
-              </span>
-            </div>
-            <h2 className="mt-1.5 font-display text-base font-semibold leading-tight text-foreground">
-              {market.title}
-            </h2>
-            <div className="mt-1 flex items-center gap-3 font-mono text-[10px] text-muted-foreground">
-              <span>Vol {market.volume}</span>
-              <span>·</span>
-              <span>{market.participants.toLocaleString()} traders</span>
-              <Link
-                to="/event/$id"
-                params={{ id: market.id }}
-                onClick={() => onOpenChange(false)}
-                className="ml-auto inline-flex items-center gap-1 text-muted-foreground transition hover:text-foreground"
-              >
-                Full market <ExternalLink className="h-3 w-3" />
-              </Link>
-            </div>
-          </div>
+        {/* Slim header — title + Full market link + close */}
+        <header className="sticky top-0 z-10 flex items-center gap-3 border-b border-border bg-background/95 px-5 py-3 backdrop-blur">
+          <h2 className="min-w-0 flex-1 truncate font-display text-base font-semibold leading-tight text-foreground">
+            {market.title}
+          </h2>
+          <Link
+            to="/event/$id"
+            params={{ id: market.id }}
+            onClick={() => onOpenChange(false)}
+            className="inline-flex shrink-0 items-center gap-1 font-mono text-[10px] uppercase tracking-widest text-muted-foreground transition hover:text-foreground"
+          >
+            Full market <ExternalLink className="h-3 w-3" />
+          </Link>
           <button
             type="button"
             aria-label="Close"
@@ -118,7 +104,7 @@ export function TradeDrawer({
         </header>
 
         {/* Outcome chooser */}
-        <div className="border-b border-border px-5 py-4">
+        <div className="border-b border-border px-5 py-3">
           <div className="mb-2 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
             Pick outcome
           </div>
@@ -158,7 +144,7 @@ export function TradeDrawer({
         {/* Side chooser — only for 3+ outcome markets, where each outcome is
             its own binary sub-market with YES/NO sides. */}
         {needsSideToggle && (
-          <div className="border-b border-border px-5 py-4">
+          <div className="border-b border-border px-5 py-3">
             <div className="mb-2 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
               Pick side · {selected.team?.short ?? selected.label}
             </div>
@@ -192,7 +178,7 @@ export function TradeDrawer({
         )}
 
         {/* Trade form */}
-        <div className="px-5 py-4">
+        <div className="px-5 py-3 pb-0">
           <TradeForm
             key={`${market.id}-${selected.id}-${needsSideToggle ? side : "single"}`}
             outcome={formOutcome}

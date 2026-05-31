@@ -1,68 +1,54 @@
-## 背景
-
-当前抽屉对所有市场用同一套逻辑：渲染所有 outcome 作为一排芯片，选中一个直接喂给 `TradeForm`。
-
-- Binary 市场（LIV vs NEW、Yes/No 问题）：两个 outcome 互斥，LIV YES = NEW NO，本身就是一个市场 → 当前展示**正确**，无需改动。
-- 多 outcome 市场（如 RMA / DRAW / BAR 1X2 三选）：实际上是**多个独立的二元子市场**，每个 outcome 都该有自己的 YES/NO。当前实现只能"买 Draw YES"，没法"买 Draw NO"，与 Polymarket 行为不一致。
-
 ## 目标
 
-参考用户给的 Polymarket 截图，把抽屉做成两层选择：
+1. 抽屉 header 精简 + 缩高。
+2. 加了 PICK SIDE 那一层之后下面的 Buy/Sell CTA 滚到屏外 → 让 CTA 始终一屏可见。
 
-```text
-┌─ Header（不变）─────────────────────────┐
-│ EPL · 23 AUG 4:30PM           [X]      │
-│ Liverpool to beat Newcastle             │
-│ Vol $1.18M · 2,604 traders  Full market│
-├─ PICK OUTCOME ─────────────────────────┤
-│ [ RMA 41¢ ]  [▣ DRAW 23¢ ]  [ BAR 36¢ ] │  ← 选哪个子市场
-├─ PICK SIDE（仅多 outcome 时出现）──────┤
-│ [▣ YES 23¢ ]   [  NO 77¢  ]            │  ← 选 YES / NO
-├─ TradeForm ────────────────────────────│
-│ Buy DRAW YES @ 23¢ …                    │
-└─────────────────────────────────────────┘
-```
+## 改动
 
-## 改动范围
+### 1. `TradeDrawer.tsx` — Header 精简
 
-只改 `src/components/sports/trade/TradeDrawer.tsx`。数据结构、Provider、调用方都不动。
+**删掉**：
+- EPL 联赛 chip + `· TODAY 6:00PM` 那行
+- `Vol $1.82M · 2,104 traders` 那行
 
-### 判定规则
+**保留**：
+- 标题 `Man City vs Arsenal`
+- `Full market ↗` 链接（放到标题右侧同一行，靠右对齐）
+- 右上角关闭 X
 
-- `market.outcomes.length === 2` **且** 两个 label 是 `YES`/`NO` → 走旧的"二选一即 YES/NO"分支，不显示第二层。
-- `market.outcomes.length === 2` 且是两支队伍（LIV/NEW 这种）→ 同样不显示第二层（选 LIV 就是 LIV YES，等价于 NEW NO，符合用户原话"对应 yes 和 no"）。
-- `market.outcomes.length >= 3` → 第一层选 outcome，**新增第二层** YES/NO 切换。
+**高度**：`py-4` → `py-3`，去掉多余的间距 div，整体从 ~110px 降到 ~56px。
 
-### YES/NO 价格
+### 2. `TradeDrawer.tsx` — 各 section 内距收紧
 
-- YES 价 = 该 outcome 的 `price`（如 Draw 23¢）。
-- NO 价 = `100 - YES`（23¢ → 77¢）。NO 没有真实订单簿，按互补价显示足够 mock。
+- `PICK OUTCOME` / `PICK SIDE`：`py-4` → `py-3`，section 间分隔线保留。
+- TradeForm 外层 wrapper：`px-5 py-4` → `px-5 py-3`。
 
-### TradeForm 喂数
+### 3. `TradeForm.tsx` — CTA 悬浮在底部
 
-- 多选场景下：
-  - `outcome` = 当前选中的 YES/NO（驱动主色：YES 走 primary，NO 走 neon）。
-  - `outcomeLabel` = `${outcomeName} ${YES|NO}`，例如 `"Draw YES"`，CTA 自然显示 `Buy Draw YES @ 23¢`。
-  - `price` = 上面算出的 YES/NO 价格。
-- 二选场景下：维持现有逻辑（首 outcome → yes，第二 → no；label 用队名/Yes/No）。
+最稳的方案：让 CTA 在 SheetContent 滚动容器里 `sticky bottom-0`，背景加 `bg-background/95 backdrop-blur`，上方加一道细分隔线。这样无论中间内容多长，按钮一直贴底可见。
 
-### 第二层 UI
+具体改动：
+- TradeForm 根容器从 `rounded-2xl border bg-surface p-5` 改为不带 padding 的纯内容容器（或保留卡片外观，但内部最后的按钮抽出来）。
+- 简洁做法：在 TradeForm 内部不动太多，仅给最后那个 `<button>` 加上：
+  ```
+  sticky bottom-0 -mx-5 -mb-5 mt-5 px-5 py-3 
+  bg-background/95 backdrop-blur 
+  border-t border-border rounded-none
+  ```
+  rounded 取消、左右负 margin 撑满抽屉宽度，sticky 让它贴到 SheetContent 的视窗底部。
 
-复用第一层芯片样式，但只有两格、固定 grid-cols-2；选中态同现有"foreground 反白"。`<key>` 加入 yes/no 维度，确保切换时 TradeForm 重新初始化（清零 margin/leverage）。
+### 4. SheetContent 滚动容器
 
-### Provider 是否要扩展？
+当前已经是 `overflow-y-auto flex-col`，sticky 子元素能正确贴底 — 不用动结构。
 
-不需要。YES/NO 选择是抽屉内部的瞬态 UI 状态，不参与全局 `TradeSelection`。调用方只传 `marketId` + 可选 `outcomeId`，默认 YES 即可。如果以后想从卡片直接打开"Draw NO"，再加 `side?: "yes"|"no"` 字段。
+## 不动
 
-## 技术细节
-
-- 在 `TradeDrawer` 内 `useState<"yes"|"no">("yes")`，并在 `selected.id` 变化时 `useEffect` 重置为 `"yes"`。
-- `isYesNoMarket` 现有判定保留；新增 `needsSideToggle = market.outcomes.length >= 3`。
-- 价格换算用整数：`yesCents = Math.round(o.price*100)`，`noCents = 100 - yesCents`。
-- 不改任何 sports-markets / Provider / 调用点 / 样式 token。
+- Provider / 调用方 / 数据。
+- 两层选择逻辑（上一轮刚加的）。
+- 卡片外的 sports-markets 数据。
+- /event/$id 全页交易面板。
 
 ## 不在范围
 
-- 真实 NO 订单簿（mock 站用互补价就够）。
-- 修改卡片侧的 openTrade 调用签名。
-- 改 `/event/$id` 全页交易面板（那是另一个页面，不在本次抽屉整理内）。
+- 桌面 vs 移动差异化布局（sticky 方案对两端都生效）。
+- TradeForm 内部表单字段精简 — 保持现有信息密度，靠 sticky CTA 解决"看不见按钮"的问题。

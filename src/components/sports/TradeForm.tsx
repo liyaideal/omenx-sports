@@ -415,20 +415,22 @@ export function TradeForm({
         )}
       </dl>
 
-      <button
-        type="button"
-        onClick={handleSubmit}
-        disabled={hasFormError}
-        className={cn(
-          "mt-5 w-full rounded-xl py-3 font-display font-semibold uppercase tracking-widest text-sm transition-opacity hover:opacity-90",
-          hasFormError
-            ? "cursor-not-allowed bg-white/[0.06] text-muted-foreground hover:opacity-100"
-            : "",
-          accentClass,
-        )}
-      >
-        {ctaLabel}
-      </button>
+      <div className="sticky bottom-0 -mx-5 -mb-5 mt-5 border-t border-border bg-background/95 px-5 py-3 backdrop-blur">
+        <button
+          type="button"
+          onClick={handleSubmit}
+          disabled={hasFormError}
+          className={cn(
+            "w-full rounded-xl py-3 font-display font-semibold uppercase tracking-widest text-sm transition-opacity hover:opacity-90",
+            hasFormError
+              ? "cursor-not-allowed bg-white/[0.06] text-muted-foreground hover:opacity-100"
+              : "",
+            accentClass,
+          )}
+        >
+          {ctaLabel}
+        </button>
+      </div>
     </div>
   );
 }
