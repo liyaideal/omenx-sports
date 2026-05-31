@@ -44,9 +44,8 @@ export function FullscreenStreamOverlay({
   }, [onClose]);
 
   const fixture = market.fixture;
-  const o1 = market.outcomes[0];
-  const o2 = market.outcomes[1] ?? market.outcomes[0];
-  const selectedId = outcomeId ?? o1.id;
+  const outcomes = market.outcomes;
+  const selectedId = outcomeId ?? outcomes[0].id;
 
   return createPortal(
     <div className="fixed inset-0 z-[60] flex flex-col bg-black/95 backdrop-blur">
@@ -123,18 +122,15 @@ export function FullscreenStreamOverlay({
       <div className="border-t border-white/10 bg-black/80 px-4 py-3">
         <div className="mx-auto flex max-w-3xl items-center gap-3">
           <div className="flex min-w-0 flex-1 items-center gap-2">
-            <ChipLg
-              label={o1.team?.name ?? o1.label}
-              cents={Math.round(o1.price * 100)}
-              selected={selectedId === o1.id}
-              onClick={() => onSelectOutcome(o1.id)}
-            />
-            <ChipLg
-              label={o2.team?.name ?? o2.label}
-              cents={Math.round(o2.price * 100)}
-              selected={selectedId === o2.id}
-              onClick={() => onSelectOutcome(o2.id)}
-            />
+            {outcomes.map((o) => (
+              <ChipLg
+                key={o.id}
+                label={o.team?.name ?? o.label}
+                cents={Math.round(o.price * 100)}
+                selected={selectedId === o.id}
+                onClick={() => onSelectOutcome(o.id)}
+              />
+            ))}
           </div>
           <button
             type="button"
