@@ -45,6 +45,10 @@ import { LeagueSpotlightCard } from "@/components/sports/league/LeagueSpotlightC
 import { LeagueComingSoonCard } from "@/components/sports/league/LeagueComingSoonCard";
 import { LeagueHubHero } from "@/components/sports/league/LeagueHubHero";
 import { HubTabs } from "@/components/sports/league/HubTabs";
+import {
+  WorldCupBackdrop,
+  RoadToFinalStrip,
+} from "@/components/sports/league/WorldCupAmbience";
 import { GroupWinnerCard } from "@/components/sports/league/GroupWinnerCard";
 import { BinaryQuestionCard } from "@/components/sports/league/BinaryQuestionCard";
 import { BracketView } from "@/components/sports/league/BracketView";
