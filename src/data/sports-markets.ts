@@ -49,6 +49,11 @@ export interface SportsMarket {
   /** Match clock as `MM:SS` or `HH:MM:SS`, used both as a label and to
    *  drive the progress bar (assuming a 90-minute regulation match). */
   liveClock?: string;
+  /** Tournament context label (e.g. "Group A · MD1", "Round of 32",
+   *  "Quarter-final", "Player prop"). When the card is rendered inside
+   *  a tournament hub the league chip is replaced by this stage chip —
+   *  league is implied by the hub, stage is the useful axis. */
+  stage?: string;
 }
 
 export const FEATURED_MATCH: SportsMarket = {
