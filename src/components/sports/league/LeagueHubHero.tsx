@@ -48,21 +48,6 @@ export function LeagueHubHero({
               backgroundImage: `repeating-linear-gradient(115deg, oklch(${accent}) 0 28px, transparent 28px 64px)`,
             }}
           />
-          {/* Floating sparkles — confetti hint. */}
-          <div aria-hidden className="pointer-events-none absolute inset-0 motion-safe:animate-pulse">
-            <span
-              className="absolute left-[8%] top-[20%] h-1 w-1 rounded-full bg-amber-300/70"
-              style={{ boxShadow: "0 0 10px rgba(252,211,77,0.6)" }}
-            />
-            <span
-              className="absolute left-[92%] top-[28%] h-1 w-1 rounded-full bg-amber-300/60"
-              style={{ boxShadow: "0 0 10px rgba(252,211,77,0.5)" }}
-            />
-            <span
-              className="absolute left-[88%] top-[78%] h-1.5 w-1.5 rounded-full bg-amber-300/70"
-              style={{ boxShadow: "0 0 12px rgba(252,211,77,0.6)" }}
-            />
-          </div>
         </>
       )}
 
