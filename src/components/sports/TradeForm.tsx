@@ -221,9 +221,6 @@ export function TradeForm({
             )}
           </button>
         ))}
-        <span className="ml-auto font-mono text-[10px] text-muted-foreground">
-          Bal {balance.toLocaleString()} USDC
-        </span>
       </div>
 
       {/* Inputs */}
