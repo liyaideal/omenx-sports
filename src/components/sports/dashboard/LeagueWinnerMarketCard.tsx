@@ -2,7 +2,7 @@ import { Link } from "@tanstack/react-router";
 import { Trophy } from "lucide-react";
 import type { SportsMarket } from "@/data/sports-markets";
 import { PricePill } from "./PricePill";
-import { TypeChip } from "@/components/sports/CardChip";
+import { CardHeader, TypeChip } from "@/components/sports/CardChip";
 
 /**
  * Multi-outcome futures market presented in a league-table layout. Rows
@@ -13,12 +13,11 @@ export function LeagueWinnerMarketCard({ market }: { market: SportsMarket }) {
   const rows = [...market.outcomes].sort((a, b) => b.price - a.price);
   return (
     <section className="flex h-full flex-col rounded-3xl border border-border bg-surface p-5 shadow-card">
-      <header className="flex items-center justify-between pb-3">
-        <div>
-          <TypeChip icon={Trophy} label="Season winner" tone="amber" />
-          <h3 className="mt-1.5 font-display text-base font-semibold text-foreground">{market.title}</h3>
-        </div>
-      </header>
+      <CardHeader
+        className="pb-3"
+        chip={<TypeChip icon={Trophy} label="Season winner" tone="amber" />}
+        title={market.title}
+      />
 
       <div className="grid grid-cols-[24px_1fr_auto] items-center gap-3 pb-2 text-[10px] font-mono uppercase tracking-widest text-muted-foreground">
         <span>#</span>
