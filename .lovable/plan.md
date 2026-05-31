@@ -1,21 +1,19 @@
-## 问题
-
-`LeagueHubHero` 对所有 tournament 类型的 league 都会在 crest 容器右上角叠加一个金色 `<Trophy />` 图标。对 World Cup 2026 来说,league logo 本身就是一座大金奖杯 —— 结果变成"奖杯叠奖杯",视觉冗余且压到 logo 边缘,显得脏。
-
 ## 改动
 
-**`src/components/sports/league/LeagueHubHero.tsx`** —— 删掉 crest 容器右上角那块 `<Trophy>` overlay(及其 import)。
+把用户上传的真实 FIFA World Cup 2026 logo (`user-uploads://2026-FIFA-Logo.png`) 复制到 `src/assets/leagues/world-cup-2026.png`,把全站对旧 `world-cup-2026.svg` 的引用全部切到这个新 PNG,并在 `/style-guide` 里专门加一块"品牌资产"展示位强调这是唯一正确的 WC2026 logo 来源。
 
-理由:
-- "这是个 tournament"这层信息已经由 logo 上方那条 `Tournament` 文字 chip + 金色 `kickoffLabel` 倒计时 pill + 金奖杯 hero 背景 ambience 表达过了,不缺这一个角标。
-- League logo 本来就是品牌资产,不应该被装饰图标遮挡。
-- Season league(EPL 等)本来就没有这个 overlay,删掉之后 tournament/season 两种 hero 的 crest 处理也更一致 —— 都靠 logo 本身说话,差异化交给 chip 行和背景纹理。
+### 文件改动
 
-不动的部分:
-- 背景 pitch stripes、accent 渐变光晕、`kickoffLabel` / hostFlags / stats 等其他 tournament-only 元素全部保留。
-- 不改 `world-cup-2026.svg` 本身,不改其它 league 的 hero。
-- `Trophy` 在 `CardChip` (TypeChip "Season winner" / "Group winner") 里继续使用,不受影响。
+1. **新增** `src/assets/leagues/world-cup-2026.png` —— 用户上传的真实 logo(深绿"26"+金奖杯+FIFA 字样)。
+2. **`src/data/leagues.ts`** —— `import` 路径从 `.svg` 改为 `.png`。
+3. **`src/components/sports/LeagueBadge.tsx`** —— `PRESETS.wc.logo` 指向新 PNG。
+4. **`src/data/tournament.ts`** —— 同上。
+5. **`src/routes/league.$slug.tsx`** —— 同上。
+6. **`src/components/sports/league/WorldCupAmbience.tsx`** —— 同上。
+7. **`src/routes/style-guide.tsx`** —— ①已有的 svg 引用切到新 PNG;②**新增**一个 "Brand assets — League logos" 小节,把 WC2026 logo 用三种尺寸(crest 24px / hero 80px / coming-soon 40px)摆出来,并在标题下写一行强调:**"FIFA World Cup 2026 — 全站只能使用这张真实 logo(`@/assets/leagues/world-cup-2026.png`),不要再生成或替换占位图。"** 顺手把 EPL / UCL / La Liga 几个 preset crest 也放一排,作为"league logo source of truth"的总览,避免以后又出现"重画一个奖杯叠加"那种事。
+8. **删除** `src/assets/leagues/world-cup-2026.svg` —— 旧占位资产不再使用,清理掉避免误用。
 
-## 备选(不推荐,先不做)
+### 不动
 
-如果之后想给 tournament hero 一个更精致的"高光"动作,可以考虑把 crest 容器换成带金色 ring + 内阴影的"奖杯展柜"框,但这是一次独立的视觉升级,不在这次清理范围内。
+- 不改 logo 容器的尺寸 / 圆角 / ring 样式 —— `LeagueBadge` 现有的 `object-contain` + 透明容器对新 PNG 同样适用。
+- 不改 `LeagueHubHero`、`LeagueComingSoonCard` 等消费方,它们都通过 `league.logo` / preset 读取,自动跟着切。
