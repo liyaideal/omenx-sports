@@ -4,7 +4,6 @@ import { useNavigate, useRouterState } from "@tanstack/react-router";
 import { Maximize2, SquareArrowOutUpRight, X } from "lucide-react";
 import type { SportsMarket } from "@/data/sports-markets";
 import { useTradeDrawer } from "@/components/sports/trade/TradeDrawerProvider";
-import { cn } from "@/lib/utils";
 
 interface GlobalStreamMiniPlayerProps {
   market: SportsMarket;
@@ -38,10 +37,11 @@ export function GlobalStreamMiniPlayer({
   useEffect(() => setMounted(true), []);
   if (!mounted) return null;
 
-  // Render every outcome as a chip so three-way markets (e.g. football
-  // home/draw/away) don't silently drop the third option.
-  const outcomes = market.outcomes;
-  const selectedId = outcomeId ?? outcomes[0].id;
+  // Mini player keeps the bottom bar minimal — only a Trade CTA + nav
+  // controls. Outcome selection happens in the fullscreen overlay or in
+  // the trade drawer itself, so cramming chips here just made them
+  // illegible (especially on three-way markets).
+  const selectedId = outcomeId ?? market.outcomes[0].id;
 
   return createPortal(
     <div className="pointer-events-none fixed bottom-4 right-4 z-50 hidden sm:block">
@@ -93,49 +93,33 @@ export function GlobalStreamMiniPlayer({
           <span className="absolute inset-0 grid place-items-center opacity-0 transition group-hover:opacity-100" />
         </button>
 
-        {/* Action bar — both-side chips + Trade + nav controls */}
-        <div className="flex items-center gap-2 border-t border-white/[0.06] px-2 py-2">
-          <div className="flex min-w-0 flex-1 items-center gap-1">
-            {outcomes.map((o) => (
-              <OutcomeChip
-                key={o.id}
-                label={o.team?.short ?? o.label}
-                cents={Math.round(o.price * 100)}
-                selected={selectedId === o.id}
-                onClick={() => onSelectOutcome(o.id)}
-              />
-            ))}
-          </div>
-          <div className="flex shrink-0 items-center gap-1">
+        {/* Action bar — Trade CTA + nav controls (no outcome chips). */}
+        <div className="flex items-center gap-1.5 border-t border-white/[0.06] px-2 py-2">
+          <button
+            type="button"
+            onClick={() =>
+              openTrade({ marketId: market.id, outcomeId: selectedId })
+            }
+            className="flex-1 rounded-md bg-primary px-3 py-2 font-mono text-[11px] font-semibold uppercase tracking-widest text-primary-foreground transition hover:bg-primary/90"
+          >
+            Trade
+          </button>
+          <IconBtn label="Fullscreen" onClick={onFullscreen}>
+            <Maximize2 className="h-3.5 w-3.5" />
+          </IconBtn>
+          {!onEventPage && (
             <IconBtn
-              label="Fullscreen"
-              onClick={onFullscreen}
-            >
-              <Maximize2 className="h-3.5 w-3.5" />
-            </IconBtn>
-            {!onEventPage && (
-              <IconBtn
-                label="Open event"
-                onClick={() =>
-                  navigate({ to: "/event/$id", params: { id: market.id } })
-                }
-              >
-                <SquareArrowOutUpRight className="h-3.5 w-3.5" />
-              </IconBtn>
-            )}
-            <button
-              type="button"
+              label="Open event"
               onClick={() =>
-                openTrade({ marketId: market.id, outcomeId: selectedId })
+                navigate({ to: "/event/$id", params: { id: market.id } })
               }
-              className="shrink-0 rounded-md bg-primary px-3 py-1.5 font-mono text-[11px] font-semibold uppercase tracking-widest text-primary-foreground transition hover:bg-primary/90"
             >
-              Trade
-            </button>
-            <IconBtn label="Hide mini player" onClick={onDismiss}>
-              <X className="h-3.5 w-3.5" />
+              <SquareArrowOutUpRight className="h-3.5 w-3.5" />
             </IconBtn>
-          </div>
+          )}
+          <IconBtn label="Hide mini player" onClick={onDismiss}>
+            <X className="h-3.5 w-3.5" />
+          </IconBtn>
         </div>
       </div>
     </div>,
