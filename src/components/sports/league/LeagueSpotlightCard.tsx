@@ -59,49 +59,49 @@ export function LeagueSpotlightCard({
         )}
       </div>
 
-      {/* Body: crest + title */}
-      <div className="flex items-center gap-4 md:gap-6">
+      {/* Body: large crest column + content column */}
+      <div className="flex items-stretch gap-5 md:gap-7">
         <span
-          className="grid h-16 w-16 shrink-0 place-items-center overflow-hidden rounded-2xl bg-white/[0.06] p-2 ring-1 ring-white/15 md:h-20 md:w-20"
-          style={{ boxShadow: `0 0 32px -8px oklch(${accent} / 0.7)` }}
+          className="grid h-32 w-32 shrink-0 place-items-center self-stretch overflow-hidden rounded-2xl bg-white/[0.06] ring-1 ring-white/15 md:h-44 md:w-44"
+          style={{ boxShadow: `0 0 40px -8px oklch(${accent} / 0.7)` }}
         >
           <img src={league.logo} alt="" className="h-full w-full object-contain" loading="eager" />
         </span>
-        <div className="min-w-0 flex-1">
-          <h3 className="truncate font-display text-2xl font-semibold text-foreground md:text-3xl">
-            {league.name}
-          </h3>
-          <p className="mt-1 line-clamp-2 text-xs text-muted-foreground md:text-sm">
-            {league.tagline}
-          </p>
-        </div>
-      </div>
+        <div className="flex min-w-0 flex-1 flex-col gap-4">
+          <div className="min-w-0">
+            <h3 className="truncate font-display text-2xl font-semibold text-foreground md:text-3xl">
+              {league.name}
+            </h3>
+            <p className="mt-1 line-clamp-2 text-xs text-muted-foreground md:text-sm">
+              {league.tagline}
+            </p>
+          </div>
 
-      {/* Highlight chips */}
-      {highlights.length > 0 && (
-        <div className="flex flex-wrap gap-1.5">
-          {highlights.slice(0, 4).map((h) => (
-            <span
-              key={h}
-              className="truncate rounded-full bg-white/[0.05] px-2.5 py-1 text-[11px] text-foreground/85 ring-1 ring-white/10"
-            >
-              {h}
+          {highlights.length > 0 && (
+            <div className="flex flex-wrap gap-1.5">
+              {highlights.slice(0, 4).map((h) => (
+                <span
+                  key={h}
+                  className="truncate rounded-full bg-white/[0.05] px-2.5 py-1 text-[11px] text-foreground/85 ring-1 ring-white/10"
+                >
+                  {h}
+                </span>
+              ))}
+            </div>
+          )}
+
+          <div className="mt-auto flex items-center justify-between gap-3">
+            <span className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+              Games · Props · Bracket
             </span>
-          ))}
+            <span
+              className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold text-background transition group-hover:gap-2.5"
+              style={{ backgroundColor: `oklch(${accent})` }}
+            >
+              Enter the hub <ArrowRight className="h-3.5 w-3.5" />
+            </span>
+          </div>
         </div>
-      )}
-
-      {/* CTA */}
-      <div className="flex items-center justify-between gap-3">
-        <span className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
-          Games · Props · Bracket
-        </span>
-        <span
-          className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold text-background transition group-hover:gap-2.5"
-          style={{ backgroundColor: `oklch(${accent})` }}
-        >
-          Enter the hub <ArrowRight className="h-3.5 w-3.5" />
-        </span>
       </div>
     </Link>
   );
