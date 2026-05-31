@@ -1216,6 +1216,70 @@ function StyleGuide() {
               hub is the single-tournament depth view. Zero overlap.
             </p>
 
+            <div className="mb-8 rounded-2xl border border-amber-300/30 bg-amber-300/[0.04] p-5">
+              <div className="mb-1 font-mono text-[10px] uppercase tracking-widest text-amber-200">
+                Brand assets — source of truth
+              </div>
+              <h3 className="font-display text-lg font-semibold text-foreground">
+                League logos · do not regenerate or replace
+              </h3>
+              <p className="mt-1.5 max-w-3xl text-sm text-muted-foreground">
+                The FIFA World Cup 2026 mark is the <b className="text-foreground">real brand asset</b> shipped at
+                {" "}<code className="font-mono text-foreground">@/assets/leagues/world-cup-2026.png</code>.
+                Never overlay a `Trophy` icon on top, never swap for a generated placeholder, never re-import a
+                similarly named SVG. Every consumer reads from{" "}
+                <code className="font-mono text-foreground">LEAGUES[].logo</code> /{" "}
+                <code className="font-mono text-foreground">LeagueBadge</code> presets — fix the source, not the
+                call site. Same rule applies to EPL / UCL / La Liga crests below.
+              </p>
+              <div className="mt-5 grid grid-cols-2 gap-5 md:grid-cols-4">
+                {LEAGUES.map((league) => (
+                  <div
+                    key={league.slug}
+                    className="flex flex-col items-center gap-2 rounded-xl border border-border bg-surface p-4"
+                  >
+                    <span
+                      className="grid h-20 w-20 place-items-center overflow-hidden rounded-2xl bg-white/[0.06] p-2 ring-1 ring-white/10"
+                      style={{ boxShadow: `0 0 24px -8px oklch(${league.accent} / 0.6)` }}
+                    >
+                      <img src={league.logo} alt={league.name} className="h-full w-full object-contain" />
+                    </span>
+                    <div className="text-center">
+                      <div className="font-display text-xs font-semibold text-foreground">{league.name}</div>
+                      <div className="font-mono text-[9px] uppercase tracking-widest text-muted-foreground">
+                        {league.short}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <div className="mt-5 flex items-end gap-6 rounded-xl border border-border bg-surface p-4">
+                <div className="flex flex-col items-center gap-1.5">
+                  <LeagueBadge league="wc" size="sm" showLabel={false} />
+                  <span className="font-mono text-[9px] uppercase tracking-widest text-muted-foreground">crest 20px</span>
+                </div>
+                <div className="flex flex-col items-center gap-1.5">
+                  <LeagueBadge league="wc" size="md" showLabel={false} />
+                  <span className="font-mono text-[9px] uppercase tracking-widest text-muted-foreground">crest 28px</span>
+                </div>
+                <div className="flex flex-col items-center gap-1.5">
+                  <span className="grid h-10 w-10 place-items-center overflow-hidden rounded-xl bg-white/[0.04] p-1.5 ring-1 ring-white/10">
+                    <img src={LEAGUES[0].logo} alt="" className="h-full w-full object-contain" />
+                  </span>
+                  <span className="font-mono text-[9px] uppercase tracking-widest text-muted-foreground">coming-soon 40px</span>
+                </div>
+                <div className="flex flex-col items-center gap-1.5">
+                  <span
+                    className="grid h-20 w-20 place-items-center overflow-hidden rounded-2xl bg-white/[0.06] p-2 ring-1 ring-white/15"
+                    style={{ boxShadow: `0 0 32px -8px oklch(${LEAGUES[0].accent} / 0.6)` }}
+                  >
+                    <img src={LEAGUES[0].logo} alt="" className="h-full w-full object-contain" />
+                  </span>
+                  <span className="font-mono text-[9px] uppercase tracking-widest text-muted-foreground">hero 80px</span>
+                </div>
+              </div>
+            </div>
+
             <div className="space-y-6">
               <div>
                 <div className="mb-3 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">

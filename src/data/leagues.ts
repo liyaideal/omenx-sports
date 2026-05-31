@@ -14,7 +14,7 @@ import {
   type SportsMarket,
   type PlayerSpotlight,
 } from "@/data/sports-markets";
-import worldCup2026Logo from "@/assets/leagues/world-cup-2026.svg";
+import worldCup2026Logo from "@/assets/leagues/world-cup-2026.png";
 
 export type LeagueKind = "tournament" | "season-league";
 
