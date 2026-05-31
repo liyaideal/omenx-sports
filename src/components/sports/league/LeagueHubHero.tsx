@@ -51,24 +51,16 @@ export function LeagueHubHero({
           {/* Floating sparkles — confetti hint. */}
           <div aria-hidden className="pointer-events-none absolute inset-0 motion-safe:animate-pulse">
             <span
-              className="absolute left-[12%] top-[18%] h-1.5 w-1.5 rounded-full"
-              style={{ background: `oklch(${accent})`, boxShadow: `0 0 12px oklch(${accent} / 0.9)` }}
+              className="absolute left-[8%] top-[20%] h-1 w-1 rounded-full bg-amber-300/70"
+              style={{ boxShadow: "0 0 10px rgba(252,211,77,0.6)" }}
             />
             <span
-              className="absolute left-[78%] top-[32%] h-1 w-1 rounded-full bg-amber-300"
-              style={{ boxShadow: "0 0 10px rgba(252,211,77,0.9)" }}
+              className="absolute left-[92%] top-[28%] h-1 w-1 rounded-full bg-amber-300/60"
+              style={{ boxShadow: "0 0 10px rgba(252,211,77,0.5)" }}
             />
             <span
-              className="absolute left-[48%] top-[12%] h-1 w-1 rounded-full bg-white/80"
-              style={{ boxShadow: "0 0 10px rgba(255,255,255,0.7)" }}
-            />
-            <span
-              className="absolute left-[88%] top-[72%] h-1.5 w-1.5 rounded-full bg-amber-300/80"
-              style={{ boxShadow: "0 0 12px rgba(252,211,77,0.7)" }}
-            />
-            <span
-              className="absolute left-[22%] top-[78%] h-1 w-1 rounded-full"
-              style={{ background: `oklch(${accent})`, boxShadow: `0 0 10px oklch(${accent} / 0.8)` }}
+              className="absolute left-[88%] top-[78%] h-1.5 w-1.5 rounded-full bg-amber-300/70"
+              style={{ boxShadow: "0 0 12px rgba(252,211,77,0.6)" }}
             />
           </div>
         </>
