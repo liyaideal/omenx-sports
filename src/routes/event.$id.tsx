@@ -318,9 +318,6 @@ function EventTradePage() {
   const stageRef = useRef<HTMLDivElement | null>(null);
   const tradeFormRef = useRef<HTMLDivElement | null>(null);
   const offscreen = useStageOffscreen(stageRef);
-  const scrollToStage = useCallback(() => {
-    stageRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
-  }, []);
   const scrollToTradeForm = useCallback(() => {
     tradeFormRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
   }, []);
