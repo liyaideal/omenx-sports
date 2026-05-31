@@ -5,6 +5,7 @@ import { PricePill } from "./PricePill";
 import { LeagueChip } from "../LeagueBadge";
 import { TeamName } from "@/components/sports/TeamName";
 import { TypeChip } from "@/components/sports/CardChip";
+import { useTradeDrawer } from "@/components/sports/trade/TradeDrawerProvider";
 
 const HOT_PARTICIPANTS = 2000;
 const TRENDING_DELTA = 0.05;
@@ -51,6 +52,12 @@ export function EventMarketTileCard({
 }) {
   const hasFixture = Boolean(market.fixture);
   const isBinary = market.shape === "binary";
+  const { openTrade } = useTradeDrawer();
+  const handleOutcomeClick = (e: React.MouseEvent, outcomeId: string) => {
+    e.preventDefault();
+    e.stopPropagation();
+    openTrade({ marketId: market.id, outcomeId });
+  };
   const hubChip = hubContext
     ? market.stage
       ? { label: market.stage, tone: "amber" as const, icon: Trophy }
@@ -88,13 +95,13 @@ export function EventMarketTileCard({
       {isBinary ? (
         <div className="grid flex-1 grid-cols-2 gap-2">
           {market.outcomes.map((o) => (
-            <OutcomeBlock key={o.id} outcome={o} />
+            <OutcomeBlock key={o.id} outcome={o} onTrade={handleOutcomeClick} />
           ))}
         </div>
       ) : (
         <div className="flex flex-1 flex-col gap-1.5">
           {market.outcomes.map((o) => (
-            <OutcomeRow key={o.id} outcome={o} />
+            <OutcomeRow key={o.id} outcome={o} onTrade={handleOutcomeClick} />
           ))}
         </div>
       )}
@@ -110,7 +117,13 @@ export function EventMarketTileCard({
   );
 }
 
-function OutcomeBlock({ outcome }: { outcome: Outcome }) {
+function OutcomeBlock({
+  outcome,
+  onTrade,
+}: {
+  outcome: Outcome;
+  onTrade: (e: React.MouseEvent, outcomeId: string) => void;
+}) {
   const isYes = outcome.label.toUpperCase() === "YES";
   const isNo = outcome.label.toUpperCase() === "NO";
   const cents = Math.round(outcome.price * 100);
@@ -119,7 +132,11 @@ function OutcomeBlock({ outcome }: { outcome: Outcome }) {
   const deltaUp = deltaPts > 0;
   const deltaDown = deltaPts < 0;
   return (
-    <div className="flex h-full flex-col justify-between gap-3 rounded-2xl bg-white/[0.03] p-4 ring-1 ring-white/[0.05] transition group-hover:bg-white/[0.06]">
+    <button
+      type="button"
+      onClick={(e) => onTrade(e, outcome.id)}
+      className="flex h-full w-full flex-col justify-between gap-3 rounded-2xl bg-white/[0.03] p-4 text-left ring-1 ring-white/[0.05] transition hover:bg-white/[0.08] hover:ring-white/15 group-hover:bg-white/[0.06]"
+    >
       <div className="flex min-w-0 items-center gap-2">
         {outcome.team ? (
           <img src={outcome.team.logo} alt="" className="h-5 w-5 shrink-0 object-contain" />
@@ -157,16 +174,26 @@ function OutcomeBlock({ outcome }: { outcome: Outcome }) {
         {deltaUp ? `+${deltaPts}¢` : deltaDown ? `−${Math.abs(deltaPts)}¢` : "0¢"}
         <span className="text-muted-foreground"> · 24h</span>
       </div>
-    </div>
+    </button>
   );
 }
 
-function OutcomeRow({ outcome }: { outcome: Outcome }) {
+function OutcomeRow({
+  outcome,
+  onTrade,
+}: {
+  outcome: Outcome;
+  onTrade: (e: React.MouseEvent, outcomeId: string) => void;
+}) {
   const isDraw = !outcome.team && (outcome.label === "Draw" || outcome.meta === "X");
   const isYes = outcome.label.toUpperCase() === "YES";
   const isNo = outcome.label.toUpperCase() === "NO";
   return (
-    <div className="flex items-center justify-between gap-3 rounded-xl bg-white/[0.03] px-3 py-2 ring-1 ring-white/[0.05] transition group-hover:bg-white/[0.06]">
+    <button
+      type="button"
+      onClick={(e) => onTrade(e, outcome.id)}
+      className="flex w-full items-center justify-between gap-3 rounded-xl bg-white/[0.03] px-3 py-2 text-left ring-1 ring-white/[0.05] transition hover:bg-white/[0.08] hover:ring-white/15 group-hover:bg-white/[0.06]"
+    >
       <div className="flex min-w-0 items-center gap-2">
         {outcome.team ? (
           <img src={outcome.team.logo} alt="" className="h-5 w-5 shrink-0 object-contain" />
@@ -190,7 +217,7 @@ function OutcomeRow({ outcome }: { outcome: Outcome }) {
         </span>
       </div>
       <PricePill price={outcome.price} delta={outcome.delta24h} size="md" />
-    </div>
+    </button>
   );
 }
 
