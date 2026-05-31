@@ -3,7 +3,6 @@ import { Play, Users } from "lucide-react";
 import type { SportsMarket } from "@/data/sports-markets";
 import { TeamName } from "@/components/sports/TeamName";
 import { useTradeDrawer } from "@/components/sports/trade/TradeDrawerProvider";
-import { DrawIcon, isDrawOutcome } from "@/components/sports/draw";
 
 /**
  * Compact "we are streaming this match" tile, sized to drop into the same
@@ -110,11 +109,6 @@ export function LiveStreamCard({ market }: { market: SportsMarket }) {
                   full={o.team.name}
                   className="truncate font-mono text-[10px] uppercase tracking-widest text-muted-foreground"
                 />
-              ) : isDrawOutcome(o) ? (
-                <span className="inline-flex items-center gap-1 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
-                  <DrawIcon className="h-3 w-3" />
-                  Draw
-                </span>
               ) : (
                 <span className="truncate font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
                   {o.label}
