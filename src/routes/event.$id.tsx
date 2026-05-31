@@ -469,19 +469,29 @@ function EventDetailHeader({
   market,
   selectedIdx,
   onSelect,
+  outcomeId,
 }: {
   market: SportsMarket;
   selectedIdx: number;
   onSelect: (idx: number) => void;
+  outcomeId?: string;
 }) {
   const fixture = market.fixture;
   return (
     <header className="relative overflow-hidden rounded-2xl border border-border bg-surface bg-ambient p-6 shadow-card">
-      <div className="flex items-center gap-2.5">
-        <LeagueChip short={market.league.short} />
-        <span className="rounded-full bg-primary/10 px-2.5 py-0.5 text-[10px] font-medium uppercase tracking-widest text-primary ring-1 ring-primary/30">
-          {market.kind === "match" ? "Match" : market.kind === "league-winner" ? "Season winner" : market.kind === "top-scorer" ? "Top scorer" : "Prop"}
-        </span>
+      <div className="flex items-center justify-between gap-2.5">
+        <div className="flex items-center gap-2.5">
+          <LeagueChip short={market.league.short} />
+          <span className="rounded-full bg-primary/10 px-2.5 py-0.5 text-[10px] font-medium uppercase tracking-widest text-primary ring-1 ring-primary/30">
+            {market.kind === "match" ? "Match" : market.kind === "league-winner" ? "Season winner" : market.kind === "top-scorer" ? "Top scorer" : "Prop"}
+          </span>
+          <span className="hidden items-center gap-3 pl-2 font-mono text-[10px] uppercase tracking-widest text-muted-foreground md:inline-flex">
+            <span>Vol <span className="text-foreground tabular-nums">{market.volume}</span></span>
+            <span>24h <span className="text-foreground tabular-nums">{market.volume24h}</span></span>
+            <span className="inline-flex items-center gap-1"><Users className="h-3 w-3" />{market.participants.toLocaleString()}</span>
+          </span>
+        </div>
+        <ShareButton outcomeId={outcomeId} />
       </div>
 
       {/* Two-column body: fixture left · outcomes right */}
@@ -525,12 +535,6 @@ function EventDetailHeader({
             ))}
           </div>
         </div>
-      </div>
-
-      <div className="mt-6 grid grid-cols-3 divide-x divide-border border-t border-border pt-4 text-center">
-        <Stat label="Volume" value={market.volume} />
-        <Stat label="24h Vol" value={market.volume24h} />
-        <Stat label="Traders" value={market.participants.toLocaleString()} icon={<Users className="h-3 w-3" />} />
       </div>
     </header>
   );
