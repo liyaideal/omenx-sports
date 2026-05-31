@@ -1728,3 +1728,58 @@ function TradeDrawerDemo() {
     </div>
   );
 }
+
+function EventLiveStageDemo() {
+  const live =
+    MATCH_MARKETS.find((m) => m.isLiveStream && m.liveScore && m.fixture) ??
+    FEATURED_MATCH;
+  const selected = live.outcomes[0] ?? live.outcomes[0];
+  return (
+    <StageTabs
+      defaultTabId="stream"
+      tabs={[
+        {
+          id: "stream",
+          label: "Stream",
+          badge: (
+            <span className="ml-1 inline-flex h-1.5 w-1.5 rounded-full bg-[color:var(--accent)] shadow-[0_0_8px_var(--accent)]" />
+          ),
+          content: <EventLiveStage market={live} selected={selected} />,
+        },
+        {
+          id: "chart",
+          label: "Chart",
+          content: (
+            <div className="rounded-2xl border border-dashed border-white/15 bg-white/[0.02] p-10 text-center text-xs text-muted-foreground">
+              PriceChart slot
+            </div>
+          ),
+        },
+        {
+          id: "book",
+          label: "Order book",
+          content: (
+            <div className="rounded-2xl border border-dashed border-white/15 bg-white/[0.02] p-10 text-center text-xs text-muted-foreground">
+              OrderBook slot
+            </div>
+          ),
+        },
+      ]}
+    />
+  );
+}
+
+function MobileTradeBarDemo() {
+  const live =
+    MATCH_MARKETS.find((m) => m.isLiveStream && m.fixture) ?? FEATURED_MATCH;
+  const selected = live.outcomes[0];
+  return (
+    <div className="relative">
+      {/* Locally override the lg:hidden rule by wrapping in a smaller, static
+          frame — only used to demo the bar inside the style-guide. */}
+      <div className="[&_.fixed]:!relative [&_.fixed]:!inset-auto [&_.fixed]:!bottom-auto">
+        <MobileTradeBar market={live} selected={selected} />
+      </div>
+    </div>
+  );
+}
