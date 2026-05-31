@@ -1,14 +1,31 @@
 ## Goal
 
-On the league hub `games` view, the live-stream cards currently stack full-width (one per row), so two live matches dominate the screen. Render them in a 2-column grid (1 column on mobile) so when there are 2 live streams they sit side by side, matching the 3-up trade card grid below.
+`GroupWinnerCard` shows a `TypeChip` (e.g. "Group winner", amber). `BinaryQuestionCard` doesn't — it just stacks an icon + title. Add a matching `TypeChip` so the binary cards in the Props grid feel consistent with the rest of the section.
+
+## Category mapping
+
+Pick the chip label from `market.kind` plus a small heuristic on the id/league so the right label shows for the three flavors we ship today:
+
+- `kind === "league-winner"` and id starts with `wc26-grpa-`/`wc26-grpb-`/… → `Group winner` (icon: `Users`, tone: `amber`)
+- `kind === "league-winner"` otherwise → `Tournament winner` (icon: `Trophy`, tone: `amber`)
+- `kind === "top-scorer"` → `Top scorer` (icon: `Target`, tone: `amber`)
+- `kind === "player-prop"` → `Player prop` (icon: `Target`, tone: `violet`)
+- `kind === "match"` (rare here — match-binary like "Liverpool to beat Newcastle") → `Match prop` (icon: `Swords` or skip the chip)
+
+A tiny helper `getBinaryChip(market)` inside `BinaryQuestionCard.tsx` returns `{ label, icon, tone }`. No new shared util needed.
 
 ## Changes
 
-**`src/routes/league.$slug.tsx`** (the live-stream block around line 246–258)
+**`src/components/sports/league/BinaryQuestionCard.tsx`**
 
-- Wrap the `liveStream.map(...)` output in a grid container instead of the current `space-y-3` stack:
-  - `grid gap-3 md:grid-cols-2`
-- Keep the "Featured kickoff" divider above the grid.
-- No changes to `LiveStreamCard` itself — its internal `aspect-[16/9]` already scales down cleanly at half width.
+- Import `CardHeader`, `TypeChip` from `@/components/sports/CardChip`; drop the local `HelpCircle`/`Trophy`/`Target` avatar block.
+- Replace the current `<header>` (avatar square + title) with `CardHeader` so we get the same chip-above-title rhythm as `GroupWinnerCard`:
+  - `chip={<TypeChip icon={chipIcon} label={chipLabel} tone={chipTone} />}`
+  - `title={market.title}` with `titleSize="sm"` and allow 2-line wrap (override the default `truncate` by passing the title as a node when needed — simplest: pass a `<span className="line-clamp-2 ...">` node).
+- Keep the existing gauge + YES/NO rows + footer untouched.
 
-That's the only edit. Mobile (`MobileEventsSection`) is untouched.
+No data changes; no other components touched. `GroupWinnerCard`'s own "Group winner" chip is unchanged.
+
+## Style guide sync
+
+`/style-guide` already renders `BinaryQuestionCard` via the PropsGrid demo (uses `getBinaryQuestionsByLeagueSlug("world-cup-2026")`), so the chip shows up automatically — no extra edit needed.

@@ -1,6 +1,31 @@
-import { Clock, Users, Trophy, Target, HelpCircle } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
+import { Clock, Users, Trophy, Target, HelpCircle, Swords } from "lucide-react";
 import type { SportsMarket } from "@/data/sports-markets";
 import { useTradeDrawer } from "@/components/sports/trade/TradeDrawerProvider";
+import { CardHeader, TypeChip, type CardChipTone } from "@/components/sports/CardChip";
+
+function getBinaryChip(market: SportsMarket): {
+  label: string;
+  icon: LucideIcon;
+  tone: CardChipTone;
+} {
+  if (market.kind === "league-winner") {
+    if (/^wc26-grp[a-h]-/i.test(market.id)) {
+      return { label: "Group winner", icon: Users, tone: "amber" };
+    }
+    return { label: "Tournament winner", icon: Trophy, tone: "amber" };
+  }
+  if (market.kind === "top-scorer") {
+    return { label: "Top scorer", icon: Target, tone: "amber" };
+  }
+  if (market.kind === "player-prop") {
+    return { label: "Player prop", icon: Target, tone: "violet" };
+  }
+  if (market.kind === "match") {
+    return { label: "Match prop", icon: Swords, tone: "violet" };
+  }
+  return { label: "Prop", icon: HelpCircle, tone: "violet" };
+}
 
 /**
  * Polymarket-style YES/NO gauge card for a single binary question. The
@@ -17,25 +42,19 @@ export function BinaryQuestionCard({ market }: { market: SportsMarket }) {
   if (!yes || !no) return null;
   const yesPct = Math.round(yes.price * 100);
   const noPct = 100 - yesPct;
-  const Icon =
-    market.kind === "league-winner"
-      ? Trophy
-      : market.kind === "player-prop" || market.kind === "top-scorer"
-        ? Target
-        : HelpCircle;
+  const chip = getBinaryChip(market);
 
   return (
     <section className="flex h-full flex-col rounded-2xl border border-border bg-surface p-4 shadow-card">
-      <header className="flex items-center justify-between pb-3">
-        <div className="flex min-w-0 items-center gap-3">
-          <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-white/[0.05] text-foreground/80 ring-1 ring-white/10">
-            <Icon className="h-4 w-4" />
-          </span>
+      <CardHeader
+        className="pb-3"
+        chip={<TypeChip icon={chip.icon} label={chip.label} tone={chip.tone} />}
+        title={
           <h3 className="line-clamp-2 font-display text-sm font-semibold leading-tight text-foreground">
             {market.title}
           </h3>
-        </div>
-      </header>
+        }
+      />
 
       {/* gauge — slim, matches the rhythm of group standings */}
       <div className="pt-1 pb-3">
