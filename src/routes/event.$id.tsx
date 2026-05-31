@@ -373,10 +373,17 @@ function EventTradePage() {
       <div className="grid gap-5 px-6 pb-10 pt-6 md:px-8 lg:grid-cols-[minmax(0,1fr)_360px]">
         <div className="min-w-0 space-y-5">
           <EventDetailHeader
-            market={market}
+            market={active}
             selectedIdx={selectedIdx}
             onSelect={setSelectedIdx}
+            outcomeId={selected?.id}
           />
+          <RelatedMarketsBar
+            markets={relatedMarkets}
+            activeIdx={activeRelatedIdx}
+            onSelect={setActiveRelatedIdx}
+          />
+          {isPreMatch && <PreMatchStrip market={market} />}
           <StageTabs
             defaultTabId={isLive ? "stream" : "chart"}
             tabs={[
@@ -402,7 +409,13 @@ function EventTradePage() {
                 id: "chart",
                 label: "Chart",
                 content: (
-                  <PriceChart tone={binaryTone} seed={hashSeed(market.id) + selectedIdx} />
+                  <div className="space-y-3">
+                    <DepthBar
+                      mark={Math.round(selected.price * 100)}
+                      sideLabels={getSideLabels(active)}
+                    />
+                    <PriceChart tone={binaryTone} seed={hashSeed(active.id) + selectedIdx} />
+                  </div>
                 ),
               },
               {
@@ -410,13 +423,14 @@ function EventTradePage() {
                 label: "Order book",
                 content: (
                   <OrderBook
-                    sideLabels={getSideLabels(market)}
+                    sideLabels={getSideLabels(active)}
                     mark={Math.round(selected.price * 100)}
                   />
                 ),
               },
             ]}
           />
+          <LiveTape market={active} />
         </div>
 
         <div ref={tradeFormRef} className="lg:sticky lg:top-4 lg:self-start">
@@ -446,7 +460,7 @@ function EventTradePage() {
 
       {/* Mobile-only sticky trade bar — desktop already has the
           right-column sticky TradeForm. */}
-      <MobileTradeBar market={market} selected={selected} onOpenForm={scrollToTradeForm} />
+      <MobileTradeBar market={active} selected={selected} onOpenForm={scrollToTradeForm} />
     </AppShell>
   );
 }
