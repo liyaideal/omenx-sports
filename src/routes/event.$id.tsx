@@ -239,11 +239,36 @@ function buildSeed(
 }
 function EventTradePage() {
   const { market } = Route.useLoaderData();
+  // Related markets for the same fixture (BTTS, O/U, scorer, cards). Chip
+  // index 0 is always the originally loaded market; other indexes swap the
+  // chart / order book / trade form in-page without navigation.
+  const relatedMarkets = useMemo(() => getRelatedMarkets(market), [market]);
+  const [activeRelatedIdx, setActiveRelatedIdx] = useState(0);
+  const active = relatedMarkets[activeRelatedIdx] ?? market;
   // For binary 2-outcome markets, treat outcomes[0] = YES, outcomes[1] = NO.
   // For three-way markets, expose all 3 outcomes and let the user pick one;
   // internally we still map the selected one to the YES side of the trade form.
   const [selectedIdx, setSelectedIdx] = useState(0);
-  const selected = market.outcomes[selectedIdx] ?? market.outcomes[0];
+  const selected = active.outcomes[selectedIdx] ?? active.outcomes[0];
+
+  // Honor deep-link ?outcome=…: when the URL carries an outcome id that
+  // exists on the active market, pre-select it on mount and after market
+  // switches.
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const sp = new URLSearchParams(window.location.search);
+    const want = sp.get("outcome");
+    if (!want) return;
+    const idx = active.outcomes.findIndex((o) => o.id === want);
+    if (idx >= 0) setSelectedIdx(idx);
+  }, [active]);
+
+  // Reset outcome selection when the user pivots to a different related
+  // market — outcome ids don't carry across markets.
+  useEffect(() => {
+    setSelectedIdx(0);
+  }, [activeRelatedIdx]);
+
   // For OutcomeSelector tone wiring (binary only)
   const binaryTone: "yes" | "no" = selectedIdx === 0 ? "yes" : "no";
 
@@ -258,13 +283,13 @@ function EventTradePage() {
     return () => clearInterval(id);
   }, []);
 
-  const league = leagueKeyFromShort(market.league.short);
+  const league = leagueKeyFromShort(active.league.short);
   const currentPx = Math.round(selected.price * 100);
 
   // Seed a couple of mock positions/orders/history rows for this market so
   // every visitor sees the table styling on first load, even before placing
   // a trade.
-  const seeded = useMemo(() => buildSeed(market, league), [market, league]);
+  const seeded = useMemo(() => buildSeed(active, league), [active, league]);
   const [seedPositions] = useState<PositionRowData[]>(seeded.positions);
   const [seedOrders] = useState<OrderRowData[]>(seeded.orders);
   const history = seeded.history;
@@ -289,6 +314,7 @@ function EventTradePage() {
   // Live-stream wiring — only the streaming events get the broadcast
   // stage + sticky floating mini player.
   const isLive = Boolean(market.isLiveStream && market.fixture && market.liveScore);
+  const isPreMatch = !isLive && Boolean(market.fixture);
   const stageRef = useRef<HTMLDivElement | null>(null);
   const tradeFormRef = useRef<HTMLDivElement | null>(null);
   const offscreen = useStageOffscreen(stageRef);
@@ -304,7 +330,7 @@ function EventTradePage() {
       // Limit buy below/above mark → resting open order.
       setOrders((prev) => [
         {
-          market: market.title,
+          market: active.title,
           league,
           outcome: order.outcome,
           outcomeLabel: order.outcomeLabel,
@@ -319,7 +345,7 @@ function EventTradePage() {
     }
     setPositions((prev) => [
       {
-        market: market.title,
+        market: active.title,
         league,
         outcome: order.outcome,
         outcomeLabel: order.outcomeLabel,
