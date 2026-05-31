@@ -1,54 +1,39 @@
 ## 目标
 
-1. 抽屉 header 精简 + 缩高。
-2. 加了 PICK SIDE 那一层之后下面的 Buy/Sell CTA 滚到屏外 → 让 CTA 始终一屏可见。
+首页（desktop home `/`）整体换成世界杯 2026 主题：
+1. 中间"Live & upcoming Events"网格里展示的卡片改为 WC 比赛（含 1 个 live-stream）。
+2. 左侧 Fans zone 的"add teams"模块（FanZoneHeader 推荐 chips + 已关注队伍 + 关联帖子 + Live activity feed）都换成国家队。
 
 ## 改动
 
-### 1. `TradeDrawer.tsx` — Header 精简
+### 1. `src/data/sports-mock.ts`
 
-**删掉**：
-- EPL 联赛 chip + `· TODAY 6:00PM` 那行
-- `Vol $1.82M · 2,104 traders` 那行
+- `FOLLOWED_TEAMS`：`[chelsea, manCity]` → `[usa, mexico]`
+- `SUGGESTED_TEAMS`：俱乐部 5 支 → 国家队 5 支：`[brazil-缺，先用 koreaRep, canada, czechia, bosnia, paraguay]`（TEAMS 里已有的 WC 国家中挑 5 个非 followed 的）
+- `FAN_POST`：标题改为 `"USA back in the World Cup spotlight"`，作者/头像保留，image 换成体育场/国旗类无版权图（继续用 Unsplash）。
+- `LIVE_TRADES`：8 条 mock 全部改写为 WC 比赛/国家队 outcome（USA, Mexico, KoreaRep, Canada, Paraguay 等），league 字段改 `"WC"`，eventTitle 用真实的 WC 对局，eventTeams 用 TeamKey。
 
-**保留**：
-- 标题 `Man City vs Arsenal`
-- `Full market ↗` 链接（放到标题右侧同一行，靠右对齐）
-- 右上角关闭 X
+### 2. `src/data/sports-markets.ts`
 
-**高度**：`py-4` → `py-3`，去掉多余的间距 div，整体从 ~110px 降到 ~56px。
+- 把 4 个 WC 1X2 组赛 (`wc26-mex-rsa`, `wc26-kor-cze`, `wc26-can-bih`, `wc26-usa-par`) 在 `MATCH_MARKETS` 数组里**移到最前**，让首页网格优先渲染它们。
+- 给其中 **2 个**加 `isLiveStream: true` + `livePoster` + `liveScore` + `liveClock`（例如 USA-PAR 和 MEX-RSA）。
+- 把原来的 `mci-ars`、`rma-bar` 上的 `isLiveStream / livePoster / liveScore / liveClock` 字段**移除**，避免它们再抢占 live 卡位（仍保留为普通赛事卡，供 EPL/La Liga hub 使用）。
+- 调整这 4 场 WC 比赛的 `dayOffset`：`0 / 0 / 1 / 1`（today/today/tomorrow/tomorrow），让 DayStripCalendar 的"today"也命中它们。
+- `FEATURED_MATCH`（Chelsea vs PSG）→ 改写为 WC 对局（如 USA vs Mexico 友谊性质的演示），id 保留为 `che-psg-2025-ucl`（不动以免破坏 ALL_MARKETS 注册和外部链接）— **保留 id，只改业务字段**：title/league/endsLabel/fixture/outcomes/volume/participants 全部 WC 化。
 
-### 2. `TradeDrawer.tsx` — 各 section 内距收紧
+不动的地方：
+- 其它 club 赛事条目继续存在（EPL/La Liga/UCL 联赛 hub 仍需要它们渲染）。
+- `LEAGUE_WINNER_MARKET` / `TOP_SCORER_MARKET` 不改（不在首页主网格，且是 EPL futures）。
+- 数据结构、组件、Provider 全部不动。
 
-- `PICK OUTCOME` / `PICK SIDE`：`py-4` → `py-3`，section 间分隔线保留。
-- TradeForm 外层 wrapper：`px-5 py-4` → `px-5 py-3`。
+## 受影响页面
 
-### 3. `TradeForm.tsx` — CTA 悬浮在底部
-
-最稳的方案：让 CTA 在 SheetContent 滚动容器里 `sticky bottom-0`，背景加 `bg-background/95 backdrop-blur`，上方加一道细分隔线。这样无论中间内容多长，按钮一直贴底可见。
-
-具体改动：
-- TradeForm 根容器从 `rounded-2xl border bg-surface p-5` 改为不带 padding 的纯内容容器（或保留卡片外观，但内部最后的按钮抽出来）。
-- 简洁做法：在 TradeForm 内部不动太多，仅给最后那个 `<button>` 加上：
-  ```
-  sticky bottom-0 -mx-5 -mb-5 mt-5 px-5 py-3 
-  bg-background/95 backdrop-blur 
-  border-t border-border rounded-none
-  ```
-  rounded 取消、左右负 margin 撑满抽屉宽度，sticky 让它贴到 SheetContent 的视窗底部。
-
-### 4. SheetContent 滚动容器
-
-当前已经是 `overflow-y-auto flex-col`，sticky 子元素能正确贴底 — 不用动结构。
-
-## 不动
-
-- Provider / 调用方 / 数据。
-- 两层选择逻辑（上一轮刚加的）。
-- 卡片外的 sports-markets 数据。
-- /event/$id 全页交易面板。
+- `/` 首页：中间 events 网格 + 左侧 fans zone 全部 WC 化 ✅。
+- `/events` 移动列表：因为共用 MATCH_MARKETS，顶部也会变成 WC（顺带受益，与"主题化"一致）。
+- 联赛 hub `/league/<slug>`：不受影响（仍按 league.short 过滤）。
 
 ## 不在范围
 
-- 桌面 vs 移动差异化布局（sticky 方案对两端都生效）。
-- TradeForm 内部表单字段精简 — 保持现有信息密度，靠 sticky CTA 解决"看不见按钮"的问题。
+- Mobile 首页 (`/events`) 单独主题化（共享数据后已自然 WC 化）。
+- 调整 `MATCH_MARKETS` 之外的次级数据集（standings/top scorers/spotlight player 不在首页主网格里）。
+- 新增/删除 sports-markets entries — 只重排序 + 字段微改。
