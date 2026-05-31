@@ -38,12 +38,10 @@ export function GlobalStreamMiniPlayer({
   useEffect(() => setMounted(true), []);
   if (!mounted) return null;
 
-  // Resolve the two top outcomes to display as chips (binary first; for
-  // three-way markets we display the first two and let users open the
-  // drawer to access the third).
-  const o1 = market.outcomes[0];
-  const o2 = market.outcomes[1] ?? market.outcomes[0];
-  const selectedId = outcomeId ?? o1.id;
+  // Render every outcome as a chip so three-way markets (e.g. football
+  // home/draw/away) don't silently drop the third option.
+  const outcomes = market.outcomes;
+  const selectedId = outcomeId ?? outcomes[0].id;
 
   return createPortal(
     <div className="pointer-events-none fixed bottom-4 right-4 z-50 hidden sm:block">
@@ -98,18 +96,15 @@ export function GlobalStreamMiniPlayer({
         {/* Action bar — both-side chips + Trade + nav controls */}
         <div className="flex items-center gap-2 border-t border-white/[0.06] px-2 py-2">
           <div className="flex min-w-0 flex-1 items-center gap-1">
-            <OutcomeChip
-              label={o1.team?.short ?? o1.label}
-              cents={Math.round(o1.price * 100)}
-              selected={selectedId === o1.id}
-              onClick={() => onSelectOutcome(o1.id)}
-            />
-            <OutcomeChip
-              label={o2.team?.short ?? o2.label}
-              cents={Math.round(o2.price * 100)}
-              selected={selectedId === o2.id}
-              onClick={() => onSelectOutcome(o2.id)}
-            />
+            {outcomes.map((o) => (
+              <OutcomeChip
+                key={o.id}
+                label={o.team?.short ?? o.label}
+                cents={Math.round(o.price * 100)}
+                selected={selectedId === o.id}
+                onClick={() => onSelectOutcome(o.id)}
+              />
+            ))}
           </div>
           <div className="flex shrink-0 items-center gap-1">
             <IconBtn
