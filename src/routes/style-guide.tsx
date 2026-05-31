@@ -38,6 +38,12 @@ import { LiveStreamCard } from "@/components/sports/dashboard/LiveStreamCard";
 import { EventLiveStage } from "@/components/sports/event/EventLiveStage";
 import { StageTabs } from "@/components/sports/event/StageTabs";
 import { MobileTradeBar } from "@/components/sports/event/MobileTradeBar";
+import { RelatedMarketsBar } from "@/components/sports/event/RelatedMarketsBar";
+import { LiveTape } from "@/components/sports/event/LiveTape";
+import { DepthBar } from "@/components/sports/event/DepthBar";
+import { PreMatchStrip } from "@/components/sports/event/PreMatchStrip";
+import { ShareButton } from "@/components/sports/event/ShareButton";
+import { getRelatedMarkets } from "@/components/sports/event/related-markets";
 import { MATCH_MARKETS, FEATURED_MATCH } from "@/data/sports-markets";
 import { MobileTopBar } from "@/components/sports/mobile/MobileTopBar";
 import { MobileBottomNav } from "@/components/sports/mobile/MobileBottomNav";
@@ -1689,6 +1695,30 @@ function StyleGuide() {
             </div>
           </Section>
 
+          <Section id="event-extras" title="Event detail extras" kicker="25 — P1 / event detail">
+            <p className="mb-6 max-w-3xl text-sm text-muted-foreground">
+              The remaining P1 modules on <code className="font-mono text-foreground">/event/$id</code>: chip row that
+              pivots between markets on the same fixture, a compact YES/NO depth bar that replaces the full order book when
+              vertical space matters, a live tape of recent fills for social proof, a pre-match countdown strip with
+              projected lineups + weather, and a share button that deep-links the currently selected outcome.
+            </p>
+
+            <EventExtrasDemo />
+
+            <div className="mt-6 rounded-2xl border border-dashed border-white/15 bg-white/[0.02] p-5 text-xs">
+              <div className="mb-2 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+                Rules
+              </div>
+              <ul className="space-y-1.5 text-muted-foreground">
+                <li>• <code className="font-mono text-foreground">RelatedMarketsBar</code> chip 0 is always the originally loaded market; selecting another chip swaps chart / order book / trade form in-page without navigation.</li>
+                <li>• <code className="font-mono text-foreground">DepthBar</code> lives at the top of the Chart tab so liquidity stays visible even when the user isn't on Order book.</li>
+                <li>• <code className="font-mono text-foreground">LiveTape</code> injects a fresh mocked fill every ~4s; pause / virtualise if we ever wire it to a real WS feed.</li>
+                <li>• <code className="font-mono text-foreground">PreMatchStrip</code> only renders when the market has a fixture and is not currently streaming.</li>
+                <li>• <code className="font-mono text-foreground">ShareButton</code> copies the current URL with <code className="font-mono text-foreground">?outcome=…</code> appended — the page reads it on mount and pre-selects.</li>
+              </ul>
+            </div>
+          </Section>
+
           <footer className="mt-12 border-t border-border pt-6 text-center text-xs text-muted-foreground font-mono">
             Stadium Neon · v0.1 · sports prediction design system
           </footer>
@@ -1780,6 +1810,40 @@ function MobileTradeBarDemo() {
       <div className="[&_.fixed]:!relative [&_.fixed]:!inset-auto [&_.fixed]:!bottom-auto">
         <MobileTradeBar market={live} selected={selected} />
       </div>
+    </div>
+  );
+}
+
+function EventExtrasDemo() {
+  const base =
+    MATCH_MARKETS.find((m) => m.isLiveStream && m.fixture) ?? FEATURED_MATCH;
+  const preMatch =
+    MATCH_MARKETS.find((m) => !m.isLiveStream && m.fixture) ?? FEATURED_MATCH;
+  const related = getRelatedMarkets(base);
+  const [idx, setIdx] = useState(0);
+  const active = related[idx] ?? base;
+  const selected = active.outcomes[0];
+  return (
+    <div className="space-y-4">
+      <RelatedMarketsBar markets={related} activeIdx={idx} onSelect={setIdx} />
+      <div className="grid gap-3 md:grid-cols-2">
+        <DepthBar
+          mark={Math.round(selected.price * 100)}
+          sideLabels={
+            active.outcomes.length === 2
+              ? {
+                  yes: active.outcomes[0].team?.name ?? active.outcomes[0].label,
+                  no: active.outcomes[1].team?.name ?? active.outcomes[1].label,
+                }
+              : undefined
+          }
+        />
+        <div className="flex items-center justify-end">
+          <ShareButton outcomeId={selected.id} />
+        </div>
+      </div>
+      <PreMatchStrip market={preMatch} />
+      <LiveTape market={active} />
     </div>
   );
 }

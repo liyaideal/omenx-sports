@@ -12,6 +12,12 @@ import { EventLiveStage, useStageOffscreen } from "@/components/sports/event/Eve
 import { StreamMiniPlayer } from "@/components/sports/event/StreamMiniPlayer";
 import { StageTabs, type StageTab } from "@/components/sports/event/StageTabs";
 import { MobileTradeBar } from "@/components/sports/event/MobileTradeBar";
+import { RelatedMarketsBar } from "@/components/sports/event/RelatedMarketsBar";
+import { LiveTape } from "@/components/sports/event/LiveTape";
+import { DepthBar } from "@/components/sports/event/DepthBar";
+import { PreMatchStrip } from "@/components/sports/event/PreMatchStrip";
+import { ShareButton } from "@/components/sports/event/ShareButton";
+import { getRelatedMarkets } from "@/components/sports/event/related-markets";
 import {
   PositionsTable,
   type PositionRowData,
@@ -233,11 +239,36 @@ function buildSeed(
 }
 function EventTradePage() {
   const { market } = Route.useLoaderData();
+  // Related markets for the same fixture (BTTS, O/U, scorer, cards). Chip
+  // index 0 is always the originally loaded market; other indexes swap the
+  // chart / order book / trade form in-page without navigation.
+  const relatedMarkets = useMemo(() => getRelatedMarkets(market), [market]);
+  const [activeRelatedIdx, setActiveRelatedIdx] = useState(0);
+  const active = relatedMarkets[activeRelatedIdx] ?? market;
   // For binary 2-outcome markets, treat outcomes[0] = YES, outcomes[1] = NO.
   // For three-way markets, expose all 3 outcomes and let the user pick one;
   // internally we still map the selected one to the YES side of the trade form.
   const [selectedIdx, setSelectedIdx] = useState(0);
-  const selected = market.outcomes[selectedIdx] ?? market.outcomes[0];
+  const selected = active.outcomes[selectedIdx] ?? active.outcomes[0];
+
+  // Honor deep-link ?outcome=…: when the URL carries an outcome id that
+  // exists on the active market, pre-select it on mount and after market
+  // switches.
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const sp = new URLSearchParams(window.location.search);
+    const want = sp.get("outcome");
+    if (!want) return;
+    const idx = active.outcomes.findIndex((o) => o.id === want);
+    if (idx >= 0) setSelectedIdx(idx);
+  }, [active]);
+
+  // Reset outcome selection when the user pivots to a different related
+  // market — outcome ids don't carry across markets.
+  useEffect(() => {
+    setSelectedIdx(0);
+  }, [activeRelatedIdx]);
+
   // For OutcomeSelector tone wiring (binary only)
   const binaryTone: "yes" | "no" = selectedIdx === 0 ? "yes" : "no";
 
@@ -252,13 +283,13 @@ function EventTradePage() {
     return () => clearInterval(id);
   }, []);
 
-  const league = leagueKeyFromShort(market.league.short);
+  const league = leagueKeyFromShort(active.league.short);
   const currentPx = Math.round(selected.price * 100);
 
   // Seed a couple of mock positions/orders/history rows for this market so
   // every visitor sees the table styling on first load, even before placing
   // a trade.
-  const seeded = useMemo(() => buildSeed(market, league), [market, league]);
+  const seeded = useMemo(() => buildSeed(active, league), [active, league]);
   const [seedPositions] = useState<PositionRowData[]>(seeded.positions);
   const [seedOrders] = useState<OrderRowData[]>(seeded.orders);
   const history = seeded.history;
@@ -283,6 +314,7 @@ function EventTradePage() {
   // Live-stream wiring — only the streaming events get the broadcast
   // stage + sticky floating mini player.
   const isLive = Boolean(market.isLiveStream && market.fixture && market.liveScore);
+  const isPreMatch = !isLive && Boolean(market.fixture);
   const stageRef = useRef<HTMLDivElement | null>(null);
   const tradeFormRef = useRef<HTMLDivElement | null>(null);
   const offscreen = useStageOffscreen(stageRef);
@@ -298,7 +330,7 @@ function EventTradePage() {
       // Limit buy below/above mark → resting open order.
       setOrders((prev) => [
         {
-          market: market.title,
+          market: active.title,
           league,
           outcome: order.outcome,
           outcomeLabel: order.outcomeLabel,
@@ -313,7 +345,7 @@ function EventTradePage() {
     }
     setPositions((prev) => [
       {
-        market: market.title,
+        market: active.title,
         league,
         outcome: order.outcome,
         outcomeLabel: order.outcomeLabel,
@@ -341,10 +373,17 @@ function EventTradePage() {
       <div className="grid gap-5 px-6 pb-10 pt-6 md:px-8 lg:grid-cols-[minmax(0,1fr)_360px]">
         <div className="min-w-0 space-y-5">
           <EventDetailHeader
-            market={market}
+            market={active}
             selectedIdx={selectedIdx}
             onSelect={setSelectedIdx}
+            outcomeId={selected?.id}
           />
+          <RelatedMarketsBar
+            markets={relatedMarkets}
+            activeIdx={activeRelatedIdx}
+            onSelect={setActiveRelatedIdx}
+          />
+          {isPreMatch && <PreMatchStrip market={market} />}
           <StageTabs
             defaultTabId={isLive ? "stream" : "chart"}
             tabs={[
@@ -370,7 +409,13 @@ function EventTradePage() {
                 id: "chart",
                 label: "Chart",
                 content: (
-                  <PriceChart tone={binaryTone} seed={hashSeed(market.id) + selectedIdx} />
+                  <div className="space-y-3">
+                    <DepthBar
+                      mark={Math.round(selected.price * 100)}
+                      sideLabels={getSideLabels(active)}
+                    />
+                    <PriceChart tone={binaryTone} seed={hashSeed(active.id) + selectedIdx} />
+                  </div>
                 ),
               },
               {
@@ -378,13 +423,14 @@ function EventTradePage() {
                 label: "Order book",
                 content: (
                   <OrderBook
-                    sideLabels={getSideLabels(market)}
+                    sideLabels={getSideLabels(active)}
                     mark={Math.round(selected.price * 100)}
                   />
                 ),
               },
             ]}
           />
+          <LiveTape market={active} />
         </div>
 
         <div ref={tradeFormRef} className="lg:sticky lg:top-4 lg:self-start">
@@ -414,7 +460,7 @@ function EventTradePage() {
 
       {/* Mobile-only sticky trade bar — desktop already has the
           right-column sticky TradeForm. */}
-      <MobileTradeBar market={market} selected={selected} onOpenForm={scrollToTradeForm} />
+      <MobileTradeBar market={active} selected={selected} onOpenForm={scrollToTradeForm} />
     </AppShell>
   );
 }
@@ -423,19 +469,29 @@ function EventDetailHeader({
   market,
   selectedIdx,
   onSelect,
+  outcomeId,
 }: {
   market: SportsMarket;
   selectedIdx: number;
   onSelect: (idx: number) => void;
+  outcomeId?: string;
 }) {
   const fixture = market.fixture;
   return (
     <header className="relative overflow-hidden rounded-2xl border border-border bg-surface bg-ambient p-6 shadow-card">
-      <div className="flex items-center gap-2.5">
-        <LeagueChip short={market.league.short} />
-        <span className="rounded-full bg-primary/10 px-2.5 py-0.5 text-[10px] font-medium uppercase tracking-widest text-primary ring-1 ring-primary/30">
-          {market.kind === "match" ? "Match" : market.kind === "league-winner" ? "Season winner" : market.kind === "top-scorer" ? "Top scorer" : "Prop"}
-        </span>
+      <div className="flex items-center justify-between gap-2.5">
+        <div className="flex items-center gap-2.5">
+          <LeagueChip short={market.league.short} />
+          <span className="rounded-full bg-primary/10 px-2.5 py-0.5 text-[10px] font-medium uppercase tracking-widest text-primary ring-1 ring-primary/30">
+            {market.kind === "match" ? "Match" : market.kind === "league-winner" ? "Season winner" : market.kind === "top-scorer" ? "Top scorer" : "Prop"}
+          </span>
+          <span className="hidden items-center gap-3 pl-2 font-mono text-[10px] uppercase tracking-widest text-muted-foreground md:inline-flex">
+            <span>Vol <span className="text-foreground tabular-nums">{market.volume}</span></span>
+            <span>24h <span className="text-foreground tabular-nums">{market.volume24h}</span></span>
+            <span className="inline-flex items-center gap-1"><Users className="h-3 w-3" />{market.participants.toLocaleString()}</span>
+          </span>
+        </div>
+        <ShareButton outcomeId={outcomeId} />
       </div>
 
       {/* Two-column body: fixture left · outcomes right */}
@@ -479,12 +535,6 @@ function EventDetailHeader({
             ))}
           </div>
         </div>
-      </div>
-
-      <div className="mt-6 grid grid-cols-3 divide-x divide-border border-t border-border pt-4 text-center">
-        <Stat label="Volume" value={market.volume} />
-        <Stat label="24h Vol" value={market.volume24h} />
-        <Stat label="Traders" value={market.participants.toLocaleString()} icon={<Users className="h-3 w-3" />} />
       </div>
     </header>
   );
