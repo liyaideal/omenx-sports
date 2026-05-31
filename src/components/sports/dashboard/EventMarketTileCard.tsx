@@ -6,6 +6,7 @@ import { LeagueChip } from "../LeagueBadge";
 import { TeamName } from "@/components/sports/TeamName";
 import { TypeChip } from "@/components/sports/CardChip";
 import { useTradeDrawer } from "@/components/sports/trade/TradeDrawerProvider";
+import { DrawIcon, isDrawOutcome } from "@/components/sports/draw";
 
 const HOT_PARTICIPANTS = 2000;
 const TRENDING_DELTA = 0.05;
@@ -185,7 +186,7 @@ function OutcomeRow({
   outcome: Outcome;
   onTrade: (e: React.MouseEvent, outcomeId: string) => void;
 }) {
-  const isDraw = !outcome.team && (outcome.label === "Draw" || outcome.meta === "X");
+  const isDraw = isDrawOutcome(outcome);
   const isYes = outcome.label.toUpperCase() === "YES";
   const isNo = outcome.label.toUpperCase() === "NO";
   return (
@@ -198,7 +199,9 @@ function OutcomeRow({
         {outcome.team ? (
           <img src={outcome.team.logo} alt="" className="h-5 w-5 shrink-0 object-contain" />
         ) : isDraw ? (
-          <span className="grid h-5 w-5 shrink-0 place-items-center rounded-full bg-white/[0.06] font-mono text-[10px] text-muted-foreground">X</span>
+          <span className="grid h-5 w-5 shrink-0 place-items-center rounded-full bg-white/[0.06] text-muted-foreground">
+            <DrawIcon className="h-3 w-3" />
+          </span>
         ) : (
           <span
             className={`grid h-5 w-5 shrink-0 place-items-center rounded-full font-mono text-[9px] font-bold ${
