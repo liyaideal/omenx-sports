@@ -65,6 +65,8 @@ import { PropsGrid } from "@/components/sports/league/PropsGrid";
 import { SpotlightPropsCardHorizontal } from "@/components/sports/league/SpotlightPropsCardHorizontal";
 import { EventMarketTileCard } from "@/components/sports/dashboard/EventMarketTileCard";
 import { useTradeDrawer } from "@/components/sports/trade/TradeDrawerProvider";
+import { TradeOutcomePicker } from "@/components/sports/trade/TradeOutcomePicker";
+import type { SportsMarket } from "@/data/sports-markets";
 import {
   WC26_GROUPS,
   WC26_BRACKET,
@@ -116,6 +118,7 @@ const SECTIONS = [
   ["hub-props", "Hub · Props"],
   ["hub-bracket", "Hub · Bracket"],
   ["trade-drawer", "Sticky Trade Drawer"],
+  ["trade-outcome-picker", "Trade Outcome Picker"],
 ] as const;
 
 function Section({ id, title, kicker, children }: { id: string; title: string; kicker?: string; children: React.ReactNode }) {
@@ -1654,6 +1657,30 @@ function StyleGuide() {
             </div>
           </Section>
 
+          <Section id="trade-outcome-picker" title="Trade Outcome Picker" kicker="22b — shared by drawer + event page">
+            <p className="mb-6 max-w-3xl text-sm text-muted-foreground">
+              Shared "Pick outcome (+ Pick side)" selector used by both the global
+              <code className="font-mono text-foreground"> TradeDrawer</code> and the in-page trade column on
+              <code className="font-mono text-foreground"> /event/$id</code>. Pills are intentionally compact so they don't
+              outweigh the actual order form below. 2–3 outcomes flex-fill the row; 4+ overflow into a single horizontal
+              scroller (never wraps to a second line).
+            </p>
+
+            <TradeOutcomePickerDemo />
+
+            <div className="mt-6 rounded-2xl border border-dashed border-white/15 bg-white/[0.02] p-5 text-xs">
+              <div className="mb-2 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+                Rules
+              </div>
+              <ul className="space-y-1.5 text-muted-foreground">
+                <li>• Always single-row. ≤3 outcomes: each pill <code className="font-mono text-foreground">flex-1</code> fills the row. ≥4 outcomes: horizontal scroll with right-edge fade mask.</li>
+                <li>• Pills are compact (<code className="font-mono text-foreground">py-1.5</code>, <code className="font-mono text-foreground">text-sm</code> price) so the trade form below stays the visual focus — not the picker.</li>
+                <li>• When market has ≥3 outcomes, a YES/NO side toggle appears below — each outcome is its own binary sub-market.</li>
+                <li>• Fully controlled — caller owns <code className="font-mono text-foreground">outcomeId</code> + <code className="font-mono text-foreground">side</code> state. Selected outcome auto-scrolls into view.</li>
+              </ul>
+            </div>
+          </Section>
+
           <Section id="event-live-stage" title="Event live stage" kicker="23 — P0 / event detail">
             <p className="mb-6 max-w-3xl text-sm text-muted-foreground">
               16:9 broadcast surface used at the top of <code className="font-mono text-foreground">/event/$id</code> when the underlying
@@ -1782,6 +1809,67 @@ function TradeDrawerDemo() {
           </button>
         )}
       </div>
+    </div>
+  );
+}
+
+function PickerVariant({ market }: { market: SportsMarket }) {
+  const [outcomeId, setOutcomeId] = useState(market.outcomes[0]?.id);
+  const [side, setSide] = useState<"yes" | "no">("yes");
+  return (
+    <div className="rounded-2xl border border-border bg-background/60 p-4">
+      <div className="mb-3 flex items-baseline justify-between">
+        <div className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+          {market.outcomes.length} outcomes
+        </div>
+        <div className="truncate font-display text-xs font-semibold text-foreground/80">
+          {market.title}
+        </div>
+      </div>
+      <TradeOutcomePicker
+        market={market}
+        outcomeId={outcomeId}
+        onOutcomeChange={setOutcomeId}
+        side={side}
+        onSideChange={setSide}
+      />
+    </div>
+  );
+}
+
+function TradeOutcomePickerDemo() {
+  const binary = MATCH_MARKETS.find((m) => m.outcomes.length === 2) ?? FEATURED_MATCH;
+  const threeWay = MATCH_MARKETS.find((m) => m.outcomes.length === 3) ?? FEATURED_MATCH;
+
+  // Synthesize a 7-outcome "player to score first" prop to validate the
+  // horizontal-scroll path. Mirrors the SportsMarket shape used elsewhere.
+  const sevenWay: SportsMarket = {
+    id: "demo-7-prop",
+    kind: "player-prop",
+    shape: "three-way",
+    title: "First goalscorer — USA vs Mexico",
+    league: { name: "World Cup 2026", short: "WC" },
+    endsLabel: "Today 8:00pm",
+    volume: "$42K",
+    volume24h: "$12K",
+    participants: 612,
+    tradeHref: "#",
+    outcomes: [
+      { id: "p1", label: "Pulisic", price: 0.22 },
+      { id: "p2", label: "Reyna", price: 0.18 },
+      { id: "p3", label: "Pepi", price: 0.14 },
+      { id: "p4", label: "Balogun", price: 0.13 },
+      { id: "p5", label: "Aaronson", price: 0.10 },
+      { id: "p6", label: "Weah", price: 0.09 },
+      { id: "p7", label: "Other / no goal", price: 0.14 },
+    ],
+  };
+
+  return (
+    <div className="grid gap-4 lg:grid-cols-3">
+      <PickerVariant market={binary} />
+      <PickerVariant market={threeWay} />
+      <PickerVariant market={sevenWay} />
     </div>
   );
 }
