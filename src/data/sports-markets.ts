@@ -383,6 +383,78 @@ export const MATCH_MARKETS: SportsMarket[] = [
   },
 ];
 
+/** Standalone Y/N events that don't belong to a fixture/league market list.
+ *  These exist so the "Related events" strip on a match page can surface
+ *  truly related questions (e.g. "Canada to advance" on the Canada vs BiH
+ *  page) without us building handicap/alt-line products. */
+export const STANDALONE_QUESTION_MARKETS: SportsMarket[] = [
+  {
+    id: "wc26-can-advance",
+    kind: "league-winner",
+    shape: "binary",
+    title: "Canada to advance from group stage",
+    kindLabel: "Group stage",
+    subject: "Canada",
+    subjectTeam: TEAMS.canada,
+    league: { name: "World Cup 2026", short: "WC" },
+    endsLabel: "Settles Jun 28, 2026",
+    volume: "$184K",
+    volume24h: "$24K",
+    participants: 920,
+    outcomes: [
+      { id: "y", label: "Yes", price: 0.61, delta24h: 0.03 },
+      { id: "n", label: "No", price: 0.39, delta24h: -0.03 },
+    ],
+    tradeHref: `/event/wc26-can-advance`,
+  },
+  {
+    id: "wc26-bih-advance",
+    kind: "league-winner",
+    shape: "binary",
+    title: "Bosnia-Herzegovina to advance from group stage",
+    kindLabel: "Group stage",
+    subject: "Bosnia-Herzegovina",
+    subjectTeam: TEAMS.bosnia,
+    league: { name: "World Cup 2026", short: "WC" },
+    endsLabel: "Settles Jun 28, 2026",
+    volume: "$96K",
+    volume24h: "$14K",
+    participants: 540,
+    outcomes: [
+      { id: "y", label: "Yes", price: 0.32, delta24h: -0.02 },
+      { id: "n", label: "No", price: 0.68, delta24h: 0.02 },
+    ],
+    tradeHref: `/event/wc26-bih-advance`,
+  },
+  {
+    id: "wc26-can-clean-sheet",
+    kind: "match",
+    shape: "binary",
+    title: "Canada to keep a clean sheet vs Bosnia-Herzegovina",
+    kindLabel: "Match question",
+    subject: "Canada",
+    subjectTeam: TEAMS.canada,
+    league: { name: "World Cup 2026", short: "WC" },
+    endsLabel: "Tomorrow 3:00pm",
+    volume: "$58K",
+    volume24h: "$12K",
+    participants: 310,
+    fixture: {
+      home: TEAMS.canada,
+      away: TEAMS.bosnia,
+      kickoff: "3:00pm",
+      whenLabel: "Tomorrow",
+    },
+    outcomes: [
+      { id: "y", label: "Yes", price: 0.37, delta24h: 0.01 },
+      { id: "n", label: "No", price: 0.63, delta24h: -0.01 },
+    ],
+    tradeHref: `/event/wc26-can-clean-sheet`,
+    dayOffset: 1,
+    stage: "Group B · MD1",
+  },
+];
+
 export const LEAGUE_WINNER_MARKET: SportsMarket = {
   id: "epl-winner-25-26",
   kind: "league-winner",
@@ -1192,6 +1264,7 @@ export const ACCOUNT_STATS = {
 export const ALL_MARKETS: SportsMarket[] = [
   FEATURED_MATCH,
   ...MATCH_MARKETS,
+  ...STANDALONE_QUESTION_MARKETS,
   LEAGUE_WINNER_MARKET,
   TOP_SCORER_MARKET,
   LALIGA_WINNER_MARKET,

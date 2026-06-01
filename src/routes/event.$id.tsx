@@ -223,13 +223,12 @@ function buildSeed(
   return { positions, orders, history };
 }
 function EventTradePage() {
-  const { market } = Route.useLoaderData();
-  // Related markets for the same fixture (BTTS, O/U, scorer, cards). Chip
-  // index 0 is always the originally loaded market; other indexes swap the
-  // chart / order book / trade form in-page without navigation.
+  const { market } = Route.useLoaderData() as { market: SportsMarket };
+  // Other real events related to this one (shared team / fixture). Rendered
+  // as a nav chip strip at the bottom; each chip routes to that event's
+  // detail page. Hidden entirely when empty.
   const relatedMarkets = useMemo(() => getRelatedMarkets(market), [market]);
-  const [activeRelatedIdx, setActiveRelatedIdx] = useState(0);
-  const active = relatedMarkets[activeRelatedIdx] ?? market;
+  const active = market;
   // For binary 2-outcome markets, treat outcomes[0] = YES, outcomes[1] = NO.
   // For three-way markets, expose all 3 outcomes and let the user pick one;
   // internally we still map the selected one to the YES side of the trade form.
@@ -247,12 +246,6 @@ function EventTradePage() {
     const idx = active.outcomes.findIndex((o) => o.id === want);
     if (idx >= 0) setSelectedIdx(idx);
   }, [active]);
-
-  // Reset outcome selection when the user pivots to a different related
-  // market — outcome ids don't carry across markets.
-  useEffect(() => {
-    setSelectedIdx(0);
-  }, [activeRelatedIdx]);
 
   // YES/NO side toggle for 3+ outcome markets — mirrors the drawer.
   const [tradeSide, setTradeSide] = useState<"yes" | "no">("yes");
@@ -487,11 +480,7 @@ function EventTradePage() {
       </div>
 
       <div className="space-y-5 px-6 pb-28 md:px-8 lg:pb-12">
-        <RelatedMarketsBar
-          markets={relatedMarkets}
-          activeIdx={activeRelatedIdx}
-          onSelect={setActiveRelatedIdx}
-        />
+        <RelatedMarketsBar markets={relatedMarkets} />
         <PositionsTable positions={livePositions} orders={allOrders} history={history} />
       </div>
 
