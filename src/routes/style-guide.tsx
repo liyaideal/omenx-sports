@@ -108,8 +108,8 @@ const SECTIONS = [
   ["cards", "Sport Cards"],
   ["leaderboard", "Leaderboard"],
   ["primitives", "Market Primitives"],
-  ["market", "Single-Market Binary"],
-  ["multi", "Multi-Market Event"],
+  ["market", "Binary Event (2 outcomes)"],
+  ["multi", "Multi-Outcome Event (3+ outcomes)"],
   ["trade", "Trade Surface"],
   ["language", "Trading Language"],
   ["spacing", "Spacing & Radius"],
@@ -121,6 +121,7 @@ const SECTIONS = [
   ["hub-bracket", "Hub · Bracket"],
   ["trade-drawer", "Sticky Trade Drawer"],
   ["trade-outcome-picker", "Trade Outcome Picker"],
+  ["production-inventory", "Production Inventory"],
 ] as const;
 
 function Section({ id, title, kicker, children }: { id: string; title: string; kicker?: string; children: React.ReactNode }) {
@@ -624,10 +625,14 @@ function StyleGuide() {
             </div>
           </Section>
 
-          {/* MARKET CARD */}
-          <Section id="market" title="Single-Market Binary" kicker="11 — One Market">
+          {/* BINARY EVENT */}
+          <Section id="market" title="Binary Event (2 outcomes)" kicker="11 — 2-outcome event">
             <p className="mb-6 max-w-3xl text-sm text-muted-foreground">
-              Every market is a single Yes/No binary. Prices are always mirrored: <code className="font-mono text-foreground">p(No) = 100 − p(Yes)</code>. The two variants below cover every binary surface in the product — the difference is whether the market provides <code className="font-mono text-foreground">sideLabels</code>.
+              A <strong className="text-foreground">binary event</strong> has exactly two outcomes that mirror each other:
+              <code className="font-mono text-foreground"> p(outcome A) + p(outcome B) = 100</code>. The two outcomes ARE the two
+              tradable sides — there is <strong className="text-foreground">no nested YES/NO</strong> per outcome and no per-outcome
+              order book. The variants below cover both surfaces: list-level cards (aliased team labels vs neutral Yes/No fallback)
+              and the shared order book that uses the two outcome labels as its column headers.
             </p>
 
             {/* 11a — Team-vs-team (aliased) */}
@@ -660,7 +665,7 @@ function StyleGuide() {
               <OrderBook sideLabels={{ yes: "Man City", no: "Real Madrid" }} />
             </div>
             <div className="mt-3 rounded-xl border border-loss/30 bg-loss/10 px-4 py-2.5 text-xs text-loss">
-              YES / NO never appears in user-facing text. Color carries the semantic — primary/green = YES side, neon/red = NO side.
+              When <code className="font-mono">sideLabels</code> exist, user-facing text is the alias (team/player name) — never the literal "YES/NO". Color carries the semantic: primary/green = first side, neon/red = second side.
             </div>
 
             {/* 11b — Neutral */}
@@ -692,14 +697,19 @@ function StyleGuide() {
               <OrderBook />
             </div>
             <div className="mt-3 rounded-xl border border-border bg-white/[0.02] px-4 py-2.5 text-xs text-muted-foreground">
-              Only when the market provides no <code className="font-mono text-foreground">sideLabels</code> do "Yes" / "No" appear as literal user text.
+              Only when the event provides no <code className="font-mono text-foreground">sideLabels</code> do literal "Yes" / "No" appear as user text — and even then it's a single market with one Trade button per side, not two nested binaries.
             </div>
           </Section>
 
-          {/* MULTI-MARKET EVENT */}
-          <Section id="multi" title="Multi-Market Event" kicker="12 — Bundled Binaries">
+          {/* MULTI-OUTCOME EVENT */}
+          <Section id="multi" title="Multi-Outcome Event (3+ outcomes)" kicker="12 — N-outcome event">
             <p className="mb-6 max-w-3xl text-sm text-muted-foreground">
-              An <strong className="text-foreground">event</strong> aggregates multiple independent binary markets. Each market is its own Yes/No (prices do <em>not</em> sum across markets — Man City reaching the final does not preclude Real Madrid from also reaching it). Each card inside the event still follows the Section 11 rules.
+              When an event has <strong className="text-foreground">3 or more outcomes</strong> (tournament winner, top scorer,
+              group winner, 1X2 with Draw, …) each outcome becomes its own independent binary sub-market with its own
+              <code className="font-mono text-foreground"> YES / NO</code> sides and its own order book — prices do <em>not</em>
+              sum across outcomes (Man City reaching the final does not preclude Real Madrid from also reaching it). This is
+              the <strong className="text-foreground">only</strong> case where per-outcome YES/NO appears. Binary (2-outcome)
+              events follow Section 11 instead.
             </p>
             <EventHeader
               league="ucl"
@@ -750,7 +760,7 @@ function StyleGuide() {
               />
             </div>
             <div className="mt-3 rounded-xl border border-border bg-white/[0.02] px-4 py-2.5 text-xs text-muted-foreground">
-              4 independent binary markets · probabilities sum to <span className="text-foreground tabular-nums">200%</span>, not 100% — each Yes is judged on its own.
+              4 outcomes · 4 independent YES/NO sub-markets · probabilities sum to <span className="text-foreground tabular-nums">200%</span>, not 100% — each YES is judged on its own.
             </div>
           </Section>
 
@@ -875,31 +885,32 @@ function StyleGuide() {
                   </thead>
                   <tbody className="divide-y divide-border">
                     <tr>
-                      <td className="py-2 pr-4 font-medium">Single binary <span className="text-muted-foreground">(aliased)</span></td>
-                      <td className="py-2 pr-4 font-mono tabular-nums">1</td>
-                      <td className="py-2 pr-4 font-mono tabular-nums">100 across yes+no</td>
-                      <td className="py-2">Team names everywhere · color = side</td>
+                      <td className="py-2 pr-4 font-medium">Binary event <span className="text-muted-foreground">(aliased)</span></td>
+                      <td className="py-2 pr-4 font-mono tabular-nums">2 outcomes</td>
+                      <td className="py-2 pr-4 font-mono tabular-nums">100 across the 2 outcomes</td>
+                      <td className="py-2">Outcome labels everywhere (team/player) · 1 Trade button per outcome · shared order book · no nested YES/NO</td>
                     </tr>
                     <tr>
-                      <td className="py-2 pr-4 font-medium">Single binary <span className="text-muted-foreground">(neutral)</span></td>
-                      <td className="py-2 pr-4 font-mono tabular-nums">1</td>
-                      <td className="py-2 pr-4 font-mono tabular-nums">100 across yes+no</td>
-                      <td className="py-2">Yes/No literal text · color = side</td>
+                      <td className="py-2 pr-4 font-medium">Binary event <span className="text-muted-foreground">(neutral)</span></td>
+                      <td className="py-2 pr-4 font-mono tabular-nums">2 outcomes</td>
+                      <td className="py-2 pr-4 font-mono tabular-nums">100 across the 2 outcomes</td>
+                      <td className="py-2">Literal "Yes" / "No" labels · still 1 Trade button per outcome · shared order book · no nested YES/NO</td>
                     </tr>
                     <tr>
-                      <td className="py-2 pr-4 font-medium">Multi-market event <span className="text-muted-foreground">(bundled)</span></td>
-                      <td className="py-2 pr-4 font-mono tabular-nums">N</td>
-                      <td className="py-2 pr-4 font-mono">each market independent</td>
-                      <td className="py-2">List of cards · each follows rows above</td>
+                      <td className="py-2 pr-4 font-medium">Multi-outcome event <span className="text-muted-foreground">(3+ outcomes)</span></td>
+                      <td className="py-2 pr-4 font-mono tabular-nums">N outcomes</td>
+                      <td className="py-2 pr-4 font-mono">each outcome independent (sums &gt; 100)</td>
+                      <td className="py-2">Per-outcome YES/NO buttons · per-outcome order book · only place YES/NO is exposed</td>
                     </tr>
                   </tbody>
                 </table>
               </div>
               <ul className="mt-4 space-y-1.5 text-xs text-muted-foreground">
-                <li>1. <code className="font-mono text-foreground">Yes/No</code> is the underlying technical label. Whenever a market provides <code className="font-mono text-foreground">sideLabels</code>, user-facing text uses the alias.</li>
-                <li>2. <span className="text-win">Green = YES side</span> · <span className="text-loss">Red = NO side</span>. Color is the only signal that carries yes/no semantics.</li>
-                <li>3. Inside one market, every surface (pill, ratio bar, orderbook header, position tag, PnL row) uses the same alias — never mix.</li>
-                <li>4. <span className="text-foreground">Leverage is a first-class control</span>, not a PRO feature. The trade form always shows the leverage slider next to Margin. <code className="font-mono text-foreground">PRO</code> only gates Cross/Iso, TP/SL, and liq visualization.</li>
+                <li>1. Vocabulary: <strong className="text-foreground">event</strong> = the question/contest. <strong className="text-foreground">market</strong> = one outcome inside it. Binary event = 2 outcomes = 2 sides of one market. Multi-outcome event = N outcomes = N independent YES/NO sub-markets.</li>
+                <li>2. <strong className="text-foreground">Binary events never render nested YES/NO.</strong> One Trade button per outcome, one shared order book. The two outcome labels are the two column headers.</li>
+                <li>3. <code className="font-mono text-foreground">Yes/No</code> is the underlying technical label. Whenever a market provides <code className="font-mono text-foreground">sideLabels</code>, user-facing text uses the alias.</li>
+                <li>4. <span className="text-win">Green = first / YES side</span> · <span className="text-loss">Red = second / NO side</span>. Color is the only signal that carries the side semantic.</li>
+                <li>5. <span className="text-foreground">Leverage is a first-class control</span>, not a PRO feature. The trade form always shows the leverage slider next to Margin. <code className="font-mono text-foreground">PRO</code> only gates Cross/Iso, TP/SL, and liq visualization.</li>
               </ul>
             </div>
 
@@ -1679,7 +1690,7 @@ function StyleGuide() {
                 </div>
                 <ul className="space-y-1.5 text-muted-foreground">
                   <li>• Only rendered when <code className="font-mono text-foreground">league.kind === "tournament"</code>.</li>
-                  <li>• Matchups deep-link to <code className="font-mono text-foreground">/event/$id</code> using the matchup id as the market id.</li>
+                  <li>• Matchups deep-link to <code className="font-mono text-foreground">/event/$id</code> using the matchup id as the market id. The bracket card shows only the two teams, but the detail page is a full <strong className="text-foreground">1X2</strong> market (home / draw / away) — never add a Draw row inside the bracket card itself.</li>
                   <li>• TBD slots render as a dashed circle — bracket is always a complete tree, never collapsed rows.</li>
                   <li>• Each column past the first gets progressively larger vertical gaps to visually converge toward the final.</li>
                 </ul>
@@ -1858,11 +1869,117 @@ function StyleGuide() {
             </div>
           </Section>
 
+          <Section id="production-inventory" title="Production Inventory" kicker="26 — playground ↔ product sync">
+            <p className="mb-6 max-w-3xl text-sm text-muted-foreground">
+              Components below are shipping in real routes but don't yet have a self-contained demo on this page.
+              They're listed with their canonical live location so contributors can see them in context. If you
+              touch any of these and the behavior is new, lift a focused demo up into the matching section above
+              instead of letting the inventory grow.
+            </p>
+
+            <div className="grid gap-4 lg:grid-cols-2">
+              <InventoryGroup
+                title="Dashboard shell & cards"
+                liveAt={[{ label: "/", href: "/" }, { label: "/events", href: "/events" }]}
+                items={[
+                  ["AppShell", "Page shell — top bar + main + footer composition"],
+                  ["AppTopBar", "Product top nav (logo, search, user menu)"],
+                  ["BridgeStrip", "Cross-product strip below the top bar"],
+                  ["DayStripCalendar", "Horizontal day filter on the events grid"],
+                  ["PageSectionHeader", "Section header on dashboard / events pages"],
+                  ["ShowMoreEventsButton", "Dashed ghost button that expands a 1-row shelf"],
+                  ["MatchMarketCard", "Fixture-style market card (used by events grid)"],
+                  ["UpcomingEventCard", "Compact upcoming-event tile"],
+                  ["LeagueTableCard", "Standings strip embedded inside a league module"],
+                  ["LeagueWinnerMarketCard", "Season-winner market card"],
+                  ["TopScorerMarketCard", "Top-scorer market card"],
+                  ["PlayerScorerCard", "Per-player scorer prop card"],
+                  ["PlayerPropsSpotlight", "Player-props spotlight row"],
+                  ["dashboard/PlayerSpotlightCard", "Dashboard variant of the player spotlight (different from the root one shown in §primitives)"],
+                  ["LiveActivityCard", "Specific-row activity feed (handle + side + outcome + price + event + time)"],
+                ]}
+              />
+              <InventoryGroup
+                title="Fans zone"
+                liveAt={[{ label: "/fans", href: "/fans" }]}
+                items={[
+                  ["FanZoneHeader", "Fans-zone hero header"],
+                  ["FanPostCard", "Single fan post card"],
+                  ["FansZoneEmpty", "Empty-state for a fan with no follows yet"],
+                  ["FollowTeamsCompact", "Inline follow-teams control"],
+                  ["FollowTeamsPanel", "Side-panel follow-teams editor"],
+                  ["TeamPickerSheet", "Sheet for picking teams to follow"],
+                ]}
+              />
+              <InventoryGroup
+                title="Mobile homepage"
+                liveAt={[{ label: "/", href: "/" }]}
+                items={[
+                  ["MobileChrome", "Outer mobile chrome wrapper (top bar + bottom nav)"],
+                  ["MobileEventsSection", "Mobile events shelf"],
+                  ["MobileFansSection", "Mobile fans-zone shelf"],
+                  ["MobileSeeMoreCard", "Dashed mobile see-more tile"],
+                ]}
+              />
+              <InventoryGroup
+                title="Event detail extras"
+                liveAt={[{ label: "/event/$id", href: "/event/featured-clasico" }]}
+                items={[
+                  ["event/CombinedPriceChart", "Multi-line overlay chart used at the top of the outcomes panel (see §event-outcomes-panel)"],
+                ]}
+              />
+            </div>
+
+            <div className="mt-6 rounded-2xl border border-dashed border-loss/30 bg-loss/5 p-5 text-xs text-loss">
+              <strong>Rule.</strong> Any new shared component MUST get a real demo above — adding it to this list is only
+              acceptable as a temporary placeholder while wiring up data. If the demo would require non-trivial provider
+              setup (live stream, follow state, etc.), wrap the provider locally inside the demo function the same way
+              <code className="font-mono"> TradeDrawerDemo</code> / <code className="font-mono">GlobalLiveStreamDemo</code> do.
+            </div>
+          </Section>
+
           <footer className="mt-12 border-t border-border pt-6 text-center text-xs text-muted-foreground font-mono">
             Stadium Neon · v0.1 · sports prediction design system
           </footer>
         </main>
       </div>
+    </div>
+  );
+}
+
+function InventoryGroup({
+  title,
+  liveAt,
+  items,
+}: {
+  title: string;
+  liveAt: { label: string; href: string }[];
+  items: [name: string, desc: string][];
+}) {
+  return (
+    <div className="rounded-2xl border border-border bg-surface p-5 shadow-card">
+      <div className="mb-3 flex flex-wrap items-baseline justify-between gap-2">
+        <h3 className="font-display text-base font-semibold text-foreground">{title}</h3>
+        <div className="flex flex-wrap gap-1.5">
+          {liveAt.map((r) => (
+            <Link
+              key={r.href}
+              to={r.href}
+              className="rounded-full bg-white/[0.04] px-2.5 py-0.5 font-mono text-[10px] uppercase tracking-widest text-muted-foreground ring-1 ring-white/10 transition hover:text-foreground hover:ring-white/20"
+            >
+              live at {r.label}
+            </Link>
+          ))}
+        </div>
+      </div>
+      <ul className="divide-y divide-border text-xs">
+        {items.map(([name, desc]) => (
+          <li key={name} className="flex flex-col gap-0.5 py-2">
+            <code className="font-mono text-[11px] text-foreground">{name}</code>
+            <span className="text-muted-foreground">{desc}</span>
+          </li>
+        ))}
+      </ul>
     </div>
   );
 }

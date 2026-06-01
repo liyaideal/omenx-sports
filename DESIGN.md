@@ -338,6 +338,14 @@ Section 7 is append-only. Every regression the user catches gets pinned here.
 - Don't add a page-level footer to product / dashboard surfaces. Footers are
   reserved for SEO / content pages (`SeoPageLayout` convention). Cross-site
   links go in the top-right user menu, not a bottom bar.
+- Don't render a **binary event** (exactly 2 outcomes) as two nested YES/NO
+  sub-markets. Binary = one Trade button per outcome + one shared order book
+  with the two outcome labels as column headers. Per-outcome YES/NO + per-
+  outcome order book is exclusive to multi-outcome (3+) events. See
+  `mem://rules/binary-event`.
+- Don't add a Draw row inside `BracketView` matchup cards. The bracket card
+  is always 2 teams; Draw only appears on the matchup's detail page as the
+  middle option of the 1X2 outcomes panel.
 - Don't use a placeholder "L" stub or a colored gradient monogram for a
   known league. Register the real logo in `PRESETS` (`LeagueBadge.tsx`).
 - Don't render the event-detail header and a separate outcome picker as two
