@@ -70,6 +70,11 @@ export interface SportsMarket {
   /** The outcome id (inside the consolidated event market) that this row
    *  represents — used to preselect the right outcome in the trade drawer. */
   eventOutcomeId?: string;
+  /** Human-readable label for the event's question kind, e.g.
+   *  "Tournament winner", "Top scorer", "Group winner". Rendered in the
+   *  non-fixture event header above the title so the page works for
+   *  questions that don't map to a single team/player. */
+  kindLabel?: string;
 }
 
 export const FEATURED_MATCH: SportsMarket = {
