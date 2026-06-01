@@ -30,6 +30,9 @@ import { LEAGUE_BG } from "@/lib/league-backgrounds";
 import { EventQuestionHeading } from "@/components/sports/event/EventQuestionHeading";
 
 export const Route = createFileRoute("/event/$id")({
+  validateSearch: (raw: Record<string, unknown>): { outcome?: string } => ({
+    outcome: typeof raw.outcome === "string" ? raw.outcome : undefined,
+  }),
   loader: ({ params }) => {
     const market = getMarketById(params.id);
     if (!market) throw notFound();

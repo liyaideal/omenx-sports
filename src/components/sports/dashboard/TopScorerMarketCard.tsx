@@ -48,6 +48,7 @@ export function TopScorerMarketCard({
               key={o.id}
               to="/event/$id"
               params={{ id: market.id }}
+              search={{ outcome: o.id }}
               className="grid grid-cols-[24px_1fr_auto] items-center gap-3 py-2.5 transition hover:bg-white/[0.02]"
             >
               <span className="font-mono text-xs tabular-nums text-muted-foreground">{i + 1}</span>
