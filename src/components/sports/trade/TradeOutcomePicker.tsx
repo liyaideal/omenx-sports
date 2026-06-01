@@ -18,18 +18,21 @@ export function deriveTradeFormProps({
   const ranked = [...market.outcomes].sort((a, b) => b.price - a.price);
   const selected =
     market.outcomes.find((o) => o.id === outcomeId) ?? ranked[0] ?? market.outcomes[0];
-  const isYesNoMarket =
-    market.outcomes.length === 2 &&
-    market.outcomes.some((o) => o.label.toUpperCase() === "YES");
+  // Binary event = exactly 2 outcomes. Both outcomes are tradable as-is;
+  // the selected outcome IS the side. outcomes[0] is rendered as the
+  // primary (green/yes) tone, outcomes[1] as the secondary (red/no) tone.
+  // Multi-outcome event = 3+ outcomes. Each outcome is its own sub-market
+  // with a real YES/NO side toggle.
+  const isBinary = market.outcomes.length === 2;
   const needsSideToggle = market.outcomes.length >= 3;
   const yesCents = Math.round(selected.price * 100);
   const noCents = 100 - yesCents;
 
   const formOutcome: "yes" | "no" = needsSideToggle
     ? side
-    : isYesNoMarket
-      ? selected.label.toUpperCase() === "NO" ? "no" : "yes"
-      : selected.id === market.outcomes[0]?.id ? "yes" : "no";
+    : isBinary
+      ? selected.id === market.outcomes[0]?.id ? "yes" : "no"
+      : "yes";
   const formLabel = needsSideToggle
     ? `${selected.team?.short ?? selected.label} ${side === "yes" ? "YES" : "NO"}`
     : selected.team?.name ?? selected.label;

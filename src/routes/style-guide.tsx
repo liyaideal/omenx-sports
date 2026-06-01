@@ -1743,9 +1743,10 @@ function StyleGuide() {
             <p className="mb-6 max-w-3xl text-sm text-muted-foreground">
               The Polymarket-style heart of <code className="font-mono text-foreground">/event/$id</code>. A single combined multi-line
               <code className="font-mono text-foreground"> CombinedPriceChart</code> at the top overlays every outcome on one canvas, and the
-              outcomes list below replaces the old "pick + side" picker. Each row has Buy YES / Buy NO buttons that preselect the right-column
-              sticky <code className="font-mono text-foreground">TradeForm</code>; clicking the row body expands an inline
-              <code className="font-mono text-foreground"> OrderBook</code> accordion (one open at a time). Same data + downstream logic as before — only the spatial arrangement changed.
+              outcomes list below adapts to the event's shape: <strong className="text-foreground">binary events</strong> (2 outcomes) render
+              the two sides flat with a single <em>Trade</em> button per row and one shared order book underneath — never nested YES/NO
+              sub-buttons; <strong className="text-foreground">multi-outcome events</strong> (3+) render each outcome as its own sub-market
+              with Buy YES / Buy NO buttons and a per-outcome order-book accordion.
             </p>
 
             <EventOutcomesPanelDemo />
@@ -1755,10 +1756,11 @@ function StyleGuide() {
                 Rules
               </div>
               <ul className="space-y-1.5 text-muted-foreground">
-                <li>• Used for <em>all</em> events — binary, 1X2, league-winner, top-scorer, props all share this single layout.</li>
+                <li>• Used for <em>all</em> events. The panel branches on <code className="font-mono text-foreground">outcomes.length === 2</code> to pick the binary vs multi-outcome layout.</li>
+                <li>• <strong className="text-foreground">Binary</strong>: each outcome IS one of the two tradable sides. No per-row YES/NO. The shared OrderBook uses the two outcome labels as headers (e.g. <code className="font-mono text-foreground">Yes Book / No Book</code>, <code className="font-mono text-foreground">Liverpool Book / Newcastle Book</code>).</li>
+                <li>• <strong className="text-foreground">Multi-outcome</strong>: each outcome is its own independent binary sub-market — per-outcome YES/NO buttons + accordion order book labeled <code className="font-mono text-foreground">{`${"{outcome}"} YES / ${"{outcome}"} NO`}</code>.</li>
                 <li>• Combined chart highlights the currently selected outcome (thicker + opaque); other lines dim to 0.45 opacity.</li>
-                <li>• Buy buttons set <code className="font-mono text-foreground">selectedIdx + tradeSide</code> upstream; the page pulses the TradeForm container for 700ms (and scroll-into-view on viewports &lt;1024px).</li>
-                <li>• Row body click = accordion toggle. <code className="font-mono text-foreground">expandedIdx</code> follows <code className="font-mono text-foreground">selectedIdx</code> when it changes upstream (deep links, related market pivots).</li>
+                <li>• Buy buttons set <code className="font-mono text-foreground">selectedIdx + tradeSide</code> upstream; the page pulses the TradeForm container for 700ms (and scroll-into-view on viewports &lt;1024px). On binary, <code className="font-mono text-foreground">tradeSide</code> is derived from <code className="font-mono text-foreground">selectedIdx</code>, not a separate toggle.</li>
                 <li>• Legend dots in the chart are also clickable — they call <code className="font-mono text-foreground">onLegendSelect</code> so users can change selection from the chart itself.</li>
               </ul>
             </div>

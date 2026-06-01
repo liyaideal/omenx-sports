@@ -1,42 +1,38 @@
-## Goal
+我理解：binary event 本身只有两个 outcome，不应该再在每个 outcome 下面生成一层 YES/NO；多选项 event 才需要对每个 option 提供 YES/NO 两侧交易。
 
-The "Related events" strip on the event detail page currently fabricates fake same-fixture alt-markets (Both teams to score / Over 2.5 / Anytime scorer / Over 4.5 cards) and swaps the chart in-place. We are not shipping those handicap/alt-line products. Rework the module so each chip is a real other event related to the current one and **navigates** to that event's detail page. If no related events exist, the whole module is hidden.
+检查到的主要问题：
+- 当前详情页 `/event/wc26-bih-advance` 把 binary event 的两个 outcome（Yes / No）又渲染成每行 `YES/NO` 两个按钮，所以变成了截图里的 `Yes` 行里还有 `YES 32¢ / NO 68¢`。
+- `src/components/sports/event/EventOutcomesPanel.tsx` 是核心错误点：它对所有 outcomes 都统一渲染 `Buy YES / Buy NO` 和 `${label} YES / ${label} NO` 的 order book。
+- `src/routes/event.$id.tsx` 也写着“binary 2-outcome markets treat outcomes[0] = YES, outcomes[1] = NO”，会让交易表单状态继续沿用错误模型。
+- 数据里仍有不少 binary event 用 `outcomes: Yes/No`：包括 `wc26-bih-advance`、`wc26-can-advance`、`wc26-can-clean-sheet`、`messi-hattrick`、`haaland-2g`、部分 player prop / group outcome / top scorer stub，以及 style-guide fixtures。
+- style-guide 里还有多处旧规则文案（binary = Yes/No、每行 Buy YES/NO），需要同步，否则之后还会按旧规范做回去。
 
-## Behavior
+实施计划：
+1. 补充项目记忆
+   - 新增/更新 memory：`binary event` 是 2-outcome event，两个 outcome 就是可交易 market；不能再给每个 outcome 嵌套 YES/NO。
+   - 明确：只有 3+ outcomes 的多选项 event 才在单个 outcome 下有 YES/NO 两侧。
 
-- Each chip = a real entry from `ALL_MARKETS`, linking to `/event/$id` for that market.
-- The current event is **not** in the strip (no "active" chip, no in-page swap).
-- Module hides entirely when the related list is empty.
-- Label on each chip is the related event's `title` (e.g. "Group A — Winner", "Canada — Group A Winner", "World Cup 2026 — Champion").
+2. 修正交易详情页核心逻辑
+   - `EventOutcomesPanel` 根据 `market.outcomes.length === 2` 分支：
+     - binary event：只显示两个 outcome 行，每行一个交易按钮（例如 `TRADE 32¢` 或 outcome label + price），不显示每行 YES/NO 双按钮。
+     - 多选项 event：保留每个 outcome 的 Buy YES / Buy NO 逻辑。
+   - OrderBook：
+     - binary event 展开某个 outcome 时展示该 outcome 自己的 book，不再用 `${label} YES / ${label} NO`。
+     - 多选项 event 才使用 `${label} YES / ${label} NO`。
 
-## Relatedness rule (data-driven, no manual mapping)
+3. 修正 `event.$id.tsx` 交易表单映射
+   - binary event：选择哪个 outcome，就把该 outcome 直接传给交易表单，隐藏/固定 side，不再允许对该 outcome 选择 YES/NO。
+   - 多选项 event：继续用 selected outcome + side（YES/NO）模式。
 
-For a given market `M`, related = other markets in `ALL_MARKETS` that match any of:
-1. **Same fixture** — same home+away team shorts (either direction).
-2. **Shared team** — any team that appears in `M` (via `fixture.home/away`, `outcomes[].team`, or `subject`) also appears in the candidate.
-3. **Same league + same tournament context** — e.g. both reference the same WC group standings or both belong to the same `league.code`.
+4. 清理数据错误
+   - 把新增的相关 events（`wc26-can-advance`、`wc26-bih-advance`、`wc26-can-clean-sheet`）从 literal `Yes/No` 数据改成更明确的两个 outcome：例如 `Advance / Miss out`、`Clean sheet / Concede`。
+   - 扫描并修正核心产品数据里其它 binary literal Yes/No，避免首页卡片、league tab、详情页再次出现同类问题。
+   - 对自动生成的 tournament per-candidate binary stub 做同样处理，避免 group card 跳转后出现嵌套 Yes/No。
 
-De-dup by `id`, exclude `M` itself, cap at ~6 chips.
+5. 同步 style-guide
+   - 更新相关 demo 和文案：binary event 不再是“每个 outcome 再买 YES/NO”；多选项 event 才是 outcome + side。
+   - 新共享/修改后的真实页面模块会同步到 `/style-guide`，保持项目规则一致。
 
-For pure non-fixture markets with no team signal (rare), result is `[]` and the bar hides — matching the user's "if no related events, don't show" requirement.
-
-## Mock data top-up
-
-Add a small number of new realistic events to `src/data/sports-markets.ts` so the current preview route (`/event/wc26-can-bih`) actually has chips:
-- "Canada to advance from Group A" (Y/N)
-- "BiH to advance from Group A" (Y/N)
-- (Group A — Winner and WC26 Champion already exist and will surface automatically.)
-
-All additions are plain Y/N or multi-outcome question events — no handicap, no over/under, no alt-line products.
-
-## Files
-
-- `src/components/sports/event/related-markets.ts` — replace `getRelatedMarkets` to return real related `SportsMarket[]` from `ALL_MARKETS` using the rule above. Drop `getRelatedChipLabel` (chip label is just the event title now).
-- `src/components/sports/event/RelatedMarketsBar.tsx` — change API to `{ markets: SportsMarket[] }`. Render each chip as a `Link to="/event/$id"`. Return `null` when `markets.length === 0`. No active state, no `onSelect`.
-- `src/routes/event.$id.tsx` — remove `activeRelatedIdx`, `active`, the related-driven `useEffect`s, and the chip-swap logic. Page always renders the loaded `market`. Pass `getRelatedMarkets(market)` to the bar.
-- `src/data/sports-markets.ts` — add the two Canada/BiH advance events (and any other small additions needed so common fixtures show ≥1 chip).
-- `src/routes/style-guide.tsx` — update the `RelatedMarketsBar` demo to the new nav API and refresh the description text (no longer an in-page tab strip).
-
-## Out of scope
-
-No design changes to the chip visuals beyond removing the active/selected pill state. No changes to chart/order book/trade form wiring beyond deleting the now-dead `active` indirection.
+6. 验证
+   - 全局重新扫描 `label: "Yes"/"No"`、`Buy YES / Buy NO` 等模式，确认只剩技术性或多选项场景允许的位置。
+   - 检查当前 `/event/wc26-bih-advance` 不再出现截图里的嵌套 Yes/No 行。
