@@ -1814,6 +1814,33 @@ function StyleGuide() {
 
             <GlobalLiveStreamDemo />
 
+            <div className="mt-6 rounded-2xl border border-white/10 bg-white/[0.02] p-5">
+              <div className="mb-3 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+                AudioTrackToggle — EN / CN
+              </div>
+              <p className="mb-4 max-w-2xl text-xs text-muted-foreground">
+                Shared segmented pill embedded in all three playable surfaces:
+                <code className="mx-1 font-mono text-foreground">GlobalStreamMiniPlayer</code>(sm),
+                <code className="mx-1 font-mono text-foreground">EventLiveStage</code>(md),
+                <code className="mx-1 font-mono text-foreground">FullscreenStreamOverlay</code>(lg).
+                Selection is global (persisted to localStorage) so the language follows the user across surfaces.
+              </p>
+              <div className="flex flex-wrap items-center gap-6 rounded-xl bg-black/40 p-4">
+                <div className="flex flex-col items-start gap-2">
+                  <span className="font-mono text-[9px] uppercase tracking-widest text-muted-foreground">sm — mini player</span>
+                  <AudioTrackToggle size="sm" />
+                </div>
+                <div className="flex flex-col items-start gap-2">
+                  <span className="font-mono text-[9px] uppercase tracking-widest text-muted-foreground">md — event stage</span>
+                  <AudioTrackToggle size="md" />
+                </div>
+                <div className="flex flex-col items-start gap-2">
+                  <span className="font-mono text-[9px] uppercase tracking-widest text-muted-foreground">lg — fullscreen</span>
+                  <AudioTrackToggle size="lg" />
+                </div>
+              </div>
+            </div>
+
             <div className="mt-6 rounded-2xl border border-dashed border-white/15 bg-white/[0.02] p-5 text-xs">
               <div className="mb-2 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
                 Rules
