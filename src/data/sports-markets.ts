@@ -5,7 +5,11 @@
  */
 import { TEAMS, type TeamLite } from "@/data/sports-mock";
 import mbappePhoto from "@/assets/mbappe.png";
-import { GROUP_OUTCOME_MARKETS } from "@/data/tournament";
+import {
+  GROUP_OUTCOME_MARKETS,
+  GROUP_WINNER_MARKETS,
+  BRACKET_MARKETS,
+} from "@/data/tournament";
 
 export type { TeamLite } from "@/data/sports-mock";
 export { TEAMS } from "@/data/sports-mock";
@@ -1196,9 +1200,9 @@ export const ALL_MARKETS: SportsMarket[] = [
   UCL_TOP_SCORER_MARKET,
   WC_CHAMPION_MARKET,
   WC_GOLDEN_BOOT_MARKET,
-  WC_GROUP_A_WINNER_MARKET,
-  WC_GROUP_F_WINNER_MARKET,
   ...SPOTLIGHTS.flatMap((s) => s.props),
+  ...GROUP_WINNER_MARKETS,
+  ...BRACKET_MARKETS,
   ...GROUP_OUTCOME_MARKETS,
 ];
 
