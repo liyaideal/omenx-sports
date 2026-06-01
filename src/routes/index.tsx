@@ -38,17 +38,17 @@ import { PageSectionHeader } from "@/components/sports/dashboard/PageSectionHead
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Stadium Neon — Sports prediction markets on OmenX" },
+      { title: "OmenX | Sports" },
       {
         name: "description",
         content:
-          "Bet the moment. Trade binary sports markets across the EPL, La Liga, UCL, and NBA — settled on OmenX.",
+          "OmenX Sports is a sports platform showcasing live and upcoming events with interactive features.",
       },
-      { property: "og:title", content: "Stadium Neon — A sports zone by OmenX" },
+      { property: "og:title", content: "OmenX | Sports" },
       {
         property: "og:description",
         content:
-          "Live sports prediction markets with deep order books and instant settlement, powered by OmenX.",
+          "OmenX Sports is a sports platform showcasing live and upcoming events with interactive features.",
       },
       { property: "og:url", content: "/" },
     ],
