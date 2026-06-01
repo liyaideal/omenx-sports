@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { OrderBook } from "@/components/sports/OrderBook";
+import { DrawIcon, isDrawOutcome } from "@/components/sports/draw";
 import {
   CombinedPriceChart,
   outcomeColor,
@@ -57,8 +58,8 @@ export function EventOutcomesPanel({
 
       <div className="rounded-2xl border border-border bg-surface shadow-card">
         <div className="flex items-center justify-between px-4 pt-3 text-[10px] font-mono uppercase tracking-widest text-muted-foreground">
-          <span>Outcomes</span>
-          <span>{market.outcomes.length} options</span>
+          <span>Markets</span>
+          <span>{market.outcomes.length} markets</span>
         </div>
         <div className="divide-y divide-border/70">
           {market.outcomes.map((o, idx) => (
@@ -205,6 +206,20 @@ function Glyph({ outcome, color }: { outcome: Outcome; color: string }) {
       >
         <img src={outcome.team.logo} alt="" className="h-full w-full object-contain" />
       </div>
+    );
+  }
+  if (isDrawOutcome(outcome)) {
+    return (
+      <span
+        className="grid h-8 w-8 shrink-0 place-items-center rounded-full"
+        style={{
+          background: `color-mix(in oklab, ${color} 18%, transparent)`,
+          color,
+          boxShadow: `0 0 12px -4px ${color}`,
+        }}
+      >
+        <DrawIcon className="h-4 w-4" />
+      </span>
     );
   }
   const initial = outcome.label.charAt(0).toUpperCase();

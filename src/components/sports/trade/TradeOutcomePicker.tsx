@@ -88,7 +88,7 @@ export function TradeOutcomePicker({
     <div className={cn("space-y-2", className)}>
       <div>
         <div className="mb-1.5 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
-          Pick outcome
+          Pick market
         </div>
         <div
           ref={scrollerRef}
