@@ -1847,7 +1847,7 @@ function StyleGuide() {
                 Rules
               </div>
               <ul className="space-y-1.5 text-muted-foreground">
-                <li>• <code className="font-mono text-foreground">RelatedMarketsBar</code> chip 0 is always the originally loaded market; selecting another chip swaps chart / order book / trade form in-page without navigation.</li>
+                <li>• <code className="font-mono text-foreground">RelatedMarketsBar</code> chips are other real events tied to the current one by shared team / fixture; each chip routes to that event's detail page. The whole module hides when nothing relates.</li>
                 <li>• <code className="font-mono text-foreground">DepthBar</code> lives at the top of the Chart tab so liquidity stays visible even when the user isn't on Order book.</li>
                 <li>• <code className="font-mono text-foreground">LiveTape</code> injects a fresh mocked fill every ~4s; pause / virtualise if we ever wire it to a real WS feed.</li>
                 <li>• <code className="font-mono text-foreground">PreMatchStrip</code> only renders when the market has a fixture and is not currently streaming.</li>
