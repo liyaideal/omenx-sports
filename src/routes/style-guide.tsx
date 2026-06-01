@@ -1682,6 +1682,31 @@ function StyleGuide() {
             </div>
           </Section>
 
+          <Section id="event-outcomes-panel" title="Event outcomes panel" kicker="22c — P0 / event detail">
+            <p className="mb-6 max-w-3xl text-sm text-muted-foreground">
+              The Polymarket-style heart of <code className="font-mono text-foreground">/event/$id</code>. A single combined multi-line
+              <code className="font-mono text-foreground"> CombinedPriceChart</code> at the top overlays every outcome on one canvas, and the
+              outcomes list below replaces the old "pick + side" picker. Each row has Buy YES / Buy NO buttons that preselect the right-column
+              sticky <code className="font-mono text-foreground">TradeForm</code>; clicking the row body expands an inline
+              <code className="font-mono text-foreground"> OrderBook</code> accordion (one open at a time). Same data + downstream logic as before — only the spatial arrangement changed.
+            </p>
+
+            <EventOutcomesPanelDemo />
+
+            <div className="mt-6 rounded-2xl border border-dashed border-white/15 bg-white/[0.02] p-5 text-xs">
+              <div className="mb-2 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+                Rules
+              </div>
+              <ul className="space-y-1.5 text-muted-foreground">
+                <li>• Used for <em>all</em> events — binary, 1X2, league-winner, top-scorer, props all share this single layout.</li>
+                <li>• Combined chart highlights the currently selected outcome (thicker + opaque); other lines dim to 0.45 opacity.</li>
+                <li>• Buy buttons set <code className="font-mono text-foreground">selectedIdx + tradeSide</code> upstream; the page pulses the TradeForm container for 700ms (and scroll-into-view on viewports &lt;1024px).</li>
+                <li>• Row body click = accordion toggle. <code className="font-mono text-foreground">expandedIdx</code> follows <code className="font-mono text-foreground">selectedIdx</code> when it changes upstream (deep links, related market pivots).</li>
+                <li>• Legend dots in the chart are also clickable — they call <code className="font-mono text-foreground">onLegendSelect</code> so users can change selection from the chart itself.</li>
+              </ul>
+            </div>
+          </Section>
+
           <Section id="event-live-stage" title="Event live stage" kicker="23 — P0 / event detail">
             <p className="mb-6 max-w-3xl text-sm text-muted-foreground">
               16:9 broadcast surface used at the top of <code className="font-mono text-foreground">/event/$id</code> when the underlying
