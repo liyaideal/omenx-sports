@@ -624,10 +624,14 @@ function StyleGuide() {
             </div>
           </Section>
 
-          {/* MARKET CARD */}
-          <Section id="market" title="Single-Market Binary" kicker="11 — One Market">
+          {/* BINARY EVENT */}
+          <Section id="market" title="Binary Event (2 outcomes)" kicker="11 — 2-outcome event">
             <p className="mb-6 max-w-3xl text-sm text-muted-foreground">
-              Every market is a single Yes/No binary. Prices are always mirrored: <code className="font-mono text-foreground">p(No) = 100 − p(Yes)</code>. The two variants below cover every binary surface in the product — the difference is whether the market provides <code className="font-mono text-foreground">sideLabels</code>.
+              A <strong className="text-foreground">binary event</strong> has exactly two outcomes that mirror each other:
+              <code className="font-mono text-foreground"> p(outcome A) + p(outcome B) = 100</code>. The two outcomes ARE the two
+              tradable sides — there is <strong className="text-foreground">no nested YES/NO</strong> per outcome and no per-outcome
+              order book. The variants below cover both surfaces: list-level cards (aliased team labels vs neutral Yes/No fallback)
+              and the shared order book that uses the two outcome labels as its column headers.
             </p>
 
             {/* 11a — Team-vs-team (aliased) */}
@@ -660,7 +664,7 @@ function StyleGuide() {
               <OrderBook sideLabels={{ yes: "Man City", no: "Real Madrid" }} />
             </div>
             <div className="mt-3 rounded-xl border border-loss/30 bg-loss/10 px-4 py-2.5 text-xs text-loss">
-              YES / NO never appears in user-facing text. Color carries the semantic — primary/green = YES side, neon/red = NO side.
+              When <code className="font-mono">sideLabels</code> exist, user-facing text is the alias (team/player name) — never the literal "YES/NO". Color carries the semantic: primary/green = first side, neon/red = second side.
             </div>
 
             {/* 11b — Neutral */}
@@ -692,14 +696,19 @@ function StyleGuide() {
               <OrderBook />
             </div>
             <div className="mt-3 rounded-xl border border-border bg-white/[0.02] px-4 py-2.5 text-xs text-muted-foreground">
-              Only when the market provides no <code className="font-mono text-foreground">sideLabels</code> do "Yes" / "No" appear as literal user text.
+              Only when the event provides no <code className="font-mono text-foreground">sideLabels</code> do literal "Yes" / "No" appear as user text — and even then it's a single market with one Trade button per side, not two nested binaries.
             </div>
           </Section>
 
-          {/* MULTI-MARKET EVENT */}
-          <Section id="multi" title="Multi-Market Event" kicker="12 — Bundled Binaries">
+          {/* MULTI-OUTCOME EVENT */}
+          <Section id="multi" title="Multi-Outcome Event (3+ outcomes)" kicker="12 — N-outcome event">
             <p className="mb-6 max-w-3xl text-sm text-muted-foreground">
-              An <strong className="text-foreground">event</strong> aggregates multiple independent binary markets. Each market is its own Yes/No (prices do <em>not</em> sum across markets — Man City reaching the final does not preclude Real Madrid from also reaching it). Each card inside the event still follows the Section 11 rules.
+              When an event has <strong className="text-foreground">3 or more outcomes</strong> (tournament winner, top scorer,
+              group winner, 1X2 with Draw, …) each outcome becomes its own independent binary sub-market with its own
+              <code className="font-mono text-foreground"> YES / NO</code> sides and its own order book — prices do <em>not</em>
+              sum across outcomes (Man City reaching the final does not preclude Real Madrid from also reaching it). This is
+              the <strong className="text-foreground">only</strong> case where per-outcome YES/NO appears. Binary (2-outcome)
+              events follow Section 11 instead.
             </p>
             <EventHeader
               league="ucl"
@@ -750,7 +759,7 @@ function StyleGuide() {
               />
             </div>
             <div className="mt-3 rounded-xl border border-border bg-white/[0.02] px-4 py-2.5 text-xs text-muted-foreground">
-              4 independent binary markets · probabilities sum to <span className="text-foreground tabular-nums">200%</span>, not 100% — each Yes is judged on its own.
+              4 outcomes · 4 independent YES/NO sub-markets · probabilities sum to <span className="text-foreground tabular-nums">200%</span>, not 100% — each YES is judged on its own.
             </div>
           </Section>
 
