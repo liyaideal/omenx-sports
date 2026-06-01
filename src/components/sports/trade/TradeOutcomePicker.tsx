@@ -2,6 +2,44 @@ import { cn } from "@/lib/utils";
 import type { SportsMarket } from "@/data/sports-markets";
 
 /**
+ * Derive what to feed into `<TradeForm>` from the current market + selection.
+ * Mirrors the logic the drawer and the event detail page share.
+ */
+export function deriveTradeFormProps({
+  market,
+  outcomeId,
+  side,
+}: {
+  market: SportsMarket;
+  outcomeId?: string;
+  side: "yes" | "no";
+}) {
+  const ranked = [...market.outcomes].sort((a, b) => b.price - a.price);
+  const selected =
+    market.outcomes.find((o) => o.id === outcomeId) ?? ranked[0] ?? market.outcomes[0];
+  const isYesNoMarket =
+    market.outcomes.length === 2 &&
+    market.outcomes.some((o) => o.label.toUpperCase() === "YES");
+  const needsSideToggle = market.outcomes.length >= 3;
+  const yesCents = Math.round(selected.price * 100);
+  const noCents = 100 - yesCents;
+
+  const formOutcome: "yes" | "no" = needsSideToggle
+    ? side
+    : isYesNoMarket
+      ? selected.label.toUpperCase() === "NO" ? "no" : "yes"
+      : selected.id === market.outcomes[0]?.id ? "yes" : "no";
+  const formLabel = needsSideToggle
+    ? `${selected.team?.short ?? selected.label} ${side === "yes" ? "YES" : "NO"}`
+    : selected.team?.name ?? selected.label;
+  const formPrice = needsSideToggle
+    ? side === "yes" ? yesCents : noCents
+    : Math.round(selected.price * 100);
+
+  return { selected, needsSideToggle, formOutcome, formLabel, formPrice };
+}
+
+/**
  * Shared "Pick outcome (+ Pick side)" selector used by both the global
  * `TradeDrawer` and the in-page trade column on the event detail page.
  * Keeping a single component guarantees both surfaces stay visually and
