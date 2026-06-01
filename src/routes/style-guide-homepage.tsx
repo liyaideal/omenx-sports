@@ -90,21 +90,6 @@ const SECTIONS = [
 ] as const;
 
 const LIVE_STREAM_MARKETS = MATCH_MARKETS.filter((m) => m.isLiveStream);
-  ["topbar", "AppTopBar"],
-  ["fanzone-header", "FanZoneHeader"],
-  ["fanzone-body", "Fans Zone body"],
-  ["match-card", "MatchMarketCard"],
-  ["fan-post", "FanPostCard"],
-  ["activity", "LiveActivityCard"],
-  ["section-header", "PageSectionHeader"],
-  ["day-strip", "DayStripCalendar"],
-  ["event-tile", "EventMarketTileCard"],
-  ["show-more", "ShowMoreEventsButton"],
-  ["events-empty", "Empty events"],
-  ["live-stream", "LiveStreamCard"],
-  ["league-hub", "League hub cards"],
-  ["bridge", "BridgeStrip"],
-] as const;
 
 function HomepagePlayground() {
   return (
