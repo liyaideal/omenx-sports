@@ -1,3 +1,4 @@
+import { useEffect, useRef } from "react";
 import { cn } from "@/lib/utils";
 import type { SportsMarket } from "@/data/sports-markets";
 
@@ -71,16 +72,31 @@ export function TradeOutcomePicker({
   const yesCents = Math.round(selected.price * 100);
   const noCents = 100 - yesCents;
 
+  // Auto-scroll selected outcome into view when it changes.
+  const scrollerRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const el = scrollerRef.current?.querySelector<HTMLElement>(
+      `[data-outcome-id="${selected.id}"]`,
+    );
+    el?.scrollIntoView({ inline: "nearest", block: "nearest" });
+  }, [selected.id]);
+
+  // ≤3 outcomes fit naturally; ≥4 will overflow and become scrollable.
+  const fitsWithoutScroll = market.outcomes.length <= 3;
+
   return (
-    <div className={cn("space-y-3", className)}>
+    <div className={cn("space-y-2", className)}>
       <div>
-        <div className="mb-2 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+        <div className="mb-1.5 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
           Pick outcome
         </div>
         <div
+          ref={scrollerRef}
           className={cn(
-            "grid gap-2",
-            market.outcomes.length <= 2 ? "grid-cols-2" : "grid-cols-3",
+            "flex gap-2 overflow-x-auto scrollbar-none snap-x",
+            fitsWithoutScroll
+              ? ""
+              : "[mask-image:linear-gradient(to_right,black_calc(100%-24px),transparent)]",
           )}
         >
           {market.outcomes.map((o) => {
@@ -89,10 +105,12 @@ export function TradeOutcomePicker({
             return (
               <button
                 key={o.id}
+                data-outcome-id={o.id}
                 type="button"
                 onClick={() => onOutcomeChange(o.id)}
                 className={cn(
-                  "flex flex-col items-start gap-1 rounded-xl px-3 py-2 text-left transition",
+                  "flex shrink-0 snap-start items-center justify-between gap-3 rounded-lg px-2.5 py-1.5 text-left transition",
+                  fitsWithoutScroll ? "flex-1 basis-0" : "min-w-[112px]",
                   active
                     ? "bg-foreground/95 text-background ring-1 ring-foreground"
                     : "bg-white/[0.04] text-foreground ring-1 ring-white/[0.06] hover:bg-white/[0.08]",
@@ -101,7 +119,7 @@ export function TradeOutcomePicker({
                 <span className="truncate font-mono text-[10px] uppercase tracking-widest">
                   {o.team?.short ?? o.label}
                 </span>
-                <span className="font-display text-lg font-semibold tabular-nums">
+                <span className="font-display text-sm font-semibold tabular-nums">
                   {cents}¢
                 </span>
               </button>
@@ -112,7 +130,7 @@ export function TradeOutcomePicker({
 
       {needsSideToggle && (
         <div>
-          <div className="mb-2 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+          <div className="mb-1.5 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
             Pick side · {selected.team?.short ?? selected.label}
           </div>
           <div className="grid grid-cols-2 gap-2">
@@ -125,16 +143,16 @@ export function TradeOutcomePicker({
                   type="button"
                   onClick={() => onSideChange(s)}
                   className={cn(
-                    "flex flex-col items-start gap-1 rounded-xl px-3 py-2 text-left transition",
+                    "flex items-center justify-between gap-3 rounded-lg px-2.5 py-1.5 text-left transition",
                     active
                       ? "bg-foreground/95 text-background ring-1 ring-foreground"
                       : "bg-white/[0.04] text-foreground ring-1 ring-white/[0.06] hover:bg-white/[0.08]",
                   )}
                 >
-                  <span className="truncate font-mono text-[10px] uppercase tracking-widest">
+                  <span className="font-mono text-[10px] uppercase tracking-widest">
                     {s === "yes" ? "Yes" : "No"}
                   </span>
-                  <span className="font-display text-lg font-semibold tabular-nums">
+                  <span className="font-display text-sm font-semibold tabular-nums">
                     {cents}¢
                   </span>
                 </button>
