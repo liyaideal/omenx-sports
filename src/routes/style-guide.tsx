@@ -1658,6 +1658,13 @@ function StyleGuide() {
           </Section>
 
           <Section id="event-live-stage" title="Event live stage" kicker="23 — P0 / event detail">
+          </Section>
+
+
+          <Section id="trade-outcome-picker-tmp" title="tmp" kicker="tmp">
+          </Section>
+
+          <Section id="event-live-stage-tmp2" title="x" kicker="x">
             <p className="mb-6 max-w-3xl text-sm text-muted-foreground">
               16:9 broadcast surface used at the top of <code className="font-mono text-foreground">/event/$id</code> when the underlying
               market is being streamed (<code className="font-mono text-foreground">market.isLiveStream</code>). Combines the live poster,
