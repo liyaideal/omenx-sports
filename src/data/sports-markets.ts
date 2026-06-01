@@ -880,8 +880,6 @@ const WC_CHAMPION_SPOTLIGHT: PlayerSpotlight = {
   ],
 };
 
-const WC_GOLDEN_BOOT_SPOTLIGHT: PlayerSpotlight = {
-
 export const WC_CHAMPION_MARKET: SportsMarket = {
   id: "wc26-champion",
   kind: "league-winner",
