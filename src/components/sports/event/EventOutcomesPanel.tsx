@@ -106,13 +106,20 @@ function OutcomeRow({
 
   return (
     <div className={cn(selected ? "bg-primary/[0.06]" : undefined)}>
-      <button
-        type="button"
+      <div
+        role="button"
+        tabIndex={0}
         onClick={onToggleExpand}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            onToggleExpand();
+          }
+        }}
         aria-expanded={expanded}
         className={cn(
-          "group flex w-full items-center gap-4 px-4 py-3 text-left transition",
-          "hover:bg-white/[0.03]",
+          "group flex w-full cursor-pointer items-center gap-4 px-4 py-3 text-left transition outline-none",
+          "hover:bg-white/[0.03] focus-visible:ring-2 focus-visible:ring-primary/40",
         )}
       >
         {/* Left: glyph + name */}
@@ -175,7 +182,7 @@ function OutcomeRow({
             )}
           />
         </div>
-      </button>
+      </div>
 
       {expanded && (
         <div className="px-4 pb-4">
@@ -242,7 +249,7 @@ function BuyButton({
             : "bg-loss/15 text-loss ring-1 ring-loss/30 hover:bg-loss/25",
       )}
     >
-      <span className="opacity-80">买 {isYes ? "是" : "否"}</span>
+      <span className="opacity-80">Buy {isYes ? "YES" : "NO"}</span>
       <span className="ml-1.5 tabular-nums">{cents}¢</span>
     </button>
   );
