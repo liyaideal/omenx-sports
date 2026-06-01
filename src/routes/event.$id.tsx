@@ -5,20 +5,15 @@ import { cn } from "@/lib/utils";
 import { AppShell } from "@/components/sports/dashboard/AppShell";
 import { AppTopBar } from "@/components/sports/dashboard/AppTopBar";
 import { LeagueChip } from "@/components/sports/LeagueBadge";
-import { PriceChart } from "@/components/sports/PriceChart";
-import { OrderBook } from "@/components/sports/OrderBook";
 import { TradeForm, type PlacedOrder } from "@/components/sports/TradeForm";
-import {
-  TradeOutcomePicker,
-  deriveTradeFormProps,
-} from "@/components/sports/trade/TradeOutcomePicker";
+import { deriveTradeFormProps } from "@/components/sports/trade/TradeOutcomePicker";
+import { EventOutcomesPanel } from "@/components/sports/event/EventOutcomesPanel";
 import { EventLiveStage, useStageOffscreen } from "@/components/sports/event/EventLiveStage";
 import { StageTabs, type StageTab } from "@/components/sports/event/StageTabs";
 import { MobileTradeBar } from "@/components/sports/event/MobileTradeBar";
 import { useLiveStream } from "@/components/sports/live/LiveStreamProvider";
 import { RelatedMarketsBar } from "@/components/sports/event/RelatedMarketsBar";
 import { LiveTape } from "@/components/sports/event/LiveTape";
-import { DepthBar } from "@/components/sports/event/DepthBar";
 import { PreMatchStrip } from "@/components/sports/event/PreMatchStrip";
 import { ShareButton } from "@/components/sports/event/ShareButton";
 import { getRelatedMarkets } from "@/components/sports/event/related-markets";
@@ -28,7 +23,7 @@ import {
   type OrderRowData,
   type HistoryRowData,
 } from "@/components/sports/PositionsTable";
-import { ACCOUNT_STATS, getMarketById, type SportsMarket, type Outcome } from "@/data/sports-markets";
+import { ACCOUNT_STATS, getMarketById, type SportsMarket } from "@/data/sports-markets";
 
 export const Route = createFileRoute("/event/$id")({
   loader: ({ params }) => {
@@ -96,24 +91,6 @@ function EventErrorComponent({ error, reset }: { error: Error; reset: () => void
   );
 }
 
-
-function getOutcomeLabel(o: Outcome): string {
-  return o.team?.name ?? o.label;
-}
-
-function getSideLabels(market: SportsMarket): { yes: string; no: string } | undefined {
-  if (market.outcomes.length !== 2) return undefined;
-  return {
-    yes: getOutcomeLabel(market.outcomes[0]),
-    no: getOutcomeLabel(market.outcomes[1]),
-  };
-}
-
-function hashSeed(s: string): number {
-  let h = 0;
-  for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) | 0;
-  return Math.abs(h) % 100;
-}
 
 function clampPct(v: number): number {
   return Math.max(1, Math.min(99, v));
@@ -273,8 +250,6 @@ function EventTradePage() {
     setSelectedIdx(0);
   }, [activeRelatedIdx]);
 
-  // For OutcomeSelector tone wiring (binary only)
-  const binaryTone: "yes" | "no" = selectedIdx === 0 ? "yes" : "no";
   // YES/NO side toggle for 3+ outcome markets — mirrors the drawer.
   const [tradeSide, setTradeSide] = useState<"yes" | "no">("yes");
   useEffect(() => {
@@ -335,6 +310,28 @@ function EventTradePage() {
   const scrollToTradeForm = useCallback(() => {
     tradeFormRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
   }, []);
+
+  // Pulse the right-column TradeForm once whenever a row-level Buy button is
+  // pressed, so the eye is drawn to the now-preselected ticket. Also scrolls
+  // into view on mobile/below-lg where the form is not sticky beside it.
+  const [pulseKey, setPulseKey] = useState(0);
+  const handleBuyFromRow = useCallback(
+    (idx: number, side: "yes" | "no") => {
+      setSelectedIdx(idx);
+      setTradeSide(side);
+      setPulseKey((k) => k + 1);
+      if (typeof window !== "undefined") {
+        const isDesktop = window.matchMedia("(min-width: 1024px)").matches;
+        if (!isDesktop) scrollToTradeForm();
+      }
+    },
+    [scrollToTradeForm],
+  );
+  useEffect(() => {
+    if (pulseKey === 0) return;
+    const t = setTimeout(() => setPulseKey(0), 700);
+    return () => clearTimeout(t);
+  }, [pulseKey]);
 
   // Global live-stream session — keeps the floating player + fullscreen
   // overlay alive across route navigation.
@@ -409,8 +406,6 @@ function EventTradePage() {
         <div className="min-w-0 space-y-5">
           <EventDetailHeader
             market={active}
-            selectedIdx={selectedIdx}
-            onSelect={setSelectedIdx}
             outcomeId={selected?.id}
           />
           <RelatedMarketsBar
@@ -419,71 +414,56 @@ function EventTradePage() {
             onSelect={setActiveRelatedIdx}
           />
           {isPreMatch && <PreMatchStrip market={market} />}
-          <StageTabs
-            defaultTabId={isLive ? "stream" : "chart"}
-            tabs={[
-              ...(isLive
-                ? ([
-                    {
-                      id: "stream",
-                      label: "Stream",
-                      badge: (
-                        <span className="ml-1 inline-flex h-1.5 w-1.5 rounded-full bg-[color:var(--accent)] shadow-[0_0_8px_var(--accent)]" />
-                      ),
-                      content: (
-                        <EventLiveStage
-                          market={market}
-                          selected={selected}
-                          stageRef={stageRef}
-                          onFullscreen={live.openFullscreen}
-                        />
-                      ),
-                    },
-                  ] satisfies StageTab[])
-                : []),
-              {
-                id: "chart",
-                label: "Chart",
-                content: (
-                  <div className="space-y-3">
-                    <DepthBar
-                      mark={Math.round(selected.price * 100)}
-                      sideLabels={getSideLabels(active)}
+          {isLive ? (
+            <StageTabs
+              defaultTabId="stream"
+              tabs={[
+                {
+                  id: "stream",
+                  label: "Stream",
+                  badge: (
+                    <span className="ml-1 inline-flex h-1.5 w-1.5 rounded-full bg-[color:var(--accent)] shadow-[0_0_8px_var(--accent)]" />
+                  ),
+                  content: (
+                    <EventLiveStage
+                      market={market}
+                      selected={selected}
+                      stageRef={stageRef}
+                      onFullscreen={live.openFullscreen}
                     />
-                    <PriceChart tone={binaryTone} seed={hashSeed(active.id) + selectedIdx} />
-                  </div>
-                ),
-              },
-              {
-                id: "book",
-                label: "Order book",
-                content: (
-                  <OrderBook
-                    sideLabels={getSideLabels(active)}
-                    mark={Math.round(selected.price * 100)}
-                  />
-                ),
-              },
-            ]}
-          />
+                  ),
+                },
+                {
+                  id: "markets",
+                  label: "Markets",
+                  content: (
+                    <EventOutcomesPanel
+                      market={active}
+                      selectedIdx={selectedIdx}
+                      tradeSide={tradeSide}
+                      onSelect={setSelectedIdx}
+                      onSideSelect={handleBuyFromRow}
+                    />
+                  ),
+                },
+              ] satisfies StageTab[]}
+            />
+          ) : (
+            <EventOutcomesPanel
+              market={active}
+              selectedIdx={selectedIdx}
+              tradeSide={tradeSide}
+              onSelect={setSelectedIdx}
+              onSideSelect={handleBuyFromRow}
+            />
+          )}
           <LiveTape market={active} />
         </div>
 
         <div ref={tradeFormRef} className="lg:sticky lg:top-4 lg:self-start space-y-3">
-          <div className="rounded-2xl border border-border bg-surface p-4 shadow-card">
-            <TradeOutcomePicker
-              market={active}
-              outcomeId={selected?.id}
-              onOutcomeChange={(id) => {
-                const idx = active.outcomes.findIndex((o) => o.id === id);
-                if (idx >= 0) setSelectedIdx(idx);
-              }}
-              side={tradeSide}
-              onSideChange={setTradeSide}
-            />
-          </div>
           <TradeForm
             key={`${active.id}-${selected?.id}-${tradeSide}`}
+            className={cn(pulseKey > 0 && "animate-trade-pulse")}
             outcome={formOutcome}
             outcomeLabel={formLabel}
             price={formPrice}
@@ -505,13 +485,9 @@ function EventTradePage() {
 
 function EventDetailHeader({
   market,
-  selectedIdx,
-  onSelect,
   outcomeId,
 }: {
   market: SportsMarket;
-  selectedIdx: number;
-  onSelect: (idx: number) => void;
   outcomeId?: string;
 }) {
   const fixture = market.fixture;
@@ -532,47 +508,28 @@ function EventDetailHeader({
         <ShareButton outcomeId={outcomeId} />
       </div>
 
-      {/* Two-column body: fixture left · outcomes right */}
-      <div className="mt-5 grid items-center gap-6 lg:grid-cols-[1.2fr_1fr] lg:gap-8 lg:divide-x lg:divide-border">
-        <div className="min-w-0 lg:pr-8">
-          {fixture ? (
-            <div className="flex items-center justify-center gap-6">
-              <CrestBlock name={fixture.home.name} logo={fixture.home.logo} hue={fixture.home.hue} />
-              <div className="text-center">
-                <div className="font-serif-display italic text-3xl text-muted-foreground">vs</div>
-                <div className="mt-1 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
-                  Kickoff
-                </div>
-                <div className="font-mono text-[11px] tracking-wider text-foreground">
-                  {fixture.whenLabel} · {fixture.kickoff}
-                </div>
+      {/* Fixture / title — outcomes now live in the EventOutcomesPanel below. */}
+      <div className="mt-5">
+        {fixture ? (
+          <div className="flex items-center justify-center gap-6">
+            <CrestBlock name={fixture.home.name} logo={fixture.home.logo} hue={fixture.home.hue} />
+            <div className="text-center">
+              <div className="font-serif-display italic text-3xl text-muted-foreground">vs</div>
+              <div className="mt-1 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+                Kickoff
               </div>
-              <CrestBlock name={fixture.away.name} logo={fixture.away.logo} hue={fixture.away.hue} />
+              <div className="font-mono text-[11px] tracking-wider text-foreground">
+                {fixture.whenLabel} · {fixture.kickoff}
+              </div>
             </div>
-          ) : (
-            <div>
-              <h1 className="font-display text-2xl font-bold text-foreground">{market.title}</h1>
-              <div className="mt-1 text-sm text-muted-foreground">{market.league.name}</div>
-            </div>
-          )}
-        </div>
-
-        <div className="min-w-0 lg:pl-2">
-          <div className="mb-2 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
-            Markets
+            <CrestBlock name={fixture.away.name} logo={fixture.away.logo} hue={fixture.away.hue} />
           </div>
-          <div className="flex flex-col gap-1.5">
-            {market.outcomes.map((o, idx) => (
-              <HeaderOutcomeRow
-                key={o.id}
-                outcome={o}
-                seed={hashSeed(market.id + ":" + o.id)}
-                selected={idx === selectedIdx}
-                onClick={() => onSelect(idx)}
-              />
-            ))}
+        ) : (
+          <div className="text-center">
+            <h1 className="font-display text-3xl font-bold text-foreground">{market.title}</h1>
+            <div className="mt-1 text-sm text-muted-foreground">{market.league.name}</div>
           </div>
-        </div>
+        )}
       </div>
     </header>
   );
@@ -592,185 +549,3 @@ function CrestBlock({ name, logo, hue }: { name: string; logo: string; hue: numb
   );
 }
 
-/**
- * Outcome row used inside the event header right column. Replaces the old
- * standalone OutcomePicker below the header. 56px tall, selected = lavender
- * ring + subtle wash. Click selects the outcome and re-tones the chart /
- * trade form upstream.
- */
-function HeaderOutcomeRow({
-  outcome,
-  seed,
-  selected,
-  onClick,
-}: {
-  outcome: Outcome;
-  seed: number;
-  selected: boolean;
-  onClick: () => void;
-}) {
-  const cents = Math.round(outcome.price * 100);
-  const delta = typeof outcome.delta24h === "number" ? Math.round(outcome.delta24h * 100) : 0;
-  const up = delta > 0;
-  const down = delta < 0;
-  const label = outcome.team?.name ?? outcome.label;
-  const short =
-    outcome.team?.name
-      ? (outcome.label || outcome.team.name).slice(0, 3).toUpperCase()
-      : label.slice(0, 1).toUpperCase();
-  const tone: "win" | "loss" | "draw" | "neutral" =
-    !outcome.team && (outcome.label === "Draw" || outcome.meta === "X")
-      ? "draw"
-      : outcome.label.toUpperCase() === "YES"
-        ? "win"
-        : outcome.label.toUpperCase() === "NO"
-          ? "loss"
-          : "neutral";
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      aria-pressed={selected}
-      className={cn(
-        "group flex h-14 items-center gap-3 rounded-xl px-3 text-left transition",
-        selected
-          ? "bg-primary/10 ring-1 ring-primary/40"
-          : "bg-white/[0.02] ring-1 ring-white/[0.04] hover:bg-white/[0.05]",
-      )}
-    >
-      <Glyph outcome={outcome} short={short} tone={tone} />
-      <span className="min-w-0 flex-1 truncate text-sm font-medium text-foreground">
-        {label}
-      </span>
-      <Sparkline seed={seed} tone={tone} />
-      <span
-        className={cn(
-          "font-mono text-[10px] tabular-nums",
-          up ? "text-win" : down ? "text-loss" : "text-muted-foreground",
-        )}
-      >
-        {up ? `+${delta}¢` : down ? `−${Math.abs(delta)}¢` : "0¢"}
-      </span>
-      <span
-        className={cn(
-          "min-w-[44px] text-right font-mono text-lg tabular-nums",
-          selected ? "text-foreground" : "text-foreground/90",
-        )}
-      >
-        {cents}
-        <span className="text-xs text-muted-foreground">¢</span>
-      </span>
-    </button>
-  );
-}
-
-function Glyph({
-  outcome,
-  short,
-  tone,
-}: {
-  outcome: Outcome;
-  short: string;
-  tone: "win" | "loss" | "draw" | "neutral";
-}) {
-  if (outcome.team) {
-    return (
-      <div
-        className="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-white/[0.05] p-0.5 ring-1 ring-white/10"
-        style={{ boxShadow: `0 0 12px -4px oklch(0.7 0.22 ${outcome.team.hue} / 0.55)` }}
-      >
-        <img src={outcome.team.logo} alt="" className="h-full w-full object-contain" />
-      </div>
-    );
-  }
-  const cls =
-    tone === "win"
-      ? "bg-win/15 text-win"
-      : tone === "loss"
-        ? "bg-loss/15 text-loss"
-        : tone === "draw"
-          ? "bg-draw/15 text-draw"
-          : "bg-white/[0.06] text-muted-foreground";
-  return (
-    <span
-      className={cn(
-        "grid h-7 w-7 shrink-0 place-items-center rounded-full font-mono text-[10px] font-bold",
-        cls,
-      )}
-    >
-      {short.charAt(0)}
-    </span>
-  );
-}
-
-/**
- * Tiny inline sparkline (~44×16) seeded by id so it stays stable across
- * renders. Pure SVG, no deps. Tone maps to win/loss/draw/neutral foreground.
- */
-function Sparkline({
-  seed,
-  tone,
-  width = 44,
-  height = 16,
-  pts = 12,
-}: {
-  seed: number;
-  tone: "win" | "loss" | "draw" | "neutral";
-  width?: number;
-  height?: number;
-  pts?: number;
-}) {
-  const values = useMemo(() => {
-    const out: number[] = [];
-    let s = seed || 1;
-    for (let i = 0; i < pts; i++) {
-      s = (s * 9301 + 49297) % 233280;
-      out.push((s / 233280) * 2 - 1);
-    }
-    return out;
-  }, [seed, pts]);
-  const min = Math.min(...values);
-  const max = Math.max(...values);
-  const range = max - min || 1;
-  const step = pts > 1 ? width / (pts - 1) : 0;
-  const d = values
-    .map((v, i) => {
-      const x = i * step;
-      const y = height - ((v - min) / range) * (height - 2) - 1;
-      return `${i === 0 ? "M" : "L"}${x.toFixed(1)} ${y.toFixed(1)}`;
-    })
-    .join(" ");
-  const stroke =
-    tone === "win"
-      ? "oklch(0.78 0.18 155)"
-      : tone === "loss"
-        ? "oklch(0.7 0.22 25)"
-        : tone === "draw"
-          ? "oklch(0.85 0.17 85)"
-          : "oklch(0.68 0.025 285)";
-  return (
-    <svg
-      width={width}
-      height={height}
-      viewBox={`0 0 ${width} ${height}`}
-      className="shrink-0 opacity-80"
-      aria-hidden
-    >
-      <path d={d} fill="none" stroke={stroke} strokeWidth="1.25" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
-  );
-}
-
-function Stat({ label, value, icon }: { label: string; value: string; icon?: React.ReactNode }) {
-  return (
-    <div className="px-2">
-      <div className="inline-flex items-center gap-1 text-[10px] font-mono uppercase tracking-widest text-muted-foreground">
-        {icon}
-        {label}
-      </div>
-      <div className="mt-1 truncate font-mono text-sm font-semibold tabular-nums text-foreground">
-        {value}
-      </div>
-    </div>
-  );
-}

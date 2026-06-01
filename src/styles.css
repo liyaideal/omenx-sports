@@ -164,3 +164,19 @@
   0% { transform: translateY(0); }
   100% { transform: translateY(-50%); }
 }
+
+@keyframes trade-pulse {
+  0% {
+    box-shadow: 0 0 0 0 color-mix(in oklab, var(--primary) 55%, transparent);
+  }
+  60% {
+    box-shadow: 0 0 0 8px color-mix(in oklab, var(--primary) 0%, transparent);
+  }
+  100% {
+    box-shadow: 0 0 0 0 color-mix(in oklab, var(--primary) 0%, transparent);
+  }
+}
+
+.animate-trade-pulse {
+  animation: trade-pulse 700ms ease-out;
+}
