@@ -1869,6 +1869,75 @@ function StyleGuide() {
             </div>
           </Section>
 
+          <Section id="production-inventory" title="Production Inventory" kicker="26 — playground ↔ product sync">
+            <p className="mb-6 max-w-3xl text-sm text-muted-foreground">
+              Components below are shipping in real routes but don't yet have a self-contained demo on this page.
+              They're listed with their canonical live location so contributors can see them in context. If you
+              touch any of these and the behavior is new, lift a focused demo up into the matching section above
+              instead of letting the inventory grow.
+            </p>
+
+            <div className="grid gap-4 lg:grid-cols-2">
+              <InventoryGroup
+                title="Dashboard shell & cards"
+                liveAt={[{ label: "/", href: "/" }, { label: "/events", href: "/events" }]}
+                items={[
+                  ["AppShell", "Page shell — top bar + main + footer composition"],
+                  ["AppTopBar", "Product top nav (logo, search, user menu)"],
+                  ["BridgeStrip", "Cross-product strip below the top bar"],
+                  ["DayStripCalendar", "Horizontal day filter on the events grid"],
+                  ["PageSectionHeader", "Section header on dashboard / events pages"],
+                  ["ShowMoreEventsButton", "Dashed ghost button that expands a 1-row shelf"],
+                  ["MatchMarketCard", "Fixture-style market card (used by events grid)"],
+                  ["UpcomingEventCard", "Compact upcoming-event tile"],
+                  ["LeagueTableCard", "Standings strip embedded inside a league module"],
+                  ["LeagueWinnerMarketCard", "Season-winner market card"],
+                  ["TopScorerMarketCard", "Top-scorer market card"],
+                  ["PlayerScorerCard", "Per-player scorer prop card"],
+                  ["PlayerPropsSpotlight", "Player-props spotlight row"],
+                  ["dashboard/PlayerSpotlightCard", "Dashboard variant of the player spotlight (different from the root one shown in §primitives)"],
+                  ["LiveActivityCard", "Specific-row activity feed (handle + side + outcome + price + event + time)"],
+                ]}
+              />
+              <InventoryGroup
+                title="Fans zone"
+                liveAt={[{ label: "/fans", href: "/fans" }]}
+                items={[
+                  ["FanZoneHeader", "Fans-zone hero header"],
+                  ["FanPostCard", "Single fan post card"],
+                  ["FansZoneEmpty", "Empty-state for a fan with no follows yet"],
+                  ["FollowTeamsCompact", "Inline follow-teams control"],
+                  ["FollowTeamsPanel", "Side-panel follow-teams editor"],
+                  ["TeamPickerSheet", "Sheet for picking teams to follow"],
+                ]}
+              />
+              <InventoryGroup
+                title="Mobile homepage"
+                liveAt={[{ label: "/", href: "/" }]}
+                items={[
+                  ["MobileChrome", "Outer mobile chrome wrapper (top bar + bottom nav)"],
+                  ["MobileEventsSection", "Mobile events shelf"],
+                  ["MobileFansSection", "Mobile fans-zone shelf"],
+                  ["MobileSeeMoreCard", "Dashed mobile see-more tile"],
+                ]}
+              />
+              <InventoryGroup
+                title="Event detail extras"
+                liveAt={[{ label: "/event/$id", href: "/event/featured-clasico" }]}
+                items={[
+                  ["event/CombinedPriceChart", "Multi-line overlay chart used at the top of the outcomes panel (see §event-outcomes-panel)"],
+                ]}
+              />
+            </div>
+
+            <div className="mt-6 rounded-2xl border border-dashed border-loss/30 bg-loss/5 p-5 text-xs text-loss">
+              <strong>Rule.</strong> Any new shared component MUST get a real demo above — adding it to this list is only
+              acceptable as a temporary placeholder while wiring up data. If the demo would require non-trivial provider
+              setup (live stream, follow state, etc.), wrap the provider locally inside the demo function the same way
+              <code className="font-mono"> TradeDrawerDemo</code> / <code className="font-mono">GlobalLiveStreamDemo</code> do.
+            </div>
+          </Section>
+
           <footer className="mt-12 border-t border-border pt-6 text-center text-xs text-muted-foreground font-mono">
             Stadium Neon · v0.1 · sports prediction design system
           </footer>
