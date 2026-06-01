@@ -11,8 +11,8 @@ export function getMarketKindLabel(market: SportsMarket): string {
       return "Tournament winner";
     case "top-scorer":
       return "Top scorer";
-    case "group-winner":
-      return "Group winner";
+    case "player-prop":
+      return "Player prop";
     case "match":
       return "Match";
     default:
