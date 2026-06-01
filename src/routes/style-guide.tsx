@@ -1689,7 +1689,7 @@ function StyleGuide() {
                 </div>
                 <ul className="space-y-1.5 text-muted-foreground">
                   <li>• Only rendered when <code className="font-mono text-foreground">league.kind === "tournament"</code>.</li>
-                  <li>• Matchups deep-link to <code className="font-mono text-foreground">/event/$id</code> using the matchup id as the market id.</li>
+                  <li>• Matchups deep-link to <code className="font-mono text-foreground">/event/$id</code> using the matchup id as the market id. The bracket card shows only the two teams, but the detail page is a full <strong className="text-foreground">1X2</strong> market (home / draw / away) — never add a Draw row inside the bracket card itself.</li>
                   <li>• TBD slots render as a dashed circle — bracket is always a complete tree, never collapsed rows.</li>
                   <li>• Each column past the first gets progressively larger vertical gaps to visually converge toward the final.</li>
                 </ul>
