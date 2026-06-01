@@ -6,7 +6,10 @@ import { AppShell } from "@/components/sports/dashboard/AppShell";
 import { AppTopBar } from "@/components/sports/dashboard/AppTopBar";
 import { LeagueChip } from "@/components/sports/LeagueBadge";
 import { TradeForm, type PlacedOrder } from "@/components/sports/TradeForm";
-import { deriveTradeFormProps } from "@/components/sports/trade/TradeOutcomePicker";
+import {
+  deriveTradeFormProps,
+  TradeOutcomePicker,
+} from "@/components/sports/trade/TradeOutcomePicker";
 import { EventOutcomesPanel } from "@/components/sports/event/EventOutcomesPanel";
 import { EventLiveStage, useStageOffscreen } from "@/components/sports/event/EventLiveStage";
 import { StageTabs, type StageTab } from "@/components/sports/event/StageTabs";
@@ -460,7 +463,22 @@ function EventTradePage() {
           <LiveTape market={active} />
         </div>
 
-        <div ref={tradeFormRef} className="lg:sticky lg:top-4 lg:self-start space-y-3">
+        <div
+          ref={tradeFormRef}
+          className="space-y-3 lg:sticky lg:top-4 lg:self-start lg:max-h-[calc(100vh-2rem)] lg:overflow-y-auto lg:pr-1 lg:[scrollbar-gutter:stable]"
+        >
+          <div className="rounded-2xl border border-border bg-surface p-3 shadow-card">
+            <TradeOutcomePicker
+              market={active}
+              outcomeId={selected?.id}
+              onOutcomeChange={(id) => {
+                const idx = active.outcomes.findIndex((o) => o.id === id);
+                if (idx >= 0) setSelectedIdx(idx);
+              }}
+              side={tradeSide}
+              onSideChange={setTradeSide}
+            />
+          </div>
           <TradeForm
             key={`${active.id}-${selected?.id}-${tradeSide}`}
             className={cn(pulseKey > 0 && "animate-trade-pulse")}
