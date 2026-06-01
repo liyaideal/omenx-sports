@@ -426,8 +426,6 @@ function EventTradePage() {
         <div className="min-w-0 space-y-5">
           <EventDetailHeader
             market={active}
-            selectedIdx={selectedIdx}
-            onSelect={setSelectedIdx}
             outcomeId={selected?.id}
           />
           <RelatedMarketsBar
