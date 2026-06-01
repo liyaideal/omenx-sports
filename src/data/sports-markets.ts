@@ -890,6 +890,7 @@ export const WC_CHAMPION_MARKET: SportsMarket = {
   kind: "league-winner",
   shape: "three-way",
   title: "World Cup 2026 — Champion",
+  kindLabel: "Tournament winner · 48 nations",
   league: { name: "World Cup 2026", short: "WC" },
   endsLabel: "Settles Jul 19, 2026",
   volume: "$8.95M",
