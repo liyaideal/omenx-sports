@@ -4,6 +4,7 @@ import { useNavigate, useRouterState } from "@tanstack/react-router";
 import { Maximize2, SquareArrowOutUpRight, X } from "lucide-react";
 import type { SportsMarket } from "@/data/sports-markets";
 import { useTradeDrawer } from "@/components/sports/trade/TradeDrawerProvider";
+import { AudioTrackToggle } from "./AudioTrackToggle";
 
 interface GlobalStreamMiniPlayerProps {
   market: SportsMarket;
@@ -75,6 +76,15 @@ export function GlobalStreamMiniPlayer({
               {market.liveClock}
             </span>
           )}
+
+          {/* Audio language toggle — overlaid bottom-left of the
+              poster so it doesn't fight with the score bug or controls. */}
+          <div
+            className="absolute bottom-2 left-2"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <AudioTrackToggle size="sm" />
+          </div>
 
           {market.liveScore && fixture && (
             <div className="absolute bottom-2 left-1/2 flex -translate-x-1/2 items-center gap-1.5 rounded-full bg-black/70 px-2 py-0.5 ring-1 ring-white/15">
