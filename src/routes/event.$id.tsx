@@ -529,7 +529,7 @@ function EventDetailHeader({
         {/* Left: fixture + share */}
         <div className="flex flex-1 flex-col">
           {fixture ? (
-            <div className="flex min-h-[200px] items-center justify-around gap-6 px-8 py-10 md:px-12 md:py-12">
+            <div className="flex min-h-[176px] items-center justify-around gap-6 px-8 py-8 md:px-12 md:py-10">
               <CrestBlock name={fixture.home.name} logo={fixture.home.logo} />
               <div className="flex flex-col items-center">
                 <div className="relative py-1">
@@ -549,7 +549,7 @@ function EventDetailHeader({
               <CrestBlock name={fixture.away.name} logo={fixture.away.logo} />
             </div>
           ) : (
-            <div className="flex min-h-[200px] flex-col items-center justify-center px-8 py-10 text-center md:px-12 md:py-12">
+            <div className="flex min-h-[176px] flex-col items-center justify-center px-8 py-8 text-center md:px-12 md:py-10">
               <h1 className="font-display text-2xl font-bold text-foreground">{market.title}</h1>
               <div className="mt-1 text-sm text-muted-foreground">{market.league.name}</div>
             </div>
@@ -559,11 +559,11 @@ function EventDetailHeader({
         {/* Divider */}
         <div
           aria-hidden
-          className="hidden w-px bg-gradient-to-b from-transparent via-white/10 to-transparent md:my-12 md:block"
+          className="hidden w-px bg-gradient-to-b from-transparent via-white/10 to-transparent md:my-8 md:block"
         />
 
         {/* Right: stats panel */}
-        <div className="flex w-full flex-row justify-around gap-8 border-t border-white/5 bg-white/[0.01] px-8 py-6 md:w-64 md:flex-col md:justify-center md:gap-10 md:border-t-0 md:px-8 md:py-12">
+        <div className="flex w-full flex-row justify-around gap-6 border-t border-white/5 bg-white/[0.01] px-8 py-5 md:w-52 md:flex-col md:justify-center md:gap-5 md:border-t-0 md:px-7 md:py-8">
           <StatBlock label="Total Volume" value={market.volume} />
           <StatBlock
             label="Live Players"
@@ -589,7 +589,7 @@ function StatBlock({
   pulse?: boolean;
 }) {
   return (
-    <div className="space-y-2">
+    <div className="space-y-1">
       <div className="flex items-center gap-2">
         {pulse ? (
           <span
@@ -597,11 +597,11 @@ function StatBlock({
             className="h-1.5 w-1.5 animate-pulse rounded-full bg-win shadow-[0_0_10px_currentColor]"
           />
         ) : null}
-        <p className="font-mono text-[9px] font-black uppercase tracking-[0.35em] text-muted-foreground/70">
+        <p className="font-mono text-[9px] font-black uppercase tracking-[0.25em] text-muted-foreground/70">
           {label}
         </p>
       </div>
-      <p className="font-mono text-2xl font-medium tracking-tight text-foreground tabular-nums">
+      <p className="font-mono text-lg font-medium tracking-tight text-foreground tabular-nums">
         {value}
       </p>
     </div>
