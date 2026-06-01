@@ -144,16 +144,20 @@ function OutcomeRow({
             {cents}
             <span className="text-sm text-muted-foreground">¢</span>
           </span>
-          {delta !== 0 && (
-            <span
-              className={cn(
-                "font-mono text-[10px] tabular-nums",
-                delta > 0 ? "text-win" : "text-loss",
-              )}
-            >
-              {delta > 0 ? `▲${delta}` : `▼${Math.abs(delta)}`}
-            </span>
-          )}
+          <span
+            className={cn(
+              "inline-block w-10 text-right font-mono text-[10px] tabular-nums",
+              delta > 0 && "text-win",
+              delta < 0 && "text-loss",
+              delta === 0 && "text-muted-foreground",
+            )}
+          >
+            {delta > 0
+              ? `▲${delta}¢`
+              : delta < 0
+                ? `▼${Math.abs(delta)}¢`
+                : `—0¢`}
+          </span>
         </div>
 
         {/* Right: Buy YES / Buy NO */}
