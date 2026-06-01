@@ -1,38 +1,33 @@
-我理解：binary event 本身只有两个 outcome，不应该再在每个 outcome 下面生成一层 YES/NO；多选项 event 才需要对每个 option 提供 YES/NO 两侧交易。
+## 目标
 
-检查到的主要问题：
-- 当前详情页 `/event/wc26-bih-advance` 把 binary event 的两个 outcome（Yes / No）又渲染成每行 `YES/NO` 两个按钮，所以变成了截图里的 `Yes` 行里还有 `YES 32¢ / NO 68¢`。
-- `src/components/sports/event/EventOutcomesPanel.tsx` 是核心错误点：它对所有 outcomes 都统一渲染 `Buy YES / Buy NO` 和 `${label} YES / ${label} NO` 的 order book。
-- `src/routes/event.$id.tsx` 也写着“binary 2-outcome markets treat outcomes[0] = YES, outcomes[1] = NO”，会让交易表单状态继续沿用错误模型。
-- 数据里仍有不少 binary event 用 `outcomes: Yes/No`：包括 `wc26-bih-advance`、`wc26-can-advance`、`wc26-can-clean-sheet`、`messi-hattrick`、`haaland-2g`、部分 player prop / group outcome / top scorer stub，以及 style-guide fixtures。
-- style-guide 里还有多处旧规则文案（binary = Yes/No、每行 Buy YES/NO），需要同步，否则之后还会按旧规范做回去。
+`/league/world-cup-2026?view=bracket` 里的 bracket 卡片只展示两支球队（保持现状），但点击进入的 `/event/<matchup-id>` 必须是 1X2 三选项 market（home / draw / away），而不是当前的二选项 binary。
 
-实施计划：
-1. 补充项目记忆
-   - 新增/更新 memory：`binary event` 是 2-outcome event，两个 outcome 就是可交易 market；不能再给每个 outcome 嵌套 YES/NO。
-   - 明确：只有 3+ outcomes 的多选项 event 才在单个 outcome 下有 YES/NO 两侧。
+## 现状
 
-2. 修正交易详情页核心逻辑
-   - `EventOutcomesPanel` 根据 `market.outcomes.length === 2` 分支：
-     - binary event：只显示两个 outcome 行，每行一个交易按钮（例如 `TRADE 32¢` 或 outcome label + price），不显示每行 YES/NO 双按钮。
-     - 多选项 event：保留每个 outcome 的 Buy YES / Buy NO 逻辑。
-   - OrderBook：
-     - binary event 展开某个 outcome 时展示该 outcome 自己的 book，不再用 `${label} YES / ${label} NO`。
-     - 多选项 event 才使用 `${label} YES / ${label} NO`。
+- `src/data/tournament.ts` 的 `BRACKET_MARKETS` 里每个 matchup 生成的是 `shape: "binary"`，`outcomes: [home, away]`。
+- 因此详情页走的是 binary 渲染分支（单交易按钮、共享 order book），缺少 Draw。
+- `BracketView` 只读 `homePrice` / `awayPrice` 来画卡，跟 outcomes 数量无关。
 
-3. 修正 `event.$id.tsx` 交易表单映射
-   - binary event：选择哪个 outcome，就把该 outcome 直接传给交易表单，隐藏/固定 side，不再允许对该 outcome 选择 YES/NO。
-   - 多选项 event：继续用 selected outcome + side（YES/NO）模式。
+## 改动
 
-4. 清理数据错误
-   - 把新增的相关 events（`wc26-can-advance`、`wc26-bih-advance`、`wc26-can-clean-sheet`）从 literal `Yes/No` 数据改成更明确的两个 outcome：例如 `Advance / Miss out`、`Clean sheet / Concede`。
-   - 扫描并修正核心产品数据里其它 binary literal Yes/No，避免首页卡片、league tab、详情页再次出现同类问题。
-   - 对自动生成的 tournament per-candidate binary stub 做同样处理，避免 group card 跳转后出现嵌套 Yes/No。
+仅改数据生成层 `src/data/tournament.ts` 中的 `BRACKET_MARKETS`：
 
-5. 同步 style-guide
-   - 更新相关 demo 和文案：binary event 不再是“每个 outcome 再买 YES/NO”；多选项 event 才是 outcome + side。
-   - 新共享/修改后的真实页面模块会同步到 `/style-guide`，保持项目规则一致。
+1. 把 `shape` 从 `"binary"` 改成 `"three-way"`。
+2. `outcomes` 改为三项：`home`、`draw`、`away`。
+   - Draw 概率派生：`drawPrice = round(1 - homePrice - awayPrice, 2)` 当 `homePrice + awayPrice < 1`；否则给一个合理保底（如 `0.18`）并按比例缩放 home/away 让三者归一。
+   - Draw outcome 形如 `{ id: "draw", label: "Draw", price: drawPrice, delta24h: 0, meta: "X" }`（沿用现有 `isDrawOutcome` 识别规则，不挂 team）。
+3. `kindLabel` 改成 `"${round.label} · 1X2"` 以反映三选项。
+4. 给每个 matchup 在源数据里加一个可选 `drawPrice?: number`，让 R16/QF/SF/Final 这种"实际不可能平的淘汰赛"也允许 mock 一个 90 分钟平局概率（说明：详情页是 90 分钟 1X2 市场，加时/点球不计）。先全部使用第 2 步的自动派生即可，不需要逐场手写。
 
-6. 验证
-   - 全局重新扫描 `label: "Yes"/"No"`、`Buy YES / Buy NO` 等模式，确认只剩技术性或多选项场景允许的位置。
-   - 检查当前 `/event/wc26-bih-advance` 不再出现截图里的嵌套 Yes/No 行。
+## 不动的地方
+
+- `BracketView.tsx`：仍然只渲染 `home` / `away` 两行 + 各自 price，不展示 Draw。
+- `EventOutcomesPanel`：已经按 `outcomes.length` 自动分支，三选项会自动走 multi-outcome 渲染，无需改组件。
+- Binary event 的既有规则（2 outcome 不嵌套 YES/NO）不受影响。
+- Group winner / 其它现有 markets 不动。
+
+## 验证
+
+- 打开 `/league/world-cup-2026?view=bracket`：卡片仍是两行球队 + 概率，无 Draw。
+- 点击任一 matchup → `/event/r32-1` 等：详情页 outcomes 面板出现 3 个选项（含 Draw），每个 outcome 有独立 YES/NO 与 order book。
+- 全局 grep 确认 `BRACKET_MARKETS` 之外没有再写死 binary fixture 用例。
