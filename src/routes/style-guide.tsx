@@ -2175,20 +2175,18 @@ function EventExtrasDemo() {
   const preMatch =
     MATCH_MARKETS.find((m) => !m.isLiveStream && m.fixture) ?? FEATURED_MATCH;
   const related = getRelatedMarkets(base);
-  const [idx, setIdx] = useState(0);
-  const active = related[idx] ?? base;
-  const selected = active.outcomes[0];
+  const selected = base.outcomes[0];
   return (
     <div className="space-y-4">
-      <RelatedMarketsBar markets={related} activeIdx={idx} onSelect={setIdx} />
+      <RelatedMarketsBar markets={related} />
       <div className="grid gap-3 md:grid-cols-2">
         <DepthBar
           mark={Math.round(selected.price * 100)}
           sideLabels={
-            active.outcomes.length === 2
+            base.outcomes.length === 2
               ? {
-                  yes: active.outcomes[0].team?.name ?? active.outcomes[0].label,
-                  no: active.outcomes[1].team?.name ?? active.outcomes[1].label,
+                  yes: base.outcomes[0].team?.name ?? base.outcomes[0].label,
+                  no: base.outcomes[1].team?.name ?? base.outcomes[1].label,
                 }
               : undefined
           }
