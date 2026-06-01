@@ -77,15 +77,6 @@ export function GlobalStreamMiniPlayer({
             </span>
           )}
 
-          {/* Audio language toggle — overlaid bottom-left of the
-              poster so it doesn't fight with the score bug or controls. */}
-          <div
-            className="absolute bottom-2 left-2"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <AudioTrackToggle size="sm" />
-          </div>
-
           {market.liveScore && fixture && (
             <div className="absolute bottom-2 left-1/2 flex -translate-x-1/2 items-center gap-1.5 rounded-full bg-black/70 px-2 py-0.5 ring-1 ring-white/15">
               <img src={fixture.home.logo} alt="" className="h-3.5 w-3.5 object-contain" />
@@ -105,6 +96,7 @@ export function GlobalStreamMiniPlayer({
 
         {/* Action bar — Trade CTA + nav controls (no outcome chips). */}
         <div className="flex items-center gap-1.5 border-t border-white/[0.06] px-2 py-2">
+          <AudioTrackToggle size="sm" className="shrink-0" />
           <button
             type="button"
             onClick={() =>
