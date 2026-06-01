@@ -54,6 +54,14 @@ export interface SportsMarket {
    *  a tournament hub the league chip is replaced by this stage chip —
    *  league is implied by the hub, stage is the useful axis. */
   stage?: string;
+  /** Short row label used when this market renders inside a bundle whose
+   *  parent event already supplies the question context (e.g. row label
+   *  "Brazil" inside a "World Cup Champion" card instead of repeating
+   *  "Brazil to win the World Cup 2026"). */
+  subject?: string;
+  /** Optional team/entity the market is about — drives the row crest
+   *  inside bundled props cards. */
+  subjectTeam?: TeamLite;
 }
 
 export const FEATURED_MATCH: SportsMarket = {
@@ -766,6 +774,8 @@ const WC_CHAMPION_SPOTLIGHT: PlayerSpotlight = {
       kind: "league-winner",
       shape: "binary",
       title: "Brazil to win the World Cup 2026",
+      subject: "Brazil",
+      subjectTeam: TEAMS.brazil,
       league: { name: "World Cup 2026", short: "WC" },
       endsLabel: "Settles Jul 19, 2026",
       volume: "$2.40M",
@@ -782,6 +792,8 @@ const WC_CHAMPION_SPOTLIGHT: PlayerSpotlight = {
       kind: "league-winner",
       shape: "binary",
       title: "Argentina to win the World Cup 2026",
+      subject: "Argentina",
+      subjectTeam: TEAMS.argentina,
       league: { name: "World Cup 2026", short: "WC" },
       endsLabel: "Settles Jul 19, 2026",
       volume: "$2.10M",
@@ -798,6 +810,8 @@ const WC_CHAMPION_SPOTLIGHT: PlayerSpotlight = {
       kind: "league-winner",
       shape: "binary",
       title: "France to win the World Cup 2026",
+      subject: "France",
+      subjectTeam: TEAMS.france,
       league: { name: "World Cup 2026", short: "WC" },
       endsLabel: "Settles Jul 19, 2026",
       volume: "$1.80M",
@@ -814,6 +828,8 @@ const WC_CHAMPION_SPOTLIGHT: PlayerSpotlight = {
       kind: "league-winner",
       shape: "binary",
       title: "England to win the World Cup 2026",
+      subject: "England",
+      subjectTeam: TEAMS.england,
       league: { name: "World Cup 2026", short: "WC" },
       endsLabel: "Settles Jul 19, 2026",
       volume: "$1.45M",
@@ -830,6 +846,8 @@ const WC_CHAMPION_SPOTLIGHT: PlayerSpotlight = {
       kind: "league-winner",
       shape: "binary",
       title: "Spain to win the World Cup 2026",
+      subject: "Spain",
+      subjectTeam: TEAMS.spain,
       league: { name: "World Cup 2026", short: "WC" },
       endsLabel: "Settles Jul 19, 2026",
       volume: "$1.20M",
