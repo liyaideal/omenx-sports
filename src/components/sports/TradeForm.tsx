@@ -4,7 +4,6 @@ import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
-import { LiquidationBar } from "./LiquidationBar";
 
 interface TradeFormProps {
   outcome: "yes" | "no";
