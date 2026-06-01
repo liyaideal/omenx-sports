@@ -281,10 +281,7 @@ export function TradeForm({
 
       {/* TP/SL toggle */}
       <div className="mt-5 flex items-center justify-between rounded-xl border border-border bg-white/[0.02] px-3 py-2.5">
-        <div>
-          <div className="text-xs font-display font-semibold">TP/SL</div>
-          <div className="text-[10px] font-mono text-muted-foreground">Take profit · Stop loss</div>
-        </div>
+        <div className="text-xs font-display font-semibold">TP/SL</div>
         <Switch checked={tpslOpen} onCheckedChange={setTpslOpen} />
       </div>
 
