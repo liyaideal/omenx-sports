@@ -1,7 +1,7 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { useNavigate, useRouterState } from "@tanstack/react-router";
-import { Maximize2, SquareArrowOutUpRight, X } from "lucide-react";
+import { GripHorizontal, Maximize2, SquareArrowOutUpRight, X } from "lucide-react";
 import type { SportsMarket } from "@/data/sports-markets";
 import { useTradeDrawer } from "@/components/sports/trade/TradeDrawerProvider";
 import { AudioTrackToggle } from "./AudioTrackToggle";
@@ -12,6 +12,28 @@ interface GlobalStreamMiniPlayerProps {
   onDismiss: () => void;
   onFullscreen: () => void;
   onSelectOutcome: (id: string) => void;
+}
+
+const STORAGE_KEY = "omenx.miniPlayer.pos";
+const PLAYER_W = 340;
+const PLAYER_H = 252; // approx: 340 * 9/16 (191) + handle (20) + action bar (~41)
+const EDGE_PAD = 8;
+const SNAP_THRESHOLD = 24;
+
+function clampPos(x: number, y: number) {
+  const maxX = Math.max(EDGE_PAD, window.innerWidth - PLAYER_W - EDGE_PAD);
+  const maxY = Math.max(EDGE_PAD, window.innerHeight - PLAYER_H - EDGE_PAD);
+  return {
+    x: Math.min(Math.max(EDGE_PAD, x), maxX),
+    y: Math.min(Math.max(EDGE_PAD, y), maxY),
+  };
+}
+
+function defaultPos() {
+  return clampPos(
+    window.innerWidth - PLAYER_W - 16,
+    window.innerHeight - PLAYER_H - 16,
+  );
 }
 
 /**
@@ -35,7 +57,73 @@ export function GlobalStreamMiniPlayer({
   const onEventPage = pathname === `/event/${market.id}`;
 
   const [mounted, setMounted] = useState(false);
-  useEffect(() => setMounted(true), []);
+  const [pos, setPos] = useState<{ x: number; y: number } | null>(null);
+  const [dragging, setDragging] = useState(false);
+  const dragOffset = useRef<{ dx: number; dy: number } | null>(null);
+
+  useEffect(() => {
+    setMounted(true);
+    let initial = defaultPos();
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (raw) {
+        const parsed = JSON.parse(raw) as { x: number; y: number };
+        if (typeof parsed?.x === "number" && typeof parsed?.y === "number") {
+          initial = clampPos(parsed.x, parsed.y);
+        }
+      }
+    } catch {
+      /* ignore */
+    }
+    setPos(initial);
+
+    const onResize = () => setPos((p) => (p ? clampPos(p.x, p.y) : p));
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
+  }, []);
+
+  const onPointerDown = useCallback((e: React.PointerEvent<HTMLDivElement>) => {
+    if (!pos) return;
+    e.preventDefault();
+    dragOffset.current = { dx: e.clientX - pos.x, dy: e.clientY - pos.y };
+    setDragging(true);
+  }, [pos]);
+
+  useEffect(() => {
+    if (!dragging) return;
+    const onMove = (e: PointerEvent) => {
+      const off = dragOffset.current;
+      if (!off) return;
+      setPos(clampPos(e.clientX - off.dx, e.clientY - off.dy));
+    };
+    const onUp = () => {
+      setDragging(false);
+      dragOffset.current = null;
+      setPos((p) => {
+        if (!p) return p;
+        let { x, y } = p;
+        const rightEdge = window.innerWidth - PLAYER_W - EDGE_PAD;
+        if (x - EDGE_PAD < SNAP_THRESHOLD) x = EDGE_PAD;
+        else if (rightEdge - x < SNAP_THRESHOLD) x = rightEdge;
+        const snapped = { x, y };
+        try {
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(snapped));
+        } catch {
+          /* ignore */
+        }
+        return snapped;
+      });
+    };
+    window.addEventListener("pointermove", onMove);
+    window.addEventListener("pointerup", onUp);
+    window.addEventListener("pointercancel", onUp);
+    return () => {
+      window.removeEventListener("pointermove", onMove);
+      window.removeEventListener("pointerup", onUp);
+      window.removeEventListener("pointercancel", onUp);
+    };
+  }, [dragging]);
+
   if (!mounted) return null;
 
   // Mini player keeps the bottom bar minimal — only a Trade CTA + nav
@@ -45,8 +133,30 @@ export function GlobalStreamMiniPlayer({
   const selectedId = outcomeId ?? market.outcomes[0].id;
 
   return createPortal(
-    <div className="pointer-events-none fixed bottom-4 right-4 z-50 hidden sm:block">
-      <div className="pointer-events-auto w-[340px] overflow-hidden rounded-2xl border border-[color:var(--accent)]/40 bg-black/90 shadow-2xl ring-1 ring-[color:var(--accent)]/30 backdrop-blur">
+    <div
+      className="pointer-events-none fixed z-50 hidden sm:block"
+      style={{
+        left: pos?.x ?? 0,
+        top: pos?.y ?? 0,
+        transition: dragging ? "none" : "left 160ms ease, top 160ms ease",
+      }}
+    >
+      <div
+        className="pointer-events-auto w-[340px] overflow-hidden rounded-2xl border border-[color:var(--accent)]/40 bg-black/90 shadow-2xl ring-1 ring-[color:var(--accent)]/30 backdrop-blur"
+        style={{ touchAction: "none" }}
+      >
+        {/* Drag handle */}
+        <div
+          role="toolbar"
+          aria-label="Drag to move"
+          title="Drag to move"
+          onPointerDown={onPointerDown}
+          className={`flex h-5 items-center justify-center border-b border-white/[0.04] bg-white/[0.03] text-white/40 transition hover:text-white/70 ${
+            dragging ? "cursor-grabbing" : "cursor-grab"
+          }`}
+        >
+          <GripHorizontal className="h-3 w-3" />
+        </div>
         {/* Poster surface — click to fullscreen */}
         <button
           type="button"
