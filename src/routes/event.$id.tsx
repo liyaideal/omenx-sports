@@ -27,6 +27,7 @@ import {
 } from "@/components/sports/PositionsTable";
 import { ACCOUNT_STATS, getMarketById, type SportsMarket } from "@/data/sports-markets";
 import { LEAGUE_BG } from "@/lib/league-backgrounds";
+import { EventQuestionHeading } from "@/components/sports/event/EventQuestionHeading";
 
 export const Route = createFileRoute("/event/$id")({
   loader: ({ params }) => {
@@ -509,7 +510,7 @@ function EventDetailHeader({
   outcomeId?: string;
 }) {
   const fixture = market.fixture;
-  const leagueBg = LEAGUE_BG[market.league.short];
+  const leagueBg = fixture ? LEAGUE_BG[market.league.short] : undefined;
   return (
     <header className="relative overflow-hidden rounded-3xl border border-border bg-surface shadow-card">
       {/* League atmospheric background */}
@@ -564,10 +565,7 @@ function EventDetailHeader({
               <CrestBlock name={fixture.away.name} logo={fixture.away.logo} />
             </div>
           ) : (
-            <div className="flex min-h-[176px] flex-col items-center justify-center px-8 py-8 text-center md:px-12 md:py-10">
-              <h1 className="font-display text-2xl font-bold text-foreground">{market.title}</h1>
-              <div className="mt-1 text-sm text-muted-foreground">{market.league.name}</div>
-            </div>
+            <EventQuestionHeading market={market} />
           )}
         </div>
 

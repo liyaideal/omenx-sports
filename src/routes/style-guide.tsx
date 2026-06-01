@@ -31,6 +31,7 @@ import { StatTile } from "@/components/sports/StatTile";
 import { SectionHeader } from "@/components/sports/SectionHeader";
 import { MarketCard } from "@/components/sports/MarketCard";
 import { EventHeader } from "@/components/sports/EventHeader";
+import { EventQuestionHeading } from "@/components/sports/event/EventQuestionHeading";
 import { OutcomeSelector } from "@/components/sports/OutcomeSelector";
 import { TeamName } from "@/components/sports/TeamName";
 import { teams } from "@/lib/teams";
@@ -750,6 +751,62 @@ function StyleGuide() {
             </div>
             <div className="mt-3 rounded-xl border border-border bg-white/[0.02] px-4 py-2.5 text-xs text-muted-foreground">
               4 independent binary markets · probabilities sum to <span className="text-foreground tabular-nums">200%</span>, not 100% — each Yes is judged on its own.
+            </div>
+          </Section>
+
+          {/* QUESTION-MODE EVENT HEADER */}
+          <Section id="question-header" title="Event Header — Question Mode" kicker="12b — Text-First Events">
+            <p className="mb-6 max-w-3xl text-sm text-muted-foreground">
+              When an event has no two-team fixture (tournament winners, top-scorer races, group winners, prop questions), the header drops the <code className="font-mono text-foreground">vs</code> crest pair and becomes a left-aligned text block: league badge + kind chip → declarative title → meta row. Works even when outcomes can't be mapped to a single team or player.
+            </p>
+            <div className="space-y-5">
+              <QuestionHeaderDemo
+                market={{
+                  id: "demo-wc-champion",
+                  kind: "league-winner",
+                  shape: "three-way",
+                  title: "World Cup 2026 — Champion",
+                  kindLabel: "Tournament winner · 48 nations",
+                  league: { name: "World Cup 2026", short: "WC" },
+                  endsLabel: "Settles Jul 19, 2026",
+                  volume: "$8.95M",
+                  volume24h: "$1.18M",
+                  participants: 25070,
+                  outcomes: [],
+                  tradeHref: "#",
+                }}
+              />
+              <QuestionHeaderDemo
+                market={{
+                  id: "demo-epl-top-scorer",
+                  kind: "top-scorer",
+                  shape: "three-way",
+                  title: "Premier League — Top scorer 25/26",
+                  league: { name: "Premier League", short: "EPL" },
+                  endsLabel: "Settles May 24, 2026",
+                  volume: "$3.6M",
+                  volume24h: "$420K",
+                  participants: 6210,
+                  outcomes: [],
+                  tradeHref: "#",
+                }}
+              />
+              <QuestionHeaderDemo
+                market={{
+                  id: "demo-wc-grpf-winner",
+                  kind: "league-winner",
+                  shape: "three-way",
+                  title: "Group F — Winner",
+                  kindLabel: "Group winner",
+                  league: { name: "World Cup 2026", short: "WC" },
+                  endsLabel: "Settles Jun 24, 2026",
+                  volume: "$640K",
+                  volume24h: "$72K",
+                  participants: 1820,
+                  outcomes: [],
+                  tradeHref: "#",
+                }}
+              />
             </div>
           </Section>
 
@@ -2143,5 +2200,52 @@ function EventExtrasDemo() {
       <PreMatchStrip market={preMatch} />
       <LiveTape market={active} />
     </div>
+  );
+}
+
+/**
+ * Showcase wrapper that mirrors the real `/event/$id` header shell
+ * (ambient surface + stats panel) around an {@link EventQuestionHeading}.
+ * Used in the style-guide so playground and product stay in sync.
+ */
+function QuestionHeaderDemo({ market }: { market: SportsMarket }) {
+  return (
+    <header className="relative overflow-hidden rounded-3xl border border-border bg-surface shadow-card">
+      <div aria-hidden className="pointer-events-none absolute inset-0 bg-ambient" />
+      <div className="relative flex flex-col items-stretch md:flex-row">
+        <div className="flex flex-1 flex-col">
+          <EventQuestionHeading market={market} />
+        </div>
+        <div
+          aria-hidden
+          className="hidden w-px bg-gradient-to-b from-transparent via-white/10 to-transparent md:my-8 md:block"
+        />
+        <div className="flex w-full flex-row justify-around gap-6 border-t border-white/5 bg-white/[0.01] px-8 py-5 md:w-52 md:flex-col md:justify-center md:gap-5 md:border-t-0 md:px-7 md:pb-8 md:pt-14">
+          <div className="space-y-1">
+            <p className="font-mono text-[9px] font-black uppercase tracking-[0.25em] text-muted-foreground/70">
+              Total Volume
+            </p>
+            <p className="font-mono text-lg font-medium tracking-tight text-foreground tabular-nums">
+              {market.volume}
+            </p>
+          </div>
+          <div className="space-y-1">
+            <div className="flex items-center gap-2">
+              <span
+                aria-hidden
+                className="h-1.5 w-1.5 animate-pulse rounded-full bg-win shadow-[0_0_10px_currentColor]"
+              />
+              <p className="font-mono text-[9px] font-black uppercase tracking-[0.25em] text-muted-foreground/70">
+                Live Players
+              </p>
+            </div>
+            <p className="font-mono text-lg font-medium tracking-tight text-foreground tabular-nums">
+              {market.participants.toLocaleString()}
+            </p>
+          </div>
+        </div>
+      </div>
+      <div className="pointer-events-none absolute bottom-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-primary/30 to-transparent" />
+    </header>
   );
 }
