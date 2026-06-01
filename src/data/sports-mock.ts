@@ -161,18 +161,6 @@ export const TEAMS = {
   },
 } as const satisfies Record<string, TeamLite>;
 
-export const FAN_POST = {
-  authorAvatar:
-    "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=160&h=160&fit=crop&crop=faces&q=80",
-  authorName: "Alex",
-  authorHandle: "@alexio_98",
-  postedAgo: "2 minutes ago",
-  title: "USA back in the World Cup spotlight!",
-  image:
-    "https://images.unsplash.com/photo-1522778119026-d647f0596c20?w=900&h=520&fit=crop&q=80",
-  href: omenxUrl.markets(),
-};
-
 export const UPCOMING_EVENTS = [
   {
     home: TEAMS.manCity,

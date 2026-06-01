@@ -53,6 +53,10 @@ interface PositionsTableProps {
   orders?: OrderRowData[];
   history?: HistoryRowData[];
   className?: string;
+  /** Called when a row's Close button is clicked. Receives the index in `positions`. */
+  onClosePosition?: (index: number) => void;
+  /** Called when a row's Cancel button is clicked. Receives the index in `orders`. */
+  onCancelOrder?: (index: number) => void;
 }
 
 const DEFAULT_POS: PositionRowData[] = [
@@ -78,7 +82,14 @@ const tabs: { id: Tab; label: string }[] = [
   { id: "history", label: "History" },
 ];
 
-export function PositionsTable({ positions = DEFAULT_POS, orders = DEFAULT_ORD, history = DEFAULT_HIST, className }: PositionsTableProps) {
+export function PositionsTable({
+  positions = DEFAULT_POS,
+  orders = DEFAULT_ORD,
+  history = DEFAULT_HIST,
+  className,
+  onClosePosition,
+  onCancelOrder,
+}: PositionsTableProps) {
   const [tab, setTab] = useState<Tab>("positions");
   return (
     <div className={cn("rounded-2xl border border-border bg-surface shadow-card", className)}>
@@ -102,14 +113,24 @@ export function PositionsTable({ positions = DEFAULT_POS, orders = DEFAULT_ORD, 
           </button>
         ))}
       </div>
-      {tab === "positions" && <PositionTable rows={positions} />}
-      {tab === "orders" && <OrderTable rows={orders} />}
+      {tab === "positions" && (
+        <PositionTable rows={positions} onClose={onClosePosition} />
+      )}
+      {tab === "orders" && (
+        <OrderTable rows={orders} onCancel={onCancelOrder} />
+      )}
       {tab === "history" && <HistoryTable rows={history} />}
     </div>
   );
 }
 
-function PositionTable({ rows }: { rows: PositionRowData[] }) {
+function PositionTable({
+  rows,
+  onClose,
+}: {
+  rows: PositionRowData[];
+  onClose?: (index: number) => void;
+}) {
   return (
     <div className="overflow-x-auto">
       <table className="w-full text-xs">
@@ -157,7 +178,11 @@ function PositionTable({ rows }: { rows: PositionRowData[] }) {
                 {roe.toFixed(1)}%
               </Td>
               <Td className="text-right">
-                <button className="rounded-md border border-border bg-white/[0.04] px-2 py-1 text-[10px] font-mono uppercase tracking-widest text-muted-foreground hover:text-foreground">
+                <button
+                  type="button"
+                  onClick={() => onClose?.(i)}
+                  className="rounded-md border border-border bg-white/[0.04] px-2 py-1 text-[10px] font-mono uppercase tracking-widest text-muted-foreground transition hover:text-foreground"
+                >
                   Close
                 </button>
               </Td>
@@ -170,7 +195,13 @@ function PositionTable({ rows }: { rows: PositionRowData[] }) {
   );
 }
 
-function OrderTable({ rows }: { rows: OrderRowData[] }) {
+function OrderTable({
+  rows,
+  onCancel,
+}: {
+  rows: OrderRowData[];
+  onCancel?: (index: number) => void;
+}) {
   return (
     <div className="overflow-x-auto">
       <table className="w-full text-xs">
@@ -202,7 +233,11 @@ function OrderTable({ rows }: { rows: OrderRowData[] }) {
               <Td className="text-right font-mono tabular-nums">{r.size}</Td>
               <Td className="text-right font-mono tabular-nums">{r.filled}%</Td>
               <Td className="text-right">
-                <button className="rounded-md border border-loss/30 bg-loss/10 px-2 py-1 text-[10px] font-mono uppercase tracking-widest text-loss hover:bg-loss/20">
+                <button
+                  type="button"
+                  onClick={() => onCancel?.(i)}
+                  className="rounded-md border border-loss/30 bg-loss/10 px-2 py-1 text-[10px] font-mono uppercase tracking-widest text-loss transition hover:bg-loss/20"
+                >
                   Cancel
                 </button>
               </Td>

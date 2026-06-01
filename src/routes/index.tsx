@@ -8,7 +8,6 @@ import { EventMarketTileCard } from "@/components/sports/dashboard/EventMarketTi
 import { LeagueSpotlightCard } from "@/components/sports/league/LeagueSpotlightCard";
 import { LeagueComingSoonCard } from "@/components/sports/league/LeagueComingSoonCard";
 import { FanZoneHeader } from "@/components/sports/dashboard/FanZoneHeader";
-import { FanPostCard } from "@/components/sports/dashboard/FanPostCard";
 import { FansZoneEmpty } from "@/components/sports/dashboard/FansZoneEmpty";
 import { LiveActivityCard } from "@/components/sports/dashboard/LiveActivityCard";
 import { DayStripCalendar } from "@/components/sports/dashboard/DayStripCalendar";
@@ -26,7 +25,6 @@ import {
   getBinaryQuestionsByLeagueSlug,
 } from "@/data/leagues";
 import {
-  FAN_POST,
   FOLLOWED_TEAMS,
   LIVE_TRADES,
   SUGGESTED_TEAMS,
@@ -137,10 +135,7 @@ function Index() {
             followedNames={FOLLOWED_TEAMS.map((t) => t.name)}
           />
           {FOLLOWED_TEAMS.length > 0 ? (
-            <>
-              <MatchMarketCard market={FEATURED_MATCH} />
-              <FanPostCard {...FAN_POST} />
-            </>
+            <MatchMarketCard market={FEATURED_MATCH} />
           ) : (
             <FansZoneEmpty editorPick={FEATURED_MATCH} suggested={SUGGESTED_TEAMS} />
           )}

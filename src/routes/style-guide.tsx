@@ -1932,7 +1932,6 @@ function StyleGuide() {
                 liveAt={[{ label: "/fans", href: "/fans" }]}
                 items={[
                   ["FanZoneHeader", "Fans-zone hero header"],
-                  ["FanPostCard", "Single fan post card"],
                   ["FansZoneEmpty", "Empty-state for a fan with no follows yet"],
                   ["FollowTeamsCompact", "Inline follow-teams control"],
                   ["FollowTeamsPanel", "Side-panel follow-teams editor"],

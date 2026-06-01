@@ -1,6 +1,7 @@
 import { createFileRoute, Link, notFound, useRouter } from "@tanstack/react-router";
 import { ArrowLeft } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { AppShell } from "@/components/sports/dashboard/AppShell";
 import { AppTopBar } from "@/components/sports/dashboard/AppTopBar";
@@ -30,6 +31,9 @@ import { LEAGUE_BG } from "@/lib/league-backgrounds";
 import { EventQuestionHeading } from "@/components/sports/event/EventQuestionHeading";
 
 export const Route = createFileRoute("/event/$id")({
+  validateSearch: (raw: Record<string, unknown>): { outcome?: string } => ({
+    outcome: typeof raw.outcome === "string" ? raw.outcome : undefined,
+  }),
   loader: ({ params }) => {
     const market = getMarketById(params.id);
     if (!market) throw notFound();
@@ -276,31 +280,33 @@ function EventTradePage() {
     side: tradeSide,
   });
 
-  // Persist positions/orders placed from this trade form for the lifetime of
-  // the page. PnL recomputes from a live "mark" that jitters around the
-  // selected outcome's price every second so the user sees motion.
-  const [positions, setPositions] = useState<PositionRowData[]>([]);
-  const [orders, setOrders] = useState<OrderRowData[]>([]);
+  // Persist positions/orders/history for the lifetime of the page. State is
+  // seeded so the tables look populated on first load; user actions
+  // (Close / Cancel / place order) mutate the same arrays. PnL recomputes
+  // from a live "mark" that jitters around each row's entry every second
+  // so the user sees motion.
+  const league = leagueKeyFromShort(active.league.short);
+  const seeded = useMemo(() => buildSeed(active, league), [active, league]);
+  const [positions, setPositions] = useState<PositionRowData[]>(seeded.positions);
+  const [orders, setOrders] = useState<OrderRowData[]>(seeded.orders);
+  const [history, setHistory] = useState<HistoryRowData[]>(seeded.history);
+  // Reset to the seed whenever we navigate to a different market.
+  useEffect(() => {
+    setPositions(seeded.positions);
+    setOrders(seeded.orders);
+    setHistory(seeded.history);
+  }, [seeded]);
   const [tick, setTick] = useState(0);
   useEffect(() => {
     const id = setInterval(() => setTick((t) => t + 1), 1000);
     return () => clearInterval(id);
   }, []);
 
-  const league = leagueKeyFromShort(active.league.short);
   const currentPx = Math.round(selected.price * 100);
-
-  // Seed a couple of mock positions/orders/history rows for this market so
-  // every visitor sees the table styling on first load, even before placing
-  // a trade.
-  const seeded = useMemo(() => buildSeed(active, league), [active, league]);
-  const [seedPositions] = useState<PositionRowData[]>(seeded.positions);
-  const [seedOrders] = useState<OrderRowData[]>(seeded.orders);
-  const history = seeded.history;
 
   // Apply a tiny live jitter so PnL updates every tick.
   const livePositions = useMemo<PositionRowData[]>(() => {
-    return [...positions, ...seedPositions].map((p, i) => {
+    return positions.map((p, i) => {
       const jitter = Math.sin((tick + i * 7) / 3) * 1.4;
       const mark = clampPct(p.entry + jitter);
       const sign = p.outcome === "yes" ? 1 : -1;
@@ -308,12 +314,50 @@ function EventTradePage() {
       const pnl = (mark / 100 - p.entry / 100) * notional * sign;
       return { ...p, mark: Math.round(mark * 10) / 10, pnl: Math.round(pnl * 100) / 100 };
     });
-  }, [positions, seedPositions, tick]);
+  }, [positions, tick]);
 
-  const allOrders = useMemo<OrderRowData[]>(
-    () => [...orders, ...seedOrders],
-    [orders, seedOrders],
+  const handleClosePosition = useCallback(
+    (idx: number) => {
+      setPositions((prev) => {
+        const row = prev[idx];
+        if (!row) return prev;
+        const jitter = Math.sin((tick + idx * 7) / 3) * 1.4;
+        const mark = Math.round(clampPct(row.entry + jitter));
+        const sign = row.outcome === "yes" ? 1 : -1;
+        const notional = row.margin * row.leverage;
+        const pnl =
+          Math.round((mark / 100 - row.entry / 100) * notional * sign * 100) / 100;
+        setHistory((h) => [
+          {
+            market: row.market,
+            league: row.league,
+            outcome: row.outcome,
+            outcomeLabel: row.outcomeLabel,
+            action: "close",
+            price: mark,
+            size: row.size,
+            pnl,
+            when: "Just now",
+          },
+          ...h,
+        ]);
+        toast.success(
+          `Closed ${row.outcomeLabel} at ${mark}¢ · ${pnl >= 0 ? "+" : ""}${pnl.toFixed(2)} USDC`,
+        );
+        return prev.filter((_, i) => i !== idx);
+      });
+    },
+    [tick],
   );
+
+  const handleCancelOrder = useCallback((idx: number) => {
+    setOrders((prev) => {
+      const row = prev[idx];
+      if (!row) return prev;
+      toast(`Cancelled ${row.type} order on ${row.outcomeLabel} @ ${row.price}¢`);
+      return prev.filter((_, i) => i !== idx);
+    });
+  }, []);
 
   // Live-stream wiring — only the streaming events get the broadcast
   // stage + sticky floating mini player.
@@ -504,7 +548,13 @@ function EventTradePage() {
 
       <div className="space-y-5 px-6 pb-28 md:px-8 lg:pb-12">
         <RelatedMarketsBar markets={relatedMarkets} />
-        <PositionsTable positions={livePositions} orders={allOrders} history={history} />
+        <PositionsTable
+          positions={livePositions}
+          orders={orders}
+          history={history}
+          onClosePosition={handleClosePosition}
+          onCancelOrder={handleCancelOrder}
+        />
       </div>
 
       {/* Mobile-only sticky trade bar — desktop already has the
