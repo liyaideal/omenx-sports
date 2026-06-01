@@ -8,6 +8,10 @@ import { LeagueChip } from "@/components/sports/LeagueBadge";
 import { PriceChart } from "@/components/sports/PriceChart";
 import { OrderBook } from "@/components/sports/OrderBook";
 import { TradeForm, type PlacedOrder } from "@/components/sports/TradeForm";
+import {
+  TradeOutcomePicker,
+  deriveTradeFormProps,
+} from "@/components/sports/trade/TradeOutcomePicker";
 import { EventLiveStage, useStageOffscreen } from "@/components/sports/event/EventLiveStage";
 import { StageTabs, type StageTab } from "@/components/sports/event/StageTabs";
 import { MobileTradeBar } from "@/components/sports/event/MobileTradeBar";
@@ -271,6 +275,16 @@ function EventTradePage() {
 
   // For OutcomeSelector tone wiring (binary only)
   const binaryTone: "yes" | "no" = selectedIdx === 0 ? "yes" : "no";
+  // YES/NO side toggle for 3+ outcome markets — mirrors the drawer.
+  const [tradeSide, setTradeSide] = useState<"yes" | "no">("yes");
+  useEffect(() => {
+    setTradeSide("yes");
+  }, [selected?.id]);
+  const { formOutcome, formLabel, formPrice } = deriveTradeFormProps({
+    market: active,
+    outcomeId: selected?.id,
+    side: tradeSide,
+  });
 
   // Persist positions/orders placed from this trade form for the lifetime of
   // the page. PnL recomputes from a live "mark" that jitters around the
@@ -455,11 +469,24 @@ function EventTradePage() {
           <LiveTape market={active} />
         </div>
 
-        <div ref={tradeFormRef} className="lg:sticky lg:top-4 lg:self-start">
+        <div ref={tradeFormRef} className="lg:sticky lg:top-4 lg:self-start space-y-3">
+          <div className="rounded-2xl border border-border bg-surface p-4 shadow-card">
+            <TradeOutcomePicker
+              market={active}
+              outcomeId={selected?.id}
+              onOutcomeChange={(id) => {
+                const idx = active.outcomes.findIndex((o) => o.id === id);
+                if (idx >= 0) setSelectedIdx(idx);
+              }}
+              side={tradeSide}
+              onSideChange={setTradeSide}
+            />
+          </div>
           <TradeForm
-            outcome={binaryTone}
-            outcomeLabel={getOutcomeLabel(selected)}
-            price={Math.round(selected.price * 100)}
+            key={`${active.id}-${selected?.id}-${tradeSide}`}
+            outcome={formOutcome}
+            outcomeLabel={formLabel}
+            price={formPrice}
             onPlaceOrder={handlePlaceOrder}
           />
         </div>
