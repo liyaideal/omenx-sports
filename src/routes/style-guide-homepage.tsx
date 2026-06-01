@@ -6,7 +6,7 @@ import {
   FEATURED_MATCH,
   MATCH_MARKETS,
 } from "@/data/sports-markets";
-import { FAN_POST, FOLLOWED_TEAMS, SUGGESTED_TEAMS, TEAMS } from "@/data/sports-mock";
+import { FOLLOWED_TEAMS, SUGGESTED_TEAMS, TEAMS } from "@/data/sports-mock";
 import { omenxUrl } from "@/lib/omenx";
 import {
   LEAGUES,
@@ -20,7 +20,6 @@ import { BridgeStrip } from "@/components/sports/dashboard/BridgeStrip";
 import { PageSectionHeader } from "@/components/sports/dashboard/PageSectionHeader";
 import { FanZoneHeader } from "@/components/sports/dashboard/FanZoneHeader";
 import { FansZoneEmpty } from "@/components/sports/dashboard/FansZoneEmpty";
-import { FanPostCard } from "@/components/sports/dashboard/FanPostCard";
 import { MatchMarketCard } from "@/components/sports/dashboard/MatchMarketCard";
 import { LiveActivityCard } from "@/components/sports/dashboard/LiveActivityCard";
 import { DayStripCalendar } from "@/components/sports/dashboard/DayStripCalendar";
@@ -77,7 +76,6 @@ const SECTIONS = [
   ["fanzone-header", "FanZoneHeader"],
   ["fanzone-body", "Fans Zone body"],
   ["match-card", "MatchMarketCard"],
-  ["fan-post", "FanPostCard"],
   ["activity", "LiveActivityCard"],
   ["section-header", "PageSectionHeader"],
   ["day-strip", "DayStripCalendar"],
@@ -191,10 +189,9 @@ function HomepagePlayground() {
                 <FansZoneEmpty editorPick={FEATURED_MATCH} suggested={SUGGESTED_TEAMS} />
               </div>
             </Variant>
-            <Variant caption="filled — featured match + fan post">
-              <div className="flex max-w-[420px] flex-col gap-4">
+            <Variant caption="filled — featured match">
+              <div className="max-w-[420px]">
                 <MatchMarketCard market={FEATURED_MATCH} />
-                <FanPostCard {...FAN_POST} />
               </div>
             </Variant>
             <Variant caption="MOBILE — World Cup 24 teams · no follows (compact card + full-screen sheet picker)">
@@ -245,12 +242,6 @@ function HomepagePlayground() {
             </Variant>
             <Variant caption="binary (YES / NO over two teams)">
               <div className="max-w-[420px]"><MatchMarketCard market={MATCH_BINARY} /></div>
-            </Variant>
-          </Section>
-
-          <Section id="fan-post" title="FanPostCard" hint="Editorial fan content block, links to source.">
-            <Variant caption="default">
-              <div className="max-w-[420px]"><FanPostCard {...FAN_POST} /></div>
             </Variant>
           </Section>
 
