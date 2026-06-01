@@ -5,6 +5,7 @@ import { Minimize2, SquareArrowOutUpRight, X } from "lucide-react";
 import type { SportsMarket } from "@/data/sports-markets";
 import { useTradeDrawer } from "@/components/sports/trade/TradeDrawerProvider";
 import { cn } from "@/lib/utils";
+import { AudioTrackToggle } from "./AudioTrackToggle";
 
 interface FullscreenStreamOverlayProps {
   market: SportsMarket;
@@ -69,6 +70,7 @@ export function FullscreenStreamOverlay({
           </div>
         </div>
         <div className="flex items-center gap-1.5">
+          <AudioTrackToggle size="lg" className="mr-1" />
           {!onEventPage && (
             <ChromeBtn
               label="Open event"

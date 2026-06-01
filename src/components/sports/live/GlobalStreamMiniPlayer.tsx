@@ -4,6 +4,7 @@ import { useNavigate, useRouterState } from "@tanstack/react-router";
 import { Maximize2, SquareArrowOutUpRight, X } from "lucide-react";
 import type { SportsMarket } from "@/data/sports-markets";
 import { useTradeDrawer } from "@/components/sports/trade/TradeDrawerProvider";
+import { AudioTrackToggle } from "./AudioTrackToggle";
 
 interface GlobalStreamMiniPlayerProps {
   market: SportsMarket;
@@ -95,6 +96,7 @@ export function GlobalStreamMiniPlayer({
 
         {/* Action bar — Trade CTA + nav controls (no outcome chips). */}
         <div className="flex items-center gap-1.5 border-t border-white/[0.06] px-2 py-2">
+          <AudioTrackToggle size="sm" className="shrink-0" />
           <button
             type="button"
             onClick={() =>
