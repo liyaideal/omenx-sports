@@ -136,7 +136,7 @@ export function LiveTape({ market, className, rows = 8 }: LiveTapeProps) {
             <div
               key={f.id}
               className={cn(
-                "grid grid-cols-[1fr_56px_96px_110px_32px] items-center gap-3 rounded-lg px-2 py-1.5 transition-colors",
+                "grid grid-cols-[1fr_56px_96px_64px_32px] items-center gap-3 rounded-lg px-2 py-1.5 transition-colors",
                 i === 0 && "bg-white/[0.04]",
               )}
             >
@@ -160,7 +160,7 @@ export function LiveTape({ market, className, rows = 8 }: LiveTapeProps) {
                 {f.outcomeLabel}
               </span>
               <span className="text-right text-foreground">
-                {f.price}¢ × {f.size}
+                {f.price}¢
               </span>
               <span className="text-right text-muted-foreground">
                 {fmtAgo(f.agoSec)}
