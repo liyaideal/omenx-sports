@@ -3,7 +3,7 @@ import { Link } from "@tanstack/react-router";
 import { ExternalLink, X } from "lucide-react";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { TradeForm } from "@/components/sports/TradeForm";
-import { cn } from "@/lib/utils";
+import { TradeOutcomePicker, deriveTradeFormProps } from "./TradeOutcomePicker";
 import type { SportsMarket } from "@/data/sports-markets";
 
 /**
@@ -42,37 +42,13 @@ export function TradeDrawer({
     );
   }
 
-  // Default to the highest-priced outcome.
-  const ranked = [...market.outcomes].sort((a, b) => b.price - a.price);
-  const selected =
-    market.outcomes.find((o) => o.id === outcomeId) ?? ranked[0] ?? market.outcomes[0];
-  const isYesNoMarket =
-    market.outcomes.length === 2 &&
-    market.outcomes.some((o) => o.label.toUpperCase() === "YES");
-  // Two-outcome markets (binary YES/NO or two-team head-to-head) are a single
-  // market — picking one outcome IS the YES/NO choice. Markets with 3+ outcomes
-  // (e.g. 1X2) are actually multiple binary sub-markets, so we add a second
-  // YES/NO toggle for the selected outcome.
-  const needsSideToggle = market.outcomes.length >= 3;
   const [side, setSide] = useState<"yes" | "no">("yes");
+  const { selected, needsSideToggle, formOutcome, formLabel, formPrice } =
+    deriveTradeFormProps({ market, outcomeId, side });
   // Reset side back to YES whenever the user picks a different outcome.
   useEffect(() => {
     setSide("yes");
   }, [selected.id]);
-
-  const yesCents = Math.round(selected.price * 100);
-  const noCents = 100 - yesCents;
-
-  // TradeForm distinguishes accent by "yes" vs "no".
-  const formOutcome: "yes" | "no" = needsSideToggle
-    ? side
-    : isYesNoMarket
-      ? (selected.label.toUpperCase() === "NO" ? "no" : "yes")
-      : selected.id === market.outcomes[0]?.id ? "yes" : "no";
-  const formLabel = needsSideToggle
-    ? `${selected.team?.short ?? selected.label} ${side === "yes" ? "YES" : "NO"}`
-    : (selected.team?.name ?? selected.label);
-  const formPrice = needsSideToggle ? (side === "yes" ? yesCents : noCents) : Math.round(selected.price * 100);
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
@@ -103,79 +79,15 @@ export function TradeDrawer({
           </button>
         </header>
 
-        {/* Outcome chooser */}
         <div className="border-b border-border px-5 py-3">
-          <div className="mb-2 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
-            Pick outcome
-          </div>
-          <div
-            className={cn(
-              "grid gap-2",
-              market.outcomes.length <= 2 ? "grid-cols-2" : "grid-cols-3",
-            )}
-          >
-            {market.outcomes.map((o) => {
-              const active = o.id === selected.id;
-              const cents = Math.round(o.price * 100);
-              return (
-                <button
-                  key={o.id}
-                  type="button"
-                  onClick={() => onOutcomeChange(o.id)}
-                  className={cn(
-                    "flex flex-col items-start gap-1 rounded-xl px-3 py-2 text-left transition",
-                    active
-                      ? "bg-foreground/95 text-background ring-1 ring-foreground"
-                      : "bg-white/[0.04] text-foreground ring-1 ring-white/[0.06] hover:bg-white/[0.08]",
-                  )}
-                >
-                  <span className="truncate font-mono text-[10px] uppercase tracking-widest">
-                    {o.team?.short ?? o.label}
-                  </span>
-                  <span className="font-display text-lg font-semibold tabular-nums">
-                    {cents}¢
-                  </span>
-                </button>
-              );
-            })}
-          </div>
+          <TradeOutcomePicker
+            market={market}
+            outcomeId={selected.id}
+            onOutcomeChange={onOutcomeChange}
+            side={side}
+            onSideChange={setSide}
+          />
         </div>
-
-        {/* Side chooser — only for 3+ outcome markets, where each outcome is
-            its own binary sub-market with YES/NO sides. */}
-        {needsSideToggle && (
-          <div className="border-b border-border px-5 py-3">
-            <div className="mb-2 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
-              Pick side · {selected.team?.short ?? selected.label}
-            </div>
-            <div className="grid grid-cols-2 gap-2">
-              {(["yes", "no"] as const).map((s) => {
-                const active = s === side;
-                const cents = s === "yes" ? yesCents : noCents;
-                return (
-                  <button
-                    key={s}
-                    type="button"
-                    onClick={() => setSide(s)}
-                    className={cn(
-                      "flex flex-col items-start gap-1 rounded-xl px-3 py-2 text-left transition",
-                      active
-                        ? "bg-foreground/95 text-background ring-1 ring-foreground"
-                        : "bg-white/[0.04] text-foreground ring-1 ring-white/[0.06] hover:bg-white/[0.08]",
-                    )}
-                  >
-                    <span className="truncate font-mono text-[10px] uppercase tracking-widest">
-                      {s === "yes" ? "Yes" : "No"}
-                    </span>
-                    <span className="font-display text-lg font-semibold tabular-nums">
-                      {cents}¢
-                    </span>
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-        )}
 
         {/* Trade form */}
         <div className="px-5 py-3 pb-0">
