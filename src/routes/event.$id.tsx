@@ -26,6 +26,7 @@ import {
   type HistoryRowData,
 } from "@/components/sports/PositionsTable";
 import { ACCOUNT_STATS, getMarketById, type SportsMarket } from "@/data/sports-markets";
+import { LEAGUE_BG } from "@/lib/league-backgrounds";
 
 export const Route = createFileRoute("/event/$id")({
   loader: ({ params }) => {
