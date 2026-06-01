@@ -1900,6 +1900,112 @@ function TradeOutcomePickerDemo() {
   );
 }
 
+/**
+ * Build the same 7-outcome synthetic prop the picker demo uses, so the
+ * outcomes-panel demo also exercises the multi-line chart + scrolling list
+ * path. Kept inside this file so the playground stays self-contained.
+ */
+function buildSevenWayMarket(): SportsMarket {
+  return {
+    id: "demo-7-prop",
+    kind: "player-prop",
+    shape: "three-way",
+    title: "First goalscorer — USA vs Mexico",
+    league: { name: "World Cup 2026", short: "WC" },
+    endsLabel: "Today 8:00pm",
+    volume: "$42K",
+    volume24h: "$12K",
+    participants: 612,
+    tradeHref: "#",
+    outcomes: [
+      { id: "p1", label: "Pulisic", price: 0.22, delta24h: 0.02 },
+      { id: "p2", label: "Reyna", price: 0.18, delta24h: -0.01 },
+      { id: "p3", label: "Pepi", price: 0.14, delta24h: 0.01 },
+      { id: "p4", label: "Balogun", price: 0.13 },
+      { id: "p5", label: "Aaronson", price: 0.10, delta24h: -0.02 },
+      { id: "p6", label: "Weah", price: 0.09 },
+      { id: "p7", label: "Other / no goal", price: 0.14 },
+    ],
+  };
+}
+
+function PanelVariant({ market }: { market: SportsMarket }) {
+  const [selectedIdx, setSelectedIdx] = useState(0);
+  const [side, setSide] = useState<"yes" | "no">("yes");
+  const [pulse, setPulse] = useState(0);
+  React.useEffect(() => {
+    if (!pulse) return;
+    const t = setTimeout(() => setPulse(0), 700);
+    return () => clearTimeout(t);
+  }, [pulse]);
+
+  const selected = market.outcomes[selectedIdx];
+  const cents = Math.round(selected.price * 100);
+  const noCents = 100 - cents;
+
+  return (
+    <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_280px]">
+      <EventOutcomesPanel
+        market={market}
+        selectedIdx={selectedIdx}
+        tradeSide={side}
+        onSelect={setSelectedIdx}
+        onSideSelect={(idx, s) => {
+          setSelectedIdx(idx);
+          setSide(s);
+          setPulse((p) => p + 1);
+        }}
+      />
+      <div
+        className={cn(
+          "h-fit rounded-2xl border border-border bg-surface p-4 text-xs lg:sticky lg:top-4",
+          pulse > 0 && "animate-trade-pulse",
+        )}
+      >
+        <div className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+          Sticky TradeForm (stub)
+        </div>
+        <div className="mt-2 font-display text-base font-semibold text-foreground">
+          {selected.team?.name ?? selected.label}{" "}
+          <span className={cn(side === "yes" ? "text-win" : "text-loss")}>
+            {side === "yes" ? "YES" : "NO"}
+          </span>
+        </div>
+        <div className="mt-1 font-mono text-2xl tabular-nums text-foreground">
+          {side === "yes" ? cents : noCents}¢
+        </div>
+        <div className="mt-3 text-[11px] text-muted-foreground">
+          Pulses lavender for ~700ms whenever a row's Buy YES / Buy NO button is pressed.
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function EventOutcomesPanelDemo() {
+  const binary = MATCH_MARKETS.find((m) => m.outcomes.length === 2) ?? FEATURED_MATCH;
+  const threeWay = MATCH_MARKETS.find((m) => m.outcomes.length === 3) ?? FEATURED_MATCH;
+  const sevenWay = buildSevenWayMarket();
+  return (
+    <div className="space-y-8">
+      <Variant label="Binary (2 outcomes)" market={binary} />
+      <Variant label="1X2 (3 outcomes)" market={threeWay} />
+      <Variant label="Player prop (7 outcomes)" market={sevenWay} />
+    </div>
+  );
+}
+
+function Variant({ label, market }: { label: string; market: SportsMarket }) {
+  return (
+    <div>
+      <div className="mb-2 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+        {label}
+      </div>
+      <PanelVariant market={market} />
+    </div>
+  );
+}
+
 function EventLiveStageDemo() {
   const live =
     MATCH_MARKETS.find((m) => m.isLiveStream && m.liveScore && m.fixture) ??
