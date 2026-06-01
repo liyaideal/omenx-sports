@@ -3,6 +3,7 @@ import { Maximize2, Pause, PictureInPicture2, Play, Volume2, VolumeX } from "luc
 import type { SportsMarket, Outcome } from "@/data/sports-markets";
 import { TeamName } from "@/components/sports/TeamName";
 import { cn } from "@/lib/utils";
+import { AudioTrackToggle } from "@/components/sports/live/AudioTrackToggle";
 
 interface EventLiveStageProps {
   market: SportsMarket;
@@ -85,11 +86,14 @@ export function EventLiveStage({
         </div>
 
         {/* Top-right clock */}
-        {market.liveClock && (
-          <span className="absolute right-4 top-4 rounded-full bg-black/60 px-2.5 py-1 font-mono text-[11px] tabular-nums text-white ring-1 ring-white/20 backdrop-blur">
-            {market.liveClock}
-          </span>
-        )}
+        <div className="absolute right-4 top-4 flex items-center gap-2">
+          <AudioTrackToggle size="md" />
+          {market.liveClock && (
+            <span className="rounded-full bg-black/60 px-2.5 py-1 font-mono text-[11px] tabular-nums text-white ring-1 ring-white/20 backdrop-blur">
+              {market.liveClock}
+            </span>
+          )}
+        </div>
 
         {/* Center play / pause */}
         <button
