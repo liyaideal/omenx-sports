@@ -414,71 +414,56 @@ function EventTradePage() {
             onSelect={setActiveRelatedIdx}
           />
           {isPreMatch && <PreMatchStrip market={market} />}
-          <StageTabs
-            defaultTabId={isLive ? "stream" : "chart"}
-            tabs={[
-              ...(isLive
-                ? ([
-                    {
-                      id: "stream",
-                      label: "Stream",
-                      badge: (
-                        <span className="ml-1 inline-flex h-1.5 w-1.5 rounded-full bg-[color:var(--accent)] shadow-[0_0_8px_var(--accent)]" />
-                      ),
-                      content: (
-                        <EventLiveStage
-                          market={market}
-                          selected={selected}
-                          stageRef={stageRef}
-                          onFullscreen={live.openFullscreen}
-                        />
-                      ),
-                    },
-                  ] satisfies StageTab[])
-                : []),
-              {
-                id: "chart",
-                label: "Chart",
-                content: (
-                  <div className="space-y-3">
-                    <DepthBar
-                      mark={Math.round(selected.price * 100)}
-                      sideLabels={getSideLabels(active)}
+          {isLive ? (
+            <StageTabs
+              defaultTabId="stream"
+              tabs={[
+                {
+                  id: "stream",
+                  label: "Stream",
+                  badge: (
+                    <span className="ml-1 inline-flex h-1.5 w-1.5 rounded-full bg-[color:var(--accent)] shadow-[0_0_8px_var(--accent)]" />
+                  ),
+                  content: (
+                    <EventLiveStage
+                      market={market}
+                      selected={selected}
+                      stageRef={stageRef}
+                      onFullscreen={live.openFullscreen}
                     />
-                    <PriceChart tone={binaryTone} seed={hashSeed(active.id) + selectedIdx} />
-                  </div>
-                ),
-              },
-              {
-                id: "book",
-                label: "Order book",
-                content: (
-                  <OrderBook
-                    sideLabels={getSideLabels(active)}
-                    mark={Math.round(selected.price * 100)}
-                  />
-                ),
-              },
-            ]}
-          />
+                  ),
+                },
+                {
+                  id: "markets",
+                  label: "Markets",
+                  content: (
+                    <EventOutcomesPanel
+                      market={active}
+                      selectedIdx={selectedIdx}
+                      tradeSide={tradeSide}
+                      onSelect={setSelectedIdx}
+                      onSideSelect={handleBuyFromRow}
+                    />
+                  ),
+                },
+              ] satisfies StageTab[]}
+            />
+          ) : (
+            <EventOutcomesPanel
+              market={active}
+              selectedIdx={selectedIdx}
+              tradeSide={tradeSide}
+              onSelect={setSelectedIdx}
+              onSideSelect={handleBuyFromRow}
+            />
+          )}
           <LiveTape market={active} />
         </div>
 
         <div ref={tradeFormRef} className="lg:sticky lg:top-4 lg:self-start space-y-3">
-          <div className="rounded-2xl border border-border bg-surface p-4 shadow-card">
-            <TradeOutcomePicker
-              market={active}
-              outcomeId={selected?.id}
-              onOutcomeChange={(id) => {
-                const idx = active.outcomes.findIndex((o) => o.id === id);
-                if (idx >= 0) setSelectedIdx(idx);
-              }}
-              side={tradeSide}
-              onSideChange={setTradeSide}
-            />
-          </div>
           <TradeForm
             key={`${active.id}-${selected?.id}-${tradeSide}`}
+            className={cn(pulseKey > 0 && "animate-trade-pulse")}
             outcome={formOutcome}
             outcomeLabel={formLabel}
             price={formPrice}
