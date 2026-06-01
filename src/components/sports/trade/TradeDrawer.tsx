@@ -3,7 +3,7 @@ import { Link } from "@tanstack/react-router";
 import { ExternalLink, X } from "lucide-react";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { TradeForm } from "@/components/sports/TradeForm";
-import { TradeOutcomePicker } from "./TradeOutcomePicker";
+import { TradeOutcomePicker, deriveTradeFormProps } from "./TradeOutcomePicker";
 import type { SportsMarket } from "@/data/sports-markets";
 
 /**
@@ -42,37 +42,13 @@ export function TradeDrawer({
     );
   }
 
-  // Default to the highest-priced outcome.
-  const ranked = [...market.outcomes].sort((a, b) => b.price - a.price);
-  const selected =
-    market.outcomes.find((o) => o.id === outcomeId) ?? ranked[0] ?? market.outcomes[0];
-  const isYesNoMarket =
-    market.outcomes.length === 2 &&
-    market.outcomes.some((o) => o.label.toUpperCase() === "YES");
-  // Two-outcome markets (binary YES/NO or two-team head-to-head) are a single
-  // market — picking one outcome IS the YES/NO choice. Markets with 3+ outcomes
-  // (e.g. 1X2) are actually multiple binary sub-markets, so we add a second
-  // YES/NO toggle for the selected outcome.
-  const needsSideToggle = market.outcomes.length >= 3;
   const [side, setSide] = useState<"yes" | "no">("yes");
+  const { selected, needsSideToggle, formOutcome, formLabel, formPrice } =
+    deriveTradeFormProps({ market, outcomeId, side });
   // Reset side back to YES whenever the user picks a different outcome.
   useEffect(() => {
     setSide("yes");
   }, [selected.id]);
-
-  const yesCents = Math.round(selected.price * 100);
-  const noCents = 100 - yesCents;
-
-  // TradeForm distinguishes accent by "yes" vs "no".
-  const formOutcome: "yes" | "no" = needsSideToggle
-    ? side
-    : isYesNoMarket
-      ? (selected.label.toUpperCase() === "NO" ? "no" : "yes")
-      : selected.id === market.outcomes[0]?.id ? "yes" : "no";
-  const formLabel = needsSideToggle
-    ? `${selected.team?.short ?? selected.label} ${side === "yes" ? "YES" : "NO"}`
-    : (selected.team?.name ?? selected.label);
-  const formPrice = needsSideToggle ? (side === "yes" ? yesCents : noCents) : Math.round(selected.price * 100);
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
