@@ -268,8 +268,6 @@ function EventTradePage() {
     setSelectedIdx(0);
   }, [activeRelatedIdx]);
 
-  // For OutcomeSelector tone wiring (binary only)
-  const binaryTone: "yes" | "no" = selectedIdx === 0 ? "yes" : "no";
   // YES/NO side toggle for 3+ outcome markets — mirrors the drawer.
   const [tradeSide, setTradeSide] = useState<"yes" | "no">("yes");
   useEffect(() => {
