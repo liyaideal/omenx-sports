@@ -409,3 +409,91 @@ export function getBracketByLeagueSlug(slug: string): BracketRound[] {
  *  the Props tab. Filters existing player-prop / season-binary markets
  *  by league short. */
 export { TEAMS };
+
+/* ------------------------------------------------------------------ */
+/*  Auto-registered SportsMarket entries for tournament views.
+ *
+ *  Every GroupWinnerCard and BracketView matchup links to /event/$id
+ *  using the group / matchup id. To avoid 404s on the trade detail
+ *  page we generate a SportsMarket-shaped record for each one and
+ *  spread them into ALL_MARKETS over in sports-markets.ts.
+ *  ------------------------------------------------------------------ */
+
+function bracketTeamToLite(t: BracketTeam | undefined) {
+  if (!t) return undefined;
+  if (t.logo == null || t.hue == null) return undefined;
+  return { name: t.name, short: t.short, logo: t.logo, hue: t.hue };
+}
+
+/** Multi-outcome "winner of group" markets for every entry in WC26_GROUPS.
+ *  Card id === market id, so clicking the card opens the matching event. */
+export const GROUP_WINNER_MARKETS = WC26_GROUPS.map((g) => {
+  const sorted = [...g.standings].sort((a, b) => b.price - a.price);
+  const isOverall = g.id === "wc26-winner";
+  return {
+    id: g.id,
+    kind: "league-winner" as const,
+    shape: "three-way" as const,
+    title: g.title,
+    kindLabel: isOverall
+      ? `Tournament winner · ${sorted.length} nations`
+      : `Group winner · ${sorted.length} nations`,
+    league: { name: "World Cup 2026", short: "WC" },
+    endsLabel: g.endsLabel,
+    volume: g.volume,
+    volume24h: "$0",
+    participants: g.participants ?? 0,
+    outcomes: sorted.map((s) => {
+      const team = "logo" in s.team && s.team.logo && "hue" in s.team && s.team.hue != null
+        ? { name: s.team.name, short: s.team.short, logo: s.team.logo as string, hue: s.team.hue as number }
+        : undefined;
+      return {
+        id: s.team.short.toLowerCase(),
+        label: s.team.name,
+        price: s.price,
+        delta24h: s.delta24h ?? 0,
+        ...(team ? { team } : {}),
+      };
+    }),
+    tradeHref: `/event/${g.id}`,
+  };
+});
+
+/** Binary head-to-head markets for every bracket matchup. Matchups whose
+ *  teams are still TBD are skipped — those cards still link to the same
+ *  /event/$id but will render the standard notFoundComponent, matching
+ *  the real-world "fixture not set" semantics. */
+export const BRACKET_MARKETS = WC26_BRACKET.flatMap((round) =>
+  round.matchups.flatMap((m) => {
+    const home = bracketTeamToLite(m.home);
+    const away = bracketTeamToLite(m.away);
+    if (!home || !away) return [];
+    if (m.homePrice == null || m.awayPrice == null) return [];
+    return [
+      {
+        id: m.id,
+        kind: "match" as const,
+        shape: "binary" as const,
+        title: `${home.name} vs ${away.name} — Winner`,
+        kindLabel: `${round.label} · Match winner`,
+        league: { name: "World Cup 2026", short: "WC" },
+        endsLabel: m.kickoffLabel ?? round.label,
+        volume: "$0",
+        volume24h: "$0",
+        participants: 0,
+        fixture: {
+          home,
+          away,
+          kickoff: m.kickoffLabel ?? "TBD",
+          whenLabel: round.label,
+        },
+        outcomes: [
+          { id: "home", label: home.name, price: m.homePrice, delta24h: 0, team: home },
+          { id: "away", label: away.name, price: m.awayPrice, delta24h: 0, team: away },
+        ],
+        stage: round.label,
+        tradeHref: `/event/${m.id}`,
+      },
+    ];
+  }),
+);
