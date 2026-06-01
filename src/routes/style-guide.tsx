@@ -31,6 +31,8 @@ import { StatTile } from "@/components/sports/StatTile";
 import { SectionHeader } from "@/components/sports/SectionHeader";
 import { MarketCard } from "@/components/sports/MarketCard";
 import { EventHeader } from "@/components/sports/EventHeader";
+import { EventQuestionHeading } from "@/components/sports/event/EventQuestionHeading";
+import type { SportsMarket } from "@/data/sports-markets";
 import { OutcomeSelector } from "@/components/sports/OutcomeSelector";
 import { TeamName } from "@/components/sports/TeamName";
 import { teams } from "@/lib/teams";
