@@ -8,7 +8,7 @@ import {
   useState,
 } from "react";
 import { useRouterState } from "@tanstack/react-router";
-import { getMarketById } from "@/data/sports-markets";
+import { ALL_MARKETS, getMarketById } from "@/data/sports-markets";
 import { GlobalStreamMiniPlayer } from "./GlobalStreamMiniPlayer";
 import { FullscreenStreamOverlay } from "./FullscreenStreamOverlay";
 
@@ -88,6 +88,21 @@ export function LiveStreamProvider({ children }: { children: React.ReactNode }) 
 
   const openFullscreen = useCallback(() => setFullscreen(true), []);
   const closeFullscreen = useCallback(() => setFullscreen(false), []);
+
+  // Auto-surface a live stream on first load so users immediately see
+  // what's on right now. Picks the first market flagged `isLiveStream`
+  // and starts it minimized (mini player bottom-right). Skipped if the
+  // user already dismissed something this session or is already watching.
+  const autoStartedRef = useRef(false);
+  useEffect(() => {
+    if (autoStartedRef.current) return;
+    if (active || dismissed) return;
+    const liveMarket = ALL_MARKETS.find((m) => m.isLiveStream);
+    if (!liveMarket) return;
+    autoStartedRef.current = true;
+    setActive({ marketId: liveMarket.id });
+    setMinimized(true);
+  }, [active, dismissed]);
 
   const value = useMemo<LiveStreamCtx>(
     () => ({
