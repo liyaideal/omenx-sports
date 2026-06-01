@@ -510,46 +510,60 @@ function EventDetailHeader({
 }) {
   const fixture = market.fixture;
   return (
-    <header className="relative overflow-hidden rounded-2xl border border-border bg-surface bg-ambient p-6 shadow-card">
+    <header className="relative overflow-hidden rounded-2xl border border-border bg-surface bg-ambient px-5 py-4 shadow-card">
       <div className="flex items-center justify-between gap-2.5">
         <div className="flex items-center gap-2.5">
           <LeagueChip short={market.league.short} />
           <span className="rounded-full bg-primary/10 px-2.5 py-0.5 text-[10px] font-medium uppercase tracking-widest text-primary ring-1 ring-primary/30">
-            {market.kind === "match" ? "Match" : market.kind === "league-winner" ? "Season winner" : market.kind === "top-scorer" ? "Top scorer" : "Prop"}
-          </span>
-          <span className="hidden items-center gap-3 pl-2 font-mono text-[10px] uppercase tracking-widest text-muted-foreground md:inline-flex">
-            <span>Vol <span className="text-foreground tabular-nums">{market.volume}</span></span>
-            <span>24h <span className="text-foreground tabular-nums">{market.volume24h}</span></span>
-            <span className="inline-flex items-center gap-1"><Users className="h-3 w-3" />{market.participants.toLocaleString()}</span>
+            {market.kind === "match" ? "Game" : market.kind === "league-winner" ? "Season winner" : market.kind === "top-scorer" ? "Top scorer" : "Prop"}
           </span>
         </div>
         <ShareButton outcomeId={outcomeId} />
       </div>
 
-      {/* Fixture / title — outcomes now live in the EventOutcomesPanel below. */}
-      <div className="mt-5">
-        {fixture ? (
-          <div className="flex items-center justify-center gap-6">
-            <CrestBlock name={fixture.home.name} logo={fixture.home.logo} hue={fixture.home.hue} />
-            <div className="text-center">
-              <div className="font-serif-display italic text-3xl text-muted-foreground">vs</div>
-              <div className="mt-1 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
-                Kickoff
+      {/* Fixture (center) + stats (right). Outcomes live in EventOutcomesPanel below. */}
+      <div className="mt-3 flex items-center justify-between gap-6">
+        <div className="flex-1">
+          {fixture ? (
+            <div className="flex items-center justify-center gap-6">
+              <CrestBlock name={fixture.home.name} logo={fixture.home.logo} hue={fixture.home.hue} />
+              <div className="text-center">
+                <div className="font-serif-display italic text-2xl leading-none text-muted-foreground">vs</div>
+                <div className="mt-2 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+                  Kickoff
+                </div>
+                <div className="font-mono text-[11px] tracking-wider text-foreground">
+                  {fixture.whenLabel} · {fixture.kickoff}
+                </div>
               </div>
-              <div className="font-mono text-[11px] tracking-wider text-foreground">
-                {fixture.whenLabel} · {fixture.kickoff}
-              </div>
+              <CrestBlock name={fixture.away.name} logo={fixture.away.logo} hue={fixture.away.hue} />
             </div>
-            <CrestBlock name={fixture.away.name} logo={fixture.away.logo} hue={fixture.away.hue} />
-          </div>
-        ) : (
-          <div className="text-center">
-            <h1 className="font-display text-3xl font-bold text-foreground">{market.title}</h1>
-            <div className="mt-1 text-sm text-muted-foreground">{market.league.name}</div>
-          </div>
-        )}
+          ) : (
+            <div className="text-center">
+              <h1 className="font-display text-2xl font-bold text-foreground">{market.title}</h1>
+              <div className="mt-1 text-sm text-muted-foreground">{market.league.name}</div>
+            </div>
+          )}
+        </div>
+        <dl className="hidden w-[104px] shrink-0 space-y-1.5 md:block">
+          <StatRow label="Vol" value={market.volume} />
+          <StatRow label="24h" value={market.volume24h} />
+          <StatRow
+            label={<Users className="h-3 w-3" aria-label="Participants" />}
+            value={market.participants.toLocaleString()}
+          />
+        </dl>
       </div>
     </header>
+  );
+}
+
+function StatRow({ label, value }: { label: React.ReactNode; value: string }) {
+  return (
+    <div className="flex items-center justify-between gap-2 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+      <dt className="inline-flex items-center">{label}</dt>
+      <dd className="text-foreground tabular-nums text-[11px] normal-case">{value}</dd>
+    </div>
   );
 }
 
@@ -557,7 +571,7 @@ function CrestBlock({ name, logo, hue }: { name: string; logo: string; hue: numb
   return (
     <div className="flex flex-col items-center gap-2">
       <div
-        className="grid h-[72px] w-[72px] place-items-center rounded-full bg-white/[0.05] p-2 ring-1 ring-white/10"
+        className="grid h-[60px] w-[60px] place-items-center rounded-full bg-white/[0.05] p-2 ring-1 ring-white/10"
         style={{ boxShadow: `0 0 30px -6px oklch(0.7 0.22 ${hue} / 0.55)` }}
       >
         <img src={logo} alt={name} className="h-full w-full object-contain" />
