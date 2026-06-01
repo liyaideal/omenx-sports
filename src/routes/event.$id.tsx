@@ -331,6 +331,28 @@ function EventTradePage() {
     tradeFormRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
   }, []);
 
+  // Pulse the right-column TradeForm once whenever a row-level Buy button is
+  // pressed, so the eye is drawn to the now-preselected ticket. Also scrolls
+  // into view on mobile/below-lg where the form is not sticky beside it.
+  const [pulseKey, setPulseKey] = useState(0);
+  const handleBuyFromRow = useCallback(
+    (idx: number, side: "yes" | "no") => {
+      setSelectedIdx(idx);
+      setTradeSide(side);
+      setPulseKey((k) => k + 1);
+      if (typeof window !== "undefined") {
+        const isDesktop = window.matchMedia("(min-width: 1024px)").matches;
+        if (!isDesktop) scrollToTradeForm();
+      }
+    },
+    [scrollToTradeForm],
+  );
+  useEffect(() => {
+    if (pulseKey === 0) return;
+    const t = setTimeout(() => setPulseKey(0), 700);
+    return () => clearTimeout(t);
+  }, [pulseKey]);
+
   // Global live-stream session — keeps the floating player + fullscreen
   // overlay alive across route navigation.
   const live = useLiveStream();
