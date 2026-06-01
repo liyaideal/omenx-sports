@@ -1933,7 +1933,7 @@ function PanelVariant({ market }: { market: SportsMarket }) {
   const [selectedIdx, setSelectedIdx] = useState(0);
   const [side, setSide] = useState<"yes" | "no">("yes");
   const [pulse, setPulse] = useState(0);
-  React.useEffect(() => {
+  useEffect(() => {
     if (!pulse) return;
     const t = setTimeout(() => setPulse(0), 700);
     return () => clearTimeout(t);
