@@ -881,6 +881,28 @@ const WC_CHAMPION_SPOTLIGHT: PlayerSpotlight = {
 };
 
 const WC_GOLDEN_BOOT_SPOTLIGHT: PlayerSpotlight = {
+
+export const WC_CHAMPION_MARKET: SportsMarket = {
+  id: "wc26-champion",
+  kind: "league-winner",
+  shape: "three-way",
+  title: "World Cup 2026 — Champion",
+  league: { name: "World Cup 2026", short: "WC" },
+  endsLabel: "Settles Jul 19, 2026",
+  volume: "$8.95M",
+  volume24h: "$1.18M",
+  participants: 25070,
+  outcomes: [
+    { id: "bra", label: "Brazil", price: 0.18, delta24h: 0.02, team: TEAMS.brazil },
+    { id: "arg", label: "Argentina", price: 0.16, delta24h: -0.01, team: TEAMS.argentina },
+    { id: "fra", label: "France", price: 0.14, delta24h: 0.01, team: TEAMS.france },
+    { id: "eng", label: "England", price: 0.11, delta24h: 0, team: TEAMS.england },
+    { id: "spa", label: "Spain", price: 0.10, delta24h: 0.01, team: TEAMS.spain },
+  ],
+  tradeHref: `/event/wc26-champion`,
+};
+
+const WC_GOLDEN_BOOT_SPOTLIGHT: PlayerSpotlight = {
   handle: "WC26_GOLDEN_BOOT",
   firstName: "Golden",
   lastName: "Boot",
