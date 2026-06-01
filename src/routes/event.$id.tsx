@@ -563,7 +563,7 @@ function EventDetailHeader({
         />
 
         {/* Right: stats panel */}
-        <div className="flex w-full flex-row justify-around gap-6 border-t border-white/5 bg-white/[0.01] px-8 py-5 md:w-52 md:flex-col md:justify-center md:gap-5 md:border-t-0 md:px-7 md:py-8">
+        <div className="flex w-full flex-row justify-around gap-6 border-t border-white/5 bg-white/[0.01] px-8 py-5 md:w-52 md:flex-col md:justify-center md:gap-5 md:border-t-0 md:px-7 md:pb-8 md:pt-14">
           <StatBlock label="Total Volume" value={market.volume} />
           <StatBlock
             label="Live Players"
