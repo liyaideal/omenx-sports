@@ -467,7 +467,7 @@ function EventTradePage() {
           ref={tradeFormRef}
           className="space-y-3 lg:sticky lg:top-4 lg:self-start lg:max-h-[calc(100vh-2rem)] lg:overflow-y-auto lg:pr-1 lg:[scrollbar-gutter:stable]"
         >
-          <div className="rounded-2xl border border-border bg-surface p-3 shadow-card">
+          <div className="rounded-2xl border border-border bg-surface p-3 shadow-card lg:sticky lg:top-0 lg:z-10">
             <TradeOutcomePicker
               market={active}
               outcomeId={selected?.id}

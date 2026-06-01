@@ -1,26 +1,18 @@
-## Three issues to fix on `/event/$id`
+## 1. Sticky picker header inside the scrollable trade column
 
-### 1. 页面里出现的中文 ("买 是/否")
-
-Source: `src/components/sports/event/EventOutcomesPanel.tsx`, `BuyButton`:
+Current setup in `src/routes/event.$id.tsx`:
 
 ```tsx
-<span className="opacity-80">买 {isYes ? "是" : "否"}</span>
+<div className="space-y-3 lg:sticky lg:top-4 lg:self-start
+                lg:max-h-[calc(100vh-2rem)] lg:overflow-y-auto …">
+  <div className="rounded-2xl border …"> <TradeOutcomePicker … /> </div>
+  <TradeForm … />
+</div>
 ```
 
-Change to English to match the rest of the product copy:
+The column is sticky, but its contents scroll **inside** the column. The picker is the first child, so as soon as the user scrolls within the column to reach `TradeForm`, the picker leaves the top of the viewport — that's what the screenshot shows.
 
-```tsx
-<span className="opacity-80">Buy {isYes ? "YES" : "NO"}</span>
-```
-
-While in this file, also fix the React DOM nesting warning (`<button>` inside `<button>`) that appears in the console: convert the outer `<button>` of `OutcomeRow` into a `<div role="button" tabIndex={0}>` with `onClick` + `onKeyDown(Enter/Space)`, so the inner `BuyButton`s remain valid.
-
-### 2. 下滑时看不到右侧交易面板的头部
-
-Cause: the right column uses `lg:sticky lg:top-4`, but `TradeForm` (≈900 px tall with TP/SL expanded) is taller than the 777 px viewport. When a sticky element is taller than the viewport, its top scrolls off-screen and there is no way to scroll back to it without scrolling the whole page up.
-
-Fix in `src/routes/event.$id.tsx`, the right column wrapper:
+Fix: pin the picker to the top of the scroll container so it always stays visible while `TradeForm` scrolls beneath it.
 
 ```tsx
 <div
@@ -29,47 +21,32 @@ Fix in `src/routes/event.$id.tsx`, the right column wrapper:
              lg:max-h-[calc(100vh-2rem)] lg:overflow-y-auto
              lg:pr-1 lg:[scrollbar-gutter:stable]"
 >
+  <div
+    className="rounded-2xl border border-border bg-surface p-3 shadow-card
+               lg:sticky lg:top-0 lg:z-10"
+  >
+    <TradeOutcomePicker … />
+  </div>
+  <TradeForm … />
+</div>
 ```
 
-This pins the column, caps its height to the viewport, and lets the form itself scroll internally so the header (market + side toggle, see #3) is always reachable.
+`lg:sticky lg:top-0` inside the scroll container makes the picker behave like a sticky header — always pinned at the top of the trade column, regardless of inner scroll position. `bg-surface` is already opaque so the form scrolling underneath won't bleed through.
 
-### 3. TradeForm 头部少了 market 名称和 YES/NO 选项
+## 2. Drop "Buy" prefix from inline row buttons
 
-In the previous refactor `TradeOutcomePicker` was removed from the right column entirely. The user wants market context + YES/NO at the top of the trade ticket itself — even when the row-level Buy buttons aren't used.
-
-Add a compact header **inside** the right column, above `TradeForm`, reusing the existing `TradeOutcomePicker` so logic stays single-sourced:
+In `src/components/sports/event/EventOutcomesPanel.tsx`, `BuyButton`:
 
 ```tsx
-<TradeOutcomePicker
-  market={active}
-  outcomeId={selected?.id}
-  onOutcomeChange={(id) => {
-    const idx = active.outcomes.findIndex((o) => o.id === id);
-    if (idx >= 0) setSelectedIdx(idx);
-  }}
-  side={tradeSide}
-  onSideChange={setTradeSide}
-/>
-<TradeForm … />
+- <span className="opacity-80">Buy {isYes ? "YES" : "NO"}</span>
++ <span className="opacity-80">{isYes ? "YES" : "NO"}</span>
 ```
 
-The picker already renders:
-- Market title chip + outcome pill grid (horizontal scroll for many outcomes)
-- YES/NO side toggle when the market has ≥3 outcomes
+Shorter pill, matches "53¢ / 47¢" sizing in the screenshot more cleanly. `min-w-[88px]` can be reduced to `min-w-[68px]` so the row breathes.
 
-For binary 2-outcome markets the side toggle stays hidden (as today), but the outcome pills still act as the visible "market header" inside the ticket, satisfying the user's ask.
+### Files
 
-Selection stays in sync both ways:
-- Row Buy button → `handleBuyFromRow` already updates `selectedIdx` + `tradeSide` → picker reflects it.
-- Picker change → updates `selectedIdx` / `tradeSide` → `EventOutcomesPanel` follows via its `useEffect([selectedIdx])` and re-highlights the chart line + expands the matching order book.
+- `src/routes/event.$id.tsx` — add `lg:sticky lg:top-0 lg:z-10` to picker wrapper.
+- `src/components/sports/event/EventOutcomesPanel.tsx` — strip "Buy", tighten `min-w` on the row pills.
 
-### Files touched
-
-- `src/components/sports/event/EventOutcomesPanel.tsx` — English copy, fix nested-button DOM warning.
-- `src/routes/event.$id.tsx` — re-add `TradeOutcomePicker` above `TradeForm` in the right column; make the sticky column scrollable.
-- `src/routes/style-guide.tsx` — update the `EventOutcomesPanelDemo` snippets to match the English labels (no structural change).
-
-### Out of scope
-
-- No changes to `TradeForm` internals, `deriveTradeFormProps`, mobile `MobileTradeBar`, or `TradeDrawer`.
-- No data-model changes.
+No other components or business logic change.
