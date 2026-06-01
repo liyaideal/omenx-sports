@@ -1,5 +1,4 @@
 import { useMemo, useState } from "react";
-import { Zap } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { Slider } from "@/components/ui/slider";
@@ -53,7 +52,7 @@ export function TradeForm({
 }: TradeFormProps) {
   const [side, setSide] = useState<Side>("buy");
   const [type, setType] = useState<Type>("market");
-  const [pro, setPro] = useState(false);
+  const [tpslOpen, setTpslOpen] = useState(false);
   const [margin, setMargin] = useState(100);
   const [leverage, setLeverage] = useState(1);
   const [tp, setTp] = useState("");
@@ -280,19 +279,16 @@ export function TradeForm({
         </div>
       </div>
 
-      {/* PRO toggle — advanced extras only */}
+      {/* TP/SL toggle */}
       <div className="mt-5 flex items-center justify-between rounded-xl border border-border bg-white/[0.02] px-3 py-2.5">
-        <div className="flex items-center gap-2">
-          <Zap className={cn("h-4 w-4", pro ? "text-neon" : "text-muted-foreground")} />
-          <div>
-            <div className="text-xs font-display font-semibold">PRO</div>
-            <div className="text-[10px] font-mono text-muted-foreground">TP/SL</div>
-          </div>
+        <div>
+          <div className="text-xs font-display font-semibold">TP/SL</div>
+          <div className="text-[10px] font-mono text-muted-foreground">Take profit · Stop loss</div>
         </div>
-        <Switch checked={pro} onCheckedChange={setPro} />
+        <Switch checked={tpslOpen} onCheckedChange={setTpslOpen} />
       </div>
 
-      {pro && (
+      {tpslOpen && (
         <div className="mt-4 space-y-4 rounded-xl border border-neon/20 bg-neon/[0.03] p-4">
           <div className="grid grid-cols-2 gap-2">
             <Field label="TP (¢)" compact error={tpError}>
