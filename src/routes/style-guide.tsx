@@ -1947,8 +1947,6 @@ function StyleGuide() {
   );
 }
 
-function TradeDrawerDemo() {
-
 function InventoryGroup({
   title,
   liveAt,
@@ -1986,7 +1984,7 @@ function InventoryGroup({
   );
 }
 
-function TradeDrawerDemoOriginal() {
+function TradeDrawerDemo() {
   const { openTrade } = useTradeDrawer();
   const threeWay = MATCH_MARKETS.find((m) => m.shape === "three-way") ?? FEATURED_MATCH;
   const binary = MATCH_MARKETS.find((m) => m.shape === "binary");
