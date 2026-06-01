@@ -1948,6 +1948,45 @@ function StyleGuide() {
 }
 
 function TradeDrawerDemo() {
+
+function InventoryGroup({
+  title,
+  liveAt,
+  items,
+}: {
+  title: string;
+  liveAt: { label: string; href: string }[];
+  items: [name: string, desc: string][];
+}) {
+  return (
+    <div className="rounded-2xl border border-border bg-surface p-5 shadow-card">
+      <div className="mb-3 flex flex-wrap items-baseline justify-between gap-2">
+        <h3 className="font-display text-base font-semibold text-foreground">{title}</h3>
+        <div className="flex flex-wrap gap-1.5">
+          {liveAt.map((r) => (
+            <Link
+              key={r.href}
+              to={r.href}
+              className="rounded-full bg-white/[0.04] px-2.5 py-0.5 font-mono text-[10px] uppercase tracking-widest text-muted-foreground ring-1 ring-white/10 transition hover:text-foreground hover:ring-white/20"
+            >
+              live at {r.label}
+            </Link>
+          ))}
+        </div>
+      </div>
+      <ul className="divide-y divide-border text-xs">
+        {items.map(([name, desc]) => (
+          <li key={name} className="flex flex-col gap-0.5 py-2">
+            <code className="font-mono text-[11px] text-foreground">{name}</code>
+            <span className="text-muted-foreground">{desc}</span>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
+function TradeDrawerDemoOriginal() {
   const { openTrade } = useTradeDrawer();
   const threeWay = MATCH_MARKETS.find((m) => m.shape === "three-way") ?? FEATURED_MATCH;
   const binary = MATCH_MARKETS.find((m) => m.shape === "binary");
