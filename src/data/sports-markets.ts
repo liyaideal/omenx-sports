@@ -1110,6 +1110,70 @@ export const SPOTLIGHTS: PlayerSpotlight[] = [
   GROUP_F_SPOTLIGHT,
 ];
 
+/* -------- Consolidated event markets for spotlight bundles. Each row of a
+ * spotlight card opens one of these multi-outcome events so the trade page
+ * renders the whole question (e.g. "World Cup Golden Boot") with every
+ * contender as an outcome, not a per-player binary stub. */
+
+export const WC_GOLDEN_BOOT_MARKET: SportsMarket = {
+  id: "wc26-golden-boot",
+  kind: "top-scorer",
+  shape: "three-way",
+  title: "World Cup 2026 — Golden Boot",
+  kindLabel: "Top scorer · Tournament award",
+  league: { name: "World Cup 2026", short: "WC" },
+  endsLabel: "Settles Jul 19, 2026",
+  volume: "$2.34M",
+  volume24h: "$298K",
+  participants: 7270,
+  outcomes: [
+    { id: "mbappe", label: "Mbappé", price: 0.22, delta24h: 0.03, meta: "FRA · #10" },
+    { id: "haaland", label: "Haaland", price: 0.16, delta24h: -0.02, meta: "NOR · #9" },
+    { id: "vinicius", label: "Vinícius Jr.", price: 0.13, delta24h: 0.01, meta: "BRA · #7" },
+    { id: "kane", label: "Kane", price: 0.11, delta24h: 0, meta: "ENG · #9" },
+  ],
+  tradeHref: `/event/wc26-golden-boot`,
+};
+
+export const WC_GROUP_A_WINNER_MARKET: SportsMarket = {
+  id: "wc26-grpa-winner",
+  kind: "league-winner",
+  shape: "three-way",
+  title: "Group A — Winner",
+  kindLabel: "Group winner · 4 nations",
+  league: { name: "World Cup 2026", short: "WC" },
+  endsLabel: "Settles Jun 24, 2026",
+  volume: "$1.59M",
+  volume24h: "$198K",
+  participants: 4950,
+  outcomes: [
+    { id: "mex", label: "Mexico", price: 0.46, delta24h: 0.02, team: TEAMS.mexico },
+    { id: "can", label: "Canada", price: 0.28, delta24h: 0.03, team: TEAMS.canada },
+    { id: "rsa", label: "South Africa", price: 0.14, delta24h: -0.01, team: TEAMS.southAfrica },
+    { id: "par", label: "Paraguay", price: 0.12, delta24h: 0.01, team: TEAMS.paraguay },
+  ],
+  tradeHref: `/event/wc26-grpa-winner`,
+};
+
+export const WC_GROUP_F_WINNER_MARKET: SportsMarket = {
+  id: "wc26-grpf-winner",
+  kind: "league-winner",
+  shape: "three-way",
+  title: "Group F — Winner",
+  kindLabel: "Group winner · 4 nations",
+  league: { name: "World Cup 2026", short: "WC" },
+  endsLabel: "Settles Jun 27, 2026",
+  volume: "$2.02M",
+  volume24h: "$268K",
+  participants: 5990,
+  outcomes: [
+    { id: "fra", label: "France", price: 0.52, delta24h: 0.03, team: TEAMS.france },
+    { id: "ger", label: "Germany", price: 0.31, delta24h: -0.02, team: TEAMS.germany },
+    { id: "jpn", label: "Japan", price: 0.12, delta24h: 0.01, team: TEAMS.japan },
+  ],
+  tradeHref: `/event/wc26-grpf-winner`,
+};
+
 /** @deprecated use SPOTLIGHTS */
 export const SPOTLIGHT = MBAPPE_SPOTLIGHT;
 
