@@ -23,6 +23,10 @@ export interface LiveStreamActive {
   outcomeId?: string;
 }
 
+export type AudioTrack = "en" | "cn";
+
+const AUDIO_STORAGE_KEY = "omenx.live.audio";
+
 interface LiveStreamCtx {
   active: LiveStreamActive | null;
   startWatching: (marketId: string, outcomeId?: string) => void;
@@ -36,6 +40,10 @@ interface LiveStreamCtx {
   fullscreen: boolean;
   openFullscreen: () => void;
   closeFullscreen: () => void;
+  /** Global broadcast audio language. Persisted to localStorage so the
+   *  preference follows the user across sessions. */
+  audioTrack: AudioTrack;
+  setAudioTrack: (t: AudioTrack) => void;
 }
 
 const Ctx = createContext<LiveStreamCtx | null>(null);
@@ -44,6 +52,24 @@ export function LiveStreamProvider({ children }: { children: React.ReactNode }) 
   const [active, setActive] = useState<LiveStreamActive | null>(null);
   const [minimized, setMinimized] = useState(false);
   const [fullscreen, setFullscreen] = useState(false);
+  const [audioTrack, setAudioTrackState] = useState<AudioTrack>("en");
+
+  // Hydrate persisted preference on mount (client-only).
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const saved = window.localStorage.getItem(AUDIO_STORAGE_KEY);
+    if (saved === "en" || saved === "cn") setAudioTrackState(saved);
+  }, []);
+
+  const setAudioTrack = useCallback((t: AudioTrack) => {
+    setAudioTrackState(t);
+    if (typeof window !== "undefined") {
+      window.localStorage.setItem(AUDIO_STORAGE_KEY, t);
+    }
+    // TODO: when a real HLS/<video> source is wired up, switch the
+    // player's audioTracks to the matching language here.
+  }, []);
+
   // Per-session dismiss flag; reset whenever the active marketId changes.
   const [dismissed, setDismissed] = useState(false);
   const dismissedForRef = useRef<string | null>(null);
@@ -115,6 +141,8 @@ export function LiveStreamProvider({ children }: { children: React.ReactNode }) 
       fullscreen,
       openFullscreen,
       closeFullscreen,
+      audioTrack,
+      setAudioTrack,
     }),
     [
       active,
@@ -125,6 +153,8 @@ export function LiveStreamProvider({ children }: { children: React.ReactNode }) 
       fullscreen,
       openFullscreen,
       closeFullscreen,
+      audioTrack,
+      setAudioTrack,
     ],
   );
 
@@ -169,6 +199,8 @@ export function useLiveStream(): LiveStreamCtx {
       fullscreen: false,
       openFullscreen: () => {},
       closeFullscreen: () => {},
+      audioTrack: "en",
+      setAudioTrack: () => {},
     };
   }
   return ctx;
