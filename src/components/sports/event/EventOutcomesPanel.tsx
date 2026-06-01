@@ -36,14 +36,227 @@ export function EventOutcomesPanel({
   onSelect,
   onSideSelect,
 }: EventOutcomesPanelProps) {
+  // Binary events (exactly 2 outcomes) — the two outcomes ARE the two
+  // tradable sides of the same market. We render them as a flat 2-row list
+  // with a single Trade button per row, and a single shared order book
+  // underneath. Never nest YES/NO buttons inside each row.
+  const isBinary = market.outcomes.length === 2;
+  const selected = market.outcomes[selectedIdx] ?? market.outcomes[0];
+
+  if (isBinary) {
+    return <BinaryOutcomesPanel market={market} selectedIdx={selectedIdx} onSelect={onSelect} selected={selected} />;
+  }
+
+  return (
+    <MultiOutcomePanel
+      market={market}
+      selectedIdx={selectedIdx}
+      tradeSide={tradeSide}
+      onSelect={onSelect}
+      onSideSelect={onSideSelect}
+      selected={selected}
+    />
+  );
+}
+
+/* ---------------- Binary (2-outcome) variant ---------------- */
+
+function BinaryOutcomesPanel({
+  market,
+  selectedIdx,
+  onSelect,
+  selected,
+}: {
+  market: SportsMarket;
+  selectedIdx: number;
+  onSelect: (idx: number) => void;
+  selected: Outcome;
+}) {
+  const [a, b] = market.outcomes;
+  const aCents = Math.round(a.price * 100);
+  return (
+    <div className="space-y-4">
+      <CombinedPriceChart
+        market={market}
+        highlightedOutcomeId={selected?.id}
+        onLegendSelect={(id) => {
+          const idx = market.outcomes.findIndex((o) => o.id === id);
+          if (idx >= 0) onSelect(idx);
+        }}
+      />
+      <div className="rounded-2xl border border-border bg-surface shadow-card">
+        <div className="flex items-center justify-between px-4 pt-3 text-[10px] font-mono uppercase tracking-widest text-muted-foreground">
+          <span>Markets</span>
+          <span>2 sides · same event</span>
+        </div>
+        <div className="divide-y divide-border/70">
+          {market.outcomes.map((o, idx) => (
+            <BinaryRow
+              key={o.id}
+              outcome={o}
+              idx={idx}
+              selected={idx === selectedIdx}
+              onSelect={() => onSelect(idx)}
+            />
+          ))}
+        </div>
+        <div className="border-t border-border/70 p-4">
+          <OrderBook
+            mark={aCents}
+            sideLabels={{
+              yes: a.team?.name ?? a.label,
+              no: b.team?.name ?? b.label,
+            }}
+          />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function BinaryRow({
+  outcome,
+  idx,
+  selected,
+  onSelect,
+}: {
+  outcome: Outcome;
+  idx: number;
+  selected: boolean;
+  onSelect: () => void;
+}) {
+  const cents = Math.round(outcome.price * 100);
+  const delta = typeof outcome.delta24h === "number" ? Math.round(outcome.delta24h * 100) : 0;
+  const label = outcome.team?.name ?? outcome.label;
+  const color = outcomeColor(outcome, idx);
+  // idx 0 = primary/green side, idx 1 = neon/red side. This is purely a
+  // visual convention — both rows are equally buyable, neither is "the YES
+  // side" of the other.
+  const isPrimarySide = idx === 0;
+  return (
+    <div className={cn(selected ? "bg-primary/[0.06]" : undefined)}>
+      <div
+        role="button"
+        tabIndex={0}
+        onClick={onSelect}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            onSelect();
+          }
+        }}
+        className={cn(
+          "group flex w-full cursor-pointer items-center gap-4 px-4 py-3 text-left transition outline-none",
+          "hover:bg-white/[0.03] focus-visible:ring-2 focus-visible:ring-primary/40",
+        )}
+      >
+        <div className="flex min-w-0 flex-1 items-center gap-3">
+          <Glyph outcome={outcome} color={color} />
+          <div className="min-w-0">
+            <div className="truncate font-display text-sm font-semibold text-foreground">
+              {label}
+            </div>
+            {outcome.meta && (
+              <div className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+                {outcome.meta}
+              </div>
+            )}
+          </div>
+        </div>
+        <div className="flex w-24 items-baseline justify-end gap-1.5">
+          <span className="font-display text-2xl font-bold tabular-nums text-foreground">
+            {cents}
+            <span className="text-sm text-muted-foreground">¢</span>
+          </span>
+          <span
+            className={cn(
+              "inline-block w-10 text-right font-mono text-[10px] tabular-nums",
+              delta > 0 && "text-win",
+              delta < 0 && "text-loss",
+              delta === 0 && "text-muted-foreground",
+            )}
+          >
+            {delta > 0
+              ? `▲${delta}¢`
+              : delta < 0
+                ? `▼${Math.abs(delta)}¢`
+                : `—0¢`}
+          </span>
+        </div>
+        <div className="flex shrink-0 items-center gap-2">
+          <SingleTradeButton
+            cents={cents}
+            active={selected}
+            tone={isPrimarySide ? "yes" : "no"}
+            label={label}
+            onClick={(e) => {
+              e.stopPropagation();
+              onSelect();
+            }}
+          />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function SingleTradeButton({
+  cents,
+  active,
+  tone,
+  label,
+  onClick,
+}: {
+  cents: number;
+  active: boolean;
+  tone: "yes" | "no";
+  label: string;
+  onClick: (e: React.MouseEvent) => void;
+}) {
+  const isYes = tone === "yes";
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      aria-label={`Trade ${label} at ${cents}¢`}
+      className={cn(
+        "min-w-[112px] rounded-md px-3 py-1.5 text-center font-mono text-[11px] font-semibold uppercase tracking-widest transition",
+        isYes
+          ? active
+            ? "bg-win text-background ring-1 ring-win"
+            : "bg-win/15 text-win ring-1 ring-win/30 hover:bg-win/25"
+          : active
+            ? "bg-loss text-background ring-1 ring-loss"
+            : "bg-loss/15 text-loss ring-1 ring-loss/30 hover:bg-loss/25",
+      )}
+    >
+      <span className="truncate">Trade</span>
+      <span className="ml-1.5 tabular-nums opacity-80">{cents}¢</span>
+    </button>
+  );
+}
+
+/* ---------------- Multi-outcome (3+) variant — unchanged behavior ---------------- */
+
+function MultiOutcomePanel({
+  market,
+  selectedIdx,
+  tradeSide,
+  onSelect,
+  onSideSelect,
+  selected,
+}: {
+  market: SportsMarket;
+  selectedIdx: number;
+  tradeSide: "yes" | "no";
+  onSelect: (idx: number) => void;
+  onSideSelect: (idx: number, side: "yes" | "no") => void;
+  selected: Outcome;
+}) {
   const [expandedIdx, setExpandedIdx] = useState<number>(selectedIdx);
   useEffect(() => {
-    // When the selected outcome changes upstream (deep link, related market
-    // pivot), follow it so the expanded book matches the trade form target.
     setExpandedIdx(selectedIdx);
   }, [selectedIdx]);
-
-  const selected = market.outcomes[selectedIdx] ?? market.outcomes[0];
 
   return (
     <div className="space-y-4">
