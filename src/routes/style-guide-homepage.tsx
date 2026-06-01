@@ -81,10 +81,10 @@ const SECTIONS = [
   ["activity", "LiveActivityCard"],
   ["section-header", "PageSectionHeader"],
   ["day-strip", "DayStripCalendar"],
-  ["live-stream", "LiveStreamCard"],
   ["event-tile", "EventMarketTileCard"],
   ["show-more", "ShowMoreEventsButton"],
   ["events-empty", "Empty events"],
+  ["live-stream", "LiveStreamCard"],
   ["league-hub", "League hub cards"],
   ["bridge", "BridgeStrip"],
 ] as const;
