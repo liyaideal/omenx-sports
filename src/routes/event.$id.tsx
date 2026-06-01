@@ -132,8 +132,20 @@ function buildSeed(
   const second = market.outcomes[1] ?? market.outcomes[0];
   const firstPx = Math.round(first.price * 100);
   const secondPx = Math.round(second.price * 100);
-  const firstLabel = first.team?.name ?? first.label;
-  const secondLabel = second.team?.name ?? second.label;
+  // For binary 2-outcome events the label IS the side, so use the full team
+  // name. For multi events the Market pill renders `<ALIAS> YES|NO`, so the
+  // outcome short label (e.g. "CAN") reads better than the long name.
+  const eventShape: "binary" | "multi" =
+    market.outcomes.length === 2 ? "binary" : "multi";
+  const firstLabel =
+    eventShape === "binary"
+      ? (first.team?.name ?? first.label)
+      : first.label;
+  const secondLabel =
+    eventShape === "binary"
+      ? (second.team?.name ?? second.label)
+      : second.label;
+  const liqYes = clampPct(firstPx - 18);
 
   const positions: PositionRowData[] = [
     {
@@ -141,20 +153,26 @@ function buildSeed(
       league,
       outcome: "yes",
       outcomeLabel: firstLabel,
+      eventShape,
       size: 180,
       entry: clampPct(firstPx - 4),
       mark: firstPx,
       leverage: 3,
       mode: "cross",
       margin: 60,
-      liq: clampPct(firstPx - 18),
+      liq: liqYes,
       pnl: 0,
+      // Pre-seed a TP/SL on the first row so the column always shows a
+      // populated state on first visit (TP above entry, SL above liq).
+      tp: clampPct(firstPx + 14),
+      sl: clampPct(Math.max(liqYes + 3, firstPx - 12)),
     },
     {
       market: market.title,
       league,
       outcome: "no",
       outcomeLabel: secondLabel,
+      eventShape,
       size: 90,
       entry: clampPct(secondPx + 3),
       mark: secondPx,
@@ -163,6 +181,8 @@ function buildSeed(
       margin: 27,
       liq: 99,
       pnl: 0,
+      tp: null,
+      sl: null,
     },
   ];
 
@@ -172,6 +192,7 @@ function buildSeed(
       league,
       outcome: "yes",
       outcomeLabel: firstLabel,
+      eventShape,
       type: "limit",
       price: clampPct(firstPx - 6),
       size: 120,
@@ -182,6 +203,7 @@ function buildSeed(
       league,
       outcome: "no",
       outcomeLabel: secondLabel,
+      eventShape,
       type: "limit",
       price: clampPct(secondPx - 4),
       size: 80,
@@ -195,6 +217,7 @@ function buildSeed(
       league,
       outcome: "yes",
       outcomeLabel: firstLabel,
+      eventShape,
       action: "fill",
       price: clampPct(firstPx - 4),
       size: 180,
@@ -205,6 +228,7 @@ function buildSeed(
       league,
       outcome: "no",
       outcomeLabel: secondLabel,
+      eventShape,
       action: "close",
       price: clampPct(secondPx + 5),
       size: 60,
@@ -216,6 +240,7 @@ function buildSeed(
       league,
       outcome: "yes",
       outcomeLabel: firstLabel,
+      eventShape,
       action: "close",
       price: clampPct(firstPx - 9),
       size: 75,
@@ -333,6 +358,7 @@ function EventTradePage() {
             league: row.league,
             outcome: row.outcome,
             outcomeLabel: row.outcomeLabel,
+            eventShape: row.eventShape,
             action: "close",
             price: mark,
             size: row.size,
@@ -358,6 +384,22 @@ function EventTradePage() {
       return prev.filter((_, i) => i !== idx);
     });
   }, []);
+
+  const handleUpdateTpsl = useCallback(
+    (idx: number, next: { tp: number | null; sl: number | null }) => {
+      setPositions((prev) =>
+        prev.map((p, i) => (i === idx ? { ...p, tp: next.tp, sl: next.sl } : p)),
+      );
+      if (next.tp === null && next.sl === null) {
+        toast("TP/SL removed");
+      } else {
+        toast.success(
+          `TP/SL updated · TP ${next.tp != null ? `${next.tp}¢` : "—"} / SL ${next.sl != null ? `${next.sl}¢` : "—"}`,
+        );
+      }
+    },
+    [],
+  );
 
   // Live-stream wiring — only the streaming events get the broadcast
   // stage + sticky floating mini player.
@@ -422,6 +464,8 @@ function EventTradePage() {
   }, [offscreen, isLive, live]);
 
   const handlePlaceOrder = (order: PlacedOrder) => {
+    const shape: "binary" | "multi" =
+      active.outcomes.length === 2 ? "binary" : "multi";
     if (order.type === "limit" && order.side === "buy" && order.price !== currentPx) {
       // Limit buy below/above mark → resting open order.
       setOrders((prev) => [
@@ -430,6 +474,7 @@ function EventTradePage() {
           league,
           outcome: order.outcome,
           outcomeLabel: order.outcomeLabel,
+          eventShape: shape,
           type: "limit",
           price: order.price,
           size: Math.round(order.shares),
@@ -445,6 +490,7 @@ function EventTradePage() {
         league,
         outcome: order.outcome,
         outcomeLabel: order.outcomeLabel,
+        eventShape: shape,
         size: Math.round(order.shares),
         entry: order.price,
         mark: order.price,
@@ -453,6 +499,8 @@ function EventTradePage() {
         margin: order.margin,
         liq: order.liq,
         pnl: 0,
+        tp: order.tp,
+        sl: order.sl,
       },
       ...prev,
     ]);
@@ -554,6 +602,7 @@ function EventTradePage() {
           history={history}
           onClosePosition={handleClosePosition}
           onCancelOrder={handleCancelOrder}
+          onUpdateTpsl={handleUpdateTpsl}
         />
       </div>
 

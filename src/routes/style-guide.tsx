@@ -863,6 +863,84 @@ function StyleGuide() {
             <div className="mt-6">
               <PositionsTable />
             </div>
+            <p className="mt-6 mb-2 text-[10px] font-mono uppercase tracking-widest text-muted-foreground">
+              PositionsTable · interaction contract
+            </p>
+            <ul className="mb-3 list-disc space-y-1 pl-5 text-xs text-muted-foreground">
+              <li>
+                <span className="text-foreground">Market pill</span>:
+                binary events show just the team alias (color = side). Multi
+                outcomes show <code className="font-mono text-foreground">{`<ALIAS> YES|NO`}</code> — pass{" "}
+                <code className="font-mono text-foreground">eventShape: "multi"</code> on each row.
+              </li>
+              <li>
+                <span className="text-foreground">TP / SL column</span>: per-row
+                inline status with click-to-edit. Pass{" "}
+                <code className="font-mono text-foreground">onUpdateTpsl(idx, {`{tp, sl}`})</code>;
+                validation rules are shared with <code className="font-mono text-foreground">TradeForm</code> via{" "}
+                <code className="font-mono text-foreground">@/lib/tpsl</code>.
+              </li>
+              <li>
+                <span className="text-foreground">Close / Cancel</span> always
+                require a two-step confirm (shadcn AlertDialog) showing the
+                full row context before mutating.
+              </li>
+            </ul>
+            <PositionsTable
+              positions={[
+                {
+                  market: "Canada vs Bosnia-Herzegovina",
+                  league: "ucl",
+                  outcome: "yes",
+                  outcomeLabel: "CAN",
+                  eventShape: "multi",
+                  size: 90,
+                  entry: 29,
+                  mark: 31,
+                  leverage: 1,
+                  mode: "cross",
+                  margin: 27,
+                  liq: 99,
+                  pnl: 0.36,
+                  tp: 40,
+                  sl: 20,
+                },
+                {
+                  market: "Canada vs Bosnia-Herzegovina",
+                  league: "ucl",
+                  outcome: "no",
+                  outcomeLabel: "BIH",
+                  eventShape: "multi",
+                  size: 60,
+                  entry: 25,
+                  mark: 22,
+                  leverage: 1,
+                  mode: "cross",
+                  margin: 15,
+                  liq: 99,
+                  pnl: 1.8,
+                  tp: null,
+                  sl: null,
+                },
+              ]}
+              orders={[
+                {
+                  market: "Canada vs Bosnia-Herzegovina",
+                  league: "ucl",
+                  outcome: "yes",
+                  outcomeLabel: "DRAW",
+                  eventShape: "multi",
+                  type: "limit",
+                  price: 22,
+                  size: 200,
+                  filled: 40,
+                },
+              ]}
+              history={[]}
+              onClosePosition={() => {}}
+              onCancelOrder={() => {}}
+              onUpdateTpsl={() => {}}
+            />
           </Section>
 
           {/* TRADING LANGUAGE */}

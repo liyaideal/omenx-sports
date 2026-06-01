@@ -3,6 +3,7 @@ import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
+import { validateTpSl, previewTpSlPnl } from "@/lib/tpsl";
 
 interface TradeFormProps {
   outcome: "yes" | "no";
@@ -92,46 +93,24 @@ export function TradeForm({
   // YES → TP > px, SL < px (and > liq); NO → reversed.
   const tpNum = tp === "" ? null : Number(tp);
   const slNum = sl === "" ? null : Number(sl);
-  const validRange = (v: number | null) => v === null || (Number.isFinite(v) && v >= 0 && v <= 100);
-  const tpInRange = validRange(tpNum);
-  const slInRange = validRange(slNum);
-  const tpDirOk =
-    tpNum === null ? true : outcome === "yes" ? tpNum > px : tpNum < px;
-  const slDirOk =
-    slNum === null
-      ? true
-      : outcome === "yes"
-        ? slNum < px && (leverage <= 1 || slNum > liq)
-        : slNum > px && (leverage <= 1 || slNum < liq);
-  const tpError = !tpInRange
-    ? "0–100¢"
-    : !tpDirOk
-      ? outcome === "yes"
-        ? `must be > ${px}¢`
-        : `must be < ${px}¢`
-      : null;
-  const slError = !slInRange
-    ? "0–100¢"
-    : !slDirOk
-      ? outcome === "yes"
-        ? leverage > 1 && slNum !== null && slNum <= liq
-          ? `must be > liq ${liq}¢`
-          : `must be < ${px}¢`
-        : leverage > 1 && slNum !== null && slNum >= liq
-          ? `must be < liq ${liq}¢`
-          : `must be > ${px}¢`
-      : null;
-  const hasFormError = !!tpError || !!slError;
-  // Mini PnL preview at TP / SL.
-  const sign = outcome === "yes" ? 1 : -1;
-  const tpPnl =
-    tpNum !== null && tpDirOk && tpInRange
-      ? (tpNum / 100 - px / 100) * notional * sign - fee
-      : null;
-  const slPnl =
-    slNum !== null && slDirOk && slInRange
-      ? (slNum / 100 - px / 100) * notional * sign - fee
-      : null;
+  const { tpError, slError, hasError: hasFormError } = validateTpSl({
+    side: outcome,
+    entry: px,
+    liq,
+    leverage,
+    tp: tpNum,
+    sl: slNum,
+  });
+  const { tpPnl, slPnl } = previewTpSlPnl({
+    side: outcome,
+    entry: px,
+    liq,
+    leverage,
+    tp: tpNum,
+    sl: slNum,
+    notional,
+    fee,
+  });
 
   const action = side === "buy" ? "Buy" : "Sell";
   const baseCtaLabel =
