@@ -1,26 +1,20 @@
+import { Link } from "@tanstack/react-router";
 import { cn } from "@/lib/utils";
 import type { SportsMarket } from "@/data/sports-markets";
-import { getRelatedChipLabel } from "./related-markets";
 
 interface RelatedMarketsBarProps {
+  /** Other real events related to the current one. Excludes the current event. */
   markets: SportsMarket[];
-  activeIdx: number;
-  onSelect: (idx: number) => void;
   className?: string;
 }
 
 /**
- * Horizontal chip row of related markets for the same fixture. Tapping a
- * chip swaps the chart / order book / trade form in-page to that market —
- * no navigation, no scroll. First chip is the originally loaded market.
+ * Horizontal chip row of OTHER real events tied to the current event by
+ * shared team / fixture. Each chip is a `<Link>` to that event's detail
+ * page — no in-page swap. Renders nothing when the list is empty.
  */
-export function RelatedMarketsBar({
-  markets,
-  activeIdx,
-  onSelect,
-  className,
-}: RelatedMarketsBarProps) {
-  if (markets.length <= 1) return null;
+export function RelatedMarketsBar({ markets, className }: RelatedMarketsBarProps) {
+  if (markets.length === 0) return null;
   return (
     <div
       className={cn(
@@ -33,24 +27,16 @@ export function RelatedMarketsBar({
           Related events
         </span>
         <div className="-mx-1 flex min-w-0 flex-1 items-center gap-1.5 overflow-x-auto px-1 pb-0.5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-          {markets.map((m, i) => {
-            const active = i === activeIdx;
-            return (
-              <button
-                key={m.id}
-                type="button"
-                onClick={() => onSelect(i)}
-                className={cn(
-                  "shrink-0 rounded-full px-3 py-1.5 text-xs font-medium transition-colors",
-                  active
-                    ? "bg-primary text-primary-foreground shadow-[0_0_18px_-6px_var(--primary)]"
-                    : "bg-white/[0.04] text-muted-foreground ring-1 ring-white/10 hover:bg-white/[0.08] hover:text-foreground",
-                )}
-              >
-                {getRelatedChipLabel(m, i)}
-              </button>
-            );
-          })}
+          {markets.map((m) => (
+            <Link
+              key={m.id}
+              to="/event/$id"
+              params={{ id: m.id }}
+              className="shrink-0 rounded-full bg-white/[0.04] px-3 py-1.5 text-xs font-medium text-muted-foreground ring-1 ring-white/10 transition-colors hover:bg-white/[0.08] hover:text-foreground"
+            >
+              {m.title}
+            </Link>
+          ))}
         </div>
       </div>
     </div>
