@@ -507,13 +507,9 @@ function EventTradePage() {
 
 function EventDetailHeader({
   market,
-  selectedIdx,
-  onSelect,
   outcomeId,
 }: {
   market: SportsMarket;
-  selectedIdx: number;
-  onSelect: (idx: number) => void;
   outcomeId?: string;
 }) {
   const fixture = market.fixture;
@@ -534,47 +530,28 @@ function EventDetailHeader({
         <ShareButton outcomeId={outcomeId} />
       </div>
 
-      {/* Two-column body: fixture left · outcomes right */}
-      <div className="mt-5 grid items-center gap-6 lg:grid-cols-[1.2fr_1fr] lg:gap-8 lg:divide-x lg:divide-border">
-        <div className="min-w-0 lg:pr-8">
-          {fixture ? (
-            <div className="flex items-center justify-center gap-6">
-              <CrestBlock name={fixture.home.name} logo={fixture.home.logo} hue={fixture.home.hue} />
-              <div className="text-center">
-                <div className="font-serif-display italic text-3xl text-muted-foreground">vs</div>
-                <div className="mt-1 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
-                  Kickoff
-                </div>
-                <div className="font-mono text-[11px] tracking-wider text-foreground">
-                  {fixture.whenLabel} · {fixture.kickoff}
-                </div>
+      {/* Fixture / title — outcomes now live in the EventOutcomesPanel below. */}
+      <div className="mt-5">
+        {fixture ? (
+          <div className="flex items-center justify-center gap-6">
+            <CrestBlock name={fixture.home.name} logo={fixture.home.logo} hue={fixture.home.hue} />
+            <div className="text-center">
+              <div className="font-serif-display italic text-3xl text-muted-foreground">vs</div>
+              <div className="mt-1 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+                Kickoff
               </div>
-              <CrestBlock name={fixture.away.name} logo={fixture.away.logo} hue={fixture.away.hue} />
+              <div className="font-mono text-[11px] tracking-wider text-foreground">
+                {fixture.whenLabel} · {fixture.kickoff}
+              </div>
             </div>
-          ) : (
-            <div>
-              <h1 className="font-display text-2xl font-bold text-foreground">{market.title}</h1>
-              <div className="mt-1 text-sm text-muted-foreground">{market.league.name}</div>
-            </div>
-          )}
-        </div>
-
-        <div className="min-w-0 lg:pl-2">
-          <div className="mb-2 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
-            Markets
+            <CrestBlock name={fixture.away.name} logo={fixture.away.logo} hue={fixture.away.hue} />
           </div>
-          <div className="flex flex-col gap-1.5">
-            {market.outcomes.map((o, idx) => (
-              <HeaderOutcomeRow
-                key={o.id}
-                outcome={o}
-                seed={hashSeed(market.id + ":" + o.id)}
-                selected={idx === selectedIdx}
-                onClick={() => onSelect(idx)}
-              />
-            ))}
+        ) : (
+          <div className="text-center">
+            <h1 className="font-display text-3xl font-bold text-foreground">{market.title}</h1>
+            <div className="mt-1 text-sm text-muted-foreground">{market.league.name}</div>
           </div>
-        </div>
+        )}
       </div>
     </header>
   );
