@@ -35,9 +35,6 @@ export function EventLiveStage({
   const [muted, setMuted] = useState(true);
   const internalRef = useRef<HTMLDivElement | null>(null);
   const ref = stageRef ?? internalRef;
-  const cents = Math.round(selected.price * 100);
-  const delta = typeof selected.delta24h === "number" ? Math.round(selected.delta24h * 100) : 0;
-  const selectedLabel = selected.team?.name ?? selected.label;
   // Slow ambient ken-burns on the poster so the surface feels alive while
   // we don't have a real stream attached.
   return (
@@ -146,32 +143,6 @@ export function EventLiveStage({
           <ControlBtn label="Fullscreen" onClick={() => onFullscreen?.()}>
             <Maximize2 className="h-3.5 w-3.5" />
           </ControlBtn>
-        </div>
-      </div>
-
-      {/* Inline market ticker — keeps the user anchored on the selected outcome's price */}
-      <div className="flex flex-wrap items-center justify-between gap-3 border-t border-white/[0.06] bg-black/40 px-4 py-2.5">
-        <div className="inline-flex items-center gap-2 font-mono text-[10px] uppercase tracking-widest text-white/60">
-          <span className="relative grid h-1.5 w-1.5 place-items-center">
-            <span className="absolute inset-0 animate-ping rounded-full bg-[color:var(--accent)] opacity-60" />
-            <span className="relative h-1.5 w-1.5 rounded-full bg-[color:var(--accent)]" />
-          </span>
-          {market.participants.toLocaleString()} watching · Streaming now
-        </div>
-        <div className="inline-flex items-center gap-2.5 font-mono text-[11px] tabular-nums text-white/90">
-          <span className="text-white/60">{selectedLabel}</span>
-          <span className="font-display text-base font-semibold text-white">
-            {cents}
-            <span className="text-white/60">¢</span>
-          </span>
-          <span
-            className={cn(
-              "text-[10px]",
-              delta > 0 ? "text-win" : delta < 0 ? "text-loss" : "text-white/50",
-            )}
-          >
-            {delta > 0 ? `+${delta}¢` : delta < 0 ? `−${Math.abs(delta)}¢` : "0¢"}
-          </span>
         </div>
       </div>
     </div>
