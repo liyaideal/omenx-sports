@@ -15,6 +15,8 @@ import {
   type PlayerSpotlight,
 } from "@/data/sports-markets";
 import worldCup2026Logo from "@/assets/leagues/world-cup-2026.png";
+import uclLogoAsset from "@/assets/leagues/ucl.svg.asset.json";
+import eplLogoAsset from "@/assets/leagues/epl.svg.asset.json";
 
 export type LeagueKind = "tournament" | "season-league";
 
@@ -59,7 +61,7 @@ export const LEAGUES: LeagueHub[] = [
     kind: "tournament",
     tagline: "Europe's elite · league phase to Wembley final",
     accent: "0.65 0.2 250",
-    logo: "https://a.espncdn.com/i/leaguelogos/soccer/500/2.png",
+    logo: uclLogoAsset.url,
     status: "coming-soon",
     startsLabel: "Sep 16",
   },
@@ -70,7 +72,7 @@ export const LEAGUES: LeagueHub[] = [
     kind: "season-league",
     tagline: "38 matchdays · 25/26 season title race",
     accent: "0.55 0.2 295",
-    logo: "https://a.espncdn.com/i/leaguelogos/soccer/500/23.png",
+    logo: eplLogoAsset.url,
     status: "coming-soon",
     startsLabel: "Aug 15",
   },
