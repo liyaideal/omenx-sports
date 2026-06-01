@@ -4,11 +4,16 @@ import { ArrowLeft } from "lucide-react";
 import {
   ACCOUNT_STATS,
   FEATURED_MATCH,
-  SEASON_LEAGUE_GROUPS,
-  SPOTLIGHTS,
+  MATCH_MARKETS,
 } from "@/data/sports-markets";
 import { FAN_POST, FOLLOWED_TEAMS, SUGGESTED_TEAMS, TEAMS } from "@/data/sports-mock";
 import { omenxUrl } from "@/lib/omenx";
+import {
+  LEAGUES,
+  getMatchMarketsByLeagueSlug,
+  getSpotlightsByLeagueSlug,
+  getBinaryQuestionsByLeagueSlug,
+} from "@/data/leagues";
 
 import { AppTopBar } from "@/components/sports/dashboard/AppTopBar";
 import { BridgeStrip } from "@/components/sports/dashboard/BridgeStrip";
@@ -21,9 +26,9 @@ import { LiveActivityCard } from "@/components/sports/dashboard/LiveActivityCard
 import { DayStripCalendar } from "@/components/sports/dashboard/DayStripCalendar";
 import { EventMarketTileCard } from "@/components/sports/dashboard/EventMarketTileCard";
 import { ShowMoreEventsButton } from "@/components/sports/dashboard/ShowMoreEventsButton";
-import { LeagueWinnerMarketCard } from "@/components/sports/dashboard/LeagueWinnerMarketCard";
-import { TopScorerMarketCard } from "@/components/sports/dashboard/TopScorerMarketCard";
-import { PlayerPropsSpotlight } from "@/components/sports/dashboard/PlayerPropsSpotlight";
+import { LiveStreamCard } from "@/components/sports/dashboard/LiveStreamCard";
+import { LeagueSpotlightCard } from "@/components/sports/league/LeagueSpotlightCard";
+import { LeagueComingSoonCard } from "@/components/sports/league/LeagueComingSoonCard";
 import { FollowTeamsCompact } from "@/components/sports/dashboard/FollowTeamsCompact";
 
 import {
@@ -36,14 +41,6 @@ import {
   TILE_ALL_DOWN,
   MATCH_THREE_WAY,
   MATCH_BINARY,
-  WINNER_DEFAULT,
-  WINNER_SHORT,
-  WINNER_ALL_UP,
-  WINNER_ALL_DOWN,
-  TOPSCORER_WITH_PHOTOS,
-  TOPSCORER_NO_PHOTOS,
-  SPOTLIGHT_ONE,
-  SPOTLIGHT_MANY,
   TRADES_DEFAULT,
   TRADES_EMPTY,
   TRADES_NO_MATCH,
@@ -84,12 +81,11 @@ const SECTIONS = [
   ["activity", "LiveActivityCard"],
   ["section-header", "PageSectionHeader"],
   ["day-strip", "DayStripCalendar"],
+  ["live-stream", "LiveStreamCard"],
   ["event-tile", "EventMarketTileCard"],
   ["show-more", "ShowMoreEventsButton"],
   ["events-empty", "Empty events"],
-  ["winner", "LeagueWinnerMarketCard"],
-  ["scorer", "TopScorerMarketCard"],
-  ["spotlight", "PlayerPropsSpotlight"],
+  ["league-hub", "League hub cards"],
   ["bridge", "BridgeStrip"],
 ] as const;
 
