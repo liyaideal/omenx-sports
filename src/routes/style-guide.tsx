@@ -2196,7 +2196,7 @@ function EventExtrasDemo() {
         </div>
       </div>
       <PreMatchStrip market={preMatch} />
-      <LiveTape market={active} />
+      <LiveTape market={base} />
     </div>
   );
 }
