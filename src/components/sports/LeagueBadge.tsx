@@ -1,6 +1,7 @@
 import { cn } from "@/lib/utils";
-import eplLogo from "@/assets/leagues/epl.png";
 import worldCup2026Logo from "@/assets/leagues/world-cup-2026.png";
+import eplLogoAsset from "@/assets/leagues/epl.svg.asset.json";
+import uclLogoAsset from "@/assets/leagues/ucl.svg.asset.json";
 
 /**
  * Real league logos sourced from ESPN's public CDN. PNGs with transparent
@@ -17,7 +18,7 @@ const PRESETS: Record<
     from: "oklch(0.55 0.2 295)",
     to: "oklch(0.35 0.15 290)",
     mono: "PL",
-    logo: eplLogo,
+    logo: eplLogoAsset.url,
   },
   laliga: {
     label: "La Liga",
@@ -31,7 +32,7 @@ const PRESETS: Record<
     from: "oklch(0.65 0.2 250)",
     to: "oklch(0.45 0.18 280)",
     mono: "UCL",
-    logo: "https://a.espncdn.com/i/leaguelogos/soccer/500/2.png",
+    logo: uclLogoAsset.url,
   },
   seriea: {
     label: "Serie A",
