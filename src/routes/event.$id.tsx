@@ -223,7 +223,7 @@ function buildSeed(
   return { positions, orders, history };
 }
 function EventTradePage() {
-  const { market } = Route.useLoaderData();
+  const { market } = Route.useLoaderData() as { market: SportsMarket };
   // Other real events related to this one (shared team / fixture). Rendered
   // as a nav chip strip at the bottom; each chip routes to that event's
   // detail page. Hidden entirely when empty.
