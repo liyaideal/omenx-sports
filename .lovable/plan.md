@@ -1,43 +1,49 @@
-## 改动
+## Event header redesign — Cinematic data panel
 
-只动 `src/routes/event.$id.tsx` 里的 `EventDetailHeader`（含 `CrestBlock` 微调）。
+Rework `EventDetailHeader` in `src/routes/event.$id.tsx` to match the selected "Cinematic data panel v4" direction. Drop the chips row entirely (no World Cup / Game labels). No data, route, or business-logic changes.
 
-### 1. 类型标签 `Match` → `Game`
-
-`market.kind === "match"` 的显示文案改成 `Game`（与全局 league hub `Games` tab 的统一术语对齐，单数用于单场标签）。其它分支不动。
-
-### 2. 顶部 VOL / 24H / 参与人数 → 右侧竖排
-
-不再放在 league chip 同一行。改为放在 fixture 区域**右侧**单独一列，三行竖排：
-- `VOL` / `$612K`
-- `24H` / `$184K`
-- 人数 icon / `4,720`
-
-每行 label（mono uppercase 10px muted）+ value（tabular foreground sm）。右对齐，占固定宽度（≈ 96px）。
-
-### 3. 头部更紧凑、更醒目
-
-外层 padding 从 `p-6` 缩到 `px-5 py-4`，并去掉 fixture 区 `mt-5`（用 `mt-3`）。
-
-新结构：
-
+### Layout
 ```text
-┌───────────────────────────────────────────────────────────────┐
-│ [WORLD CUP] [GAME]                                  [< SHARE] │
-│                                                               │
-│   🇺🇸           vs              🇵🇾          VOL   $612K    │
-│  United        Kickoff         Paraguay      24H   $184K    │
-│  States   Today · 9:00pm                     👥    4,720    │
-└───────────────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────┬──────────────────┐
+│                                             │  TOTAL VOLUME    │
+│   [USA crest]   vs (faint serif)   [PAR]    │  $612K           │
+│                 9:00 PM TODAY               │                  │
+│                                             │  ● LIVE PLAYERS  │
+│  [ Share match snapshot →↗ ]                │  4,720           │
+└─────────────────────────────────────────────┴──────────────────┘
 ```
 
-- 顶条只剩 chips（左）+ Share（右）—— 去掉那条 inline stats，整行更轻。
-- Fixture 块和 stats 列在一个 flex 里：`flex items-center justify-between gap-6`，fixture 居中靠左/中，stats 列贴右。
-- CrestBlock 尺寸从 `72×72` 缩到 `60×60`，队名 `text-sm` 不变，整体高度自然下降。
-- `vs` 字号从 `text-3xl` → `text-2xl`，Kickoff 行间距收紧。
+- Outer: `rounded-3xl border border-border bg-surface bg-ambient shadow-card relative overflow-hidden`, soft violet/indigo blur orbs in two corners (decorative).
+- Two-column flex (`md:flex-row`):
+  - **Left (flex-1)**: fixture (crests + faint serif `vs` with thin vertical hairline behind it + pill `9:00 PM TODAY`), then a full-width "Share match snapshot" CTA at the bottom.
+  - **Vertical hairline divider** (`hidden md:block w-px bg-gradient-to-b from-transparent via-white/10 to-transparent`).
+  - **Right (w-72)**: two stats — `TOTAL VOLUME` and `LIVE PLAYERS` (pulsing emerald dot). Drop the 24h row to keep the panel calm.
+- Bottom 2px violet gradient trim.
 
-不动业务逻辑、不动数据、不动 share / fixture 数据源。
+### Removed
+- World Cup `LeagueChip` and `Game/Season winner/...` kind chip — both deleted from the header. (League/kind info is still discoverable via the breadcrumb / page context.)
+- `Users` icon import if unused after removal.
 
-## 文件
+### Crest treatment
+- Replace circular glow halos with rounded-xl rectangular crests (`w-24 h-16`, `ring-1 ring-white/15`, soft shadow). Hover adds subtle violet glow + 1.05 scale.
+- Team name: `font-black uppercase tracking-[0.22em] text-[12px]` under the crest.
 
-- `src/routes/event.$id.tsx`（仅 `EventDetailHeader` + `CrestBlock`）
+### Typography
+- `vs`: faint italic serif `text-5xl text-foreground/5` with thin vertical divider overlay.
+- Kickoff pill: `text-[10px] font-bold tracking-[0.15em] text-primary uppercase` — combines time + "today" on one line.
+- Stat labels: `text-[9px] font-black tracking-[0.35em] text-muted-foreground/60 uppercase`.
+- Stat values: mono `text-2xl` foreground, tabular-nums.
+
+### Share button
+- Move `<ShareButton />` to a full-width CTA at the bottom of the left column. Add a `variant?: "icon" | "wide"` prop to `ShareButton`; default `icon`, new `wide` renders the cinematic full-width style. Keeps logic in one place.
+
+### Tokens / theming
+- Use semantic tokens (`border-border`, `bg-surface`, `text-foreground`, `text-muted-foreground`, `text-primary`). No raw hex.
+
+### Files to change
+- `src/routes/event.$id.tsx` — rewrite `EventDetailHeader` + `CrestBlock`, drop chips row + `StatRow` helper, prune unused imports.
+- `src/components/sports/event/ShareButton.tsx` — add `variant` prop.
+- `src/routes/style-guide.tsx` — mirror the new header in the playground.
+
+### Out of scope
+- `RelatedMarketsBar`, `LiveTape`, `PositionsTable`, `TradeForm`, data, routes.
