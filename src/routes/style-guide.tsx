@@ -884,31 +884,32 @@ function StyleGuide() {
                   </thead>
                   <tbody className="divide-y divide-border">
                     <tr>
-                      <td className="py-2 pr-4 font-medium">Single binary <span className="text-muted-foreground">(aliased)</span></td>
-                      <td className="py-2 pr-4 font-mono tabular-nums">1</td>
-                      <td className="py-2 pr-4 font-mono tabular-nums">100 across yes+no</td>
-                      <td className="py-2">Team names everywhere · color = side</td>
+                      <td className="py-2 pr-4 font-medium">Binary event <span className="text-muted-foreground">(aliased)</span></td>
+                      <td className="py-2 pr-4 font-mono tabular-nums">2 outcomes</td>
+                      <td className="py-2 pr-4 font-mono tabular-nums">100 across the 2 outcomes</td>
+                      <td className="py-2">Outcome labels everywhere (team/player) · 1 Trade button per outcome · shared order book · no nested YES/NO</td>
                     </tr>
                     <tr>
-                      <td className="py-2 pr-4 font-medium">Single binary <span className="text-muted-foreground">(neutral)</span></td>
-                      <td className="py-2 pr-4 font-mono tabular-nums">1</td>
-                      <td className="py-2 pr-4 font-mono tabular-nums">100 across yes+no</td>
-                      <td className="py-2">Yes/No literal text · color = side</td>
+                      <td className="py-2 pr-4 font-medium">Binary event <span className="text-muted-foreground">(neutral)</span></td>
+                      <td className="py-2 pr-4 font-mono tabular-nums">2 outcomes</td>
+                      <td className="py-2 pr-4 font-mono tabular-nums">100 across the 2 outcomes</td>
+                      <td className="py-2">Literal "Yes" / "No" labels · still 1 Trade button per outcome · shared order book · no nested YES/NO</td>
                     </tr>
                     <tr>
-                      <td className="py-2 pr-4 font-medium">Multi-market event <span className="text-muted-foreground">(bundled)</span></td>
-                      <td className="py-2 pr-4 font-mono tabular-nums">N</td>
-                      <td className="py-2 pr-4 font-mono">each market independent</td>
-                      <td className="py-2">List of cards · each follows rows above</td>
+                      <td className="py-2 pr-4 font-medium">Multi-outcome event <span className="text-muted-foreground">(3+ outcomes)</span></td>
+                      <td className="py-2 pr-4 font-mono tabular-nums">N outcomes</td>
+                      <td className="py-2 pr-4 font-mono">each outcome independent (sums &gt; 100)</td>
+                      <td className="py-2">Per-outcome YES/NO buttons · per-outcome order book · only place YES/NO is exposed</td>
                     </tr>
                   </tbody>
                 </table>
               </div>
               <ul className="mt-4 space-y-1.5 text-xs text-muted-foreground">
-                <li>1. <code className="font-mono text-foreground">Yes/No</code> is the underlying technical label. Whenever a market provides <code className="font-mono text-foreground">sideLabels</code>, user-facing text uses the alias.</li>
-                <li>2. <span className="text-win">Green = YES side</span> · <span className="text-loss">Red = NO side</span>. Color is the only signal that carries yes/no semantics.</li>
-                <li>3. Inside one market, every surface (pill, ratio bar, orderbook header, position tag, PnL row) uses the same alias — never mix.</li>
-                <li>4. <span className="text-foreground">Leverage is a first-class control</span>, not a PRO feature. The trade form always shows the leverage slider next to Margin. <code className="font-mono text-foreground">PRO</code> only gates Cross/Iso, TP/SL, and liq visualization.</li>
+                <li>1. Vocabulary: <strong className="text-foreground">event</strong> = the question/contest. <strong className="text-foreground">market</strong> = one outcome inside it. Binary event = 2 outcomes = 2 sides of one market. Multi-outcome event = N outcomes = N independent YES/NO sub-markets.</li>
+                <li>2. <strong className="text-foreground">Binary events never render nested YES/NO.</strong> One Trade button per outcome, one shared order book. The two outcome labels are the two column headers.</li>
+                <li>3. <code className="font-mono text-foreground">Yes/No</code> is the underlying technical label. Whenever a market provides <code className="font-mono text-foreground">sideLabels</code>, user-facing text uses the alias.</li>
+                <li>4. <span className="text-win">Green = first / YES side</span> · <span className="text-loss">Red = second / NO side</span>. Color is the only signal that carries the side semantic.</li>
+                <li>5. <span className="text-foreground">Leverage is a first-class control</span>, not a PRO feature. The trade form always shows the leverage slider next to Margin. <code className="font-mono text-foreground">PRO</code> only gates Cross/Iso, TP/SL, and liq visualization.</li>
               </ul>
             </div>
 
