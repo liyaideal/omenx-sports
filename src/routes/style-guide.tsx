@@ -65,6 +65,8 @@ import { PropsGrid } from "@/components/sports/league/PropsGrid";
 import { SpotlightPropsCardHorizontal } from "@/components/sports/league/SpotlightPropsCardHorizontal";
 import { EventMarketTileCard } from "@/components/sports/dashboard/EventMarketTileCard";
 import { useTradeDrawer } from "@/components/sports/trade/TradeDrawerProvider";
+import { TradeOutcomePicker } from "@/components/sports/trade/TradeOutcomePicker";
+import type { SportsMarket } from "@/data/sports-markets";
 import {
   WC26_GROUPS,
   WC26_BRACKET,
@@ -116,6 +118,7 @@ const SECTIONS = [
   ["hub-props", "Hub · Props"],
   ["hub-bracket", "Hub · Bracket"],
   ["trade-drawer", "Sticky Trade Drawer"],
+  ["trade-outcome-picker", "Trade Outcome Picker"],
 ] as const;
 
 function Section({ id, title, kicker, children }: { id: string; title: string; kicker?: string; children: React.ReactNode }) {
