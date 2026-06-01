@@ -239,7 +239,7 @@ function BuyButton({
       type="button"
       onClick={onClick}
       className={cn(
-        "min-w-[88px] rounded-md px-3 py-1.5 text-center font-mono text-[11px] font-semibold uppercase tracking-widest transition",
+        "min-w-[68px] rounded-md px-3 py-1.5 text-center font-mono text-[11px] font-semibold uppercase tracking-widest transition",
         isYes
           ? active
             ? "bg-win text-background ring-1 ring-win"
@@ -249,8 +249,8 @@ function BuyButton({
             : "bg-loss/15 text-loss ring-1 ring-loss/30 hover:bg-loss/25",
       )}
     >
-      <span className="opacity-80">Buy {isYes ? "YES" : "NO"}</span>
-      <span className="ml-1.5 tabular-nums">{cents}¢</span>
+      <span>{isYes ? "YES" : "NO"}</span>
+      <span className="ml-1.5 tabular-nums opacity-80">{cents}¢</span>
     </button>
   );
 }
