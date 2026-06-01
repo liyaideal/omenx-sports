@@ -754,6 +754,62 @@ function StyleGuide() {
             </div>
           </Section>
 
+          {/* QUESTION-MODE EVENT HEADER */}
+          <Section id="question-header" title="Event Header — Question Mode" kicker="12b — Text-First Events">
+            <p className="mb-6 max-w-3xl text-sm text-muted-foreground">
+              When an event has no two-team fixture (tournament winners, top-scorer races, group winners, prop questions), the header drops the <code className="font-mono text-foreground">vs</code> crest pair and becomes a left-aligned text block: league badge + kind chip → declarative title → meta row. Works even when outcomes can't be mapped to a single team or player.
+            </p>
+            <div className="space-y-5">
+              <QuestionHeaderDemo
+                market={{
+                  id: "demo-wc-champion",
+                  kind: "league-winner",
+                  shape: "three-way",
+                  title: "World Cup 2026 — Champion",
+                  kindLabel: "Tournament winner · 48 nations",
+                  league: { name: "World Cup 2026", short: "WC" },
+                  endsLabel: "Settles Jul 19, 2026",
+                  volume: "$8.95M",
+                  volume24h: "$1.18M",
+                  participants: 25070,
+                  outcomes: [],
+                  tradeHref: "#",
+                }}
+              />
+              <QuestionHeaderDemo
+                market={{
+                  id: "demo-epl-top-scorer",
+                  kind: "top-scorer",
+                  shape: "three-way",
+                  title: "Premier League — Top scorer 25/26",
+                  league: { name: "Premier League", short: "EPL" },
+                  endsLabel: "Settles May 24, 2026",
+                  volume: "$3.6M",
+                  volume24h: "$420K",
+                  participants: 6210,
+                  outcomes: [],
+                  tradeHref: "#",
+                }}
+              />
+              <QuestionHeaderDemo
+                market={{
+                  id: "demo-wc-grpf-winner",
+                  kind: "league-winner",
+                  shape: "three-way",
+                  title: "Group F — Winner",
+                  kindLabel: "Group winner",
+                  league: { name: "World Cup 2026", short: "WC" },
+                  endsLabel: "Settles Jun 24, 2026",
+                  volume: "$640K",
+                  volume24h: "$72K",
+                  participants: 1820,
+                  outcomes: [],
+                  tradeHref: "#",
+                }}
+              />
+            </div>
+          </Section>
+
           {/* TRADE SURFACE */}
           <Section id="trade" title="Trade Surface" kicker="13 — Detail">
             <p className="mb-2 max-w-2xl text-sm text-muted-foreground">
