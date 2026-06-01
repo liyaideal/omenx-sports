@@ -1,10 +1,9 @@
 import { createFileRoute, Link, notFound, useRouter } from "@tanstack/react-router";
-import { ArrowLeft, Users } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
 import { AppShell } from "@/components/sports/dashboard/AppShell";
 import { AppTopBar } from "@/components/sports/dashboard/AppTopBar";
-import { LeagueChip } from "@/components/sports/LeagueBadge";
 import { TradeForm, type PlacedOrder } from "@/components/sports/TradeForm";
 import {
   deriveTradeFormProps,
@@ -510,73 +509,116 @@ function EventDetailHeader({
 }) {
   const fixture = market.fixture;
   return (
-    <header className="relative overflow-hidden rounded-2xl border border-border bg-surface bg-ambient px-5 py-4 shadow-card">
-      <div className="flex items-center justify-between gap-2.5">
-        <div className="flex items-center gap-2.5">
-          <LeagueChip short={market.league.short} />
-          <span className="rounded-full bg-primary/10 px-2.5 py-0.5 text-[10px] font-medium uppercase tracking-widest text-primary ring-1 ring-primary/30">
-            {market.kind === "match" ? "Game" : market.kind === "league-winner" ? "Season winner" : market.kind === "top-scorer" ? "Top scorer" : "Prop"}
-          </span>
-        </div>
-        <ShareButton outcomeId={outcomeId} />
-      </div>
+    <header className="relative overflow-hidden rounded-3xl border border-border bg-surface bg-ambient shadow-card">
+      {/* Ambient orbs */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute -right-20 -top-20 h-72 w-72 rounded-full bg-primary/15 blur-[100px]"
+      />
+      <div
+        aria-hidden
+        className="pointer-events-none absolute -bottom-20 -left-20 h-72 w-72 rounded-full bg-primary/10 blur-[100px]"
+      />
 
-      {/* Fixture (center) + stats (right). Outcomes live in EventOutcomesPanel below. */}
-      <div className="mt-3 flex items-center justify-between gap-6">
-        <div className="flex-1">
+      <div className="relative flex flex-col items-stretch md:flex-row">
+        {/* Left: fixture + share */}
+        <div className="flex flex-1 flex-col">
           {fixture ? (
-            <div className="flex items-center justify-center gap-6">
-              <CrestBlock name={fixture.home.name} logo={fixture.home.logo} hue={fixture.home.hue} />
-              <div className="text-center">
-                <div className="font-serif-display italic text-2xl leading-none text-muted-foreground">vs</div>
-                <div className="mt-2 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
-                  Kickoff
+            <div className="flex items-center justify-around gap-6 px-8 pt-8 pb-6 md:px-12 md:pt-10">
+              <CrestBlock name={fixture.home.name} logo={fixture.home.logo} />
+              <div className="flex flex-col items-center">
+                <div className="relative py-1">
+                  <span className="select-none font-serif-display text-5xl italic leading-none tracking-tighter text-foreground/[0.06]">
+                    vs
+                  </span>
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <div className="h-10 w-px bg-gradient-to-b from-transparent via-white/15 to-transparent" />
+                  </div>
                 </div>
-                <div className="font-mono text-[11px] tracking-wider text-foreground">
-                  {fixture.whenLabel} · {fixture.kickoff}
+                <div className="mt-3 rounded-full border border-white/10 bg-white/[0.03] px-3.5 py-1.5">
+                  <span className="whitespace-nowrap font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-primary">
+                    {fixture.kickoff} · {fixture.whenLabel}
+                  </span>
                 </div>
               </div>
-              <CrestBlock name={fixture.away.name} logo={fixture.away.logo} hue={fixture.away.hue} />
+              <CrestBlock name={fixture.away.name} logo={fixture.away.logo} />
             </div>
           ) : (
-            <div className="text-center">
+            <div className="px-8 pt-10 pb-6 text-center md:px-12">
               <h1 className="font-display text-2xl font-bold text-foreground">{market.title}</h1>
               <div className="mt-1 text-sm text-muted-foreground">{market.league.name}</div>
             </div>
           )}
+
+          <div className="px-8 pb-8 md:px-12 md:pb-10">
+            <ShareButton outcomeId={outcomeId} variant="wide" />
+          </div>
         </div>
-        <dl className="hidden w-[104px] shrink-0 space-y-1.5 md:block">
-          <StatRow label="Vol" value={market.volume} />
-          <StatRow label="24h" value={market.volume24h} />
-          <StatRow
-            label={<Users className="h-3 w-3" aria-label="Participants" />}
+
+        {/* Divider */}
+        <div
+          aria-hidden
+          className="hidden w-px bg-gradient-to-b from-transparent via-white/10 to-transparent md:my-10 md:block"
+        />
+
+        {/* Right: stats panel */}
+        <div className="flex w-full flex-row justify-around gap-8 border-t border-white/5 bg-white/[0.01] px-8 py-6 md:w-64 md:flex-col md:justify-center md:gap-10 md:border-t-0 md:px-8 md:py-10">
+          <StatBlock label="Total Volume" value={market.volume} />
+          <StatBlock
+            label="Live Players"
             value={market.participants.toLocaleString()}
+            pulse
           />
-        </dl>
+        </div>
       </div>
+
+      {/* Bottom accent trim */}
+      <div className="pointer-events-none absolute bottom-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-primary/30 to-transparent" />
     </header>
   );
 }
 
-function StatRow({ label, value }: { label: React.ReactNode; value: string }) {
+function StatBlock({
+  label,
+  value,
+  pulse,
+}: {
+  label: string;
+  value: string;
+  pulse?: boolean;
+}) {
   return (
-    <div className="flex items-center justify-between gap-2 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
-      <dt className="inline-flex items-center">{label}</dt>
-      <dd className="text-foreground tabular-nums text-[11px] normal-case">{value}</dd>
+    <div className="space-y-2">
+      <div className="flex items-center gap-2">
+        {pulse ? (
+          <span
+            aria-hidden
+            className="h-1.5 w-1.5 animate-pulse rounded-full bg-win shadow-[0_0_10px_currentColor]"
+          />
+        ) : null}
+        <p className="font-mono text-[9px] font-black uppercase tracking-[0.35em] text-muted-foreground/70">
+          {label}
+        </p>
+      </div>
+      <p className="font-mono text-2xl font-medium tracking-tight text-foreground tabular-nums">
+        {value}
+      </p>
     </div>
   );
 }
 
-function CrestBlock({ name, logo, hue }: { name: string; logo: string; hue: number }) {
+function CrestBlock({ name, logo }: { name: string; logo: string }) {
   return (
-    <div className="flex flex-col items-center gap-2">
-      <div
-        className="grid h-[60px] w-[60px] place-items-center rounded-full bg-white/[0.05] p-2 ring-1 ring-white/10"
-        style={{ boxShadow: `0 0 30px -6px oklch(0.7 0.22 ${hue} / 0.55)` }}
-      >
-        <img src={logo} alt={name} className="h-full w-full object-contain" />
+    <div className="group flex flex-col items-center gap-4">
+      <div className="relative">
+        <div className="absolute inset-0 scale-125 rounded-full bg-primary/30 opacity-0 blur-2xl transition-opacity duration-500 group-hover:opacity-100" />
+        <div className="relative grid h-20 w-28 place-items-center overflow-hidden rounded-xl bg-white/[0.04] p-3 shadow-2xl ring-1 ring-white/15 transition-transform duration-300 group-hover:scale-105">
+          <img src={logo} alt={name} className="h-full w-full object-contain" />
+        </div>
       </div>
-      <div className="font-display text-sm font-semibold text-foreground">{name}</div>
+      <div className="max-w-[140px] text-center font-display text-[12px] font-black uppercase tracking-[0.22em] text-foreground/90">
+        {name}
+      </div>
     </div>
   );
 }
