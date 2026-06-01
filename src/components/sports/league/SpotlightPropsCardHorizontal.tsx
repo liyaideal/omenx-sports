@@ -49,7 +49,8 @@ export function SpotlightPropsCardHorizontal({
   const totalVol = player.props.reduce((s, m) => s + parseDollars(m.volume), 0);
   const total24h = player.props.reduce((s, m) => s + parseDollars(m.volume24h ?? "0"), 0);
   const endsLabel = player.props[0]?.endsLabel ?? "";
-  const primaryMarketId = player.props[0]?.id;
+  const primaryMarketId =
+    player.props[0]?.eventMarketId ?? player.props[0]?.id;
 
   return (
     <section className="relative flex h-full overflow-hidden rounded-2xl border border-border bg-surface bg-ambient shadow-card">
@@ -159,7 +160,12 @@ export function SpotlightPropsCardHorizontal({
                 <div className="flex shrink-0 items-center gap-1.5">
                   <button
                     type="button"
-                    onClick={() => openTrade({ marketId: m.id, outcomeId: yes.id })}
+                    onClick={() =>
+                      openTrade({
+                        marketId: m.eventMarketId ?? m.id,
+                        outcomeId: m.eventOutcomeId ?? yes.id,
+                      })
+                    }
                     className="inline-flex items-center gap-1 rounded-md bg-[oklch(0.78_0.18_155_/_0.12)] px-2 py-1 font-mono text-[11px] font-semibold tabular-nums text-[oklch(0.85_0.16_155)] ring-1 ring-[oklch(0.78_0.18_155_/_0.3)] transition hover:bg-[oklch(0.78_0.18_155_/_0.22)]"
                     aria-label={`Buy ${yes.label} on ${m.title}`}
                   >
@@ -168,7 +174,12 @@ export function SpotlightPropsCardHorizontal({
                   </button>
                   <button
                     type="button"
-                    onClick={() => openTrade({ marketId: m.id, outcomeId: no.id })}
+                    onClick={() =>
+                      openTrade({
+                        marketId: m.eventMarketId ?? m.id,
+                        outcomeId: m.eventOutcomeId ?? no.id,
+                      })
+                    }
                     className="inline-flex items-center gap-1 rounded-md bg-[oklch(0.7_0.22_25_/_0.12)] px-2 py-1 font-mono text-[11px] font-semibold tabular-nums text-[oklch(0.82_0.16_25)] ring-1 ring-[oklch(0.7_0.22_25_/_0.3)] transition hover:bg-[oklch(0.7_0.22_25_/_0.22)]"
                     aria-label={`Buy ${no.label} on ${m.title}`}
                   >

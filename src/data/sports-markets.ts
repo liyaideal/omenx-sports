@@ -62,6 +62,14 @@ export interface SportsMarket {
   /** Optional team/entity the market is about — drives the row crest
    *  inside bundled props cards. */
   subjectTeam?: TeamLite;
+  /** When this market is a single row inside a bundled multi-outcome event
+   *  (e.g. "Brazil" inside the "World Cup Champion" event), point to the
+   *  consolidated event market id so the card link and trade drawer open
+   *  the right page instead of a per-team binary stub. */
+  eventMarketId?: string;
+  /** The outcome id (inside the consolidated event market) that this row
+   *  represents — used to preselect the right outcome in the trade drawer. */
+  eventOutcomeId?: string;
 }
 
 export const FEATURED_MATCH: SportsMarket = {
@@ -776,6 +784,8 @@ const WC_CHAMPION_SPOTLIGHT: PlayerSpotlight = {
       title: "Brazil to win the World Cup 2026",
       subject: "Brazil",
       subjectTeam: TEAMS.brazil,
+      eventMarketId: "wc26-champion",
+      eventOutcomeId: "bra",
       league: { name: "World Cup 2026", short: "WC" },
       endsLabel: "Settles Jul 19, 2026",
       volume: "$2.40M",
@@ -794,6 +804,8 @@ const WC_CHAMPION_SPOTLIGHT: PlayerSpotlight = {
       title: "Argentina to win the World Cup 2026",
       subject: "Argentina",
       subjectTeam: TEAMS.argentina,
+      eventMarketId: "wc26-champion",
+      eventOutcomeId: "arg",
       league: { name: "World Cup 2026", short: "WC" },
       endsLabel: "Settles Jul 19, 2026",
       volume: "$2.10M",
@@ -812,6 +824,8 @@ const WC_CHAMPION_SPOTLIGHT: PlayerSpotlight = {
       title: "France to win the World Cup 2026",
       subject: "France",
       subjectTeam: TEAMS.france,
+      eventMarketId: "wc26-champion",
+      eventOutcomeId: "fra",
       league: { name: "World Cup 2026", short: "WC" },
       endsLabel: "Settles Jul 19, 2026",
       volume: "$1.80M",
@@ -830,6 +844,8 @@ const WC_CHAMPION_SPOTLIGHT: PlayerSpotlight = {
       title: "England to win the World Cup 2026",
       subject: "England",
       subjectTeam: TEAMS.england,
+      eventMarketId: "wc26-champion",
+      eventOutcomeId: "eng",
       league: { name: "World Cup 2026", short: "WC" },
       endsLabel: "Settles Jul 19, 2026",
       volume: "$1.45M",
@@ -848,6 +864,8 @@ const WC_CHAMPION_SPOTLIGHT: PlayerSpotlight = {
       title: "Spain to win the World Cup 2026",
       subject: "Spain",
       subjectTeam: TEAMS.spain,
+      eventMarketId: "wc26-champion",
+      eventOutcomeId: "spa",
       league: { name: "World Cup 2026", short: "WC" },
       endsLabel: "Settles Jul 19, 2026",
       volume: "$1.20M",
@@ -860,6 +878,26 @@ const WC_CHAMPION_SPOTLIGHT: PlayerSpotlight = {
       tradeHref: `/event/n`,
     },
   ],
+};
+
+export const WC_CHAMPION_MARKET: SportsMarket = {
+  id: "wc26-champion",
+  kind: "league-winner",
+  shape: "three-way",
+  title: "World Cup 2026 — Champion",
+  league: { name: "World Cup 2026", short: "WC" },
+  endsLabel: "Settles Jul 19, 2026",
+  volume: "$8.95M",
+  volume24h: "$1.18M",
+  participants: 25070,
+  outcomes: [
+    { id: "bra", label: "Brazil", price: 0.18, delta24h: 0.02, team: TEAMS.brazil },
+    { id: "arg", label: "Argentina", price: 0.16, delta24h: -0.01, team: TEAMS.argentina },
+    { id: "fra", label: "France", price: 0.14, delta24h: 0.01, team: TEAMS.france },
+    { id: "eng", label: "England", price: 0.11, delta24h: 0, team: TEAMS.england },
+    { id: "spa", label: "Spain", price: 0.10, delta24h: 0.01, team: TEAMS.spain },
+  ],
+  tradeHref: `/event/wc26-champion`,
 };
 
 const WC_GOLDEN_BOOT_SPOTLIGHT: PlayerSpotlight = {
@@ -1046,6 +1084,7 @@ export const ALL_MARKETS: SportsMarket[] = [
   UCL_WINNER_MARKET,
   LALIGA_TOP_SCORER_MARKET,
   UCL_TOP_SCORER_MARKET,
+  WC_CHAMPION_MARKET,
   ...SPOTLIGHTS.flatMap((s) => s.props),
   ...GROUP_OUTCOME_MARKETS,
 ];
