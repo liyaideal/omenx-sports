@@ -508,17 +508,31 @@ function EventDetailHeader({
   outcomeId?: string;
 }) {
   const fixture = market.fixture;
+  const leagueBg = LEAGUE_BG[market.league.short];
   return (
-    <header className="relative overflow-hidden rounded-3xl border border-border bg-surface bg-ambient shadow-card">
-      {/* Ambient orbs */}
-      <div
-        aria-hidden
-        className="pointer-events-none absolute -right-20 -top-20 h-72 w-72 rounded-full bg-primary/15 blur-[100px]"
-      />
-      <div
-        aria-hidden
-        className="pointer-events-none absolute -bottom-20 -left-20 h-72 w-72 rounded-full bg-primary/10 blur-[100px]"
-      />
+    <header className="relative overflow-hidden rounded-3xl border border-border bg-surface shadow-card">
+      {/* League atmospheric background */}
+      {leagueBg ? (
+        <>
+          <img
+            aria-hidden
+            src={leagueBg}
+            alt=""
+            loading="lazy"
+            className="pointer-events-none absolute inset-0 h-full w-full object-cover opacity-40"
+          />
+          <div
+            aria-hidden
+            className="pointer-events-none absolute inset-0 bg-gradient-to-b from-surface/60 via-surface/80 to-surface"
+          />
+          <div
+            aria-hidden
+            className="pointer-events-none absolute inset-0 bg-gradient-to-r from-surface/70 via-transparent to-surface/70"
+          />
+        </>
+      ) : (
+        <div aria-hidden className="pointer-events-none absolute inset-0 bg-ambient" />
+      )}
 
       {/* Top-right share */}
       <div className="absolute right-4 top-4 z-10">
