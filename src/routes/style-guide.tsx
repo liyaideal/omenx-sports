@@ -121,6 +121,7 @@ const SECTIONS = [
   ["hub-bracket", "Hub · Bracket"],
   ["trade-drawer", "Sticky Trade Drawer"],
   ["trade-outcome-picker", "Trade Outcome Picker"],
+  ["production-inventory", "Production Inventory"],
 ] as const;
 
 function Section({ id, title, kicker, children }: { id: string; title: string; kicker?: string; children: React.ReactNode }) {
