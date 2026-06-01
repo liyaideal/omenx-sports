@@ -121,7 +121,6 @@ function PositionTable({ rows }: { rows: PositionRowData[] }) {
             <Th className="text-right">Entry</Th>
             <Th className="text-right">Mark</Th>
             <Th className="text-right">Lev</Th>
-            <Th className="text-right">Mode</Th>
             <Th className="text-right">Margin</Th>
             <Th className="text-right">Liq</Th>
             <Th className="text-right">PnL</Th>
@@ -147,7 +146,6 @@ function PositionTable({ rows }: { rows: PositionRowData[] }) {
               <Td className="text-right font-mono tabular-nums">{r.entry}¢</Td>
               <Td className="text-right font-mono tabular-nums">{r.mark}¢</Td>
               <Td className="text-right font-mono tabular-nums">{r.leverage}×</Td>
-              <Td className="text-right font-mono uppercase text-[10px] tracking-widest text-muted-foreground">{r.mode}</Td>
               <Td className="text-right font-mono tabular-nums">{r.margin.toFixed(0)}</Td>
               <Td className="text-right font-mono tabular-nums text-loss">{r.liq}¢</Td>
               <Td className={cn("text-right font-mono tabular-nums", r.pnl >= 0 ? "text-win" : "text-loss")}>

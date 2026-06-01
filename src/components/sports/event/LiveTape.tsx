@@ -136,14 +136,14 @@ export function LiveTape({ market, className, rows = 8 }: LiveTapeProps) {
             <div
               key={f.id}
               className={cn(
-                "grid grid-cols-[1fr_auto_auto_auto_auto] items-center gap-3 rounded-lg px-2 py-1.5 transition-colors",
+                "grid grid-cols-[1fr_56px_96px_110px_32px] items-center gap-3 rounded-lg px-2 py-1.5 transition-colors",
                 i === 0 && "bg-white/[0.04]",
               )}
             >
               <span className="truncate text-muted-foreground">{f.user}</span>
               <span
                 className={cn(
-                  "rounded-sm px-1.5 py-0.5 text-[10px] uppercase",
+                  "w-full rounded-sm py-0.5 text-center text-[10px] uppercase",
                   f.side === "buy"
                     ? "bg-win/15 text-win"
                     : "bg-loss/15 text-loss",
@@ -153,16 +153,16 @@ export function LiveTape({ market, className, rows = 8 }: LiveTapeProps) {
               </span>
               <span
                 className={cn(
-                  "min-w-[60px] truncate text-right",
+                  "truncate text-right",
                   tone === "primary" ? "text-primary" : "text-neon",
                 )}
               >
                 {f.outcomeLabel}
               </span>
-              <span className="min-w-[44px] text-right text-foreground">
+              <span className="text-right text-foreground">
                 {f.price}¢ × {f.size}
               </span>
-              <span className="min-w-[28px] text-right text-muted-foreground">
+              <span className="text-right text-muted-foreground">
                 {fmtAgo(f.agoSec)}
               </span>
             </div>
