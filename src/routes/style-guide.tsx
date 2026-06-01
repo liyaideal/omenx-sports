@@ -2202,3 +2202,50 @@ function EventExtrasDemo() {
     </div>
   );
 }
+
+/**
+ * Showcase wrapper that mirrors the real `/event/$id` header shell
+ * (ambient surface + stats panel) around an {@link EventQuestionHeading}.
+ * Used in the style-guide so playground and product stay in sync.
+ */
+function QuestionHeaderDemo({ market }: { market: SportsMarket }) {
+  return (
+    <header className="relative overflow-hidden rounded-3xl border border-border bg-surface shadow-card">
+      <div aria-hidden className="pointer-events-none absolute inset-0 bg-ambient" />
+      <div className="relative flex flex-col items-stretch md:flex-row">
+        <div className="flex flex-1 flex-col">
+          <EventQuestionHeading market={market} />
+        </div>
+        <div
+          aria-hidden
+          className="hidden w-px bg-gradient-to-b from-transparent via-white/10 to-transparent md:my-8 md:block"
+        />
+        <div className="flex w-full flex-row justify-around gap-6 border-t border-white/5 bg-white/[0.01] px-8 py-5 md:w-52 md:flex-col md:justify-center md:gap-5 md:border-t-0 md:px-7 md:pb-8 md:pt-14">
+          <div className="space-y-1">
+            <p className="font-mono text-[9px] font-black uppercase tracking-[0.25em] text-muted-foreground/70">
+              Total Volume
+            </p>
+            <p className="font-mono text-lg font-medium tracking-tight text-foreground tabular-nums">
+              {market.volume}
+            </p>
+          </div>
+          <div className="space-y-1">
+            <div className="flex items-center gap-2">
+              <span
+                aria-hidden
+                className="h-1.5 w-1.5 animate-pulse rounded-full bg-win shadow-[0_0_10px_currentColor]"
+              />
+              <p className="font-mono text-[9px] font-black uppercase tracking-[0.25em] text-muted-foreground/70">
+                Live Players
+              </p>
+            </div>
+            <p className="font-mono text-lg font-medium tracking-tight text-foreground tabular-nums">
+              {market.participants.toLocaleString()}
+            </p>
+          </div>
+        </div>
+      </div>
+      <div className="pointer-events-none absolute bottom-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-primary/30 to-transparent" />
+    </header>
+  );
+}
