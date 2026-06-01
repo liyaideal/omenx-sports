@@ -548,7 +548,7 @@ function EventDetailHeader({
               <CrestBlock name={fixture.home.name} logo={fixture.home.logo} />
               <div className="flex flex-col items-center">
                 <div className="relative py-1">
-                  <span className="select-none font-serif-display text-5xl italic leading-none tracking-tighter text-foreground/[0.06]">
+                  <span className="select-none font-serif-display text-5xl italic leading-none tracking-tighter text-foreground/20">
                     vs
                   </span>
                   <div className="absolute inset-0 flex items-center justify-center">
