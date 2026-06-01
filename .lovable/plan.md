@@ -1,49 +1,46 @@
-## Event header redesign — Cinematic data panel
+## 方案 A：联赛海报做底
 
-Rework `EventDetailHeader` in `src/routes/event.$id.tsx` to match the selected "Cinematic data panel v4" direction. Drop the chips row entirely (no World Cup / Game labels). No data, route, or business-logic changes.
+### 思路
+联赛只有 5 种（WC / UCL / EPL / LL / MLS），我们提前为每个联赛 AI 生成一张 atmospheric 背景图，按 `market.league.short` 映射，作为头部模块的底图，配合深色遮罩 + 轻微模糊保证文字可读。
 
-### Layout
-```text
-┌─────────────────────────────────────────────┬──────────────────┐
-│                                             │  TOTAL VOLUME    │
-│   [USA crest]   vs (faint serif)   [PAR]    │  $612K           │
-│                 9:00 PM TODAY               │                  │
-│                                             │  ● LIVE PLAYERS  │
-│  [ Share match snapshot →↗ ]                │  4,720           │
-└─────────────────────────────────────────────┴──────────────────┘
-```
+### 步骤
 
-- Outer: `rounded-3xl border border-border bg-surface bg-ambient shadow-card relative overflow-hidden`, soft violet/indigo blur orbs in two corners (decorative).
-- Two-column flex (`md:flex-row`):
-  - **Left (flex-1)**: fixture (crests + faint serif `vs` with thin vertical hairline behind it + pill `9:00 PM TODAY`), then a full-width "Share match snapshot" CTA at the bottom.
-  - **Vertical hairline divider** (`hidden md:block w-px bg-gradient-to-b from-transparent via-white/10 to-transparent`).
-  - **Right (w-72)**: two stats — `TOTAL VOLUME` and `LIVE PLAYERS` (pulsing emerald dot). Drop the 24h row to keep the panel calm.
-- Bottom 2px violet gradient trim.
+1. **AI 生成 5 张联赛底图** → `src/assets/league-bg/`
+   - `wc.jpg` — World Cup 2026：北美球场夜景 + 金绿氛围、抽象大力神杯轮廓
+   - `ucl.jpg` — UEFA Champions League：深蓝星空 + 欧冠星纹球场穹顶
+   - `epl.jpg` — Premier League：英伦球场看台灯光 + 紫色调
+   - `ll.jpg` — La Liga：西班牙日落球场 + 橙红渐变
+   - `mls.jpg` — MLS：北美都市夜景球场 + 红蓝氛围
+   - 统一风格：宽幅 1920×720、低饱和、画面中心留暗（给文字让位）、无文字无logo、cinematic、轻噪点
 
-### Removed
-- World Cup `LeagueChip` and `Game/Season winner/...` kind chip — both deleted from the header. (League/kind info is still discoverable via the breadcrumb / page context.)
-- `Users` icon import if unused after removal.
+2. **建立映射** `src/lib/league-backgrounds.ts`
+   ```ts
+   import wc from "@/assets/league-bg/wc.jpg"
+   // ...
+   export const LEAGUE_BG: Record<string, string> = { WC: wc, UCL: ucl, EPL: epl, LL: ll, MLS: mls }
+   ```
 
-### Crest treatment
-- Replace circular glow halos with rounded-xl rectangular crests (`w-24 h-16`, `ring-1 ring-white/15`, soft shadow). Hover adds subtle violet glow + 1.05 scale.
-- Team name: `font-black uppercase tracking-[0.22em] text-[12px]` under the crest.
+3. **改造头部** `src/routes/event.$id.tsx` (EventHeader, line 512+)
+   - 移除当前两个 `bg-primary/15` 紫色 blur orbs
+   - 在 `<header>` 内最底层加：
+     ```tsx
+     <img src={LEAGUE_BG[market.league.short]} className="absolute inset-0 h-full w-full object-cover opacity-40" />
+     <div className="absolute inset-0 bg-gradient-to-b from-surface/70 via-surface/85 to-surface" />
+     <div className="absolute inset-0 backdrop-blur-[2px]" />
+     ```
+   - 保留底部 primary 渐变光带
+   - 兜底：联赛不在映射里时退回当前 `bg-ambient` 纯色
 
-### Typography
-- `vs`: faint italic serif `text-5xl text-foreground/5` with thin vertical divider overlay.
-- Kickoff pill: `text-[10px] font-bold tracking-[0.15em] text-primary uppercase` — combines time + "today" on one line.
-- Stat labels: `text-[9px] font-black tracking-[0.35em] text-muted-foreground/60 uppercase`.
-- Stat values: mono `text-2xl` foreground, tabular-nums.
+4. **同步 style-guide** `/style-guide`（按 core memory）：
+   - 在 event header 示例区切换 league 演示不同底图
 
-### Share button
-- Move `<ShareButton />` to a full-width CTA at the bottom of the left column. Add a `variant?: "icon" | "wide"` prop to `ShareButton`; default `icon`, new `wide` renders the cinematic full-width style. Keeps logic in one place.
+### 视觉效果
+- 没有 "World Cup" label 也能一眼认出赛事
+- 各联赛页面有差异化氛围，但通过统一遮罩保证 UI 一致
+- 文字对比度由 70→85% surface 渐变保证
 
-### Tokens / theming
-- Use semantic tokens (`border-border`, `bg-surface`, `text-foreground`, `text-muted-foreground`, `text-primary`). No raw hex.
+### 风险
+- AI 生成图需要人工挑选，可能跑 1–2 轮才满意（每联赛 1–2 张候选）
+- 文件体积：5 张 jpg 控制在每张 < 200KB
 
-### Files to change
-- `src/routes/event.$id.tsx` — rewrite `EventDetailHeader` + `CrestBlock`, drop chips row + `StatRow` helper, prune unused imports.
-- `src/components/sports/event/ShareButton.tsx` — add `variant` prop.
-- `src/routes/style-guide.tsx` — mirror the new header in the playground.
-
-### Out of scope
-- `RelatedMarketsBar`, `LiveTape`, `PositionsTable`, `TradeForm`, data, routes.
+确认后开始生成图片并接入。
