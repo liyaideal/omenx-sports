@@ -1,5 +1,5 @@
 import { useCallback, useState } from "react";
-import { Check, Share2 } from "lucide-react";
+import { ArrowUpRight, Check, Share2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface ShareButtonProps {
@@ -7,6 +7,8 @@ interface ShareButtonProps {
   outcomeId?: string;
   className?: string;
   label?: string;
+  /** `icon` = compact pill (default). `wide` = full-width cinematic CTA. */
+  variant?: "icon" | "wide";
 }
 
 /**
@@ -14,7 +16,12 @@ interface ShareButtonProps {
  * `?outcome=…` so opening the URL pre-selects the outcome the user was on.
  * Stays visible in the event header regardless of whether the page is live.
  */
-export function ShareButton({ outcomeId, className, label = "Share" }: ShareButtonProps) {
+export function ShareButton({
+  outcomeId,
+  className,
+  label,
+  variant = "icon",
+}: ShareButtonProps) {
   const [copied, setCopied] = useState(false);
 
   const copy = useCallback(() => {
@@ -46,6 +53,32 @@ export function ShareButton({ outcomeId, className, label = "Share" }: ShareButt
     }
   }, [outcomeId]);
 
+  if (variant === "wide") {
+    const wideLabel = label ?? "Share match snapshot";
+    return (
+      <button
+        type="button"
+        onClick={copy}
+        className={cn(
+          "group flex w-full items-center justify-center gap-4 rounded-2xl border border-white/5 bg-white/[0.02] py-4 transition-all duration-300 hover:border-white/10 hover:bg-white/[0.06] active:scale-[0.98]",
+          className,
+        )}
+      >
+        <span className="font-mono text-[11px] font-bold uppercase tracking-[0.25em] text-muted-foreground transition-colors group-hover:text-foreground">
+          {copied ? "Link copied" : wideLabel}
+        </span>
+        <span className="grid h-6 w-6 place-items-center rounded-lg bg-primary/10 transition-colors group-hover:bg-primary/20">
+          {copied ? (
+            <Check className="h-3.5 w-3.5 text-win" />
+          ) : (
+            <ArrowUpRight className="h-3.5 w-3.5 text-primary transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
+          )}
+        </span>
+      </button>
+    );
+  }
+
+  const iconLabel = label ?? "Share";
   return (
     <button
       type="button"
@@ -63,7 +96,7 @@ export function ShareButton({ outcomeId, className, label = "Share" }: ShareButt
       ) : (
         <>
           <Share2 className="h-3.5 w-3.5" />
-          {label}
+          {iconLabel}
         </>
       )}
     </button>
