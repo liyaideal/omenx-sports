@@ -1,70 +1,43 @@
-## 目标
+# 直播音轨 CN/EN 切换
 
-让 `/style-guide` 重新跟当前产品对齐：删掉已下线的旧组件 demo、补齐新组件 demo、把已经过时的措辞（特别是 binary / Yes-No 那套老语言）更新成当前真实规则。
+## 范围确认
 
-## 现状盘点
+只在"真正播放"的三个表面加音轨切换控件，其它入口卡（首页 `LiveStreamCard`、`MobileLiveHero`）不动：
 
-通过对比 `src/components/sports/**` 与 `src/routes/style-guide.tsx` 的 import 列表：
+1. `GlobalStreamMiniPlayer`（全局右下角悬浮）
+2. `FullscreenStreamOverlay`（全屏剧场）
+3. `EventLiveStage`（事件详情页 Stream tab）
 
-### A. 死代码组件（仓库里有文件，但没有任何 route/组件再引用，style-guide 也没展示）
-- `src/components/sports/FanPulseCard.tsx`
-- `src/components/sports/HeroMarketCard.tsx`
-- `src/components/sports/LiquidationBar.tsx`
-- `src/components/sports/LiveTicker.tsx`
-- `src/components/sports/MiniEventCard.tsx`
-- `src/components/sports/PlayerSpotlightHero.tsx`
-- `src/components/sports/TopMoverCard.tsx`
-- `src/components/sports/TopTradersCard.tsx`
-- `src/components/sports/TopBar.tsx`
+## 状态管理
 
-### B. 已在生产页用、但 style-guide 还没收录的组件（需要补 demo）
-Dashboard 层：
-- `AppShell` · `AppTopBar` · `BridgeStrip` · `DayStripCalendar`
-- `FanPostCard` · `FanZoneHeader` · `FansZoneEmpty` · `FollowTeamsCompact` · `FollowTeamsPanel` · `TeamPickerSheet`
-- `LeagueTableCard` · `LeagueWinnerMarketCard` · `MatchMarketCard` · `UpcomingEventCard`
-- `LiveActivityCard` · `PageSectionHeader` · `ShowMoreEventsButton`
-- `PlayerPropsSpotlight` · `PlayerScorerCard` · `TopScorerMarketCard`
-- `dashboard/PlayerSpotlightCard`（注意与根目录 `PlayerSpotlightCard` 同名，需要在 demo 标题区分）
+音轨选择是全局状态：用户在悬浮卡选 CN，进全屏 / 进事件页 stream tab 应保持 CN。放到 `LiveStreamProvider` 里：
 
-Mobile 层：
-- `MobileChrome` · `MobileEventsSection` · `MobileFansSection` · `MobileSeeMoreCard`
+- 在 context 增加 `audioTrack: "cn" | "en"` 与 `setAudioTrack`
+- 默认 `"en"`，记忆到 `localStorage`（key: `omenx.live.audio`）
+- 暴露给三个消费组件
 
-Live / Trade 层：
-- `live/FullscreenStreamOverlay` · `live/GlobalStreamMiniPlayer`
-- `trade/TradeDrawer`（目前只 demo 了 provider，没有 drawer 内部样式独立 demo；可在现有 "Sticky Trade Drawer" 章节里补一个内嵌静态预览）
+## UI 规格
 
-Event 层：
-- `event/CombinedPriceChart`（被 `EventOutcomesPanel` 复用，需要在交易详情页章节展示一次）
+统一的小型 segmented pill，两个选项 `EN` / `CN`，复用现有 chrome 按钮风格：
 
-### C. 措辞 / 规则严重过时的章节
-1. **Section 11 "Single-Market Binary"** 与 Section 12 "Multi-Market Event"：通篇说"每个 market 就是 Yes/No"，与最新的 `event = 问题、market = 选项；binary event 不再嵌套 YES/NO；多选项 event 才有 per-outcome YES/NO` 完全冲突。需要：
-   - 把章节标题改成 "Binary Event (2 outcomes)" / "Multi-Outcome Event (3+ outcomes)"
-   - 重写描述，引用 `mem://rules/binary-event` 的规则：binary = 两个 outcome 各一个 Trade 按钮 + 一个共享 OrderBook；multi-outcome = 每个 outcome 自带 YES/NO + 独立 OrderBook
-   - 删除 "Every market is a single Yes/No binary. p(No) = 100 − p(Yes)" 这类已经不成立的总结
-2. **Section 14 "Trading Language"** 里 "Yes/No literal text · color = side" 的表格行 + 列举条文需要按新规则改写（binary event 不再叫 Yes/No；只有 sideLabels alias / outcome label）。
-3. **Section "Hub · Bracket"** 需要更新说明：BracketView 卡片只展示两支球队，但跳转的 `/event/<matchup>` 是 1X2（home/draw/away）三选项 market —— 这是这次刚改的规则，必须写进 demo 文案，否则别人会以为还是 binary。
-4. **EventOutcomesPanel demo 文案**（已经基本正确）核对一遍，确认与代码现状匹配；如果有微调（例如 `selectedIdx + tradeSide` 文案）顺手修。
-5. **DESIGN.md** §7 "Do's and Don'ts" 追加两条：
-   - Don't: 把 binary event 再渲染成 per-outcome Yes/No。
-   - Don't: 在 BracketView 卡片里加 Draw 行（Draw 只在详情页的 1X2 outcomes 面板出现）。
+- **MiniPlayer**：放在海报右下角内嵌的控制层（与时钟同一区），尺寸 `h-5`，字号 `text-[9px]`，仅图标式，hover 显示完整。避免和底部 Trade 行抢空间。
+- **FullscreenOverlay**：放在顶部 chrome 右侧（`SquareArrowOutUpRight` 左边），尺寸 `h-9`，与现有圆形 chrome 按钮等高的胶囊。
+- **EventLiveStage**：放在视频右上角覆盖层（与现在的 LIVE/clock 同侧但下沉一层），尺寸 `h-7`。
 
-## 执行步骤
+视觉：未选 = `bg-white/10 text-white/60`；选中 = `bg-[color:var(--accent)] text-[color:var(--accent-foreground)]`。整体一个 `<AudioTrackToggle size="sm|md|lg" />` 共享组件，避免三处复制。
 
-1. **删除 A 组死代码组件文件**（共 9 个）。先 `rg` 二次确认无引用后再删，避免误删。
-2. **更新 Section 11/12/14 文案与示例**（不动数据来源，只改 copy + 删除已经不适用的 demo 卡片）。
-3. **更新 Section "Hub · Bracket"** 说明，加一句 "卡片只展示两队；交易详情页是 1X2 三选项 market（含 Draw）"。
-4. **在 style-guide 末尾新增章节**承载 B 组未收录的组件 demo。建议按归属分组而不是 22 个独立小节：
-   - 新章节 `dashboard-shell`：AppShell · AppTopBar · BridgeStrip · DayStripCalendar · PageSectionHeader · ShowMoreEventsButton
-   - 新章节 `dashboard-cards`：MatchMarketCard · UpcomingEventCard · LeagueTableCard · LeagueWinnerMarketCard · TopScorerMarketCard · PlayerScorerCard · PlayerPropsSpotlight · dashboard/PlayerSpotlightCard · LiveActivityCard
-   - 在已有 `fans` 章节内补：FanZoneHeader · FanPostCard · FansZoneEmpty · FollowTeamsCompact · FollowTeamsPanel · TeamPickerSheet
-   - 在已有 `mobile-shell` 章节内补：MobileChrome · MobileEventsSection · MobileFansSection · MobileSeeMoreCard
-   - 在已有 `trade-drawer` / event 相关章节内补：TradeDrawer 内部样式预览 · CombinedPriceChart · live/FullscreenStreamOverlay · live/GlobalStreamMiniPlayer
-   - `SECTIONS` 顶部目录数组同步增加新条目，让侧栏 / 跳转锚点可用
-5. **DESIGN.md** §7 追加上述两条 Don't。
-6. **本地校验**：`bun run` 走 typecheck/build；浏览器打开 `/style-guide` 滚一遍，确认新增 demo 都能渲染、文案与产品一致。
+## 行为
 
-## 不做的事
+- 切换时只更新 provider state（mock 阶段不真的换音轨，预留接入 hls.js `audioTracks` 的位置，写个 `// TODO: switch <audio>/HLS track here` 注释）
+- 因为目前播放面是静态海报，没有真实 `<video>`，所以这一版仅做 UI + 状态联动；后续接真实流时再 wire 到 player API。
 
-- 不重写整个 style-guide 的视觉/排版，只补漏 + 修过时文案。
-- 不动任何业务页面（`/`、`/event/$id`、`/league/$slug`、`/fans`、`/events`）的实际行为。
-- 不调整 design tokens / styles.css。
+## 新增 / 修改文件
+
+- 新增 `src/components/sports/live/AudioTrackToggle.tsx`
+- 修改 `src/components/sports/live/LiveStreamProvider.tsx`（加 audioTrack state + persist）
+- 修改 `GlobalStreamMiniPlayer.tsx` / `FullscreenStreamOverlay.tsx` / `EventLiveStage.tsx`（嵌入 toggle）
+- 在 `src/routes/style-guide.tsx` Live 区块加 `AudioTrackToggle` 的三种尺寸 demo（遵循 core rule：新共享组件必须在 style guide 展示）
+
+## 确认点
+
+如果你希望默认是 CN 而不是 EN，或想用文字 `中文 / English` 而不是 `CN / EN`，告诉我，我在实现时调一下。
