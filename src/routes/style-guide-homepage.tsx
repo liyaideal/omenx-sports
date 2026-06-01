@@ -73,6 +73,9 @@ export const Route = createFileRoute("/style-guide-homepage")({
 });
 
 const SECTIONS = [
+  // (constant defined below)
+] as const;
+const _placeholder = 0; void _placeholder;
   ["topbar", "AppTopBar"],
   ["fanzone-header", "FanZoneHeader"],
   ["fanzone-body", "Fans Zone body"],
