@@ -1657,14 +1657,31 @@ function StyleGuide() {
             </div>
           </Section>
 
+          <Section id="trade-outcome-picker" title="Trade Outcome Picker" kicker="22b — shared by drawer + event page">
+            <p className="mb-6 max-w-3xl text-sm text-muted-foreground">
+              Shared "Pick outcome (+ Pick side)" selector used by both the global
+              <code className="font-mono text-foreground"> TradeDrawer</code> and the in-page trade column on
+              <code className="font-mono text-foreground"> /event/$id</code>. Pills are intentionally compact so they don't
+              outweigh the actual order form below. 2–3 outcomes flex-fill the row; 4+ overflow into a single horizontal
+              scroller (never wraps to a second line).
+            </p>
+
+            <TradeOutcomePickerDemo />
+
+            <div className="mt-6 rounded-2xl border border-dashed border-white/15 bg-white/[0.02] p-5 text-xs">
+              <div className="mb-2 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+                Rules
+              </div>
+              <ul className="space-y-1.5 text-muted-foreground">
+                <li>• Always single-row. ≤3 outcomes: each pill <code className="font-mono text-foreground">flex-1</code> fills the row. ≥4 outcomes: horizontal scroll with right-edge fade mask.</li>
+                <li>• Pills are compact (<code className="font-mono text-foreground">py-1.5</code>, <code className="font-mono text-foreground">text-sm</code> price) so the trade form below stays the visual focus — not the picker.</li>
+                <li>• When market has ≥3 outcomes, a YES/NO side toggle appears below — each outcome is its own binary sub-market.</li>
+                <li>• Fully controlled — caller owns <code className="font-mono text-foreground">outcomeId</code> + <code className="font-mono text-foreground">side</code> state. Selected outcome auto-scrolls into view.</li>
+              </ul>
+            </div>
+          </Section>
+
           <Section id="event-live-stage" title="Event live stage" kicker="23 — P0 / event detail">
-          </Section>
-
-
-          <Section id="trade-outcome-picker-tmp" title="tmp" kicker="tmp">
-          </Section>
-
-          <Section id="event-live-stage-tmp2" title="x" kicker="x">
             <p className="mb-6 max-w-3xl text-sm text-muted-foreground">
               16:9 broadcast surface used at the top of <code className="font-mono text-foreground">/event/$id</code> when the underlying
               market is being streamed (<code className="font-mono text-foreground">market.isLiveStream</code>). Combines the live poster,
