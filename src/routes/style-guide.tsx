@@ -66,6 +66,7 @@ import { SpotlightPropsCardHorizontal } from "@/components/sports/league/Spotlig
 import { EventMarketTileCard } from "@/components/sports/dashboard/EventMarketTileCard";
 import { useTradeDrawer } from "@/components/sports/trade/TradeDrawerProvider";
 import { TradeOutcomePicker } from "@/components/sports/trade/TradeOutcomePicker";
+import { EventOutcomesPanel } from "@/components/sports/event/EventOutcomesPanel";
 import type { SportsMarket } from "@/data/sports-markets";
 import {
   WC26_GROUPS,
