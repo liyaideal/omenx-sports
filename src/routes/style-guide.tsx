@@ -1814,6 +1814,71 @@ function TradeDrawerDemo() {
 }
 
 function EventLiveStageDemo() {
+  return null;
+}
+
+function _PickerVariant({ market }: { market: SportsMarket }) {
+  const [outcomeId, setOutcomeId] = useState(market.outcomes[0]?.id);
+  const [side, setSide] = useState<"yes" | "no">("yes");
+  return (
+    <div className="rounded-2xl border border-border bg-background/60 p-4">
+      <div className="mb-3 flex items-baseline justify-between">
+        <div className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+          {market.outcomes.length} outcomes
+        </div>
+        <div className="truncate font-display text-xs font-semibold text-foreground/80">
+          {market.title}
+        </div>
+      </div>
+      <TradeOutcomePicker
+        market={market}
+        outcomeId={outcomeId}
+        onOutcomeChange={setOutcomeId}
+        side={side}
+        onSideChange={setSide}
+      />
+    </div>
+  );
+}
+
+function TradeOutcomePickerDemo() {
+  const binary = MATCH_MARKETS.find((m) => m.outcomes.length === 2) ?? FEATURED_MATCH;
+  const threeWay = MATCH_MARKETS.find((m) => m.outcomes.length === 3) ?? FEATURED_MATCH;
+
+  // Synthesize a 7-outcome "player to score first" prop to validate the
+  // horizontal-scroll path. Mirrors the SportsMarket shape used elsewhere.
+  const sevenWay: SportsMarket = {
+    id: "demo-7-prop",
+    kind: "player-prop",
+    shape: "three-way",
+    title: "First goalscorer — USA vs Mexico",
+    league: { name: "World Cup 2026", short: "WC" },
+    endsLabel: "Today 8:00pm",
+    volume: "$42K",
+    volume24h: "$12K",
+    participants: 612,
+    tradeHref: "#",
+    outcomes: [
+      { id: "p1", label: "Pulisic", price: 0.22 },
+      { id: "p2", label: "Reyna", price: 0.18 },
+      { id: "p3", label: "Pepi", price: 0.14 },
+      { id: "p4", label: "Balogun", price: 0.13 },
+      { id: "p5", label: "Aaronson", price: 0.10 },
+      { id: "p6", label: "Weah", price: 0.09 },
+      { id: "p7", label: "Other / no goal", price: 0.14 },
+    ],
+  };
+
+  return (
+    <div className="grid gap-4 lg:grid-cols-3">
+      <_PickerVariant market={binary} />
+      <_PickerVariant market={threeWay} />
+      <_PickerVariant market={sevenWay} />
+    </div>
+  );
+}
+
+function _EventLiveStageDemo() {
   const live =
     MATCH_MARKETS.find((m) => m.isLiveStream && m.liveScore && m.fixture) ??
     FEATURED_MATCH;
