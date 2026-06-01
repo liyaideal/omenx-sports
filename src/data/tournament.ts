@@ -469,13 +469,33 @@ export const BRACKET_MARKETS = WC26_BRACKET.flatMap((round) =>
     const away = bracketTeamToLite(m.away);
     if (!home || !away) return [];
     if (m.homePrice == null || m.awayPrice == null) return [];
+    // Derive a 1X2 (home/draw/away) market for the detail page. Bracket
+    // list itself only shows two teams; the trade page exposes the full
+    // 90-minute 1X2 question (knockout extra-time/penalties not counted).
+    const rawHome = m.homePrice;
+    const rawAway = m.awayPrice;
+    const sum = rawHome + rawAway;
+    let homePrice: number;
+    let awayPrice: number;
+    let drawPrice: number;
+    if (sum < 1) {
+      homePrice = Math.round(rawHome * 100) / 100;
+      awayPrice = Math.round(rawAway * 100) / 100;
+      drawPrice = Math.round((1 - homePrice - awayPrice) * 100) / 100;
+    } else {
+      // Reserve a baseline draw probability and renormalize home/away.
+      drawPrice = 0.18;
+      const scale = (1 - drawPrice) / sum;
+      homePrice = Math.round(rawHome * scale * 100) / 100;
+      awayPrice = Math.round((1 - drawPrice - homePrice) * 100) / 100;
+    }
     return [
       {
         id: m.id,
         kind: "match" as const,
-        shape: "binary" as const,
+        shape: "three-way" as const,
         title: `${home.name} vs ${away.name} — Winner`,
-        kindLabel: `${round.label} · Match winner`,
+        kindLabel: `${round.label} · 1X2`,
         league: { name: "World Cup 2026", short: "WC" },
         endsLabel: m.kickoffLabel ?? round.label,
         volume: "$0",
@@ -488,8 +508,9 @@ export const BRACKET_MARKETS = WC26_BRACKET.flatMap((round) =>
           whenLabel: round.label,
         },
         outcomes: [
-          { id: "home", label: home.name, price: m.homePrice, delta24h: 0, team: home },
-          { id: "away", label: away.name, price: m.awayPrice, delta24h: 0, team: away },
+          { id: "home", label: home.name, price: homePrice, delta24h: 0, team: home },
+          { id: "draw", label: "Draw", price: drawPrice, delta24h: 0, meta: "X" },
+          { id: "away", label: away.name, price: awayPrice, delta24h: 0, team: away },
         ],
         stage: round.label,
         tradeHref: `/event/${m.id}`,
