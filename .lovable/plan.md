@@ -1,11 +1,19 @@
 ## 改动
 
-`src/components/sports/event/LiveTape.tsx`：行内的 `{f.price}¢ × {f.size}` 改为只显示 `{f.price}¢`，去掉 `× size`，避免泄露成交量。
+### 1. `RelatedMarketsBar.tsx` 标签改名
 
-列宽相应收窄：grid 第 4 列从 `110px` 改到 `64px`，让右端整体更紧凑。
+- 左侧 `Markets` → `Related Events`（小标题文案，不动组件名/props）
 
-`Fill` 类型和数据生成里的 `size` 字段保留（不影响别处，也方便以后内部使用），仅 UI 不再展示。
+### 2. `event.$id.tsx` 位置调整
+
+- 从 `EventDetailHeader` 下方移除当前的 `<RelatedMarketsBar … />` 块
+- 放到底部 `<PositionsTable …/>` 上方（同一个 `<div className="px-6 pb-28 …">` 容器内，PositionsTable 之前，加点上下间距）
+
+### 3. style-guide 同步
+
+- `src/routes/style-guide.tsx` 里 RelatedMarketsBar 演示位置不动，仅文案 demo 自然跟着组件走（无需改）
 
 ## 文件
 
-- `src/components/sports/event/LiveTape.tsx`
+- `src/components/sports/event/RelatedMarketsBar.tsx`
+- `src/routes/event.$id.tsx`

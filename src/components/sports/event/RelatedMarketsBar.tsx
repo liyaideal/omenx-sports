@@ -30,7 +30,7 @@ export function RelatedMarketsBar({
     >
       <div className="flex items-center gap-2">
         <span className="shrink-0 px-1 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
-          Markets
+          Related events
         </span>
         <div className="-mx-1 flex min-w-0 flex-1 items-center gap-1.5 overflow-x-auto px-1 pb-0.5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           {markets.map((m, i) => {

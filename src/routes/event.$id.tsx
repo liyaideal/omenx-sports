@@ -411,11 +411,6 @@ function EventTradePage() {
             market={active}
             outcomeId={selected?.id}
           />
-          <RelatedMarketsBar
-            markets={relatedMarkets}
-            activeIdx={activeRelatedIdx}
-            onSelect={setActiveRelatedIdx}
-          />
           {isPreMatch && <PreMatchStrip market={market} />}
           {isLive ? (
             <StageTabs
@@ -490,7 +485,12 @@ function EventTradePage() {
         </div>
       </div>
 
-      <div className="px-6 pb-28 md:px-8 lg:pb-12">
+      <div className="space-y-5 px-6 pb-28 md:px-8 lg:pb-12">
+        <RelatedMarketsBar
+          markets={relatedMarkets}
+          activeIdx={activeRelatedIdx}
+          onSelect={setActiveRelatedIdx}
+        />
         <PositionsTable positions={livePositions} orders={allOrders} history={history} />
       </div>
 
