@@ -396,20 +396,13 @@ export function TradeForm({
 
       {/* Summary */}
       <dl className="mt-5 space-y-1.5 border-t border-border pt-4 text-[11px] font-mono">
-        <SummaryRow label="Avg price" value={`${Math.round(px)}¢`} />
-        <SummaryRow label="Margin mode" value="Cross" />
         <SummaryRow label="Margin" value={`${margin.toFixed(2)} USDC`} />
-        <SummaryRow label="Notional" value={`${notional.toFixed(2)} USDC`} />
         <SummaryRow label="Contracts" value={shares.toFixed(1)} />
-        <SummaryRow label="Fee" value={`${fee.toFixed(2)} USDC`} />
         <SummaryRow
           label="Est. PnL @ settle"
           value={`${pnlAtSettle >= 0 ? "+" : ""}${pnlAtSettle.toFixed(2)} USDC`}
           highlight={pnlAtSettle >= 0 ? "win" : "loss"}
         />
-        {leverage > 1 && (
-          <SummaryRow label="Liq price" value={`${Math.round(liq)}¢`} highlight="loss" />
-        )}
       </dl>
 
       <div className="sticky bottom-0 -mx-5 -mb-5 mt-5 border-t border-border bg-background/95 px-5 py-3 backdrop-blur">
