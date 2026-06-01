@@ -54,6 +54,14 @@ export interface SportsMarket {
    *  a tournament hub the league chip is replaced by this stage chip —
    *  league is implied by the hub, stage is the useful axis. */
   stage?: string;
+  /** Short row label used when this market renders inside a bundle whose
+   *  parent event already supplies the question context (e.g. row label
+   *  "Brazil" inside a "World Cup Champion" card instead of repeating
+   *  "Brazil to win the World Cup 2026"). */
+  subject?: string;
+  /** Optional team/entity the market is about — drives the row crest
+   *  inside bundled props cards. */
+  subjectTeam?: TeamLite;
 }
 
 export const FEATURED_MATCH: SportsMarket = {

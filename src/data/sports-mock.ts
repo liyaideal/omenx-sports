@@ -117,6 +117,36 @@ export const TEAMS = {
     logo: "https://flagcdn.com/w160/py.png",
     hue: 10,
   },
+  brazil: {
+    name: "Brazil",
+    short: "BRA",
+    logo: "https://flagcdn.com/w160/br.png",
+    hue: 145,
+  },
+  argentina: {
+    name: "Argentina",
+    short: "ARG",
+    logo: "https://flagcdn.com/w160/ar.png",
+    hue: 215,
+  },
+  france: {
+    name: "France",
+    short: "FRA",
+    logo: "https://flagcdn.com/w160/fr.png",
+    hue: 250,
+  },
+  england: {
+    name: "England",
+    short: "ENG",
+    logo: "https://flagcdn.com/w160/gb-eng.png",
+    hue: 25,
+  },
+  spain: {
+    name: "Spain",
+    short: "ESP",
+    logo: "https://flagcdn.com/w160/es.png",
+    hue: 30,
+  },
 } as const satisfies Record<string, TeamLite>;
 
 export const FAN_POST = {
