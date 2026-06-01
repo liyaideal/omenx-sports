@@ -520,11 +520,16 @@ function EventDetailHeader({
         className="pointer-events-none absolute -bottom-20 -left-20 h-72 w-72 rounded-full bg-primary/10 blur-[100px]"
       />
 
+      {/* Top-right share */}
+      <div className="absolute right-4 top-4 z-10">
+        <ShareButton outcomeId={outcomeId} />
+      </div>
+
       <div className="relative flex flex-col items-stretch md:flex-row">
         {/* Left: fixture + share */}
         <div className="flex flex-1 flex-col">
           {fixture ? (
-            <div className="flex items-center justify-around gap-6 px-8 pt-8 pb-6 md:px-12 md:pt-10">
+            <div className="flex min-h-[200px] items-center justify-around gap-6 px-8 py-10 md:px-12 md:py-12">
               <CrestBlock name={fixture.home.name} logo={fixture.home.logo} />
               <div className="flex flex-col items-center">
                 <div className="relative py-1">
@@ -544,25 +549,21 @@ function EventDetailHeader({
               <CrestBlock name={fixture.away.name} logo={fixture.away.logo} />
             </div>
           ) : (
-            <div className="px-8 pt-10 pb-6 text-center md:px-12">
+            <div className="flex min-h-[200px] flex-col items-center justify-center px-8 py-10 text-center md:px-12 md:py-12">
               <h1 className="font-display text-2xl font-bold text-foreground">{market.title}</h1>
               <div className="mt-1 text-sm text-muted-foreground">{market.league.name}</div>
             </div>
           )}
-
-          <div className="px-8 pb-8 md:px-12 md:pb-10">
-            <ShareButton outcomeId={outcomeId} variant="wide" />
-          </div>
         </div>
 
         {/* Divider */}
         <div
           aria-hidden
-          className="hidden w-px bg-gradient-to-b from-transparent via-white/10 to-transparent md:my-10 md:block"
+          className="hidden w-px bg-gradient-to-b from-transparent via-white/10 to-transparent md:my-12 md:block"
         />
 
         {/* Right: stats panel */}
-        <div className="flex w-full flex-row justify-around gap-8 border-t border-white/5 bg-white/[0.01] px-8 py-6 md:w-64 md:flex-col md:justify-center md:gap-10 md:border-t-0 md:px-8 md:py-10">
+        <div className="flex w-full flex-row justify-around gap-8 border-t border-white/5 bg-white/[0.01] px-8 py-6 md:w-64 md:flex-col md:justify-center md:gap-10 md:border-t-0 md:px-8 md:py-12">
           <StatBlock label="Total Volume" value={market.volume} />
           <StatBlock
             label="Live Players"
