@@ -3,7 +3,7 @@ import { Link } from "@tanstack/react-router";
 import { ExternalLink, X } from "lucide-react";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { TradeForm } from "@/components/sports/TradeForm";
-import { cn } from "@/lib/utils";
+import { TradeOutcomePicker } from "./TradeOutcomePicker";
 import type { SportsMarket } from "@/data/sports-markets";
 
 /**
@@ -103,79 +103,15 @@ export function TradeDrawer({
           </button>
         </header>
 
-        {/* Outcome chooser */}
         <div className="border-b border-border px-5 py-3">
-          <div className="mb-2 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
-            Pick outcome
-          </div>
-          <div
-            className={cn(
-              "grid gap-2",
-              market.outcomes.length <= 2 ? "grid-cols-2" : "grid-cols-3",
-            )}
-          >
-            {market.outcomes.map((o) => {
-              const active = o.id === selected.id;
-              const cents = Math.round(o.price * 100);
-              return (
-                <button
-                  key={o.id}
-                  type="button"
-                  onClick={() => onOutcomeChange(o.id)}
-                  className={cn(
-                    "flex flex-col items-start gap-1 rounded-xl px-3 py-2 text-left transition",
-                    active
-                      ? "bg-foreground/95 text-background ring-1 ring-foreground"
-                      : "bg-white/[0.04] text-foreground ring-1 ring-white/[0.06] hover:bg-white/[0.08]",
-                  )}
-                >
-                  <span className="truncate font-mono text-[10px] uppercase tracking-widest">
-                    {o.team?.short ?? o.label}
-                  </span>
-                  <span className="font-display text-lg font-semibold tabular-nums">
-                    {cents}¢
-                  </span>
-                </button>
-              );
-            })}
-          </div>
+          <TradeOutcomePicker
+            market={market}
+            outcomeId={selected.id}
+            onOutcomeChange={onOutcomeChange}
+            side={side}
+            onSideChange={setSide}
+          />
         </div>
-
-        {/* Side chooser — only for 3+ outcome markets, where each outcome is
-            its own binary sub-market with YES/NO sides. */}
-        {needsSideToggle && (
-          <div className="border-b border-border px-5 py-3">
-            <div className="mb-2 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
-              Pick side · {selected.team?.short ?? selected.label}
-            </div>
-            <div className="grid grid-cols-2 gap-2">
-              {(["yes", "no"] as const).map((s) => {
-                const active = s === side;
-                const cents = s === "yes" ? yesCents : noCents;
-                return (
-                  <button
-                    key={s}
-                    type="button"
-                    onClick={() => setSide(s)}
-                    className={cn(
-                      "flex flex-col items-start gap-1 rounded-xl px-3 py-2 text-left transition",
-                      active
-                        ? "bg-foreground/95 text-background ring-1 ring-foreground"
-                        : "bg-white/[0.04] text-foreground ring-1 ring-white/[0.06] hover:bg-white/[0.08]",
-                    )}
-                  >
-                    <span className="truncate font-mono text-[10px] uppercase tracking-widest">
-                      {s === "yes" ? "Yes" : "No"}
-                    </span>
-                    <span className="font-display text-lg font-semibold tabular-nums">
-                      {cents}¢
-                    </span>
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-        )}
 
         {/* Trade form */}
         <div className="px-5 py-3 pb-0">
