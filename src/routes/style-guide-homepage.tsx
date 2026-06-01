@@ -355,34 +355,55 @@ function HomepagePlayground() {
             </Variant>
           </Section>
 
-          <Section id="winner" title="LeagueWinnerMarketCard" hint="Futures market in a league-table layout.">
-            <Variant caption="default (4 outcomes)"><LeagueWinnerMarketCard market={WINNER_DEFAULT} /></Variant>
-            <Variant caption="short (2 outcomes)"><LeagueWinnerMarketCard market={WINNER_SHORT} /></Variant>
-            <Variant caption="all deltas up"><LeagueWinnerMarketCard market={WINNER_ALL_UP} /></Variant>
-            <Variant caption="all deltas down"><LeagueWinnerMarketCard market={WINNER_ALL_DOWN} /></Variant>
+          <Section
+            id="live-stream"
+            title="LiveStreamCard"
+            hint="Hero card for in-progress matches with an attached stream. Replaces the EventMarketTileCard in the events grid while the match is live."
+          >
+            {LIVE_STREAM_MARKETS.length === 0 ? (
+              <EmptyFallback label="No isLiveStream markets in MATCH_MARKETS" />
+            ) : (
+              LIVE_STREAM_MARKETS.map((m) => (
+                <Variant key={m.id} caption={`${m.title} · ${m.stage ?? "live"}`}>
+                  <div className="max-w-[520px]"><LiveStreamCard market={m} /></div>
+                </Variant>
+              ))
+            )}
           </Section>
 
-          <Section id="scorer" title="TopScorerMarketCard" hint="Same row layout as the winner card, but with player photos.">
-            <Variant caption="with photos">
-                <TopScorerMarketCard
-                  market={TOPSCORER_WITH_PHOTOS.market}
-                  photos={TOPSCORER_WITH_PHOTOS.photos}
-                />
-              </Variant>
-            <Variant caption="no photos — initials fallback">
-                <TopScorerMarketCard
-                  market={TOPSCORER_NO_PHOTOS.market}
-                  photos={TOPSCORER_NO_PHOTOS.photos}
-                />
-              </Variant>
-          </Section>
-
-          <Section id="spotlight" title="PlayerPropsSpotlight" hint="Carousel of player prop bundles.">
-            <Variant caption="single player (chevrons loop on same player)">
-              <div className="w-[340px]"><PlayerPropsSpotlight players={SPOTLIGHT_ONE} /></div>
-            </Variant>
-            <Variant caption={`${SPOTLIGHT_MANY.length} players (carousel)`}>
-              <div className="w-[340px]"><PlayerPropsSpotlight players={SPOTLIGHT_MANY} /></div>
+          <Section
+            id="league-hub"
+            title="League hub cards"
+            hint="Bottom-of-homepage rollout strip: one featured hub (full-width hero) + a grid of coming-soon league tiles."
+          >
+            {LEAGUES.filter((l) => l.status === "featured").map((league) => {
+              const matches = getMatchMarketsByLeagueSlug(league.slug);
+              const spotlights = getSpotlightsByLeagueSlug(league.slug);
+              const binaries = getBinaryQuestionsByLeagueSlug(league.slug);
+              const eventCount = matches.length + spotlights.length + binaries.length;
+              const highlights = [
+                ...spotlights.slice(0, 3).map((s) => s.tagline ?? `${s.firstName} ${s.lastName}`),
+                ...binaries.slice(0, 3).map((b) => b.title),
+              ]
+                .filter(Boolean)
+                .slice(0, 4) as string[];
+              return (
+                <Variant key={league.slug} caption={`featured — ${league.name}`}>
+                  <LeagueSpotlightCard
+                    league={league}
+                    eventCount={eventCount}
+                    highlights={highlights}
+                    kickoffLabel="Kicks off June 11"
+                  />
+                </Variant>
+              );
+            })}
+            <Variant caption="coming-soon grid (3 across)">
+              <div className="grid gap-2.5 md:grid-cols-3">
+                {LEAGUES.filter((l) => l.status === "coming-soon").map((league) => (
+                  <LeagueComingSoonCard key={league.slug} league={league} />
+                ))}
+              </div>
             </Variant>
           </Section>
 
