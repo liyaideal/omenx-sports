@@ -93,7 +93,7 @@ export function TradeOutcomePicker({
         <div
           ref={scrollerRef}
           className={cn(
-            "flex gap-2 overflow-x-auto scrollbar-none snap-x",
+            "flex gap-2 overflow-x-auto snap-x [scrollbar-width:none] [&::-webkit-scrollbar]:hidden",
             fitsWithoutScroll
               ? ""
               : "[mask-image:linear-gradient(to_right,black_calc(100%-24px),transparent)]",
