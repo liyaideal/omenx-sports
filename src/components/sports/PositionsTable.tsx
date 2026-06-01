@@ -515,7 +515,7 @@ function ClosePositionDialog({
               eventShape={row.eventShape}
             />
           </div>
-          <div className="mt-2 grid grid-cols-2 gap-y-1 text-[10px]">
+          <div className="mt-2 grid grid-cols-2 gap-x-6 gap-y-1 text-[10px]">
             <Kv k="Size" v={`${row.size}`} />
             <Kv k="Lev" v={`${row.leverage}×`} />
             <Kv k="Entry" v={`${row.entry}¢`} />
@@ -586,7 +586,7 @@ function CancelOrderDialog({
               eventShape={row.eventShape}
             />
           </div>
-          <div className="mt-2 grid grid-cols-2 gap-y-1 text-[10px]">
+          <div className="mt-2 grid grid-cols-2 gap-x-6 gap-y-1 text-[10px]">
             <Kv k="Type" v={row.type.toUpperCase()} />
             <Kv k="Price" v={`${row.price}¢`} />
             <Kv k="Size" v={`${row.size}`} />
