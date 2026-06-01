@@ -62,6 +62,14 @@ export interface SportsMarket {
   /** Optional team/entity the market is about — drives the row crest
    *  inside bundled props cards. */
   subjectTeam?: TeamLite;
+  /** When this market is a single row inside a bundled multi-outcome event
+   *  (e.g. "Brazil" inside the "World Cup Champion" event), point to the
+   *  consolidated event market id so the card link and trade drawer open
+   *  the right page instead of a per-team binary stub. */
+  eventMarketId?: string;
+  /** The outcome id (inside the consolidated event market) that this row
+   *  represents — used to preselect the right outcome in the trade drawer. */
+  eventOutcomeId?: string;
 }
 
 export const FEATURED_MATCH: SportsMarket = {
