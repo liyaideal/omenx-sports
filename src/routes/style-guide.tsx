@@ -1813,11 +1813,7 @@ function TradeDrawerDemo() {
   );
 }
 
-function EventLiveStageDemo() {
-  return null;
-}
-
-function _PickerVariant({ market }: { market: SportsMarket }) {
+function PickerVariant({ market }: { market: SportsMarket }) {
   const [outcomeId, setOutcomeId] = useState(market.outcomes[0]?.id);
   const [side, setSide] = useState<"yes" | "no">("yes");
   return (
@@ -1871,14 +1867,14 @@ function TradeOutcomePickerDemo() {
 
   return (
     <div className="grid gap-4 lg:grid-cols-3">
-      <_PickerVariant market={binary} />
-      <_PickerVariant market={threeWay} />
-      <_PickerVariant market={sevenWay} />
+      <PickerVariant market={binary} />
+      <PickerVariant market={threeWay} />
+      <PickerVariant market={sevenWay} />
     </div>
   );
 }
 
-function _EventLiveStageDemo() {
+function EventLiveStageDemo() {
   const live =
     MATCH_MARKETS.find((m) => m.isLiveStream && m.liveScore && m.fixture) ??
     FEATURED_MATCH;
