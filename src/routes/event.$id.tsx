@@ -229,9 +229,11 @@ function EventTradePage() {
   // detail page. Hidden entirely when empty.
   const relatedMarkets = useMemo(() => getRelatedMarkets(market), [market]);
   const active = market;
-  // For binary 2-outcome markets, treat outcomes[0] = YES, outcomes[1] = NO.
-  // For three-way markets, expose all 3 outcomes and let the user pick one;
-  // internally we still map the selected one to the YES side of the trade form.
+  // For binary 2-outcome events, both outcomes are equally tradable. The
+  // selected index alone determines the trade target — we don't nest an
+  // extra YES/NO toggle inside a binary event.
+  // For 3+ outcome events, each outcome is its own binary sub-market and
+  // still uses the YES/NO side toggle.
   const [selectedIdx, setSelectedIdx] = useState(0);
   const selected = active.outcomes[selectedIdx] ?? active.outcomes[0];
 
@@ -247,11 +249,27 @@ function EventTradePage() {
     if (idx >= 0) setSelectedIdx(idx);
   }, [active]);
 
-  // YES/NO side toggle for 3+ outcome markets — mirrors the drawer.
-  const [tradeSide, setTradeSide] = useState<"yes" | "no">("yes");
+  // YES/NO side toggle for 3+ outcome markets — mirrors the drawer. For
+  // binary events this state is unused; we derive the tone from selectedIdx.
+  const isBinaryEvent = active.outcomes.length === 2;
+  const [multiTradeSide, setMultiTradeSide] = useState<"yes" | "no">("yes");
   useEffect(() => {
-    setTradeSide("yes");
-  }, [selected?.id]);
+    if (!isBinaryEvent) setMultiTradeSide("yes");
+  }, [selected?.id, isBinaryEvent]);
+  const tradeSide: "yes" | "no" = isBinaryEvent
+    ? selectedIdx === 0
+      ? "yes"
+      : "no"
+    : multiTradeSide;
+  const setTradeSide = (s: "yes" | "no") => {
+    if (isBinaryEvent) {
+      // Flipping side on a binary event = selecting the other outcome.
+      const target = s === "yes" ? 0 : 1;
+      if (target < active.outcomes.length) setSelectedIdx(target);
+    } else {
+      setMultiTradeSide(s);
+    }
+  };
   const { formOutcome, formLabel, formPrice } = deriveTradeFormProps({
     market: active,
     outcomeId: selected?.id,
@@ -315,14 +333,19 @@ function EventTradePage() {
   const handleBuyFromRow = useCallback(
     (idx: number, side: "yes" | "no") => {
       setSelectedIdx(idx);
-      setTradeSide(side);
+      if (isBinaryEvent) {
+        // Binary rows only emit "yes" — the side IS the selected outcome.
+        // No-op beyond setting selectedIdx.
+      } else {
+        setMultiTradeSide(side);
+      }
       setPulseKey((k) => k + 1);
       if (typeof window !== "undefined") {
         const isDesktop = window.matchMedia("(min-width: 1024px)").matches;
         if (!isDesktop) scrollToTradeForm();
       }
     },
-    [scrollToTradeForm],
+    [scrollToTradeForm, isBinaryEvent],
   );
   useEffect(() => {
     if (pulseKey === 0) return;
