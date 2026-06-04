@@ -3,6 +3,7 @@ import { Play, Users } from "lucide-react";
 import type { SportsMarket } from "@/data/sports-markets";
 import { TeamName } from "@/components/sports/TeamName";
 import { useTradeDrawer } from "@/components/sports/trade/TradeDrawerProvider";
+import { LiveDelayInfo } from "@/components/sports/live/LiveDelayInfo";
 
 /**
  * Compact "we are streaming this match" tile, sized to drop into the same
@@ -50,8 +51,9 @@ export function LiveStreamCard({ market }: { market: SportsMarket }) {
         </div>
 
         {market.liveClock && (
-          <span className="absolute right-3 top-3 rounded-full bg-background/60 px-2 py-0.5 font-mono text-[10px] tabular-nums text-white ring-1 ring-white/20 backdrop-blur">
+          <span className="absolute right-3 top-3 inline-flex items-center gap-1 rounded-full bg-background/60 px-2 py-0.5 font-mono text-[10px] tabular-nums text-white ring-1 ring-white/20 backdrop-blur">
             {market.liveClock}
+            <LiveDelayInfo variant="score" tone="onMedia" />
           </span>
         )}
 

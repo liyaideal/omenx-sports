@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "@tanstack/react-router";
-import { ExternalLink, X } from "lucide-react";
+import { ExternalLink, Info, X } from "lucide-react";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { TradeForm } from "@/components/sports/TradeForm";
 import { TradeOutcomePicker, deriveTradeFormProps } from "./TradeOutcomePicker";
@@ -88,6 +88,17 @@ export function TradeDrawer({
             onSideChange={setSide}
           />
         </div>
+
+        {market.isLiveStream && (
+          <div className="mx-5 mt-3 flex items-start gap-2 rounded-lg border border-[#f59e0b]/30 bg-[#f59e0b]/10 px-3 py-2 text-[11px] leading-relaxed text-[#fbbf24]">
+            <Info className="mt-[1px] h-3.5 w-3.5 shrink-0" />
+            <span>
+              Live scores and stream may lag the venue by{" "}
+              <span className="font-semibold">30–60 seconds</span>. Trade
+              accordingly — settlement uses the official result.
+            </span>
+          </div>
+        )}
 
         {/* Trade form */}
         <div className="px-5 py-3 pb-0">

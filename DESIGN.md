@@ -231,6 +231,29 @@ Methodology, Privacy, Glossary, marketing landings), matching the OmenX
 `SeoPageLayout` convention. `Terms` / `Help` / cross-site OmenX links live
 in the existing top-right user menu, not a bottom bar.
 
+### Live delay disclosure — LOCKED PATTERN
+
+Pattern is borrowed from Polymarket's `• HT ⓘ` chip. Long disclaimer copy
+lives behind the icon, never in the chip itself. We never toast for this.
+
+- Component: `LiveDelayInfo` (`src/components/sports/live/LiveDelayInfo.tsx`)
+  with `variant="score" | "stream"` and `tone="muted" | "onMedia"`.
+- Every visible live-time chip (`liveClock`) MUST carry
+  `<LiveDelayInfo variant="score" />`. Required surfaces today:
+  `EventLiveStage`, `FullscreenStreamOverlay`, `GlobalStreamMiniPlayer`,
+  `dashboard/LiveStreamCard`. New live chips inherit the rule.
+- Video surfaces (Stage + Fullscreen) carry a persistent caption
+  `Stream delayed · reference only` followed by the ⓘ. Styling:
+  `font-mono text-[9px] uppercase tracking-widest text-white/55`,
+  `bg-black/45..55` + `ring-1 ring-white/10` + `backdrop-blur`.
+  The mini player is too small for the caption — chip ⓘ only.
+- `TradeDrawer` MUST render the amber inline notice when
+  `market.isLiveStream`: `border-[#f59e0b]/30 bg-[#f59e0b]/10 text-[#fbbf24]`,
+  `Info` icon + sentence quoting `30–60 seconds`. Not dismissible.
+- Copy is fixed. Score chip popover talks about "scores and match time";
+  stream popover talks about "live stream". Both quote `30–60 seconds`
+  and end with "settlement uses the official result."
+
 ## 5. Layout Principles
 
 ### Spacing scale
@@ -357,6 +380,11 @@ Section 7 is append-only. Every regression the user catches gets pinned here.
   panel — the side panel will leak whitespace below its content. Wrap the
   list in `xl:grid-cols-2` and switch the side panel to `h-fit lg:self-start`
   (sticky when needed).
+- Don't push the live delay disclaimer into chip text or as a toast.
+  The only acceptable forms are the ⓘ inside the chip, the persistent
+  caption on the video surface, and the amber notice in the trade drawer.
+- Don't ship a new live chip or video surface without `LiveDelayInfo`.
+  The icon is part of the chip, not optional polish.
 
 ## 8. Responsive Behavior
 
