@@ -1934,6 +1934,69 @@ function StyleGuide() {
             </div>
           </Section>
 
+          <Section id="live-delay-info" title="Live delay disclosure" kicker="23c — P0 / live data">
+            <p className="mb-6 max-w-3xl text-sm text-muted-foreground">
+              Shared <code className="font-mono text-foreground">LiveDelayInfo</code> ⓘ affordance, plus the persistent
+              "Stream delayed · reference only" caption on video surfaces and the amber notice that appears inside the
+              <code className="mx-1 font-mono text-foreground">TradeDrawer</code> when the underlying market
+              <code className="mx-1 font-mono text-foreground">isLiveStream</code>. Inspired by Polymarket's
+              <code className="mx-1 font-mono text-foreground">• HT ⓘ</code> pattern — long disclaimer copy lives behind
+              the icon, never in the chip itself.
+            </p>
+
+            <div className="grid gap-6 md:grid-cols-2">
+              <div className="rounded-2xl border border-white/10 bg-black/40 p-5">
+                <div className="mb-3 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+                  Score chip — over media
+                </div>
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-black/60 px-2.5 py-1 font-mono text-[11px] tabular-nums text-white ring-1 ring-white/20 backdrop-blur">
+                  62′
+                  <LiveDelayInfo variant="score" tone="onMedia" />
+                </span>
+                <div className="mt-4 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+                  Persistent stream caption
+                </div>
+                <div className="mt-2 inline-flex items-center gap-1.5 rounded bg-black/55 px-2 py-0.5 font-mono text-[9px] uppercase tracking-widest text-white/55 ring-1 ring-white/10 backdrop-blur">
+                  Stream delayed · reference only
+                  <LiveDelayInfo variant="stream" tone="onMedia" />
+                </div>
+              </div>
+
+              <div className="rounded-2xl border border-border bg-surface p-5">
+                <div className="mb-3 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+                  Trade drawer — live market notice
+                </div>
+                <div className="flex items-start gap-2 rounded-lg border border-[#f59e0b]/30 bg-[#f59e0b]/10 px-3 py-2 text-[11px] leading-relaxed text-[#fbbf24]">
+                  <span className="mt-[1px] inline-grid h-3.5 w-3.5 shrink-0 place-items-center rounded-full">ⓘ</span>
+                  <span>
+                    Live scores and stream may lag the venue by{" "}
+                    <span className="font-semibold">30–60 seconds</span>. Trade
+                    accordingly — settlement uses the official result.
+                  </span>
+                </div>
+                <div className="mt-4 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+                  Muted chip (in-content)
+                </div>
+                <span className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-white/[0.04] px-2.5 py-1 font-mono text-[11px] tabular-nums text-foreground ring-1 ring-white/10">
+                  Live · 62′
+                  <LiveDelayInfo variant="score" tone="muted" />
+                </span>
+              </div>
+            </div>
+
+            <div className="mt-6 rounded-2xl border border-dashed border-white/15 bg-white/[0.02] p-5 text-xs">
+              <div className="mb-2 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+                Rules
+              </div>
+              <ul className="space-y-1.5 text-muted-foreground">
+                <li>• Every visible <code className="font-mono text-foreground">liveClock</code> chip carries a <code className="font-mono text-foreground">LiveDelayInfo variant="score"</code> — no exceptions (EventLiveStage, FullscreenStreamOverlay, GlobalStreamMiniPlayer, LiveStreamCard).</li>
+                <li>• Video surfaces (Stage + Fullscreen) carry the persistent caption <code className="font-mono text-foreground">"Stream delayed · reference only"</code> with the icon at the end. Mini player is too small — chip ⓘ only.</li>
+                <li>• <code className="font-mono text-foreground">TradeDrawer</code> shows the amber notice whenever <code className="font-mono text-foreground">market.isLiveStream</code>. Not dismissible — this is the strongest touchpoint before money moves.</li>
+                <li>• Never replace the icon with full-sentence copy in the chip. Copy lives inside the popover. We do not toast.</li>
+              </ul>
+            </div>
+          </Section>
+
           <Section id="event-trade-bar" title="Mobile sticky trade bar" kicker="24 — P0 / event detail mobile">
             <p className="mb-6 max-w-3xl text-sm text-muted-foreground">
               Fixed bottom action bar shown on <code className="font-mono text-foreground">&lt;lg</code> screens of the event detail page.
