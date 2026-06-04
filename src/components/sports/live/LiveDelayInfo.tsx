@@ -48,7 +48,6 @@ export function LiveDelayInfo({
           onClick={(e) => {
             // Don't bubble up into surrounding clickable chips / cards.
             e.stopPropagation();
-            e.preventDefault();
           }}
           className={cn(
             "inline-flex shrink-0 items-center justify-center rounded-full transition",
