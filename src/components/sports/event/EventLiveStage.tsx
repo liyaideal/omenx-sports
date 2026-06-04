@@ -4,6 +4,7 @@ import type { SportsMarket, Outcome } from "@/data/sports-markets";
 import { TeamName } from "@/components/sports/TeamName";
 import { cn } from "@/lib/utils";
 import { AudioTrackToggle } from "@/components/sports/live/AudioTrackToggle";
+import { LiveDelayInfo } from "@/components/sports/live/LiveDelayInfo";
 
 interface EventLiveStageProps {
   market: SportsMarket;
@@ -89,8 +90,9 @@ export function EventLiveStage({
         <div className="absolute right-4 top-4 flex items-center gap-2">
           <AudioTrackToggle size="md" />
           {market.liveClock && (
-            <span className="rounded-full bg-black/60 px-2.5 py-1 font-mono text-[11px] tabular-nums text-white ring-1 ring-white/20 backdrop-blur">
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-black/60 px-2.5 py-1 font-mono text-[11px] tabular-nums text-white ring-1 ring-white/20 backdrop-blur">
               {market.liveClock}
+              <LiveDelayInfo variant="score" tone="onMedia" />
             </span>
           )}
         </div>
@@ -136,17 +138,23 @@ export function EventLiveStage({
           </div>
         )}
 
-        {/* Bottom-right controls */}
-        <div className="absolute bottom-4 right-4 flex items-center gap-1.5">
-          <ControlBtn label={muted ? "Unmute" : "Mute"} onClick={() => setMuted((v) => !v)}>
-            {muted ? <VolumeX className="h-3.5 w-3.5" /> : <Volume2 className="h-3.5 w-3.5" />}
-          </ControlBtn>
-          <ControlBtn label="Picture in picture" onClick={() => {}}>
-            <PictureInPicture2 className="h-3.5 w-3.5" />
-          </ControlBtn>
-          <ControlBtn label="Fullscreen" onClick={() => onFullscreen?.()}>
-            <Maximize2 className="h-3.5 w-3.5" />
-          </ControlBtn>
+        {/* Bottom-right controls + persistent delay caption */}
+        <div className="absolute bottom-4 right-4 flex flex-col items-end gap-2">
+          <div className="inline-flex items-center gap-1.5 rounded bg-black/45 px-2 py-0.5 font-mono text-[9px] uppercase tracking-widest text-white/55 ring-1 ring-white/10 backdrop-blur">
+            Stream delayed · reference only
+            <LiveDelayInfo variant="stream" tone="onMedia" />
+          </div>
+          <div className="flex items-center gap-1.5">
+            <ControlBtn label={muted ? "Unmute" : "Mute"} onClick={() => setMuted((v) => !v)}>
+              {muted ? <VolumeX className="h-3.5 w-3.5" /> : <Volume2 className="h-3.5 w-3.5" />}
+            </ControlBtn>
+            <ControlBtn label="Picture in picture" onClick={() => {}}>
+              <PictureInPicture2 className="h-3.5 w-3.5" />
+            </ControlBtn>
+            <ControlBtn label="Fullscreen" onClick={() => onFullscreen?.()}>
+              <Maximize2 className="h-3.5 w-3.5" />
+            </ControlBtn>
+          </div>
         </div>
       </div>
     </div>

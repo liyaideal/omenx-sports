@@ -6,6 +6,7 @@ import type { SportsMarket } from "@/data/sports-markets";
 import { useTradeDrawer } from "@/components/sports/trade/TradeDrawerProvider";
 import { cn } from "@/lib/utils";
 import { AudioTrackToggle } from "./AudioTrackToggle";
+import { LiveDelayInfo } from "./LiveDelayInfo";
 
 interface FullscreenStreamOverlayProps {
   market: SportsMarket;
@@ -61,8 +62,9 @@ export function FullscreenStreamOverlay({
             LIVE
           </span>
           {market.liveClock && (
-            <span className="rounded bg-white/10 px-2 py-0.5 font-mono text-[10px] tabular-nums text-white/80 ring-1 ring-white/15">
+            <span className="inline-flex items-center gap-1.5 rounded bg-white/10 px-2 py-0.5 font-mono text-[10px] tabular-nums text-white/80 ring-1 ring-white/15">
               {market.liveClock}
+              <LiveDelayInfo variant="score" tone="onMedia" />
             </span>
           )}
           <div className="ml-2 truncate font-display text-sm font-semibold text-white">
@@ -102,6 +104,11 @@ export function FullscreenStreamOverlay({
         ) : (
           <div className="h-full w-full bg-gradient-to-br from-white/[0.06] to-transparent" />
         )}
+        {/* Persistent delay caption — bottom-right of the video surface */}
+        <div className="absolute bottom-4 right-4 inline-flex items-center gap-1.5 rounded bg-black/55 px-2 py-0.5 font-mono text-[9px] uppercase tracking-widest text-white/55 ring-1 ring-white/10 backdrop-blur">
+          Stream delayed · reference only
+          <LiveDelayInfo variant="stream" tone="onMedia" />
+        </div>
         {/* Score bug */}
         {fixture && market.liveScore && (
           <div className="absolute bottom-4 left-1/2 -translate-x-1/2">

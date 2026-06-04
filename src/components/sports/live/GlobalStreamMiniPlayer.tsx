@@ -5,6 +5,7 @@ import { GripHorizontal, Maximize2, SquareArrowOutUpRight, X } from "lucide-reac
 import type { SportsMarket } from "@/data/sports-markets";
 import { useTradeDrawer } from "@/components/sports/trade/TradeDrawerProvider";
 import { AudioTrackToggle } from "./AudioTrackToggle";
+import { LiveDelayInfo } from "./LiveDelayInfo";
 
 interface GlobalStreamMiniPlayerProps {
   market: SportsMarket;
@@ -182,8 +183,9 @@ export function GlobalStreamMiniPlayer({
           </span>
 
           {market.liveClock && (
-            <span className="absolute right-2 top-2 rounded bg-black/60 px-1.5 py-[1px] font-mono text-[9px] tabular-nums text-white ring-1 ring-white/15">
+            <span className="absolute right-2 top-2 inline-flex items-center gap-1 rounded bg-black/60 px-1.5 py-[1px] font-mono text-[9px] tabular-nums text-white ring-1 ring-white/15">
               {market.liveClock}
+              <LiveDelayInfo variant="score" tone="onMedia" />
             </span>
           )}
 
