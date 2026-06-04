@@ -4,6 +4,7 @@ import { toast } from "sonner";
 import type { SportsMarket, TeamLite } from "@/data/sports-markets";
 import { PricePill } from "./PricePill";
 import { LeagueChip } from "../LeagueBadge";
+import { useTradeDrawer } from "@/components/sports/trade/TradeDrawerProvider";
 
 /**
  * Featured match market — replaces the old FanPollCard. Two crests, a
@@ -14,6 +15,7 @@ export function MatchMarketCard({ market }: { market: SportsMarket }) {
   if (!market.fixture) return null;
   const { home, away } = market.fixture;
   const total = market.outcomes.reduce((s, o) => s + o.price, 0) || 1;
+  const { openTrade } = useTradeDrawer();
   const hueFor = (o: typeof market.outcomes[number], isDraw: boolean): string =>
     isDraw ? "280" : o.team ? String(o.team.hue) : "305";
   return (
@@ -74,7 +76,16 @@ export function MatchMarketCard({ market }: { market: SportsMarket }) {
             const hue = hueFor(o, isDraw);
             const chroma = isDraw ? "0.04" : "0.2";
             return (
-              <div key={o.id} className="flex items-center gap-3">
+              <button
+                key={o.id}
+                type="button"
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  openTrade({ marketId: market.id, outcomeId: o.id });
+                }}
+                className="flex w-full items-center gap-3 rounded-lg px-1 py-1 -mx-1 text-left transition hover:bg-white/[0.04]"
+              >
                 <span
                   className="h-2.5 w-2.5 shrink-0 rounded-full"
                   style={{ background: `oklch(0.68 ${chroma} ${hue})` }}
@@ -83,7 +94,7 @@ export function MatchMarketCard({ market }: { market: SportsMarket }) {
                   {o.team?.name ?? o.label}
                 </span>
                 <PricePill price={o.price} delta={o.delta24h} size="sm" />
-              </div>
+              </button>
             );
           })}
         </div>
