@@ -380,6 +380,11 @@ Section 7 is append-only. Every regression the user catches gets pinned here.
   panel — the side panel will leak whitespace below its content. Wrap the
   list in `xl:grid-cols-2` and switch the side panel to `h-fit lg:self-start`
   (sticky when needed).
+- Don't push the live delay disclaimer into chip text or as a toast.
+  The only acceptable forms are the ⓘ inside the chip, the persistent
+  caption on the video surface, and the amber notice in the trade drawer.
+- Don't ship a new live chip or video surface without `LiveDelayInfo`.
+  The icon is part of the chip, not optional polish.
 
 ## 8. Responsive Behavior
 
