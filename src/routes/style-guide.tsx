@@ -1942,6 +1942,8 @@ function StyleGuide() {
               (Quick buy) or scroll to the full form (tap the price block).
             </p>
 
+            {/* moved to new section below */}
+
             <div className="relative h-32 overflow-hidden rounded-2xl border border-border bg-background/40 p-0">
               <div className="pointer-events-none absolute inset-x-0 top-0 px-4 py-4 text-xs text-muted-foreground">
                 Mocked content above the bar…
