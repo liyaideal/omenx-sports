@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { X } from "lucide-react";
 import { Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { cn } from "@/lib/utils";
 import type { Outcome, SportsMarket } from "@/data/sports-markets";
@@ -15,7 +16,36 @@ export interface CombinedPriceChartProps {
   highlightedOutcomeId?: string;
   /** Click an outcome legend dot to surface it upstream. */
   onLegendSelect?: (outcomeId: string) => void;
+  /**
+   * Open positions on this event. Rendered as dashed reference lines + a
+   * right-edge chip per position (TradingView-style position overlay).
+   * When omitted or empty, the chart renders without any overlay chrome.
+   */
+  positions?: ChartPosition[];
   className?: string;
+}
+
+/**
+ * One open position to overlay onto the chart. The chart's Y axis is the
+ * YES price for each outcome (0–100¢); a NO position at entry¢ is plotted
+ * at the equivalent YES price (100 − entry) so the geometry "where I'm at
+ * vs where the market is" reads correctly.
+ */
+export interface ChartPosition {
+  outcomeId: string;
+  side: "yes" | "no";
+  /** Entry price in ¢ (0–100), on the side the user actually bought. */
+  entry: number;
+  /** Unrealized P/L in USDC (signed). */
+  pnl: number;
+  /** Contracts held. Used for the title/tooltip; not rendered as a number
+   *  in the chip to keep it compact. */
+  size: number;
+  /** Outcome alias to show in the chip, e.g. "USA" or "Draw". */
+  outcomeLabel: string;
+  /** Fires when the user clicks the chip's × button. Usually a Sell shortcut
+   *  via the TradeDrawer; the chart itself stays presentational. */
+  onClose?: () => void;
 }
 
 const RANGES = ["1H", "6H", "1D", "1W", "ALL"] as const;
@@ -72,6 +102,7 @@ export function CombinedPriceChart({
   market,
   highlightedOutcomeId,
   onLegendSelect,
+  positions,
   className,
 }: CombinedPriceChartProps) {
   const [range, setRange] = useState<Range>("1D");
@@ -97,6 +128,25 @@ export function CombinedPriceChart({
     }
     return { data, perOutcome: series };
   }, [market, range]);
+
+  // Build the overlay rows (one chip per position). We resolve the outcome
+  // here so the chip can borrow that outcome's color and YES price.
+  const overlay = useMemo(() => {
+    if (!positions || positions.length === 0) return [];
+    return positions
+      .map((p) => {
+        const idx = market.outcomes.findIndex((o) => o.id === p.outcomeId);
+        if (idx < 0) return null;
+        const o = market.outcomes[idx];
+        const color = outcomeColor(o, idx);
+        // YES-axis position of the entry. NO is mirrored to the YES axis.
+        const yChart = p.side === "yes" ? p.entry : 100 - p.entry;
+        return { ...p, color, yChart };
+      })
+      .filter((x): x is NonNullable<typeof x> => x !== null)
+      // Top-down so chips don't read in a random order when they overlap.
+      .sort((a, b) => b.yChart - a.yChart);
+  }, [positions, market.outcomes]);
 
   return (
     <div className={cn("rounded-2xl border border-border bg-surface p-5 shadow-card", className)}>
@@ -129,6 +179,7 @@ export function CombinedPriceChart({
       </div>
 
       <div className="mt-4 h-56 w-full">
+        <div className="relative h-full w-full">
         <ResponsiveContainer width="100%" height="100%">
           <LineChart data={data} margin={{ left: 0, right: 8, top: 8, bottom: 0 }}>
             <XAxis dataKey="t" hide />
@@ -166,6 +217,20 @@ export function CombinedPriceChart({
             })}
           </LineChart>
         </ResponsiveContainer>
+        {/* Position overlay — sits above the SVG, anchored to the plot area.
+            `top: 8px` matches the chart's top margin so the y-axis math lines
+            up with the painted curves. */}
+        {overlay.length > 0 && (
+          <div
+            className="pointer-events-none absolute inset-x-0"
+            style={{ top: 8, bottom: 0, right: 8 }}
+          >
+            {overlay.map((p) => (
+              <PositionOverlayRow key={`${p.outcomeId}-${p.side}-${p.entry}`} p={p} />
+            ))}
+          </div>
+        )}
+        </div>
       </div>
 
       {/* Legend strip — colored dot + name + current ¢. Click to highlight. */}
@@ -192,6 +257,83 @@ export function CombinedPriceChart({
             </button>
           );
         })}
+      </div>
+    </div>
+  );
+}
+
+/* ---------- Position overlay row ---------- */
+
+function PositionOverlayRow({
+  p,
+}: {
+  p: {
+    outcomeId: string;
+    side: "yes" | "no";
+    entry: number;
+    pnl: number;
+    size: number;
+    outcomeLabel: string;
+    color: string;
+    yChart: number;
+    onClose?: () => void;
+  };
+}) {
+  const topPct = Math.max(0, Math.min(100, 100 - p.yChart));
+  const pnlUp = p.pnl >= 0;
+  const pnlText = `${pnlUp ? "+" : "−"}$${Math.abs(p.pnl).toFixed(2)}`;
+  const sideLabel = p.side === "yes" ? "YES" : "NO";
+  return (
+    <div
+      className="absolute inset-x-0 flex items-center"
+      style={{ top: `${topPct}%`, transform: "translateY(-50%)" }}
+    >
+      {/* Dashed reference line spanning the full plot width. */}
+      <div
+        className="h-px flex-1 border-t border-dashed"
+        style={{ borderColor: p.color, opacity: 0.55 }}
+      />
+      {/* Right-edge chip: outcome+side · entry¢ │ P/L · × */}
+      <div
+        className="pointer-events-auto ml-1 flex shrink-0 items-stretch overflow-hidden rounded-md border bg-surface-elevated/95 shadow-card backdrop-blur"
+        style={{ borderColor: `color-mix(in oklab, ${p.color} 55%, transparent)` }}
+        title={`${p.outcomeLabel} ${sideLabel} · ${p.size.toLocaleString()} @ ${p.entry}¢`}
+      >
+        <div
+          className="flex flex-col justify-center px-1.5 py-1 font-mono leading-none"
+          style={{ background: `color-mix(in oklab, ${p.color} 12%, transparent)` }}
+        >
+          <span
+            className="text-[9px] font-semibold uppercase tracking-wider"
+            style={{ color: p.color }}
+          >
+            {p.outcomeLabel} {sideLabel}
+          </span>
+          <span className="mt-0.5 text-[10px] font-semibold tabular-nums text-foreground">
+            {Math.round(p.entry)}¢
+          </span>
+        </div>
+        <div className="flex flex-col justify-center border-l border-border/70 px-1.5 py-1 font-mono leading-none">
+          <span className="text-[9px] uppercase tracking-wider text-muted-foreground">P/L</span>
+          <span
+            className={cn(
+              "mt-0.5 text-[10px] font-semibold tabular-nums",
+              pnlUp ? "text-win" : "text-loss",
+            )}
+          >
+            {pnlText}
+          </span>
+        </div>
+        {p.onClose && (
+          <button
+            type="button"
+            onClick={p.onClose}
+            aria-label={`Close ${p.outcomeLabel} ${sideLabel} position`}
+            className="grid w-6 shrink-0 place-items-center border-l border-border/70 text-muted-foreground transition hover:bg-white/[0.06] hover:text-foreground"
+          >
+            <X className="h-3 w-3" />
+          </button>
+        )}
       </div>
     </div>
   );

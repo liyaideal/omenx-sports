@@ -11,6 +11,7 @@ import {
   TradeOutcomePicker,
 } from "@/components/sports/trade/TradeOutcomePicker";
 import { EventOutcomesPanel } from "@/components/sports/event/EventOutcomesPanel";
+import type { ChartPosition } from "@/components/sports/event/CombinedPriceChart";
 import { EventLiveStage, useStageOffscreen } from "@/components/sports/event/EventLiveStage";
 import { StageTabs, type StageTab } from "@/components/sports/event/StageTabs";
 import { MobileTradeBar } from "@/components/sports/event/MobileTradeBar";
@@ -401,6 +402,30 @@ function EventTradePage() {
     [],
   );
 
+  // Map live positions onto the price chart as TradingView-style overlays.
+  // Each seeded position carries `outcomeLabel` from `buildSeed`, which is
+  // either the team's full name (binary events) or the outcome's bare label
+  // (multi-outcome events) — match on both so it works for every shape.
+  const chartPositions = useMemo<ChartPosition[]>(() => {
+    const out: ChartPosition[] = [];
+    livePositions.forEach((p, idx) => {
+      const matched = active.outcomes.find(
+        (o) => (o.team?.name ?? "") === p.outcomeLabel || o.label === p.outcomeLabel,
+      );
+      if (!matched) return;
+      out.push({
+        outcomeId: matched.id,
+        side: p.outcome,
+        entry: p.entry,
+        pnl: p.pnl,
+        size: p.size,
+        outcomeLabel: matched.team?.short ?? matched.label,
+        onClose: () => handleClosePosition(idx),
+      });
+    });
+    return out;
+  }, [livePositions, active.outcomes, handleClosePosition]);
+
   // Live-stream wiring — only the streaming events get the broadcast
   // stage + sticky floating mini player.
   const isLive = Boolean(market.isLiveStream && market.fixture && market.liveScore);
@@ -550,6 +575,7 @@ function EventTradePage() {
                       tradeSide={tradeSide}
                       onSelect={setSelectedIdx}
                       onSideSelect={handleBuyFromRow}
+                      chartPositions={chartPositions}
                     />
                   ),
                 },
@@ -562,6 +588,7 @@ function EventTradePage() {
               tradeSide={tradeSide}
               onSelect={setSelectedIdx}
               onSideSelect={handleBuyFromRow}
+              chartPositions={chartPositions}
             />
           )}
           <LiveTape market={active} />
