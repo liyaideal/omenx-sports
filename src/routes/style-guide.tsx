@@ -70,6 +70,7 @@ import { EventMarketTileCard } from "@/components/sports/dashboard/EventMarketTi
 import { useTradeDrawer } from "@/components/sports/trade/TradeDrawerProvider";
 import { TradeOutcomePicker } from "@/components/sports/trade/TradeOutcomePicker";
 import { EventOutcomesPanel } from "@/components/sports/event/EventOutcomesPanel";
+import type { ChartPosition } from "@/components/sports/event/CombinedPriceChart";
 import type { SportsMarket } from "@/data/sports-markets";
 import {
   WC26_GROUPS,
