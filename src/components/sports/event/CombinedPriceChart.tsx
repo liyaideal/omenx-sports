@@ -261,3 +261,80 @@ export function CombinedPriceChart({
     </div>
   );
 }
+
+/* ---------- Position overlay row ---------- */
+
+function PositionOverlayRow({
+  p,
+}: {
+  p: {
+    outcomeId: string;
+    side: "yes" | "no";
+    entry: number;
+    pnl: number;
+    size: number;
+    outcomeLabel: string;
+    color: string;
+    yChart: number;
+    onClose?: () => void;
+  };
+}) {
+  const topPct = Math.max(0, Math.min(100, 100 - p.yChart));
+  const pnlUp = p.pnl >= 0;
+  const pnlText = `${pnlUp ? "+" : "−"}$${Math.abs(p.pnl).toFixed(2)}`;
+  const sideLabel = p.side === "yes" ? "YES" : "NO";
+  return (
+    <div
+      className="absolute inset-x-0 flex items-center"
+      style={{ top: `${topPct}%`, transform: "translateY(-50%)" }}
+    >
+      {/* Dashed reference line spanning the full plot width. */}
+      <div
+        className="h-px flex-1 border-t border-dashed"
+        style={{ borderColor: p.color, opacity: 0.55 }}
+      />
+      {/* Right-edge chip: outcome+side · entry¢ │ P/L · × */}
+      <div
+        className="pointer-events-auto ml-1 flex shrink-0 items-stretch overflow-hidden rounded-md border bg-surface-elevated/95 shadow-card backdrop-blur"
+        style={{ borderColor: `color-mix(in oklab, ${p.color} 55%, transparent)` }}
+        title={`${p.outcomeLabel} ${sideLabel} · ${p.size.toLocaleString()} @ ${p.entry}¢`}
+      >
+        <div
+          className="flex flex-col justify-center px-1.5 py-1 font-mono leading-none"
+          style={{ background: `color-mix(in oklab, ${p.color} 12%, transparent)` }}
+        >
+          <span
+            className="text-[9px] font-semibold uppercase tracking-wider"
+            style={{ color: p.color }}
+          >
+            {p.outcomeLabel} {sideLabel}
+          </span>
+          <span className="mt-0.5 text-[10px] font-semibold tabular-nums text-foreground">
+            {Math.round(p.entry)}¢
+          </span>
+        </div>
+        <div className="flex flex-col justify-center border-l border-border/70 px-1.5 py-1 font-mono leading-none">
+          <span className="text-[9px] uppercase tracking-wider text-muted-foreground">P/L</span>
+          <span
+            className={cn(
+              "mt-0.5 text-[10px] font-semibold tabular-nums",
+              pnlUp ? "text-win" : "text-loss",
+            )}
+          >
+            {pnlText}
+          </span>
+        </div>
+        {p.onClose && (
+          <button
+            type="button"
+            onClick={p.onClose}
+            aria-label={`Close ${p.outcomeLabel} ${sideLabel} position`}
+            className="grid w-6 shrink-0 place-items-center border-l border-border/70 text-muted-foreground transition hover:bg-white/[0.06] hover:text-foreground"
+          >
+            <X className="h-3 w-3" />
+          </button>
+        )}
+      </div>
+    </div>
+  );
+}
