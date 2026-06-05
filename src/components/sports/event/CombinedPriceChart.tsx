@@ -102,6 +102,7 @@ export function CombinedPriceChart({
   market,
   highlightedOutcomeId,
   onLegendSelect,
+  positions,
   className,
 }: CombinedPriceChartProps) {
   const [range, setRange] = useState<Range>("1D");
@@ -127,6 +128,25 @@ export function CombinedPriceChart({
     }
     return { data, perOutcome: series };
   }, [market, range]);
+
+  // Build the overlay rows (one chip per position). We resolve the outcome
+  // here so the chip can borrow that outcome's color and YES price.
+  const overlay = useMemo(() => {
+    if (!positions || positions.length === 0) return [];
+    return positions
+      .map((p) => {
+        const idx = market.outcomes.findIndex((o) => o.id === p.outcomeId);
+        if (idx < 0) return null;
+        const o = market.outcomes[idx];
+        const color = outcomeColor(o, idx);
+        // YES-axis position of the entry. NO is mirrored to the YES axis.
+        const yChart = p.side === "yes" ? p.entry : 100 - p.entry;
+        return { ...p, color, yChart };
+      })
+      .filter((x): x is NonNullable<typeof x> => x !== null)
+      // Top-down so chips don't read in a random order when they overlap.
+      .sort((a, b) => b.yChart - a.yChart);
+  }, [positions, market.outcomes]);
 
   return (
     <div className={cn("rounded-2xl border border-border bg-surface p-5 shadow-card", className)}>
