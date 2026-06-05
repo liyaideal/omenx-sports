@@ -7,6 +7,7 @@ import {
   CombinedPriceChart,
   outcomeColor,
 } from "@/components/sports/event/CombinedPriceChart";
+import type { ChartPosition } from "@/components/sports/event/CombinedPriceChart";
 import type { Outcome, SportsMarket } from "@/data/sports-markets";
 
 /**
@@ -27,6 +28,11 @@ export interface EventOutcomesPanelProps {
   tradeSide: "yes" | "no";
   onSelect: (idx: number) => void;
   onSideSelect: (idx: number, side: "yes" | "no") => void;
+  /**
+   * Open positions on this event. Surfaced on the chart as a TradingView-
+   * style overlay (one dashed rail + chip per position). Omit for zero.
+   */
+  chartPositions?: ChartPosition[];
 }
 
 export function EventOutcomesPanel({
@@ -35,6 +41,7 @@ export function EventOutcomesPanel({
   tradeSide,
   onSelect,
   onSideSelect,
+  chartPositions,
 }: EventOutcomesPanelProps) {
   // Binary events (exactly 2 outcomes) — the two outcomes ARE the two
   // tradable sides of the same market. We render them as a flat 2-row list
@@ -44,7 +51,15 @@ export function EventOutcomesPanel({
   const selected = market.outcomes[selectedIdx] ?? market.outcomes[0];
 
   if (isBinary) {
-    return <BinaryOutcomesPanel market={market} selectedIdx={selectedIdx} onSelect={onSelect} selected={selected} />;
+    return (
+      <BinaryOutcomesPanel
+        market={market}
+        selectedIdx={selectedIdx}
+        onSelect={onSelect}
+        selected={selected}
+        chartPositions={chartPositions}
+      />
+    );
   }
 
   return (
@@ -55,6 +70,7 @@ export function EventOutcomesPanel({
       onSelect={onSelect}
       onSideSelect={onSideSelect}
       selected={selected}
+      chartPositions={chartPositions}
     />
   );
 }
@@ -66,11 +82,13 @@ function BinaryOutcomesPanel({
   selectedIdx,
   onSelect,
   selected,
+  chartPositions,
 }: {
   market: SportsMarket;
   selectedIdx: number;
   onSelect: (idx: number) => void;
   selected: Outcome;
+  chartPositions?: ChartPosition[];
 }) {
   const [a, b] = market.outcomes;
   const aCents = Math.round(a.price * 100);
@@ -83,6 +101,7 @@ function BinaryOutcomesPanel({
           const idx = market.outcomes.findIndex((o) => o.id === id);
           if (idx >= 0) onSelect(idx);
         }}
+        positions={chartPositions}
       />
       <div className="rounded-2xl border border-border bg-surface shadow-card">
         <div className="flex items-center justify-between px-4 pt-3 text-[10px] font-mono uppercase tracking-widest text-muted-foreground">
