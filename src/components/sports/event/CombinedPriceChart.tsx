@@ -179,6 +179,7 @@ export function CombinedPriceChart({
       </div>
 
       <div className="mt-4 h-56 w-full">
+        <div className="relative h-full w-full">
         <ResponsiveContainer width="100%" height="100%">
           <LineChart data={data} margin={{ left: 0, right: 8, top: 8, bottom: 0 }}>
             <XAxis dataKey="t" hide />
@@ -216,6 +217,20 @@ export function CombinedPriceChart({
             })}
           </LineChart>
         </ResponsiveContainer>
+        {/* Position overlay — sits above the SVG, anchored to the plot area.
+            `top: 8px` matches the chart's top margin so the y-axis math lines
+            up with the painted curves. */}
+        {overlay.length > 0 && (
+          <div
+            className="pointer-events-none absolute inset-x-0"
+            style={{ top: 8, bottom: 0, right: 8 }}
+          >
+            {overlay.map((p) => (
+              <PositionOverlayRow key={`${p.outcomeId}-${p.side}-${p.entry}`} p={p} />
+            ))}
+          </div>
+        )}
+        </div>
       </div>
 
       {/* Legend strip — colored dot + name + current ¢. Click to highlight. */}
