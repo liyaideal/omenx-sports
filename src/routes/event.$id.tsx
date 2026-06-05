@@ -11,6 +11,7 @@ import {
   TradeOutcomePicker,
 } from "@/components/sports/trade/TradeOutcomePicker";
 import { EventOutcomesPanel } from "@/components/sports/event/EventOutcomesPanel";
+import type { ChartPosition } from "@/components/sports/event/CombinedPriceChart";
 import { EventLiveStage, useStageOffscreen } from "@/components/sports/event/EventLiveStage";
 import { StageTabs, type StageTab } from "@/components/sports/event/StageTabs";
 import { MobileTradeBar } from "@/components/sports/event/MobileTradeBar";
