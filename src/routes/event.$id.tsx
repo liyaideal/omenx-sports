@@ -575,6 +575,7 @@ function EventTradePage() {
                       tradeSide={tradeSide}
                       onSelect={setSelectedIdx}
                       onSideSelect={handleBuyFromRow}
+                      chartPositions={chartPositions}
                     />
                   ),
                 },
@@ -587,6 +588,7 @@ function EventTradePage() {
               tradeSide={tradeSide}
               onSelect={setSelectedIdx}
               onSideSelect={handleBuyFromRow}
+              chartPositions={chartPositions}
             />
           )}
           <LiveTape market={active} />
