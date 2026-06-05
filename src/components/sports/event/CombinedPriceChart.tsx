@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { X } from "lucide-react";
 import { Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { cn } from "@/lib/utils";
 import type { Outcome, SportsMarket } from "@/data/sports-markets";
@@ -15,7 +16,36 @@ export interface CombinedPriceChartProps {
   highlightedOutcomeId?: string;
   /** Click an outcome legend dot to surface it upstream. */
   onLegendSelect?: (outcomeId: string) => void;
+  /**
+   * Open positions on this event. Rendered as dashed reference lines + a
+   * right-edge chip per position (TradingView-style position overlay).
+   * When omitted or empty, the chart renders without any overlay chrome.
+   */
+  positions?: ChartPosition[];
   className?: string;
+}
+
+/**
+ * One open position to overlay onto the chart. The chart's Y axis is the
+ * YES price for each outcome (0–100¢); a NO position at entry¢ is plotted
+ * at the equivalent YES price (100 − entry) so the geometry "where I'm at
+ * vs where the market is" reads correctly.
+ */
+export interface ChartPosition {
+  outcomeId: string;
+  side: "yes" | "no";
+  /** Entry price in ¢ (0–100), on the side the user actually bought. */
+  entry: number;
+  /** Unrealized P/L in USDC (signed). */
+  pnl: number;
+  /** Contracts held. Used for the title/tooltip; not rendered as a number
+   *  in the chip to keep it compact. */
+  size: number;
+  /** Outcome alias to show in the chip, e.g. "USA" or "Draw". */
+  outcomeLabel: string;
+  /** Fires when the user clicks the chip's × button. Usually a Sell shortcut
+   *  via the TradeDrawer; the chart itself stays presentational. */
+  onClose?: () => void;
 }
 
 const RANGES = ["1H", "6H", "1D", "1W", "ALL"] as const;
