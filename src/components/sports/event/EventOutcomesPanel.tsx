@@ -264,6 +264,7 @@ function MultiOutcomePanel({
   onSelect,
   onSideSelect,
   selected,
+  chartPositions,
 }: {
   market: SportsMarket;
   selectedIdx: number;
@@ -271,6 +272,7 @@ function MultiOutcomePanel({
   onSelect: (idx: number) => void;
   onSideSelect: (idx: number, side: "yes" | "no") => void;
   selected: Outcome;
+  chartPositions?: ChartPosition[];
 }) {
   const [expandedIdx, setExpandedIdx] = useState<number>(selectedIdx);
   useEffect(() => {
@@ -286,6 +288,7 @@ function MultiOutcomePanel({
           const idx = market.outcomes.findIndex((o) => o.id === id);
           if (idx >= 0) onSelect(idx);
         }}
+        positions={chartPositions}
       />
 
       <div className="rounded-2xl border border-border bg-surface shadow-card">
