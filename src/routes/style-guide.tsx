@@ -2289,6 +2289,34 @@ function PanelVariant({ market }: { market: SportsMarket }) {
   const cents = Math.round(selected.price * 100);
   const noCents = 100 - cents;
 
+  // Seed two mock chart positions so the new TradingView-style overlay
+  // (CombinedPriceChart `positions`) is exercised in every panel variant —
+  // one long-YES on the leading outcome and one long-NO on the runner-up.
+  const chartPositions = useMemo<ChartPosition[]>(() => {
+    const a = market.outcomes[0];
+    const b = market.outcomes[1] ?? market.outcomes[0];
+    const aEntry = Math.max(1, Math.min(99, Math.round(a.price * 100) - 4));
+    const bEntry = Math.max(1, Math.min(99, 100 - Math.round(b.price * 100) - 6));
+    return [
+      {
+        outcomeId: a.id,
+        side: "yes",
+        entry: aEntry,
+        pnl: 2.51,
+        size: 180,
+        outcomeLabel: a.team?.short ?? a.label,
+      },
+      {
+        outcomeId: b.id,
+        side: "no",
+        entry: bEntry,
+        pnl: 0.36,
+        size: 90,
+        outcomeLabel: b.team?.short ?? b.label,
+      },
+    ];
+  }, [market]);
+
   return (
     <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_280px]">
       <EventOutcomesPanel
@@ -2301,6 +2329,7 @@ function PanelVariant({ market }: { market: SportsMarket }) {
           setSide(s);
           setPulse((p) => p + 1);
         }}
+        chartPositions={chartPositions}
       />
       <div
         className={cn(
