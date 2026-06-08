@@ -394,6 +394,51 @@ export const WC26_BRACKET: BracketRound[] = [
   },
 ];
 
+/** Mid-tournament bracket with TBD slots — used in style-guide to show
+ *  how unseeded later rounds look while earlier rounds are still playing. */
+export const WC26_BRACKET_PARTIAL: BracketRound[] = [
+  {
+    id: "r16",
+    label: "Round of 16",
+    matchups: [
+      { id: "r16-1", home: ARG, away: NOR, homePrice: 0.71, awayPrice: 0.29, kickoffLabel: "Jul 5", winner: "home" },
+      { id: "r16-2", home: NED, away: ENG, homePrice: 0.46, awayPrice: 0.54, kickoffLabel: "Jul 5", winner: "away" },
+      { id: "r16-3", home: FRA, away: ITA, homePrice: 0.58, awayPrice: 0.42, kickoffLabel: "Jul 6", winner: "home" },
+      { id: "r16-4", home: GER, away: CRO, homePrice: 0.62, awayPrice: 0.38, kickoffLabel: "Jul 6", winner: "home" },
+      { id: "r16-5", home: BRA, away: URU, homePrice: 0.66, awayPrice: 0.34, kickoffLabel: "Jul 7" },
+      { id: "r16-6", home: ESP, away: BEL, homePrice: 0.59, awayPrice: 0.41, kickoffLabel: "Jul 7" },
+      { id: "r16-7", home: POR, away: USA, homePrice: 0.68, awayPrice: 0.32, kickoffLabel: "Jul 8" },
+      { id: "r16-8", home: POL, away: MAR, homePrice: 0.52, awayPrice: 0.48, kickoffLabel: "Jul 8" },
+    ],
+  },
+  {
+    id: "qf",
+    label: "Quarterfinals",
+    matchups: [
+      { id: "qf1", home: ARG, away: ENG, homePrice: 0.62, awayPrice: 0.38, kickoffLabel: "Jul 10" },
+      { id: "qf2", home: FRA, away: GER, homePrice: 0.58, awayPrice: 0.42, kickoffLabel: "Jul 10" },
+      // Lower half still TBD — bracket stays a complete tree
+      { id: "qf3", kickoffLabel: "Jul 11" },
+      { id: "qf4", kickoffLabel: "Jul 11" },
+    ],
+  },
+  {
+    id: "sf",
+    label: "Semifinals",
+    matchups: [
+      { id: "sf1", kickoffLabel: "Jul 14" },
+      { id: "sf2", kickoffLabel: "Jul 15" },
+    ],
+  },
+  {
+    id: "f",
+    label: "Final",
+    matchups: [
+      { id: "final", kickoffLabel: "Jul 19 · MetLife" },
+    ],
+  },
+];
+
 /** Map league slug → tournament data. Season leagues return undefined. */
 export function getGroupsByLeagueSlug(slug: string): GroupMarket[] {
   if (slug === "world-cup-2026") return WC26_GROUPS;
