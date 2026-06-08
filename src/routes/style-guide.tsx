@@ -1761,6 +1761,13 @@ function StyleGuide() {
 
               <div>
                 <div className="mb-3 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+                  Partial TBD — mid-tournament, later rounds unseeded
+                </div>
+                <BracketView rounds={WC26_BRACKET_PARTIAL} />
+              </div>
+
+              <div>
+                <div className="mb-3 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
                   Empty state — season leagues / pre-seed
                 </div>
                 <BracketView rounds={[]} />
@@ -1778,6 +1785,7 @@ function StyleGuide() {
                   <li>• Card layout is <strong className="text-foreground">vertical</strong>: row 1 = two flags + serif "vs"; row 2 = two full team names (no country codes — names alone are enough); row 3 = the two advance prices, or a green ✓ won badge for the winner once decided.</li>
                   <li>• Columns use <code className="font-mono text-foreground">flex-1 min-w-0</code> so the bracket stretches to fill its container at desktop widths (≥ 880px). Final column uses <code className="font-mono text-foreground">flex-[1.3]</code> + purple glow + 🏆 title for emphasis.</li>
                   <li>• Loser side: flag dimmed + grayscaled, name muted. Winner side: green name + ✓ replacing price. No country-code abbreviations anywhere.</li>
+                  <li>• <strong className="text-foreground">TBD appearance</strong>: when a matchup side is still unknown, its flag slot shows a <code className="font-mono text-foreground">border-dashed</code> empty circle; the name slot shows "TBD" in muted text; no price is rendered. The card is still fully clickable (leads to the same /event/$id page, which renders a not-found state until the fixture is set). Bracket maintains a complete symmetric tree even when half the matchups are TBD.</li>
                 </ul>
               </div>
             </div>
