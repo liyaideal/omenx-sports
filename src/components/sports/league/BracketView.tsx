@@ -39,9 +39,10 @@ export function BracketView({ rounds }: { rounds: BracketRound[] }) {
 
 /* ---------------- Symmetric (desktop) ---------------- */
 
-// Outer→inner column widths. Index 0 = outermost (R32), last = round before final.
-const OUTER_WIDTHS = [96, 104, 112, 120];
-const FINAL_WIDTH = 132;
+// Uniform outer width keeps full team names readable across rounds; the
+// Final column is slightly wider to anchor the centerline visually.
+const OUTER_WIDTH = 108;
+const FINAL_WIDTH = 128;
 
 function SymmetricBracket({ rounds }: { rounds: BracketRound[] }) {
   // Final = last round when it has exactly 1 matchup; otherwise treat as
@@ -50,18 +51,11 @@ function SymmetricBracket({ rounds }: { rounds: BracketRound[] }) {
   const hasFinal = !!last && last.matchups.length === 1;
   const outerRounds = hasFinal ? rounds.slice(0, -1) : rounds;
 
-  // Pick widths: align outermost shown round to OUTER_WIDTHS[0], stepping in.
-  // If fewer rounds than slots, use the inner slots so cards stay readable.
-  const widths = outerRounds.map((_, i) => {
-    const slot = OUTER_WIDTHS.length - outerRounds.length + i;
-    return OUTER_WIDTHS[Math.max(0, slot)] ?? OUTER_WIDTHS[OUTER_WIDTHS.length - 1];
-  });
-
   return (
-    <div className="rounded-2xl border border-border bg-surface p-3 shadow-card">
-      <div className="flex items-stretch justify-center gap-1">
+    <div className="overflow-x-auto rounded-2xl border border-border bg-surface p-3 shadow-card">
+      <div className="mx-auto flex w-fit items-stretch justify-center gap-1.5">
         {/* Left half */}
-        {outerRounds.map((round, i) => {
+        {outerRounds.map((round) => {
           const half = Math.ceil(round.matchups.length / 2);
           const top = round.matchups.slice(0, half);
           return (
@@ -70,7 +64,7 @@ function SymmetricBracket({ rounds }: { rounds: BracketRound[] }) {
               label={round.label}
               count={round.matchups.length}
               matchups={top}
-              width={widths[i]}
+              width={OUTER_WIDTH}
               mirrored={false}
             />
           );
@@ -86,12 +80,12 @@ function SymmetricBracket({ rounds }: { rounds: BracketRound[] }) {
             width={FINAL_WIDTH}
             mirrored={false}
             centered
+            isFinal
           />
         )}
 
         {/* Right half (reversed: SF → … → R32) */}
-        {[...outerRounds].reverse().map((round, idx) => {
-          const i = outerRounds.length - 1 - idx;
+        {[...outerRounds].reverse().map((round) => {
           const half = Math.ceil(round.matchups.length / 2);
           const bottom = round.matchups.slice(half);
           return (
@@ -100,7 +94,7 @@ function SymmetricBracket({ rounds }: { rounds: BracketRound[] }) {
               label={round.label}
               count={round.matchups.length}
               matchups={bottom}
-              width={widths[i]}
+              width={OUTER_WIDTH}
               mirrored
             />
           );
@@ -117,6 +111,7 @@ function HalfColumn({
   width,
   mirrored,
   centered,
+  isFinal,
 }: {
   label: string;
   count: number;
@@ -124,17 +119,31 @@ function HalfColumn({
   width: number;
   mirrored: boolean;
   centered?: boolean;
+  isFinal?: boolean;
 }) {
-  const compact = width <= 104;
   return (
     <div className="flex shrink-0 flex-col" style={{ width }}>
-      <div className="mb-2 flex items-baseline justify-between px-0.5">
-        <span className="truncate font-mono text-[9px] uppercase tracking-widest text-muted-foreground">
-          {compact ? shortLabel(label) : label}
+      <div
+        className={cn(
+          "mb-2 flex items-baseline gap-1 px-0.5",
+          mirrored ? "flex-row-reverse justify-between" : "justify-between",
+          isFinal && "justify-center",
+        )}
+      >
+        <span
+          className={cn(
+            "truncate font-mono text-[9px] uppercase tracking-widest",
+            isFinal ? "text-primary" : "text-muted-foreground",
+          )}
+        >
+          {isFinal ? "🏆 " : ""}
+          {shortLabel(label)}
         </span>
-        <span className="font-mono text-[9px] uppercase tracking-widest text-muted-foreground">
-          {count}
-        </span>
+        {!isFinal && (
+          <span className="font-mono text-[9px] uppercase tracking-widest text-muted-foreground">
+            {count}
+          </span>
+        )}
       </div>
       <div
         className={cn(
@@ -146,8 +155,8 @@ function HalfColumn({
           <MatchupCard
             key={m.id}
             matchup={m}
-            compact={compact}
             mirrored={mirrored}
+            highlight={isFinal}
           />
         ))}
       </div>
@@ -156,12 +165,11 @@ function HalfColumn({
 }
 
 function shortLabel(label: string) {
-  // "Round of 32" → "R32", "Quarterfinals" → "QF", etc.
-  const m = label.match(/Round of (\d+)/i);
-  if (m) return `R${m[1]}`;
+  // Shorten only the longest labels; keep "Final" / "R32" / "R16" as-is.
   if (/quarter/i.test(label)) return "QF";
   if (/semi/i.test(label)) return "SF";
-  if (/^final/i.test(label)) return "F";
+  const m = label.match(/Round of (\d+)/i);
+  if (m) return `R${m[1]}`;
   return label;
 }
 
@@ -207,7 +215,7 @@ function RoundColumn({
         style={stretch ? { gap: `${columnIndex * 24}px` } : undefined}
       >
         {round.matchups.map((m) => (
-          <MatchupCard key={m.id} matchup={m} compact={false} mirrored={false} />
+          <MatchupCard key={m.id} matchup={m} mirrored={false} />
         ))}
       </div>
     </div>
@@ -216,27 +224,27 @@ function RoundColumn({
 
 function MatchupCard({
   matchup,
-  compact,
   mirrored,
+  highlight,
 }: {
   matchup: BracketMatchup;
-  compact: boolean;
   mirrored: boolean;
+  highlight?: boolean;
 }) {
   return (
     <Link
       to="/event/$id"
       params={{ id: matchup.id }}
       className={cn(
-        "group block rounded-lg border border-border bg-background/40 transition hover:border-white/15 hover:bg-white/[0.03]",
-        compact ? "p-1" : "p-2",
+        "group block rounded-lg border border-border bg-background/40 p-2 transition hover:border-white/15 hover:bg-white/[0.03]",
+        highlight &&
+          "border-primary/40 bg-[oklch(0.82_0.1_305_/_0.08)] shadow-[0_0_24px_-8px_oklch(0.82_0.1_305_/_0.6)] hover:border-primary/60",
       )}
     >
       <TeamRow
         team={matchup.home}
         price={matchup.homePrice}
         settled={matchup.winner === "home"}
-        compact={compact}
         mirrored={mirrored}
       />
       <div className="my-1 h-px bg-white/[0.04]" />
@@ -244,10 +252,9 @@ function MatchupCard({
         team={matchup.away}
         price={matchup.awayPrice}
         settled={matchup.winner === "away"}
-        compact={compact}
         mirrored={mirrored}
       />
-      {matchup.kickoffLabel && !compact && (
+      {matchup.kickoffLabel && (
         <div className="mt-1.5 text-center font-mono text-[9px] uppercase tracking-widest text-muted-foreground">
           {matchup.kickoffLabel}
         </div>
@@ -260,13 +267,11 @@ function TeamRow({
   team,
   price,
   settled,
-  compact,
   mirrored,
 }: {
   team?: BracketTeam;
   price?: number;
   settled?: boolean;
-  compact: boolean;
   mirrored: boolean;
 }) {
   if (!team) {
@@ -277,16 +282,10 @@ function TeamRow({
           mirrored && "flex-row-reverse",
         )}
       >
+        <span className="h-4 w-4 shrink-0 place-items-center rounded-full border border-dashed border-white/15" />
         <span
           className={cn(
-            "shrink-0 place-items-center rounded-full border border-dashed border-white/15",
-            compact ? "h-4 w-4" : "h-5 w-5",
-          )}
-        />
-        <span
-          className={cn(
-            "min-w-0 flex-1 truncate font-mono uppercase tracking-widest text-muted-foreground",
-            compact ? "text-[9px]" : "text-[11px]",
+            "min-w-0 flex-1 truncate font-mono text-[10px] uppercase tracking-widest text-muted-foreground",
             mirrored && "text-right",
           )}
         >
@@ -296,7 +295,6 @@ function TeamRow({
     );
   }
   const hue = team.hue ?? 220;
-  const displayName = compact ? team.short : team.name;
   return (
     <div
       className={cn(
@@ -307,39 +305,25 @@ function TeamRow({
     >
       {team.logo ? (
         <span
-          className={cn(
-            "grid shrink-0 place-items-center overflow-hidden rounded-full bg-white/[0.05]",
-            compact ? "h-4 w-4" : "h-5 w-5",
-          )}
+          className="grid h-4 w-4 shrink-0 place-items-center overflow-hidden rounded-full bg-white/[0.05]"
           style={{ boxShadow: `0 0 10px -3px oklch(0.7 0.18 ${hue} / 0.5)` }}
         >
           <img src={team.logo} alt="" className="h-full w-full object-cover" />
         </span>
       ) : (
-        <span
-          className={cn(
-            "shrink-0 rounded-full bg-white/[0.05]",
-            compact ? "h-4 w-4" : "h-5 w-5",
-          )}
-        />
+        <span className="h-4 w-4 shrink-0 rounded-full bg-white/[0.05]" />
       )}
       <span
         className={cn(
-          "min-w-0 flex-1 truncate font-medium text-foreground",
-          compact ? "text-[10px]" : "text-xs",
+          "min-w-0 flex-1 truncate text-[11px] font-medium text-foreground",
           mirrored && "text-right",
         )}
         title={team.name}
       >
-        {displayName}
+        {team.name}
       </span>
       {typeof price === "number" && !settled && (
-        <span
-          className={cn(
-            "font-mono font-semibold tabular-nums text-foreground",
-            compact ? "text-[10px]" : "text-[11px]",
-          )}
-        >
+        <span className="font-mono text-[10px] font-semibold tabular-nums text-foreground">
           {Math.round(price * 100)}¢
         </span>
       )}
