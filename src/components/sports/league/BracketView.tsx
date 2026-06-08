@@ -5,15 +5,15 @@ import type { BracketMatchup, BracketRound, BracketTeam } from "@/data/tournamen
 /**
  * Tournament knockout bracket.
  *
- * Desktop (md+): symmetric funnel layout. Each round is split into top/bottom
- * halves and laid out as [left R32 … left SF | Final | right SF … right R32],
- * with the final centered. Column widths shrink toward the outer rounds so
- * the entire tree fits in a typical desktop content width (~1000px) without
- * horizontal scrolling. Right-half cards are mirrored (logo on the right)
- * to reinforce the funnel.
+ * Desktop (md+): symmetric funnel that stretches to fill the container.
+ * Layout: [left R32 … left SF | Final | right SF … right R32]. Columns
+ * flex equally; the Final column gets a slight bias for visual anchor.
  *
- * Mobile (<md): single-direction horizontal scroll — bracket integrity
- * beats wrapping on narrow screens.
+ * Each matchup card uses a vertical "versus" layout — both flags share a
+ * row on top, both country names share a row below, prices share a third
+ * row. This keeps columns narrow without truncating names per side cell.
+ *
+ * Mobile (<md): horizontal scroll fallback using the same versus card.
  */
 export function BracketView({ rounds }: { rounds: BracketRound[] }) {
   if (rounds.length === 0) {
@@ -25,11 +25,9 @@ export function BracketView({ rounds }: { rounds: BracketRound[] }) {
   }
   return (
     <>
-      {/* Desktop — symmetric funnel */}
       <div className="hidden md:block">
         <SymmetricBracket rounds={rounds} />
       </div>
-      {/* Mobile — original horizontal scroll */}
       <div className="md:hidden">
         <LinearBracket rounds={rounds} />
       </div>
@@ -39,63 +37,48 @@ export function BracketView({ rounds }: { rounds: BracketRound[] }) {
 
 /* ---------------- Symmetric (desktop) ---------------- */
 
-// Uniform outer width keeps full team names readable across rounds; the
-// Final column is slightly wider to anchor the centerline visually.
-const OUTER_WIDTH = 108;
-const FINAL_WIDTH = 128;
-
 function SymmetricBracket({ rounds }: { rounds: BracketRound[] }) {
-  // Final = last round when it has exactly 1 matchup; otherwise treat as
-  // non-final tree (no center) and just render left/right halves.
   const last = rounds[rounds.length - 1];
   const hasFinal = !!last && last.matchups.length === 1;
   const outerRounds = hasFinal ? rounds.slice(0, -1) : rounds;
 
   return (
     <div className="overflow-x-auto rounded-2xl border border-border bg-surface p-3 shadow-card">
-      <div className="mx-auto flex w-fit items-stretch justify-center gap-1.5">
-        {/* Left half */}
+      <div className="flex w-full min-w-[880px] items-stretch gap-2">
         {outerRounds.map((round) => {
           const half = Math.ceil(round.matchups.length / 2);
-          const top = round.matchups.slice(0, half);
           return (
             <HalfColumn
               key={`L-${round.id}`}
               label={round.label}
               count={round.matchups.length}
-              matchups={top}
-              width={OUTER_WIDTH}
-              mirrored={false}
+              matchups={round.matchups.slice(0, half)}
+              flex={1}
             />
           );
         })}
 
-        {/* Final */}
         {hasFinal && (
           <HalfColumn
             key="F"
             label={last!.label}
             count={1}
             matchups={last!.matchups}
-            width={FINAL_WIDTH}
-            mirrored={false}
+            flex={1.3}
             centered
             isFinal
           />
         )}
 
-        {/* Right half (reversed: SF → … → R32) */}
         {[...outerRounds].reverse().map((round) => {
           const half = Math.ceil(round.matchups.length / 2);
-          const bottom = round.matchups.slice(half);
           return (
             <HalfColumn
               key={`R-${round.id}`}
               label={round.label}
               count={round.matchups.length}
-              matchups={bottom}
-              width={OUTER_WIDTH}
-              mirrored
+              matchups={round.matchups.slice(half)}
+              flex={1}
             />
           );
         })}
@@ -108,28 +91,20 @@ function HalfColumn({
   label,
   count,
   matchups,
-  width,
-  mirrored,
+  flex,
   centered,
   isFinal,
 }: {
   label: string;
   count: number;
   matchups: BracketMatchup[];
-  width: number;
-  mirrored: boolean;
+  flex: number;
   centered?: boolean;
   isFinal?: boolean;
 }) {
   return (
-    <div className="flex shrink-0 flex-col" style={{ width }}>
-      <div
-        className={cn(
-          "mb-2 flex items-baseline gap-1 px-0.5",
-          mirrored ? "flex-row-reverse justify-between" : "justify-between",
-          isFinal && "justify-center",
-        )}
-      >
+    <div className="flex min-w-0 flex-col" style={{ flex: `${flex} 1 0` }}>
+      <div className="mb-2 flex items-baseline justify-center gap-1.5 px-0.5">
         <span
           className={cn(
             "truncate font-mono text-[9px] uppercase tracking-widest",
@@ -152,12 +127,7 @@ function HalfColumn({
         )}
       >
         {matchups.map((m) => (
-          <MatchupCard
-            key={m.id}
-            matchup={m}
-            mirrored={mirrored}
-            highlight={isFinal}
-          />
+          <MatchupCard key={m.id} matchup={m} highlight={isFinal} />
         ))}
       </div>
     </div>
@@ -165,7 +135,6 @@ function HalfColumn({
 }
 
 function shortLabel(label: string) {
-  // Shorten only the longest labels; keep "Final" / "R32" / "R16" as-is.
   if (/quarter/i.test(label)) return "QF";
   if (/semi/i.test(label)) return "SF";
   const m = label.match(/Round of (\d+)/i);
@@ -177,8 +146,8 @@ function shortLabel(label: string) {
 
 function LinearBracket({ rounds }: { rounds: BracketRound[] }) {
   return (
-    <div className="overflow-x-auto rounded-2xl border border-border bg-surface p-4 shadow-card md:p-6">
-      <div className="flex min-w-fit gap-4 md:gap-6">
+    <div className="overflow-x-auto rounded-2xl border border-border bg-surface p-4 shadow-card">
+      <div className="flex min-w-fit gap-4">
         {rounds.map((round, ri) => (
           <RoundColumn key={round.id} round={round} stretch={ri > 0} columnIndex={ri} />
         ))}
@@ -197,7 +166,7 @@ function RoundColumn({
   columnIndex: number;
 }) {
   return (
-    <div className="flex w-[240px] shrink-0 flex-col">
+    <div className="flex w-[200px] shrink-0 flex-col">
       <div className="mb-3 flex items-baseline justify-between">
         <span className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
           {round.label}
@@ -207,30 +176,27 @@ function RoundColumn({
         </span>
       </div>
       <div
-        className={cn(
-          "flex flex-1 flex-col",
-          // Each subsequent column doubles the gap → visual convergence.
-          stretch ? "justify-around" : "gap-3",
-        )}
+        className={cn("flex flex-1 flex-col", stretch ? "justify-around" : "gap-3")}
         style={stretch ? { gap: `${columnIndex * 24}px` } : undefined}
       >
         {round.matchups.map((m) => (
-          <MatchupCard key={m.id} matchup={m} mirrored={false} />
+          <MatchupCard key={m.id} matchup={m} />
         ))}
       </div>
     </div>
   );
 }
 
+/* ---------------- Versus card ---------------- */
+
 function MatchupCard({
   matchup,
-  mirrored,
   highlight,
 }: {
   matchup: BracketMatchup;
-  mirrored: boolean;
   highlight?: boolean;
 }) {
+  const { home, away, homePrice, awayPrice, winner, kickoffLabel } = matchup;
   return (
     <Link
       to="/event/$id"
@@ -241,97 +207,77 @@ function MatchupCard({
           "border-primary/40 bg-[oklch(0.82_0.1_305_/_0.08)] shadow-[0_0_24px_-8px_oklch(0.82_0.1_305_/_0.6)] hover:border-primary/60",
       )}
     >
-      <TeamRow
-        team={matchup.home}
-        price={matchup.homePrice}
-        settled={matchup.winner === "home"}
-        mirrored={mirrored}
-      />
-      <div className="my-1 h-px bg-white/[0.04]" />
-      <TeamRow
-        team={matchup.away}
-        price={matchup.awayPrice}
-        settled={matchup.winner === "away"}
-        mirrored={mirrored}
-      />
-      {matchup.kickoffLabel && (
+      <div className="flex items-center justify-center gap-2">
+        <Flag team={home} dim={winner === "away"} />
+        <span className="font-serif text-[10px] italic text-muted-foreground">vs</span>
+        <Flag team={away} dim={winner === "home"} />
+      </div>
+      <div className="mt-1.5 grid grid-cols-2 gap-1">
+        <NameCell team={home} settled={winner === "home"} />
+        <NameCell team={away} settled={winner === "away"} />
+      </div>
+      <div className="mt-0.5 grid grid-cols-2 gap-1">
+        <PriceCell price={homePrice} settled={winner === "home"} />
+        <PriceCell price={awayPrice} settled={winner === "away"} />
+      </div>
+      {kickoffLabel && (
         <div className="mt-1.5 text-center font-mono text-[9px] uppercase tracking-widest text-muted-foreground">
-          {matchup.kickoffLabel}
+          {kickoffLabel}
         </div>
       )}
     </Link>
   );
 }
 
-function TeamRow({
-  team,
-  price,
-  settled,
-  mirrored,
-}: {
-  team?: BracketTeam;
-  price?: number;
-  settled?: boolean;
-  mirrored: boolean;
-}) {
+function Flag({ team, dim }: { team?: BracketTeam; dim?: boolean }) {
   if (!team) {
-    return (
-      <div
-        className={cn(
-          "flex items-center gap-1.5 py-1 opacity-50",
-          mirrored && "flex-row-reverse",
-        )}
-      >
-        <span className="h-4 w-4 shrink-0 place-items-center rounded-full border border-dashed border-white/15" />
-        <span
-          className={cn(
-            "min-w-0 flex-1 truncate font-mono text-[10px] uppercase tracking-widest text-muted-foreground",
-            mirrored && "text-right",
-          )}
-        >
-          TBD
-        </span>
-      </div>
-    );
+    return <span className="h-7 w-7 shrink-0 rounded-full border border-dashed border-white/15" />;
   }
   const hue = team.hue ?? 220;
   return (
-    <div
+    <span
       className={cn(
-        "flex items-center gap-1.5 py-1",
-        mirrored && "flex-row-reverse",
-        settled && "rounded-md bg-[oklch(0.78_0.18_155_/_0.12)] px-1",
+        "grid h-7 w-7 shrink-0 place-items-center overflow-hidden rounded-full bg-white/[0.05] transition",
+        dim && "opacity-40 grayscale",
       )}
+      style={{ boxShadow: `0 0 12px -3px oklch(0.7 0.18 ${hue} / 0.55)` }}
     >
       {team.logo ? (
-        <span
-          className="grid h-4 w-4 shrink-0 place-items-center overflow-hidden rounded-full bg-white/[0.05]"
-          style={{ boxShadow: `0 0 10px -3px oklch(0.7 0.18 ${hue} / 0.5)` }}
-        >
-          <img src={team.logo} alt="" className="h-full w-full object-cover" />
-        </span>
-      ) : (
-        <span className="h-4 w-4 shrink-0 rounded-full bg-white/[0.05]" />
+        <img src={team.logo} alt={team.name} className="h-full w-full object-cover" />
+      ) : null}
+    </span>
+  );
+}
+
+function NameCell({ team, settled }: { team?: BracketTeam; settled?: boolean }) {
+  return (
+    <span
+      className={cn(
+        "min-w-0 truncate text-center text-[11px] font-medium",
+        settled ? "text-[oklch(0.78_0.18_155)]" : "text-foreground",
+        !team && "text-muted-foreground",
       )}
-      <span
-        className={cn(
-          "min-w-0 flex-1 truncate text-[11px] font-medium text-foreground",
-          mirrored && "text-right",
-        )}
-        title={team.name}
-      >
-        {team.name}
+      title={team?.name}
+    >
+      {team?.name ?? "TBD"}
+    </span>
+  );
+}
+
+function PriceCell({ price, settled }: { price?: number; settled?: boolean }) {
+  if (settled) {
+    return (
+      <span className="text-center font-mono text-[10px] uppercase tracking-widest text-[oklch(0.78_0.18_155)]">
+        ✓ won
       </span>
-      {typeof price === "number" && !settled && (
-        <span className="font-mono text-[10px] font-semibold tabular-nums text-foreground">
-          {Math.round(price * 100)}¢
-        </span>
-      )}
-      {settled && (
-        <span className="font-mono text-[9px] uppercase tracking-widest text-[oklch(0.78_0.18_155)]">
-          ✓
-        </span>
-      )}
-    </div>
+    );
+  }
+  if (typeof price !== "number") {
+    return <span className="text-center font-mono text-[10px] text-muted-foreground">—</span>;
+  }
+  return (
+    <span className="text-center font-mono text-[11px] font-semibold tabular-nums text-foreground">
+      {Math.round(price * 100)}¢
+    </span>
   );
 }
