@@ -1746,8 +1746,9 @@ function StyleGuide() {
 
           <Section id="hub-bracket" title="Hub · Bracket" kicker="21 — P2 / ?view=bracket">
             <p className="mb-6 max-w-3xl text-sm text-muted-foreground">
-              Knockout tree for tournament-kind leagues. Columns are rounds; each matchup is a pair of team pills with
-              their advance-probability. Mobile horizontally scrolls — bracket integrity beats wrapping.
+              Knockout tree for tournament-kind leagues. Columns are rounds; each matchup is a vertical "versus" card
+              — flags on top, full team names + advance-probability stacked below. Desktop fills the container width;
+              mobile falls back to a horizontally-scrolling linear list (bracket integrity beats wrapping).
             </p>
 
             <div className="space-y-6">
@@ -1774,6 +1775,9 @@ function StyleGuide() {
                   <li>• Matchups deep-link to <code className="font-mono text-foreground">/event/$id</code> using the matchup id as the market id. The bracket card shows only the two teams, but the detail page is a full <strong className="text-foreground">1X2</strong> market (home / draw / away) — never add a Draw row inside the bracket card itself.</li>
                   <li>• TBD slots render as a dashed circle — bracket is always a complete tree, never collapsed rows.</li>
                   <li>• Each column past the first gets progressively larger vertical gaps to visually converge toward the final.</li>
+                  <li>• Card layout is <strong className="text-foreground">vertical</strong>: row 1 = two flags + serif "vs"; row 2 = two full team names (no country codes — names alone are enough); row 3 = the two advance prices, or a green ✓ won badge for the winner once decided.</li>
+                  <li>• Columns use <code className="font-mono text-foreground">flex-1 min-w-0</code> so the bracket stretches to fill its container at desktop widths (≥ 880px). Final column uses <code className="font-mono text-foreground">flex-[1.3]</code> + purple glow + 🏆 title for emphasis.</li>
+                  <li>• Loser side: flag dimmed + grayscaled, name muted. Winner side: green name + ✓ replacing price. No country-code abbreviations anywhere.</li>
                 </ul>
               </div>
             </div>
