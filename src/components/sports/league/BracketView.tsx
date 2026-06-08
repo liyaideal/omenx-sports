@@ -39,9 +39,10 @@ export function BracketView({ rounds }: { rounds: BracketRound[] }) {
 
 /* ---------------- Symmetric (desktop) ---------------- */
 
-// Outer→inner column widths. Index 0 = outermost (R32), last = round before final.
-const OUTER_WIDTHS = [96, 104, 112, 120];
-const FINAL_WIDTH = 132;
+// Uniform outer width keeps full team names readable across rounds; the
+// Final column is slightly wider to anchor the centerline visually.
+const OUTER_WIDTH = 108;
+const FINAL_WIDTH = 128;
 
 function SymmetricBracket({ rounds }: { rounds: BracketRound[] }) {
   // Final = last round when it has exactly 1 matchup; otherwise treat as
@@ -50,18 +51,11 @@ function SymmetricBracket({ rounds }: { rounds: BracketRound[] }) {
   const hasFinal = !!last && last.matchups.length === 1;
   const outerRounds = hasFinal ? rounds.slice(0, -1) : rounds;
 
-  // Pick widths: align outermost shown round to OUTER_WIDTHS[0], stepping in.
-  // If fewer rounds than slots, use the inner slots so cards stay readable.
-  const widths = outerRounds.map((_, i) => {
-    const slot = OUTER_WIDTHS.length - outerRounds.length + i;
-    return OUTER_WIDTHS[Math.max(0, slot)] ?? OUTER_WIDTHS[OUTER_WIDTHS.length - 1];
-  });
-
   return (
-    <div className="rounded-2xl border border-border bg-surface p-3 shadow-card">
-      <div className="flex items-stretch justify-center gap-1">
+    <div className="overflow-x-auto rounded-2xl border border-border bg-surface p-3 shadow-card">
+      <div className="mx-auto flex w-fit items-stretch justify-center gap-1.5">
         {/* Left half */}
-        {outerRounds.map((round, i) => {
+        {outerRounds.map((round) => {
           const half = Math.ceil(round.matchups.length / 2);
           const top = round.matchups.slice(0, half);
           return (
@@ -70,7 +64,7 @@ function SymmetricBracket({ rounds }: { rounds: BracketRound[] }) {
               label={round.label}
               count={round.matchups.length}
               matchups={top}
-              width={widths[i]}
+              width={OUTER_WIDTH}
               mirrored={false}
             />
           );
@@ -86,12 +80,12 @@ function SymmetricBracket({ rounds }: { rounds: BracketRound[] }) {
             width={FINAL_WIDTH}
             mirrored={false}
             centered
+            isFinal
           />
         )}
 
         {/* Right half (reversed: SF → … → R32) */}
-        {[...outerRounds].reverse().map((round, idx) => {
-          const i = outerRounds.length - 1 - idx;
+        {[...outerRounds].reverse().map((round) => {
           const half = Math.ceil(round.matchups.length / 2);
           const bottom = round.matchups.slice(half);
           return (
@@ -100,7 +94,7 @@ function SymmetricBracket({ rounds }: { rounds: BracketRound[] }) {
               label={round.label}
               count={round.matchups.length}
               matchups={bottom}
-              width={widths[i]}
+              width={OUTER_WIDTH}
               mirrored
             />
           );
@@ -117,6 +111,7 @@ function HalfColumn({
   width,
   mirrored,
   centered,
+  isFinal,
 }: {
   label: string;
   count: number;
@@ -124,17 +119,31 @@ function HalfColumn({
   width: number;
   mirrored: boolean;
   centered?: boolean;
+  isFinal?: boolean;
 }) {
-  const compact = width <= 104;
   return (
     <div className="flex shrink-0 flex-col" style={{ width }}>
-      <div className="mb-2 flex items-baseline justify-between px-0.5">
-        <span className="truncate font-mono text-[9px] uppercase tracking-widest text-muted-foreground">
-          {compact ? shortLabel(label) : label}
+      <div
+        className={cn(
+          "mb-2 flex items-baseline gap-1 px-0.5",
+          mirrored ? "flex-row-reverse justify-between" : "justify-between",
+          isFinal && "justify-center",
+        )}
+      >
+        <span
+          className={cn(
+            "truncate font-mono text-[9px] uppercase tracking-widest",
+            isFinal ? "text-primary" : "text-muted-foreground",
+          )}
+        >
+          {isFinal ? "🏆 " : ""}
+          {shortLabel(label)}
         </span>
-        <span className="font-mono text-[9px] uppercase tracking-widest text-muted-foreground">
-          {count}
-        </span>
+        {!isFinal && (
+          <span className="font-mono text-[9px] uppercase tracking-widest text-muted-foreground">
+            {count}
+          </span>
+        )}
       </div>
       <div
         className={cn(
@@ -146,8 +155,8 @@ function HalfColumn({
           <MatchupCard
             key={m.id}
             matchup={m}
-            compact={compact}
             mirrored={mirrored}
+            highlight={isFinal}
           />
         ))}
       </div>
@@ -156,12 +165,11 @@ function HalfColumn({
 }
 
 function shortLabel(label: string) {
-  // "Round of 32" → "R32", "Quarterfinals" → "QF", etc.
-  const m = label.match(/Round of (\d+)/i);
-  if (m) return `R${m[1]}`;
+  // Shorten only the longest labels; keep "Final" / "R32" / "R16" as-is.
   if (/quarter/i.test(label)) return "QF";
   if (/semi/i.test(label)) return "SF";
-  if (/^final/i.test(label)) return "F";
+  const m = label.match(/Round of (\d+)/i);
+  if (m) return `R${m[1]}`;
   return label;
 }
 
