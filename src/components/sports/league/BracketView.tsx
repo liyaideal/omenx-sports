@@ -215,7 +215,7 @@ function RoundColumn({
         style={stretch ? { gap: `${columnIndex * 24}px` } : undefined}
       >
         {round.matchups.map((m) => (
-          <MatchupCard key={m.id} matchup={m} compact={false} mirrored={false} />
+          <MatchupCard key={m.id} matchup={m} mirrored={false} />
         ))}
       </div>
     </div>
@@ -224,27 +224,27 @@ function RoundColumn({
 
 function MatchupCard({
   matchup,
-  compact,
   mirrored,
+  highlight,
 }: {
   matchup: BracketMatchup;
-  compact: boolean;
   mirrored: boolean;
+  highlight?: boolean;
 }) {
   return (
     <Link
       to="/event/$id"
       params={{ id: matchup.id }}
       className={cn(
-        "group block rounded-lg border border-border bg-background/40 transition hover:border-white/15 hover:bg-white/[0.03]",
-        compact ? "p-1" : "p-2",
+        "group block rounded-lg border border-border bg-background/40 p-2 transition hover:border-white/15 hover:bg-white/[0.03]",
+        highlight &&
+          "border-primary/40 bg-[oklch(0.82_0.1_305_/_0.08)] shadow-[0_0_24px_-8px_oklch(0.82_0.1_305_/_0.6)] hover:border-primary/60",
       )}
     >
       <TeamRow
         team={matchup.home}
         price={matchup.homePrice}
         settled={matchup.winner === "home"}
-        compact={compact}
         mirrored={mirrored}
       />
       <div className="my-1 h-px bg-white/[0.04]" />
@@ -252,10 +252,9 @@ function MatchupCard({
         team={matchup.away}
         price={matchup.awayPrice}
         settled={matchup.winner === "away"}
-        compact={compact}
         mirrored={mirrored}
       />
-      {matchup.kickoffLabel && !compact && (
+      {matchup.kickoffLabel && (
         <div className="mt-1.5 text-center font-mono text-[9px] uppercase tracking-widest text-muted-foreground">
           {matchup.kickoffLabel}
         </div>
@@ -268,13 +267,11 @@ function TeamRow({
   team,
   price,
   settled,
-  compact,
   mirrored,
 }: {
   team?: BracketTeam;
   price?: number;
   settled?: boolean;
-  compact: boolean;
   mirrored: boolean;
 }) {
   if (!team) {
@@ -285,16 +282,10 @@ function TeamRow({
           mirrored && "flex-row-reverse",
         )}
       >
+        <span className="h-4 w-4 shrink-0 place-items-center rounded-full border border-dashed border-white/15" />
         <span
           className={cn(
-            "shrink-0 place-items-center rounded-full border border-dashed border-white/15",
-            compact ? "h-4 w-4" : "h-5 w-5",
-          )}
-        />
-        <span
-          className={cn(
-            "min-w-0 flex-1 truncate font-mono uppercase tracking-widest text-muted-foreground",
-            compact ? "text-[9px]" : "text-[11px]",
+            "min-w-0 flex-1 truncate font-mono text-[10px] uppercase tracking-widest text-muted-foreground",
             mirrored && "text-right",
           )}
         >
@@ -304,7 +295,6 @@ function TeamRow({
     );
   }
   const hue = team.hue ?? 220;
-  const displayName = compact ? team.short : team.name;
   return (
     <div
       className={cn(
@@ -315,39 +305,25 @@ function TeamRow({
     >
       {team.logo ? (
         <span
-          className={cn(
-            "grid shrink-0 place-items-center overflow-hidden rounded-full bg-white/[0.05]",
-            compact ? "h-4 w-4" : "h-5 w-5",
-          )}
+          className="grid h-4 w-4 shrink-0 place-items-center overflow-hidden rounded-full bg-white/[0.05]"
           style={{ boxShadow: `0 0 10px -3px oklch(0.7 0.18 ${hue} / 0.5)` }}
         >
           <img src={team.logo} alt="" className="h-full w-full object-cover" />
         </span>
       ) : (
-        <span
-          className={cn(
-            "shrink-0 rounded-full bg-white/[0.05]",
-            compact ? "h-4 w-4" : "h-5 w-5",
-          )}
-        />
+        <span className="h-4 w-4 shrink-0 rounded-full bg-white/[0.05]" />
       )}
       <span
         className={cn(
-          "min-w-0 flex-1 truncate font-medium text-foreground",
-          compact ? "text-[10px]" : "text-xs",
+          "min-w-0 flex-1 truncate text-[11px] font-medium text-foreground",
           mirrored && "text-right",
         )}
         title={team.name}
       >
-        {displayName}
+        {team.name}
       </span>
       {typeof price === "number" && !settled && (
-        <span
-          className={cn(
-            "font-mono font-semibold tabular-nums text-foreground",
-            compact ? "text-[10px]" : "text-[11px]",
-          )}
-        >
+        <span className="font-mono text-[10px] font-semibold tabular-nums text-foreground">
           {Math.round(price * 100)}¢
         </span>
       )}
