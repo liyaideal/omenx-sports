@@ -75,6 +75,7 @@ import type { SportsMarket } from "@/data/sports-markets";
 import {
   WC26_GROUPS,
   WC26_BRACKET,
+  WC26_BRACKET_PARTIAL,
   getGroupsByLeagueSlug,
   getBracketByLeagueSlug,
 } from "@/data/tournament";
