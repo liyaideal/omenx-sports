@@ -9,15 +9,14 @@ import { ArrowUpRight } from "lucide-react";
 export function BridgeStrip({
   openPositions,
   pnlToday,
-  toClaim,
   portfolioHref,
   headline = "Made a call? Cash it in.",
 }: {
   openPositions: number;
   /** Signed string, e.g. "+$142.20" or "-$12.40" or "$0.00". */
   pnlToday: string;
-  /** Display string, e.g. "$48.00". Pass "$0.00" for zero state. */
-  toClaim: string;
+  /** @deprecated retained for backward-compatible call sites; not rendered. */
+  toClaim?: string;
   portfolioHref: string;
   headline?: string;
 }) {
@@ -42,8 +41,6 @@ export function BridgeStrip({
             <span className={`inline-flex items-center gap-1 ${pnlTone}`}>
               {pnlToday} today {pnlArrow}
             </span>
-            <span className="text-border">·</span>
-            <span className="text-foreground">{toClaim} to claim</span>
           </span>
         </div>
         <a
