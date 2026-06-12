@@ -194,7 +194,7 @@ export function OrderBook({
       </div>
       <div className="flex items-center justify-between px-2 pb-2 text-[10px] font-mono uppercase tracking-widest">
         <span className="text-muted-foreground/70 normal-case tracking-normal">
-          NO book mirrors YES · price = 100 − p · ask ↔ bid swap
+          Two opposite sides of the same market
         </span>
         <span className="text-muted-foreground">Price · Size · Total</span>
       </div>
