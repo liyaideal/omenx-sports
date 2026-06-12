@@ -2427,7 +2427,7 @@ function EventLiveStageDemo() {
             <div className="space-y-3">
               <OrderBook sideLabels={{ yes: "Man City", no: "Real Madrid" }} />
               <p className="text-xs text-muted-foreground">
-                Each column is a full one-sided book: <span className="text-[oklch(0.82_0.16_25)]">Asks</span> on top, <span className="text-[oklch(0.85_0.16_155)]">Bids</span> on bottom, divided by Last · Spread. The NO column mirrors YES via <code className="font-mono">100 − p</code> with ask↔bid swapped.
+                Left column shows <span className="text-[oklch(0.85_0.16_155)]">Man City</span> orders: sellers above, buyers below the last traded price. Right column shows <span className="text-[oklch(0.82_0.16_25)]">Real Madrid</span> the same way — prices move in opposite directions because the two outcomes are mutually exclusive.
               </p>
             </div>
           ),
