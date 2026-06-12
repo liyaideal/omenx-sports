@@ -27,7 +27,7 @@ export function HubTabs({
     <nav
       role="tablist"
       aria-label="League view"
-      className="sticky top-0 z-30 -mx-1 flex gap-1 overflow-x-auto border-b border-border bg-background/85 px-1 py-2 backdrop-blur"
+      className="sticky top-0 z-30 -mx-1 flex gap-1 overflow-x-auto border-b border-white/[0.04] bg-background/40 px-1 py-2 backdrop-blur-sm"
     >
       {tabs.map((t) => {
         const active = t.view === current;
