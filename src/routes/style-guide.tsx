@@ -2424,8 +2424,11 @@ function EventLiveStageDemo() {
           id: "book",
           label: "Order book",
           content: (
-            <div className="rounded-2xl border border-dashed border-white/15 bg-white/[0.02] p-10 text-center text-xs text-muted-foreground">
-              OrderBook slot
+            <div className="space-y-3">
+              <OrderBook sideLabels={{ yes: "Man City", no: "Real Madrid" }} />
+              <p className="text-xs text-muted-foreground">
+                Each column is a full one-sided book: <span className="text-[oklch(0.82_0.16_25)]">Asks</span> on top, <span className="text-[oklch(0.85_0.16_155)]">Bids</span> on bottom, divided by Last · Spread. The NO column mirrors YES via <code className="font-mono">100 − p</code> with ask↔bid swapped.
+              </p>
             </div>
           ),
         },
