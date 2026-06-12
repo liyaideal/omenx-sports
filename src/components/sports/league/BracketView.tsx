@@ -43,7 +43,7 @@ function SymmetricBracket({ rounds }: { rounds: BracketRound[] }) {
   const outerRounds = hasFinal ? rounds.slice(0, -1) : rounds;
 
   return (
-    <div className="overflow-x-auto rounded-2xl border border-border bg-surface p-3 shadow-card">
+    <div className="overflow-x-auto rounded-2xl border border-white/[0.06] bg-white/[0.02] p-3 backdrop-blur-sm">
       <div className="flex w-full min-w-[880px] items-stretch gap-2">
         {outerRounds.map((round) => {
           const half = Math.ceil(round.matchups.length / 2);
