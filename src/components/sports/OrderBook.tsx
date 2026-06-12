@@ -183,20 +183,7 @@ export function OrderBook({
     <div className={cn("rounded-2xl border border-border bg-surface p-4 shadow-card", className)}>
       <div className="flex items-center justify-between px-2 pb-2">
         <div className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground">Order Book</div>
-        <div className="flex items-center gap-3 text-[10px] font-mono uppercase tracking-widest text-muted-foreground">
-          <span>
-            Mark <span className="text-foreground tabular-nums">{mark}¢</span>
-          </span>
-          <span>
-            Spread <span className="text-foreground tabular-nums">{ySpread}¢</span>
-          </span>
-        </div>
-      </div>
-      <div className="flex items-center justify-between px-2 pb-2 text-[10px] font-mono uppercase tracking-widest">
-        <span className="text-muted-foreground/70 normal-case tracking-normal">
-          Two opposite sides of the same market
-        </span>
-        <span className="text-muted-foreground">Price · Size · Total</span>
+        <div className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground">Price · Size · Total</div>
       </div>
       <div className="grid grid-cols-2 gap-3">
         <div>
