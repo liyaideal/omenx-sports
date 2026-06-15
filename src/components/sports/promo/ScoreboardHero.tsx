@@ -51,8 +51,13 @@ export function ScoreboardHero({ compact = false }: { compact?: boolean }) {
             cropping or mask hack needed. */}
         <div className="relative h-full w-1/3 hidden md:block">
           <div
-            className="absolute inset-0 bg-contain bg-no-repeat bg-center"
-            style={{ backgroundImage: `url(${trophyAsset.url})` }}
+            className="absolute inset-0 bg-no-repeat bg-center"
+            style={{
+              backgroundImage: `url(${trophyAsset.url})`,
+              // source has wide black margins; scale to ~180% so the trophy
+              // sculpture fills the column without dead space on the sides.
+              backgroundSize: "auto 130%",
+            }}
           />
           {/* feather right edge into the slab */}
           <div className="absolute inset-0 bg-gradient-to-r from-transparent via-transparent to-black" />
@@ -78,8 +83,11 @@ export function ScoreboardHero({ compact = false }: { compact?: boolean }) {
           never crowds the number column. */}
       <div
         aria-hidden
-        className="absolute inset-y-0 left-0 w-1/2 bg-contain bg-no-repeat bg-center opacity-25 md:hidden"
-        style={{ backgroundImage: `url(${trophyAsset.url})` }}
+        className="absolute inset-y-0 left-0 w-1/2 bg-no-repeat bg-center opacity-25 md:hidden"
+        style={{
+          backgroundImage: `url(${trophyAsset.url})`,
+          backgroundSize: "auto 130%",
+        }}
       />
       <div aria-hidden className="absolute inset-0 bg-led-matrix opacity-25" />
       <TwinkleField count={compact ? 8 : 22} />
