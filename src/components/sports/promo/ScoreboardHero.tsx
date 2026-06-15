@@ -2,8 +2,7 @@ import { useEffect, useState } from "react";
 import { Trophy } from "lucide-react";
 import { CARNIVAL_PRIZE_POOL, CARNIVAL_ENDS_AT } from "@/data/world-cup-carnival";
 import { cn } from "@/lib/utils";
-import trophyAsset from "@/assets/carnival/wc26-trophy-landscape.png.asset.json";
-import stadiumAsset from "@/assets/carnival/hero-stadium-right.jpg.asset.json";
+import heroBgAsset from "@/assets/carnival/hero-trophy-stadium.jpg.asset.json";
 import { CarnivalFlagsMarquee } from "./CarnivalFlagsMarquee";
 import { TwinkleField } from "./ConfettiLayer";
 
@@ -45,41 +44,29 @@ export function ScoreboardHero({ compact = false }: { compact?: boolean }) {
         "border-[#1a1a1a]",
       )}
     >
-      {/* Background split — right 2/3 stadium */}
-      <div aria-hidden className="absolute inset-y-0 right-0 w-2/3">
-        <div
-          className="absolute inset-0 bg-cover bg-center opacity-40 grayscale-[0.2]"
-          style={{ backgroundImage: `url(${stadiumAsset.url})` }}
-        />
-        <div className="absolute inset-0 bg-gradient-to-l from-black/80 via-black/20 to-black" />
-        <div
-          className="absolute top-1/4 right-1/4 h-40 w-40 rounded-full opacity-60"
-          style={{
-            background: "oklch(0.7 0.18 145 / 0.25)",
-            filter: "blur(80px)",
-          }}
-        />
-      </div>
-      {/* Left 1/3 trophy — landscape PNG, scaled to fill column height */}
-      <img
-        aria-hidden
-        src={trophyAsset.url}
-        alt=""
-        className="absolute inset-y-0 left-0 hidden h-full w-auto md:block"
-        style={{ maxWidth: "none" }}
-      />
+      {/* Full-bleed cinematic background: trophy hero-lit on the left,
+          night stadium on the right — one cohesive scene. */}
       <div
         aria-hidden
-        className="absolute inset-y-0 left-0 hidden w-1/3 bg-gradient-to-r from-transparent via-transparent to-black md:block"
+        className="absolute inset-0 bg-cover bg-left opacity-55"
+        style={{ backgroundImage: `url(${heroBgAsset.url})` }}
       />
-      {/* On mobile (< md) the trophy becomes a faint full-bleed watermark so it
-          never crowds the number column. */}
+      {/* Dark veil so the LED numerals stay readable on top */}
       <div
         aria-hidden
-        className="absolute inset-y-0 left-0 w-1/2 bg-no-repeat bg-center opacity-25 md:hidden"
+        className="absolute inset-0"
         style={{
-          backgroundImage: `url(${trophyAsset.url})`,
-          backgroundSize: "auto 110%",
+          background:
+            "radial-gradient(ellipse at 50% 50%, rgba(0,0,0,0.75) 0%, rgba(0,0,0,0.55) 40%, rgba(0,0,0,0.35) 100%)",
+        }}
+      />
+      {/* Soft green atmosphere glow */}
+      <div
+        aria-hidden
+        className="absolute top-1/3 right-1/4 h-40 w-40 rounded-full opacity-50"
+        style={{
+          background: "oklch(0.7 0.18 145 / 0.25)",
+          filter: "blur(80px)",
         }}
       />
       <div aria-hidden className="absolute inset-0 bg-led-matrix opacity-25" />
