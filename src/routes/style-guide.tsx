@@ -90,6 +90,11 @@ import { TradeForm } from "@/components/sports/TradeForm";
 import { PositionsTable } from "@/components/sports/PositionsTable";
 import { Wallet, TrendingUp, LineChart } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { ScoreboardHero } from "@/components/sports/promo/ScoreboardHero";
+import { ScoreboardTicker } from "@/components/sports/promo/ScoreboardTicker";
+import { CarnivalTabs } from "@/components/sports/promo/CarnivalTabs";
+import { CarnivalPromoCard } from "@/components/sports/promo/CarnivalPromoCard";
+import { OverviewSection } from "@/components/sports/promo/OverviewSection";
 
 export const Route = createFileRoute("/style-guide")({
   head: () => ({
