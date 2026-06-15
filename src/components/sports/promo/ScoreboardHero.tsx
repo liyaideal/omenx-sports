@@ -66,7 +66,8 @@ export function ScoreboardHero({ compact = false }: { compact?: boolean }) {
         className="absolute inset-y-0 left-0 hidden w-1/3 bg-no-repeat bg-center md:block"
         style={{
           backgroundImage: `url(${trophyAsset.url})`,
-          backgroundSize: "auto 110%",
+          backgroundSize: "cover",
+          backgroundColor: "red",
         }}
       />
       <div
