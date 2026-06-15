@@ -1841,6 +1841,77 @@ function StyleGuide() {
             </div>
           </Section>
 
+          <Section id="world-cup-carnival" title="World Cup Carnival" kicker="Promo · /promo/world-cup">
+            <p className="mb-6 max-w-3xl text-sm text-muted-foreground">
+              Stadium LED scoreboard visual language for the World Cup
+              Carnival hub. Black slab + dot-matrix backdrop +
+              <code className="font-mono text-foreground"> Orbitron</code> numerals +
+              <code className="font-mono text-foreground"> Chakra Petch</code> body. Accent green
+              <code className="font-mono text-foreground"> oklch(0.7 0.18 145)</code> drives the
+              primary glow; amber (Combo) and blue (Lucky Box) are the per-series accents. Only used inside the
+              promo hub and the WC2026 league hero promo slot — does not leak into general dashboard surfaces.
+            </p>
+
+            <div className="space-y-6">
+              <div>
+                <div className="mb-3 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+                  ScoreboardHero — full
+                </div>
+                <ScoreboardHero />
+              </div>
+
+              <div>
+                <div className="mb-3 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+                  ScoreboardHero — compact (used above non-overview tabs)
+                </div>
+                <ScoreboardHero compact />
+              </div>
+
+              <div>
+                <div className="mb-3 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+                  CarnivalTabs — 5 LED cells, accent underline on active
+                </div>
+                <CarnivalTabs current="overview" />
+              </div>
+
+              <div>
+                <div className="mb-3 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+                  CarnivalPromoCard — slotted into LeagueHubHero on world-cup-2026
+                </div>
+                <div className="max-w-sm">
+                  <CarnivalPromoCard />
+                </div>
+              </div>
+
+              <div>
+                <div className="mb-3 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+                  ScoreboardTicker — bottom-of-page LED marquee
+                </div>
+                <ScoreboardTicker />
+              </div>
+
+              <div>
+                <div className="mb-3 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+                  OverviewSection — full composition (hero + 3 series cards + fan status + ticker)
+                </div>
+                <OverviewSection />
+              </div>
+
+              <div className="rounded-2xl border border-dashed border-white/15 bg-white/[0.02] p-5 text-xs">
+                <div className="mb-2 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+                  Rules
+                </div>
+                <ul className="space-y-1.5 text-muted-foreground">
+                  <li>• LED visual language is scoped to <code className="font-mono text-foreground">/promo/world-cup</code> and the WC2026 league hero promo slot — never spill into events, fans zone, or other leagues.</li>
+                  <li>• Numerics use <code className="font-mono text-foreground">font-scoreboard</code> (Orbitron, tabular-nums); body uses <code className="font-mono text-foreground">font-pitch</code> (Chakra Petch).</li>
+                  <li>• Series accent green = SEC-01 (Welcome Pack), amber = SEC-02 (Combo Challenge), blue = SEC-03 (Lucky Box). Pin one accent per series, never mix.</li>
+                  <li>• Every interactive card has a bottom 1px LED bar that lights with the card's accent on hover/active.</li>
+                  <li>• Countdown ticks against <code className="font-mono text-foreground">CARNIVAL_ENDS_AT</code> (2026-07-19). Live red dot uses <code className="font-mono text-foreground">animate-ping</code>, never a solid red.</li>
+                </ul>
+              </div>
+            </div>
+          </Section>
+
           <Section id="trade-drawer" title="Sticky Trade Drawer" kicker="22 — P3 / global">
             <p className="mb-6 max-w-3xl text-sm text-muted-foreground">
               A global right-edge sliding sheet that opens via the <code className="font-mono text-foreground">useTradeDrawer()</code> hook
