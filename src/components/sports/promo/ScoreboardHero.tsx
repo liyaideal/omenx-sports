@@ -61,17 +61,16 @@ export function ScoreboardHero({ compact = false }: { compact?: boolean }) {
         />
       </div>
       {/* Left 1/3 trophy — landscape PNG, scaled to fill column height */}
-      <div
+      <img
         aria-hidden
-        className="absolute inset-y-0 left-0 w-1/3 bg-no-repeat bg-center"
-        style={{
-          backgroundImage: `url(${trophyAsset.url})`,
-          backgroundSize: "auto 110%",
-        }}
+        src={trophyAsset.url}
+        alt=""
+        className="absolute inset-y-0 left-0 hidden h-full w-auto md:block"
+        style={{ maxWidth: "none" }}
       />
       <div
         aria-hidden
-        className="absolute inset-y-0 left-0 w-1/3 bg-gradient-to-r from-transparent via-transparent to-black"
+        className="absolute inset-y-0 left-0 hidden w-1/3 bg-gradient-to-r from-transparent via-transparent to-black md:block"
       />
       {/* On mobile (< md) the trophy becomes a faint full-bleed watermark so it
           never crowds the number column. */}
