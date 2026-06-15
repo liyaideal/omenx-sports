@@ -80,7 +80,7 @@ export function ScoreboardHero({ compact = false }: { compact?: boolean }) {
         className="absolute inset-y-0 left-0 w-1/2 bg-no-repeat bg-center opacity-25 md:hidden"
         style={{
           backgroundImage: `url(${trophyAsset.url})`,
-          backgroundSize: "auto 130%",
+          backgroundSize: "auto 110%",
         }}
       />
       <div aria-hidden className="absolute inset-0 bg-led-matrix opacity-25" />
