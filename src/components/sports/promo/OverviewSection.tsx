@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { Circle, Diamond, BarChart3 } from "lucide-react";
+import { Circle, Diamond, BarChart3, Trophy, Sparkles, Zap } from "lucide-react";
 import {
   USER_CARNIVAL_STATE,
   CARNIVAL_TABS,
@@ -7,6 +7,10 @@ import {
 } from "@/data/world-cup-carnival";
 import { ScoreboardHero } from "./ScoreboardHero";
 import { ScoreboardTicker } from "./ScoreboardTicker";
+import { ConfettiLayer } from "./ConfettiLayer";
+import welcomeAsset from "@/assets/carnival/card-welcome.jpg.asset.json";
+import comboAsset from "@/assets/carnival/card-combo.jpg.asset.json";
+import luckyboxAsset from "@/assets/carnival/card-luckybox.jpg.asset.json";
 import { cn } from "@/lib/utils";
 
 interface SeriesEntry {
@@ -18,6 +22,8 @@ interface SeriesEntry {
   accent: string; // OKLCH or hex
   icon: React.ReactNode;
   iconShape: "circle" | "diamond" | "bars";
+  banner: string;
+  ornament: React.ReactNode;
 }
 
 const SERIES: SeriesEntry[] = [
@@ -30,6 +36,8 @@ const SERIES: SeriesEntry[] = [
     accent: "oklch(0.7 0.18 145)",
     icon: <Circle className="h-3 w-3" />,
     iconShape: "circle",
+    banner: welcomeAsset.url,
+    ornament: <Sparkles className="h-4 w-4" />,
   },
   {
     tab: "combo",
@@ -40,6 +48,8 @@ const SERIES: SeriesEntry[] = [
     accent: "#facc15",
     icon: <Diamond className="h-3.5 w-3.5" />,
     iconShape: "diamond",
+    banner: comboAsset.url,
+    ornament: <Zap className="h-4 w-4" />,
   },
   {
     tab: "luckybox",
@@ -50,23 +60,30 @@ const SERIES: SeriesEntry[] = [
     accent: "#60a5fa",
     icon: <BarChart3 className="h-3.5 w-3.5" />,
     iconShape: "bars",
+    banner: luckyboxAsset.url,
+    ornament: <Trophy className="h-4 w-4" />,
   },
 ];
 
 export function OverviewSection() {
   return (
-    <div className="flex flex-col gap-6">
+    <div className="relative flex flex-col gap-6">
+      <ConfettiLayer count={20} className="z-0" />
       <ScoreboardHero />
 
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+      <div className="relative z-10 grid grid-cols-1 gap-4 md:grid-cols-3">
         {SERIES.map((s) => (
           <SeriesCard key={s.tab} entry={s} />
         ))}
       </div>
 
-      <FanStatusPanel />
+      <div className="relative z-10">
+        <FanStatusPanel />
+      </div>
 
-      <ScoreboardTicker />
+      <div className="relative z-10">
+        <ScoreboardTicker />
+      </div>
     </div>
   );
 }
@@ -78,12 +95,45 @@ function SeriesCard({ entry }: { entry: SeriesEntry }) {
     <Link
       to="/promo/world-cup"
       search={{ tab: entry.tab }}
-      className="group relative block overflow-hidden border-2 border-zinc-800 bg-[#0a0a0a] transition-colors hover:border-[color:var(--card-accent)]"
+      className="group relative flex flex-col overflow-hidden border-2 border-zinc-800 bg-[#0a0a0a] transition-colors hover:border-[color:var(--card-accent)]"
       style={{ ["--card-accent" as string]: entry.accent }}
       aria-label={`Open ${label}`}
     >
-      <div className="p-5">
-        <div className="flex items-start justify-between">
+      {/* Top banner — AI art, fades to black at the bottom for legibility. */}
+      <div className="relative h-32 overflow-hidden">
+        <img
+          src={entry.banner}
+          alt=""
+          loading="lazy"
+          className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
+        />
+        <div
+          aria-hidden
+          className="absolute inset-0"
+          style={{
+            backgroundImage:
+              "linear-gradient(180deg, rgba(0,0,0,0.25) 0%, rgba(0,0,0,0.55) 60%, #0a0a0a 100%)",
+          }}
+        />
+        <div aria-hidden className="absolute inset-0 bg-led-matrix opacity-20 mix-blend-overlay" />
+        <span
+          aria-hidden
+          className="absolute right-3 top-3 grid h-7 w-7 place-items-center rounded border border-zinc-700 bg-black/60 text-[color:var(--card-accent)] backdrop-blur-sm"
+          style={{
+            boxShadow:
+              "0 0 10px color-mix(in oklab, var(--card-accent) 40%, transparent)",
+          }}
+        >
+          {entry.ornament}
+        </span>
+        <span className="absolute bottom-2 left-3 font-scoreboard text-[10px] font-bold tracking-[0.25em] text-zinc-300">
+          {entry.sec}
+        </span>
+      </div>
+
+      <div className="relative flex flex-1 flex-col p-5">
+        <div aria-hidden className="pointer-events-none absolute inset-0 bg-led-matrix opacity-[0.06]" />
+        <div className="relative flex items-start justify-between">
           <span
             className="grid h-8 w-8 place-items-center rounded border border-zinc-700 bg-zinc-900 text-[color:var(--card-accent)]"
             aria-hidden
@@ -107,26 +157,23 @@ function SeriesCard({ entry }: { entry: SeriesEntry }) {
               )}
             </span>
           </span>
-          <span className="font-scoreboard text-[10px] font-bold tracking-[0.25em] text-zinc-500">
-            {entry.sec}
-          </span>
         </div>
 
-        <h3 className="mt-5 font-pitch text-xl font-bold uppercase tracking-wide text-white transition-colors group-hover:text-[color:var(--card-accent)]">
+        <h3 className="relative mt-4 font-pitch text-xl font-bold uppercase tracking-wide text-white transition-colors group-hover:text-[color:var(--card-accent)]">
           {entry.title}
         </h3>
-        <div className="mt-1 font-scoreboard text-lg font-black italic tabular-nums text-[color:var(--card-accent)]">
+        <div className="relative mt-1 font-scoreboard text-lg font-black italic tabular-nums text-[color:var(--card-accent)]">
           {entry.highlight}
         </div>
-        <p className="mt-3 text-sm text-zinc-400">{entry.body}</p>
+        <p className="relative mt-3 text-sm text-zinc-400">{entry.body}</p>
 
-        <div className="mt-5 inline-flex items-center gap-2 font-pitch text-[11px] font-bold uppercase tracking-[0.2em] text-zinc-500 transition-colors group-hover:text-[color:var(--card-accent)]">
+        <div className="relative mt-5 inline-flex items-center gap-2 font-pitch text-[11px] font-bold uppercase tracking-[0.2em] text-zinc-500 transition-colors group-hover:text-[color:var(--card-accent)]">
           Enter section →
         </div>
       </div>
       <span
         aria-hidden
-        className="block h-1 bg-zinc-800 transition-all group-hover:bg-[color:var(--card-accent)] group-hover:shadow-[0_0_12px_var(--card-accent)]"
+        className="relative block h-1 bg-zinc-800 transition-all group-hover:bg-[color:var(--card-accent)] group-hover:shadow-[0_0_12px_var(--card-accent)]"
       />
     </Link>
   );
