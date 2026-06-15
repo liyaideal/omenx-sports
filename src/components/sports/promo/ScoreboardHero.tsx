@@ -45,28 +45,50 @@ export function ScoreboardHero({ compact = false }: { compact?: boolean }) {
         "border-[#1a1a1a]",
       )}
     >
-      {/* Trophy on the left (official WC26 mark) — full-bleed contain, masked toward the center. */}
+      {/* Background split: left 1/3 trophy + right 2/3 stadium (direction A) */}
+      <div aria-hidden className="absolute inset-0 flex">
+        {/* Left: trophy zone, anchored bottom-left, height tall enough that the
+            "FIFA WORLD" plaque at the base of the source image falls below the
+            crop and never leaks into the slab. */}
+        <div className="relative h-full w-1/3 hidden md:block">
+          <div
+            className="absolute inset-0 bg-contain bg-no-repeat bg-left-bottom opacity-95"
+            style={{
+              backgroundImage: `url(${trophyAsset.url})`,
+              // Hide the "FIFA WORLD" plaque at the bottom of the source image
+              // AND fade the top so the LIVE PRIZE POOL chip stays readable.
+              maskImage:
+                "linear-gradient(180deg, transparent 0%, rgba(0,0,0,0.6) 18%, rgba(0,0,0,1) 38%, rgba(0,0,0,1) 86%, transparent 96%)",
+              WebkitMaskImage:
+                "linear-gradient(180deg, transparent 0%, rgba(0,0,0,0.6) 18%, rgba(0,0,0,1) 38%, rgba(0,0,0,1) 86%, transparent 96%)",
+            }}
+          />
+          {/* fade trophy edge into the slab so the gold blends right */}
+          <div className="absolute inset-0 bg-gradient-to-r from-black/40 via-transparent to-black/60" />
+        </div>
+        {/* Right: stadium with vignette + a soft green atmosphere blob to kill
+            the "dead green field" feeling. */}
+        <div className="relative h-full flex-1">
+          <div
+            className="absolute inset-0 bg-cover bg-center opacity-40 grayscale-[0.2]"
+            style={{ backgroundImage: `url(${stadiumAsset.url})` }}
+          />
+          <div className="absolute inset-0 bg-gradient-to-l from-black/80 via-black/20 to-black" />
+          <div
+            className="absolute top-1/4 right-1/4 h-40 w-40 rounded-full opacity-60"
+            style={{
+              background: "oklch(0.7 0.18 145 / 0.25)",
+              filter: "blur(80px)",
+            }}
+          />
+        </div>
+      </div>
+      {/* On mobile (< md) the trophy becomes a faint full-bleed watermark so it
+          never crowds the number column. */}
       <div
         aria-hidden
-        className="absolute inset-y-0 left-0 w-[42%] md:w-[36%] bg-contain bg-no-repeat bg-left-bottom opacity-90"
-        style={{
-          backgroundImage: `url(${trophyAsset.url})`,
-          maskImage:
-            "linear-gradient(90deg, rgba(0,0,0,1) 0%, rgba(0,0,0,0.85) 60%, transparent 100%)",
-          WebkitMaskImage:
-            "linear-gradient(90deg, rgba(0,0,0,1) 0%, rgba(0,0,0,0.85) 60%, transparent 100%)",
-        }}
-      />
-      <div
-        aria-hidden
-        className="absolute inset-y-0 right-0 w-1/2 bg-cover bg-center opacity-35"
-        style={{
-          backgroundImage: `url(${stadiumAsset.url})`,
-          maskImage:
-            "linear-gradient(270deg, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.6) 55%, transparent 100%)",
-          WebkitMaskImage:
-            "linear-gradient(270deg, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.6) 55%, transparent 100%)",
-        }}
+        className="absolute inset-y-0 left-0 w-1/2 bg-contain bg-no-repeat bg-left-bottom opacity-25 md:hidden"
+        style={{ backgroundImage: `url(${trophyAsset.url})` }}
       />
       <div aria-hidden className="absolute inset-0 bg-led-matrix opacity-25" />
       <TwinkleField count={compact ? 8 : 22} />
@@ -113,24 +135,39 @@ export function ScoreboardHero({ compact = false }: { compact?: boolean }) {
               Live Prize Pool
             </span>
           </div>
-          <div className="flex items-center gap-2 rounded border border-zinc-800 bg-[#0c0c0c] px-3 py-1.5">
-            <span className="font-pitch text-[9px] font-bold uppercase tracking-[0.25em] text-zinc-500">
+          <div className="flex min-w-[180px] flex-col items-center rounded border border-zinc-800 bg-black/90 px-4 py-2 shadow-2xl">
+            <span className="font-pitch text-[8px] font-bold uppercase tracking-[0.25em] text-zinc-500">
               Ends in
             </span>
             <span
-              className="font-scoreboard text-sm font-bold text-[oklch(0.7_0.18_145)] tabular-nums"
+              className="font-scoreboard text-base font-bold text-[oklch(0.7_0.18_145)] tabular-nums leading-tight tracking-tight"
               suppressHydrationWarning
             >
-              {c
-                ? `${pad(c.days)}d : ${pad(c.hours)}h : ${pad(c.minutes)}m : ${pad(c.seconds)}s`
-                : "—— : —— : —— : ——"}
+              {c ? (
+                <>
+                  {pad(c.days)} <span className="text-zinc-700">:</span> {pad(c.hours)}{" "}
+                  <span className="text-zinc-700">:</span> {pad(c.minutes)}{" "}
+                  <span className="text-zinc-700">:</span> {pad(c.seconds)}
+                </>
+              ) : (
+                "—— : —— : —— : ——"
+              )}
             </span>
           </div>
         </div>
 
         {/* big number */}
         <div className="flex flex-col items-center text-center">
-          <div className="flex items-baseline gap-3">
+          <div className="flex items-center gap-4">
+            {/* left neon rail anchor */}
+            <span
+              aria-hidden
+              className="hidden h-[2px] w-10 md:block"
+              style={{
+                background: "oklch(0.7 0.18 145)",
+                boxShadow: "0 0 10px oklch(0.7 0.18 145 / 0.6)",
+              }}
+            />
             <span
               className={cn(
                 "font-scoreboard font-black italic tracking-tighter text-[oklch(0.7_0.18_145)] tabular-nums",
@@ -148,6 +185,15 @@ export function ScoreboardHero({ compact = false }: { compact?: boolean }) {
             >
               U
             </span>
+            {/* right neon rail anchor */}
+            <span
+              aria-hidden
+              className="hidden h-[2px] w-10 md:block"
+              style={{
+                background: "oklch(0.7 0.18 145)",
+                boxShadow: "0 0 10px oklch(0.7 0.18 145 / 0.6)",
+              }}
+            />
           </div>
           <div className="mt-3 inline-flex items-center gap-2 rounded border border-zinc-800 bg-[#0e0e0e] px-3 py-1">
             <Trophy className="h-3 w-3 text-amber-400" />
