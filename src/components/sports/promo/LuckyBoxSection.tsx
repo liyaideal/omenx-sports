@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Trophy, Sparkles } from "lucide-react";
+import { Trophy, Sparkles, Gift } from "lucide-react";
 import { toast } from "sonner";
 import {
   LUCKY_BOX_TIERS,
@@ -18,17 +18,21 @@ const ACCENT: Record<LuckyBoxTier["accent"], string> = {
 export function LuckyBoxSection() {
   return (
     <div className="flex flex-col gap-6">
-      <div className="border-2 border-zinc-800 bg-[#0a0a0a] p-5">
-        <div className="font-scoreboard text-[10px] font-bold tracking-[0.25em] text-blue-400">
+      <div className="relative overflow-hidden border-2 border-zinc-800 bg-[#0a0a0a] p-5">
+        <Gift
+          aria-hidden
+          className="pointer-events-none absolute -right-4 -top-4 h-28 w-28 text-blue-400/10"
+        />
+        <div className="relative font-scoreboard text-[10px] font-bold tracking-[0.25em] text-blue-400">
           SEC-03 · DAILY LUCKY BOX
         </div>
-        <h3 className="mt-1 font-pitch text-xl font-bold uppercase tracking-wide text-white">
+        <h3 className="relative mt-1 font-pitch text-xl font-bold uppercase tracking-wide text-white">
           Today's volume:{" "}
           <span className="font-scoreboard text-[oklch(0.7_0.18_145)] tabular-nums">
             {USER_CARNIVAL_STATE.todayVolume.toLocaleString()} U
           </span>
         </h3>
-        <p className="mt-1 text-sm text-zinc-400">
+        <p className="relative mt-1 text-sm text-zinc-400">
           Higher daily volume unlocks a bigger vault tomorrow. One spin per
           calendar day — first-come, first-served while pool stock lasts.
         </p>
@@ -98,6 +102,19 @@ function TierCard({ tier }: { tier: LuckyBoxTier }) {
         aria-live="polite"
       >
         <div aria-hidden className="absolute inset-0 bg-led-matrix opacity-25" />
+        <div
+          aria-hidden
+          className="absolute inset-0 animate-scoreboard-sweep"
+          style={{
+            backgroundImage:
+              "linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.06) 50%, transparent 100%)",
+          }}
+        />
+        <Trophy
+          aria-hidden
+          className="pointer-events-none absolute left-3 top-2 h-5 w-5 opacity-10"
+          style={{ color: accent }}
+        />
         <div
           className={cn(
             "relative font-scoreboard text-xl font-black italic tabular-nums",
