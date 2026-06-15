@@ -116,7 +116,7 @@ export function AppTopBar({
             <Link
               to="/promo/world-cup"
               search={{ tab: "overview" }}
-              className="group relative flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-lg border border-[oklch(0.7_0.18_145)]/40 bg-[oklch(0.7_0.18_145)]/10 px-2.5 py-2 font-pitch text-[11px] font-bold uppercase tracking-[0.14em] text-[oklch(0.7_0.18_145)] transition-all hover:bg-[oklch(0.7_0.18_145)]/20 hover:text-white xl:px-3.5 xl:text-xs"
+              className="group relative hidden shrink-0 items-center gap-1.5 whitespace-nowrap rounded-lg border border-[oklch(0.7_0.18_145)]/40 bg-[oklch(0.7_0.18_145)]/10 px-2.5 py-2 font-pitch text-[11px] font-bold uppercase tracking-[0.14em] text-[oklch(0.7_0.18_145)] transition-all hover:bg-[oklch(0.7_0.18_145)]/20 hover:text-white lg:flex xl:px-3.5 xl:text-xs"
               style={{
                 boxShadow:
                   "inset 0 0 0 1px oklch(0.7 0.18 145 / 0.3), 0 0 14px -6px oklch(0.7 0.18 145 / 0.55)",
