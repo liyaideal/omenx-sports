@@ -206,3 +206,49 @@
 .animate-carnival-ticker {
   animation: carnival-ticker 32s linear infinite;
 }
+
+/* ---------------- World Cup Carnival visual layer ---------------- */
+
+@keyframes flag-marquee {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+.animate-flag-marquee { animation: flag-marquee 60s linear infinite; }
+.animate-flag-marquee-reverse { animation: flag-marquee 80s linear infinite reverse; }
+
+@keyframes carnival-twinkle {
+  0%, 100% { opacity: 0.15; transform: scale(1); }
+  50% { opacity: 0.9; transform: scale(1.35); }
+}
+.animate-carnival-twinkle { animation: carnival-twinkle 3.6s ease-in-out infinite; }
+
+@keyframes confetti-fall {
+  0% { transform: translateY(-10%) rotate(0deg); opacity: 0; }
+  10% { opacity: 1; }
+  90% { opacity: 1; }
+  100% { transform: translateY(110vh) rotate(540deg); opacity: 0; }
+}
+.animate-confetti-fall { animation: confetti-fall linear infinite; }
+
+@keyframes carnival-spark {
+  0% { transform: translateY(0) scale(0.6); opacity: 0; }
+  20% { opacity: 1; }
+  100% { transform: translateY(-60px) scale(1.1); opacity: 0; }
+}
+.animate-carnival-spark { animation: carnival-spark 3.2s ease-out infinite; }
+
+/* Soft pitch stripes used as a watermark behind rules / cards */
+@utility bg-pitch-stripes {
+  background-image: repeating-linear-gradient(
+    90deg,
+    oklch(0.7 0.18 145 / 0.06) 0 32px,
+    transparent 32px 64px
+  );
+}
+
+/* Stadium lighting glow used at top + bottom of carnival page */
+@utility bg-stadium-glow {
+  background-image:
+    radial-gradient(60% 60% at 20% 0%, oklch(0.7 0.18 145 / 0.18), transparent 70%),
+    radial-gradient(50% 60% at 80% 100%, rgba(250, 204, 21, 0.12), transparent 70%);
+}
