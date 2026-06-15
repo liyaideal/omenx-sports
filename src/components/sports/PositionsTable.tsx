@@ -229,6 +229,7 @@ function PositionTable({
               <Td>
                 <div className="flex items-center gap-2">
                   <LeagueBadge league={r.league} showLabel={false} />
+                  {r.isAirdrop && <AirdropBadge />}
                   <span className="font-medium text-foreground">{r.market}</span>
                 </div>
               </Td>
@@ -246,6 +247,7 @@ function PositionTable({
                   tp={r.tp ?? null}
                   sl={r.sl ?? null}
                   disabled={!onUpdateTpsl}
+                  locked={r.isAirdrop}
                   onClick={() => setEditIdx(i)}
                 />
               </Td>
