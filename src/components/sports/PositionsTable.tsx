@@ -398,6 +398,21 @@ function HistoryTable({ rows }: { rows: HistoryRowData[] }) {
 function Td({ children, className }: { children?: React.ReactNode; className?: string }) {
   return <td className={cn("px-4 py-3", className)}>{children}</td>;
 }
+
+/**
+ * Purple AIRDROP pill shown inline with the event name for airdrop/voucher
+ * positions. Hard-coded purple (not a token) to match the OmenX main site
+ * exactly — the sports `--primary` token is blue and would clash with the
+ * YES/NO color system.
+ */
+function AirdropBadge() {
+  return (
+    <span className="inline-flex items-center gap-1 rounded-md bg-purple-500/15 px-1.5 py-0.5 font-mono text-[9px] uppercase tracking-widest text-purple-300 ring-1 ring-purple-500/30">
+      <Gift className="h-3 w-3" />
+      Airdrop
+    </span>
+  );
+}
 /**
  * Renders the user-facing outcome. For team-vs-team markets the label IS the
  * side alias (e.g. "Arsenal" = YES); color carries the yes/no semantic. For
