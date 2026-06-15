@@ -824,6 +824,43 @@ function StyleGuide() {
             </div>
           </Section>
 
+          {/* LIVE EVENT HEADER (fixture mode) */}
+          <Section id="live-event-header" title="Event Header — Live Score" kicker="12c — Live Fixture Mode">
+            <p className="mb-6 max-w-3xl text-sm text-muted-foreground">
+              When a fixture event is live, the center column of <code className="font-mono text-foreground">EventDetailHeader</code> swaps the serif <code className="font-mono text-foreground">vs</code> + kickoff chip for a broadcast-style score: a pulsing <span className="text-primary">● LIVE</span> pill, big tabular-nums <code className="font-mono text-foreground">{`{home} – {away}`}</code>, and a muted <code className="font-mono text-foreground">Official scoring</code> line with the shared <code className="font-mono text-foreground">LiveDelayInfo</code> ⓘ trigger. Score in the header beats the 30–60s stream delay — users see the truth on landing.
+            </p>
+            <div className="rounded-3xl border border-border bg-surface p-8 shadow-card">
+              <div className="flex items-center justify-around gap-6">
+                <div className="flex flex-col items-center gap-2">
+                  <div className="grid h-20 w-20 place-items-center rounded-2xl bg-white/[0.04] ring-1 ring-white/10 text-2xl">🇲🇽</div>
+                  <div className="font-mono text-[11px] font-bold uppercase tracking-[0.18em] text-foreground/80">Mexico</div>
+                </div>
+                <div className="flex flex-col items-center gap-2">
+                  <span className="inline-flex items-center gap-1.5 rounded-full bg-primary/15 px-2.5 py-0.5 font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-primary ring-1 ring-primary/30">
+                    <span aria-hidden className="h-1.5 w-1.5 animate-pulse rounded-full bg-primary shadow-[0_0_8px_currentColor]" />
+                    Live
+                  </span>
+                  <div className="flex items-baseline gap-3 font-display text-5xl font-semibold leading-none tabular-nums text-foreground md:text-6xl">
+                    <span>1</span>
+                    <span className="text-foreground/30">–</span>
+                    <span>0</span>
+                  </div>
+                  <div className="inline-flex items-center gap-1.5 font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground/70">
+                    <span>Official scoring</span>
+                    <LiveDelayInfo variant="score" tone="muted" />
+                  </div>
+                </div>
+                <div className="flex flex-col items-center gap-2">
+                  <div className="grid h-20 w-20 place-items-center rounded-2xl bg-white/[0.04] ring-1 ring-white/10 text-2xl">🇿🇦</div>
+                  <div className="font-mono text-[11px] font-bold uppercase tracking-[0.18em] text-foreground/80">South Africa</div>
+                </div>
+              </div>
+            </div>
+            <div className="mt-3 rounded-xl border border-border bg-white/[0.02] px-4 py-2.5 text-xs text-muted-foreground">
+              Falls back to the serif <code className="font-mono text-foreground">vs</code> + <code className="font-mono text-foreground">3:00PM · TODAY</code> pill when the match isn't live or has no <code className="font-mono text-foreground">liveScore</code>.
+            </div>
+          </Section>
+
           {/* TRADE SURFACE */}
           <Section id="trade" title="Trade Surface" kicker="13 — Detail">
             <p className="mb-2 max-w-2xl text-sm text-muted-foreground">
