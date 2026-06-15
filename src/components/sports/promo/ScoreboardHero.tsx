@@ -52,10 +52,15 @@ export function ScoreboardHero({ compact = false }: { compact?: boolean }) {
             crop and never leaks into the slab. */}
         <div className="relative h-full w-1/3 hidden md:block">
           <div
-            className="absolute left-0 bottom-0 w-full bg-contain bg-no-repeat bg-left-bottom opacity-95"
+            className="absolute inset-0 bg-contain bg-no-repeat bg-left-bottom opacity-95"
             style={{
               backgroundImage: `url(${trophyAsset.url})`,
-              height: "118%",
+              // Hide the "FIFA WORLD" plaque at the bottom of the source image
+              // AND fade the top so the LIVE PRIZE POOL chip stays readable.
+              maskImage:
+                "linear-gradient(180deg, transparent 0%, rgba(0,0,0,0.6) 18%, rgba(0,0,0,1) 38%, rgba(0,0,0,1) 86%, transparent 96%)",
+              WebkitMaskImage:
+                "linear-gradient(180deg, transparent 0%, rgba(0,0,0,0.6) 18%, rgba(0,0,0,1) 38%, rgba(0,0,0,1) 86%, transparent 96%)",
             }}
           />
           {/* fade trophy edge into the slab so the gold blends right */}
