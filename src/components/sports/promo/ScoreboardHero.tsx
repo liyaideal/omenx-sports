@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Trophy } from "lucide-react";
 import { CARNIVAL_PRIZE_POOL, CARNIVAL_ENDS_AT } from "@/data/world-cup-carnival";
 import { cn } from "@/lib/utils";
-import heroBgAsset from "@/assets/carnival/hero-trophy-stadium.jpg.asset.json";
+import heroBgAsset from "@/assets/carnival/hero-trophy-wide.jpg.asset.json";
 import { CarnivalFlagsMarquee } from "./CarnivalFlagsMarquee";
 import { TwinkleField } from "./ConfettiLayer";
 
@@ -48,8 +48,8 @@ export function ScoreboardHero({ compact = false }: { compact?: boolean }) {
           night stadium on the right — one cohesive scene. */}
       <div
         aria-hidden
-        className="absolute inset-0 bg-cover bg-left opacity-55"
-        style={{ backgroundImage: `url(${heroBgAsset.url})` }}
+        className="absolute inset-0 bg-no-repeat bg-left bg-contain opacity-60"
+        style={{ backgroundImage: `url(${heroBgAsset.url})`, backgroundSize: "auto 100%" }}
       />
       {/* Dark veil so the LED numerals stay readable on top */}
       <div
