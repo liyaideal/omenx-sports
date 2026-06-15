@@ -446,13 +446,35 @@ function TpSlCell({
   tp,
   sl,
   disabled,
+  locked,
   onClick,
 }: {
   tp: number | null;
   sl: number | null;
   disabled?: boolean;
+  locked?: boolean;
   onClick: () => void;
 }) {
+  if (locked) {
+    return (
+      <TooltipProvider delayDuration={150}>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <span
+              tabIndex={0}
+              className="inline-flex cursor-default items-center justify-center rounded-md border border-dashed border-border/60 bg-white/[0.02] px-2 py-1 text-muted-foreground/60"
+              aria-label="TP/SL not available"
+            >
+              <Lock className="h-3 w-3" />
+            </span>
+          </TooltipTrigger>
+          <TooltipContent side="top" className="max-w-[220px] text-center text-[11px] leading-snug">
+            Voucher positions don't support TP/SL. Close manually within the hold window.
+          </TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
+    );
+  }
   const empty = tp === null && sl === null;
   if (empty) {
     return (
