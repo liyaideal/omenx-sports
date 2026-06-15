@@ -45,40 +45,34 @@ export function ScoreboardHero({ compact = false }: { compact?: boolean }) {
         "border-[#1a1a1a]",
       )}
     >
-      {/* Background split: left 1/3 trophy + right 2/3 stadium (direction A) */}
-      <div aria-hidden className="absolute inset-0 flex">
-        {/* Left: trophy zone — landscape source, full trophy centered, no
-            cropping or mask hack needed. */}
-        <div className="relative h-full w-1/3 hidden md:block">
-          <div
-            className="absolute inset-0 bg-no-repeat bg-center"
-            style={{
-              backgroundImage: `url(${trophyAsset.url})`,
-              // source has wide black margins; scale to ~180% so the trophy
-              // sculpture fills the column without dead space on the sides.
-              backgroundSize: "auto 130%",
-            }}
-          />
-          {/* feather right edge into the slab */}
-          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-transparent to-black" />
-        </div>
-        {/* Right: stadium with vignette + a soft green atmosphere blob to kill
-            the "dead green field" feeling. */}
-        <div className="relative h-full flex-1">
-          <div
-            className="absolute inset-0 bg-cover bg-center opacity-40 grayscale-[0.2]"
-            style={{ backgroundImage: `url(${stadiumAsset.url})` }}
-          />
-          <div className="absolute inset-0 bg-gradient-to-l from-black/80 via-black/20 to-black" />
-          <div
-            className="absolute top-1/4 right-1/4 h-40 w-40 rounded-full opacity-60"
-            style={{
-              background: "oklch(0.7 0.18 145 / 0.25)",
-              filter: "blur(80px)",
-            }}
-          />
-        </div>
+      {/* Background split — right 2/3 stadium */}
+      <div aria-hidden className="absolute inset-y-0 right-0 w-2/3">
+        <div
+          className="absolute inset-0 bg-cover bg-center opacity-40 grayscale-[0.2]"
+          style={{ backgroundImage: `url(${stadiumAsset.url})` }}
+        />
+        <div className="absolute inset-0 bg-gradient-to-l from-black/80 via-black/20 to-black" />
+        <div
+          className="absolute top-1/4 right-1/4 h-40 w-40 rounded-full opacity-60"
+          style={{
+            background: "oklch(0.7 0.18 145 / 0.25)",
+            filter: "blur(80px)",
+          }}
+        />
       </div>
+      {/* Left 1/3 trophy — landscape PNG, scaled to fill column height */}
+      <div
+        aria-hidden
+        className="absolute inset-y-0 left-0 hidden w-1/3 bg-no-repeat bg-center md:block"
+        style={{
+          backgroundImage: `url(${trophyAsset.url})`,
+          backgroundSize: "auto 110%",
+        }}
+      />
+      <div
+        aria-hidden
+        className="absolute inset-y-0 left-0 hidden w-1/3 bg-gradient-to-r from-transparent via-transparent to-black md:block"
+      />
       {/* On mobile (< md) the trophy becomes a faint full-bleed watermark so it
           never crowds the number column. */}
       <div
