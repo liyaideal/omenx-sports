@@ -185,6 +185,25 @@ function buildSeed(
       tp: null,
       sl: null,
     },
+    // Airdrop / voucher position: no TP/SL, leverage capped at 5× upstream.
+    {
+      market: market.title,
+      league,
+      outcome: "yes",
+      outcomeLabel: firstLabel,
+      eventShape,
+      size: 200,
+      entry: firstPx,
+      mark: firstPx,
+      leverage: 5,
+      mode: "isolated",
+      margin: 10,
+      liq: clampPct(firstPx - 20),
+      pnl: 0,
+      tp: null,
+      sl: null,
+      isAirdrop: true,
+    },
   ];
 
   const orders: OrderRowData[] = [
