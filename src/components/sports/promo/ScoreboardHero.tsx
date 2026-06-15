@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Trophy } from "lucide-react";
 import { CARNIVAL_PRIZE_POOL, CARNIVAL_ENDS_AT } from "@/data/world-cup-carnival";
 import { cn } from "@/lib/utils";
-import trophyAsset from "@/assets/carnival/hero-trophy-left.jpg.asset.json";
+import trophyAsset from "@/assets/carnival/wc26-trophy-logo.png.asset.json";
 import stadiumAsset from "@/assets/carnival/hero-stadium-right.jpg.asset.json";
 import { CarnivalFlagsMarquee } from "./CarnivalFlagsMarquee";
 import { TwinkleField } from "./ConfettiLayer";
@@ -45,16 +45,16 @@ export function ScoreboardHero({ compact = false }: { compact?: boolean }) {
         "border-[#1a1a1a]",
       )}
     >
-      {/* Trophy on the left, stadium on the right — soft, masked toward the center. */}
+      {/* Trophy on the left (official WC26 mark) — full-bleed contain, masked toward the center. */}
       <div
         aria-hidden
-        className="absolute inset-y-0 left-0 w-1/2 bg-cover bg-center opacity-40"
+        className="absolute inset-y-0 left-0 w-[42%] md:w-[36%] bg-contain bg-no-repeat bg-left-bottom opacity-90"
         style={{
           backgroundImage: `url(${trophyAsset.url})`,
           maskImage:
-            "linear-gradient(90deg, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.6) 55%, transparent 100%)",
+            "linear-gradient(90deg, rgba(0,0,0,1) 0%, rgba(0,0,0,0.85) 60%, transparent 100%)",
           WebkitMaskImage:
-            "linear-gradient(90deg, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.6) 55%, transparent 100%)",
+            "linear-gradient(90deg, rgba(0,0,0,1) 0%, rgba(0,0,0,0.85) 60%, transparent 100%)",
         }}
       />
       <div
