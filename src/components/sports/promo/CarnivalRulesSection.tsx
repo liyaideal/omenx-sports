@@ -4,6 +4,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+import { Trophy } from "lucide-react";
 
 const SECTIONS = [
   {
@@ -48,15 +49,23 @@ const SECTIONS = [
 
 export function CarnivalRulesSection() {
   return (
-    <div className="border-2 border-zinc-800 bg-[#0a0a0a] p-5">
-      <div className="font-scoreboard text-[10px] font-bold tracking-[0.25em] text-zinc-500">
+    <div className="relative overflow-hidden border-2 border-zinc-800 bg-[#0a0a0a] p-5">
+      {/* Faint pitch stripes watermark */}
+      <div aria-hidden className="pointer-events-none absolute inset-0 bg-pitch-stripes" />
+      {/* Oversized trophy watermark in the corner */}
+      <Trophy
+        aria-hidden
+        className="pointer-events-none absolute -right-6 -top-6 h-40 w-40 text-amber-400/[0.04]"
+      />
+
+      <div className="relative font-scoreboard text-[10px] font-bold tracking-[0.25em] text-zinc-500">
         INFO · CARNIVAL RULES
       </div>
-      <h3 className="mt-1 font-pitch text-xl font-bold uppercase tracking-wide text-white">
+      <h3 className="relative mt-1 font-pitch text-xl font-bold uppercase tracking-wide text-white">
         How it works
       </h3>
 
-      <Accordion type="multiple" defaultValue={["RULE-00"]} className="mt-4">
+      <Accordion type="multiple" defaultValue={["RULE-00"]} className="relative mt-4">
         {SECTIONS.map((s) => (
           <AccordionItem key={s.code} value={s.code} className="border-zinc-800">
             <AccordionTrigger className="font-pitch text-sm font-bold uppercase tracking-wide text-white">
