@@ -1,7 +1,13 @@
 import { useMemo, useState } from "react";
-import { Pencil, Plus } from "lucide-react";
+import { Gift, Lock, Pencil, Plus } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { LeagueBadge } from "./LeagueBadge";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -59,6 +65,11 @@ export interface PositionRowData {
   tp?: number | null;
   /** Stop-loss price in ¢, or null if unset. */
   sl?: number | null;
+  /**
+   * When true, this is an airdrop/voucher position: shows the AIRDROP badge,
+   * TP/SL is locked (no edit), and leverage is capped at 5× upstream.
+   */
+  isAirdrop?: boolean;
 }
 
 export interface OrderRowData {
@@ -109,6 +120,7 @@ const DEFAULT_POS: PositionRowData[] = [
   { market: "Man City win UCL?", league: "ucl", outcome: "yes", outcomeLabel: "MCI", eventShape: "multi", size: 250, entry: 28, mark: 34, leverage: 5, mode: "cross", margin: 50, liq: 12, pnl: 53.6, tp: 45, sl: 18 },
   { market: "El Clásico", league: "laliga", outcome: "no", outcomeLabel: "Barcelona", eventShape: "binary", size: 120, entry: 53, mark: 59, leverage: 1, mode: "isolated", margin: 120, liq: 99, pnl: 15.3, tp: null, sl: null },
   { market: "Liverpool top 4?", league: "epl", outcome: "yes", outcomeLabel: "Yes", eventShape: "binary", size: 80, entry: 62, mark: 55, leverage: 3, mode: "cross", margin: 27, liq: 28, pnl: -16.8, tp: 80, sl: 45 },
+  { market: "United States vs Paraguay", league: "ucl", outcome: "yes", outcomeLabel: "USA", eventShape: "multi", size: 200, entry: 25, mark: 25, leverage: 5, mode: "isolated", margin: 10, liq: 5, pnl: 0, tp: null, sl: null, isAirdrop: true },
 ];
 const DEFAULT_ORD: OrderRowData[] = [
   { market: "Arsenal vs Spurs", league: "epl", outcome: "yes", outcomeLabel: "Arsenal", eventShape: "binary", type: "limit", price: 55, size: 200, filled: 40 },
@@ -217,6 +229,7 @@ function PositionTable({
               <Td>
                 <div className="flex items-center gap-2">
                   <LeagueBadge league={r.league} showLabel={false} />
+                  {r.isAirdrop && <AirdropBadge />}
                   <span className="font-medium text-foreground">{r.market}</span>
                 </div>
               </Td>
@@ -234,6 +247,7 @@ function PositionTable({
                   tp={r.tp ?? null}
                   sl={r.sl ?? null}
                   disabled={!onUpdateTpsl}
+                  locked={r.isAirdrop}
                   onClick={() => setEditIdx(i)}
                 />
               </Td>
@@ -384,6 +398,21 @@ function HistoryTable({ rows }: { rows: HistoryRowData[] }) {
 function Td({ children, className }: { children?: React.ReactNode; className?: string }) {
   return <td className={cn("px-4 py-3", className)}>{children}</td>;
 }
+
+/**
+ * Purple AIRDROP pill shown inline with the event name for airdrop/voucher
+ * positions. Hard-coded purple (not a token) to match the OmenX main site
+ * exactly — the sports `--primary` token is blue and would clash with the
+ * YES/NO color system.
+ */
+function AirdropBadge() {
+  return (
+    <span className="inline-flex items-center gap-1 rounded-md bg-purple-500/15 px-1.5 py-0.5 font-mono text-[9px] uppercase tracking-widest text-purple-300 ring-1 ring-purple-500/30">
+      <Gift className="h-3 w-3" />
+      Airdrop
+    </span>
+  );
+}
 /**
  * Renders the user-facing outcome. For team-vs-team markets the label IS the
  * side alias (e.g. "Arsenal" = YES); color carries the yes/no semantic. For
@@ -432,13 +461,35 @@ function TpSlCell({
   tp,
   sl,
   disabled,
+  locked,
   onClick,
 }: {
   tp: number | null;
   sl: number | null;
   disabled?: boolean;
+  locked?: boolean;
   onClick: () => void;
 }) {
+  if (locked) {
+    return (
+      <TooltipProvider delayDuration={150}>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <span
+              tabIndex={0}
+              className="inline-flex cursor-default items-center justify-center rounded-md border border-dashed border-border/60 bg-white/[0.02] px-2 py-1 text-muted-foreground/60"
+              aria-label="TP/SL not available"
+            >
+              <Lock className="h-3 w-3" />
+            </span>
+          </TooltipTrigger>
+          <TooltipContent side="top" className="max-w-[220px] text-center text-[11px] leading-snug">
+            Voucher positions don't support TP/SL. Close manually within the hold window.
+          </TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
+    );
+  }
   const empty = tp === null && sl === null;
   if (empty) {
     return (
