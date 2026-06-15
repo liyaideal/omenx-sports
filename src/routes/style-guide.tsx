@@ -888,6 +888,13 @@ function StyleGuide() {
                 require a two-step confirm (shadcn AlertDialog) showing the
                 full row context before mutating.
               </li>
+              <li>
+                <span className="text-foreground">Airdrop variant</span>: rows
+                with <code className="font-mono text-foreground">isAirdrop: true</code> show
+                a purple <code className="font-mono text-foreground">AIRDROP</code> badge,
+                lock the TP/SL cell (hover tooltip explains why), and are
+                capped at 5× leverage upstream.
+              </li>
             </ul>
             <PositionsTable
               positions={[
