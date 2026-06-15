@@ -85,11 +85,6 @@ function CarnivalContent({ tab }: { tab: CarnivalTab }) {
       <div className="relative space-y-6">
         <CarnivalTabs current={tab} />
 
-        {/* Flag marquee just under the tab bar */}
-        <div className="relative -mt-2 overflow-hidden rounded-md border border-zinc-900 bg-black/60">
-          <CarnivalFlagsMarquee height={16} opacity={0.5} reverse />
-        </div>
-
         {tab !== "overview" && <ScoreboardHero compact />}
 
         {tab === "overview" && <OverviewSection />}
