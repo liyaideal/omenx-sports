@@ -76,20 +76,24 @@ function CarnivalPage() {
 
 function CarnivalContent({ tab }: { tab: CarnivalTab }) {
   return (
-    <div className="space-y-6">
-      <CarnivalTabs current={tab} />
+    <div className="relative">
+      {/* Ambient stadium lighting at top + bottom */}
+      <div aria-hidden className="pointer-events-none absolute inset-x-0 top-0 h-72 bg-stadium-glow" />
+      <div aria-hidden className="pointer-events-none absolute inset-x-0 bottom-0 h-72 bg-stadium-glow rotate-180" />
 
-      {tab !== "overview" && (
-        <ScoreboardHero compact />
-      )}
+      <div className="relative space-y-6">
+        <CarnivalTabs current={tab} />
 
-      {tab === "overview" && <OverviewSection />}
-      {tab === "newbie" && <NewbieRewardsSection />}
-      {tab === "combo" && <ComboChallengeSection />}
-      {tab === "luckybox" && <LuckyBoxSection />}
-      {tab === "rules" && <CarnivalRulesSection />}
+        {tab !== "overview" && <ScoreboardHero compact />}
 
-      {tab !== "overview" && <ScoreboardTicker />}
+        {tab === "overview" && <OverviewSection />}
+        {tab === "newbie" && <NewbieRewardsSection />}
+        {tab === "combo" && <ComboChallengeSection />}
+        {tab === "luckybox" && <LuckyBoxSection />}
+        {tab === "rules" && <CarnivalRulesSection />}
+
+        {tab !== "overview" && <ScoreboardTicker />}
+      </div>
     </div>
   );
 }

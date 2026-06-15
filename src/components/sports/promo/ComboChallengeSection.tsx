@@ -62,8 +62,17 @@ export function ComboChallengeSection() {
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="border-2 border-zinc-800 bg-[#0a0a0a] p-5">
-        <div className="flex flex-wrap items-center justify-between gap-3">
+      <div className="relative overflow-hidden border-2 border-zinc-800 bg-[#0a0a0a] p-5">
+        <div
+          aria-hidden
+          className="pointer-events-none absolute -right-10 -top-10 h-48 w-48 rounded-full"
+          style={{
+            background:
+              "radial-gradient(circle, rgba(250,204,21,0.18) 0%, transparent 70%)",
+          }}
+        />
+        <div aria-hidden className="pointer-events-none absolute inset-0 bg-led-matrix opacity-[0.08]" />
+        <div className="relative flex flex-wrap items-center justify-between gap-3">
           <div>
             <div className="font-scoreboard text-[10px] font-bold tracking-[0.25em] text-amber-400">
               SEC-02 · COMBO CHALLENGE

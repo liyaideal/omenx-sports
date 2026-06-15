@@ -4,11 +4,13 @@ import { Trophy, ArrowRight } from "lucide-react";
 import { CARNIVAL_PRIZE_POOL, CARNIVAL_ENDS_AT } from "@/data/world-cup-carnival";
 
 function useCountdown(targetIso: string) {
-  const [now, setNow] = useState(() => Date.now());
+  const [now, setNow] = useState<number | null>(null);
   useEffect(() => {
-    const id = setInterval(() => setNow(Date.now()), 1000);
+    setNow(Date.now());
+    const id = setInterval(() => setNow(Date.now()), 60_000);
     return () => clearInterval(id);
   }, []);
+  if (now === null) return null;
   const diff = Math.max(0, new Date(targetIso).getTime() - now);
   const days = Math.floor(diff / 86_400_000);
   const hours = Math.floor((diff % 86_400_000) / 3_600_000);
@@ -65,8 +67,11 @@ export function CarnivalPromoCard() {
               prize pool
             </span>
           </div>
-          <div className="mt-0.5 font-scoreboard text-[10px] font-bold uppercase tracking-[0.2em] text-zinc-500">
-            Ends in {left}
+          <div
+            className="mt-0.5 font-scoreboard text-[10px] font-bold uppercase tracking-[0.2em] text-zinc-500"
+            suppressHydrationWarning
+          >
+            Ends in {left ?? "——"}
           </div>
         </div>
         <span className="grid h-9 w-9 shrink-0 place-items-center rounded border border-[oklch(0.7_0.18_145)]/50 bg-[oklch(0.7_0.18_145)]/10 text-[oklch(0.7_0.18_145)] transition-colors group-hover:bg-[oklch(0.7_0.18_145)] group-hover:text-black">

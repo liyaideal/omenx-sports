@@ -2,13 +2,23 @@ import { useEffect, useState } from "react";
 import { Trophy } from "lucide-react";
 import { CARNIVAL_PRIZE_POOL, CARNIVAL_ENDS_AT } from "@/data/world-cup-carnival";
 import { cn } from "@/lib/utils";
+import trophyAsset from "@/assets/carnival/hero-trophy-left.jpg.asset.json";
+import stadiumAsset from "@/assets/carnival/hero-stadium-right.jpg.asset.json";
+import { CarnivalFlagsMarquee } from "./CarnivalFlagsMarquee";
+import { TwinkleField } from "./ConfettiLayer";
 
+/**
+ * SSR-safe countdown. Returns null until mounted on the client to avoid
+ * hydration mismatches (Date.now() is non-deterministic across SSR/client).
+ */
 function useCountdown(targetIso: string) {
-  const [now, setNow] = useState(() => Date.now());
+  const [now, setNow] = useState<number | null>(null);
   useEffect(() => {
+    setNow(Date.now());
     const id = setInterval(() => setNow(Date.now()), 1000);
     return () => clearInterval(id);
   }, []);
+  if (now === null) return null;
   const diff = Math.max(0, new Date(targetIso).getTime() - now);
   const days = Math.floor(diff / 86_400_000);
   const hours = Math.floor((diff % 86_400_000) / 3_600_000);
@@ -35,7 +45,31 @@ export function ScoreboardHero({ compact = false }: { compact?: boolean }) {
         "border-[#1a1a1a]",
       )}
     >
+      {/* Trophy on the left, stadium on the right — soft, masked toward the center. */}
+      <div
+        aria-hidden
+        className="absolute inset-y-0 left-0 w-1/2 bg-cover bg-center opacity-40"
+        style={{
+          backgroundImage: `url(${trophyAsset.url})`,
+          maskImage:
+            "linear-gradient(90deg, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.6) 55%, transparent 100%)",
+          WebkitMaskImage:
+            "linear-gradient(90deg, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.6) 55%, transparent 100%)",
+        }}
+      />
+      <div
+        aria-hidden
+        className="absolute inset-y-0 right-0 w-1/2 bg-cover bg-center opacity-35"
+        style={{
+          backgroundImage: `url(${stadiumAsset.url})`,
+          maskImage:
+            "linear-gradient(270deg, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.6) 55%, transparent 100%)",
+          WebkitMaskImage:
+            "linear-gradient(270deg, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.6) 55%, transparent 100%)",
+        }}
+      />
       <div aria-hidden className="absolute inset-0 bg-led-matrix opacity-25" />
+      <TwinkleField count={compact ? 8 : 22} />
       {/* side neon rails */}
       <div
         aria-hidden
@@ -54,6 +88,19 @@ export function ScoreboardHero({ compact = false }: { compact?: boolean }) {
         }}
       />
 
+      {/* Four metallic L-brackets in each corner — like a real LED scoreboard frame. */}
+      <CornerBracket className="left-1.5 top-1.5" />
+      <CornerBracket className="right-1.5 top-1.5 rotate-90" />
+      <CornerBracket className="left-1.5 bottom-1.5 -rotate-90" />
+      <CornerBracket className="right-1.5 bottom-1.5 rotate-180" />
+
+      {/* Flag marquee strip across the very top */}
+      {!compact && (
+        <div className="relative border-b border-zinc-900/80">
+          <CarnivalFlagsMarquee height={18} opacity={0.55} />
+        </div>
+      )}
+
       <div className={cn("relative grid gap-6 p-6 md:p-10", compact && "p-5 md:p-6")}>
         {/* top row: live + edition + countdown */}
         <div className="flex flex-wrap items-center justify-between gap-3">
@@ -70,8 +117,13 @@ export function ScoreboardHero({ compact = false }: { compact?: boolean }) {
             <span className="font-pitch text-[9px] font-bold uppercase tracking-[0.25em] text-zinc-500">
               Ends in
             </span>
-            <span className="font-scoreboard text-sm font-bold text-[oklch(0.7_0.18_145)] tabular-nums">
-              {pad(c.days)}d : {pad(c.hours)}h : {pad(c.minutes)}m : {pad(c.seconds)}s
+            <span
+              className="font-scoreboard text-sm font-bold text-[oklch(0.7_0.18_145)] tabular-nums"
+              suppressHydrationWarning
+            >
+              {c
+                ? `${pad(c.days)}d : ${pad(c.hours)}h : ${pad(c.minutes)}m : ${pad(c.seconds)}s`
+                : "—— : —— : —— : ——"}
             </span>
           </div>
         </div>
@@ -105,6 +157,27 @@ export function ScoreboardHero({ compact = false }: { compact?: boolean }) {
           </div>
         </div>
       </div>
+
+      {/* Flag marquee strip across the very bottom — reverse direction */}
+      {!compact && (
+        <div className="relative border-t border-zinc-900/80">
+          <CarnivalFlagsMarquee height={14} opacity={0.4} reverse />
+        </div>
+      )}
     </div>
+  );
+}
+
+function CornerBracket({ className = "" }: { className?: string }) {
+  return (
+    <span
+      aria-hidden
+      className={"absolute z-10 h-5 w-5 " + className}
+      style={{
+        borderLeft: "2px solid oklch(0.7 0.18 145 / 0.7)",
+        borderTop: "2px solid oklch(0.7 0.18 145 / 0.7)",
+        filter: "drop-shadow(0 0 6px oklch(0.7 0.18 145 / 0.6))",
+      }}
+    />
   );
 }
