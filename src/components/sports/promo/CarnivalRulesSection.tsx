@@ -1,0 +1,82 @@
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
+
+const SECTIONS = [
+  {
+    code: "RULE-00",
+    title: "General",
+    body: [
+      "Total reward pool: 3,000,000 U across the three series. Each series has its own quota; eligible rewards stack across series.",
+      "Effective volume = leveraged trades on supported markets with fee rate ≥ 0.04%.",
+      "Position vouchers stay claimable for 7 days. Open positions opened with a voucher are valid for 72 hours.",
+      "Sybil / wash trading / collusion / abuse disqualifies the account and forfeits rewards. OMENX reserves the final interpretation right.",
+    ],
+  },
+  {
+    code: "RULE-01",
+    title: "Welcome Pack",
+    body: [
+      "T-01 – T-03 are new-user only. T-04 (invite) is open to all users.",
+      "Rewards are credited within 15 minutes after task completion.",
+      "Invite reward counts up to 10 valid invited users — max 500 U.",
+    ],
+  },
+  {
+    code: "RULE-02",
+    title: "Combo Challenge",
+    body: [
+      "Each combo locks 10 U at the odds shown at submission time.",
+      "All 4 legs must win. Combos pay 10 U × locked odds, capped at 50× (max 500 U).",
+      "Max 3 combos per user. Identical combos may not be re-submitted.",
+      "Markets within 30 minutes of kickoff are not eligible. Cancelled fixtures void the matching leg per page rules.",
+    ],
+  },
+  {
+    code: "RULE-03",
+    title: "Lucky Box",
+    body: [
+      "One spin per user per day, granted the morning after qualifying volume is hit.",
+      "Daily volume tier locks the highest pool unlocked; tiers do not stack.",
+      "Each pool has a daily spin cap — first come, first served until depleted.",
+    ],
+  },
+];
+
+export function CarnivalRulesSection() {
+  return (
+    <div className="border-2 border-zinc-800 bg-[#0a0a0a] p-5">
+      <div className="font-scoreboard text-[10px] font-bold tracking-[0.25em] text-zinc-500">
+        INFO · CARNIVAL RULES
+      </div>
+      <h3 className="mt-1 font-pitch text-xl font-bold uppercase tracking-wide text-white">
+        How it works
+      </h3>
+
+      <Accordion type="multiple" defaultValue={["RULE-00"]} className="mt-4">
+        {SECTIONS.map((s) => (
+          <AccordionItem key={s.code} value={s.code} className="border-zinc-800">
+            <AccordionTrigger className="font-pitch text-sm font-bold uppercase tracking-wide text-white">
+              <span className="flex items-center gap-3">
+                <span className="font-scoreboard text-[10px] font-bold tracking-[0.2em] text-zinc-500">
+                  {s.code}
+                </span>
+                {s.title}
+              </span>
+            </AccordionTrigger>
+            <AccordionContent>
+              <ul className="list-disc space-y-1.5 pl-5 text-sm text-zinc-400">
+                {s.body.map((b) => (
+                  <li key={b}>{b}</li>
+                ))}
+              </ul>
+            </AccordionContent>
+          </AccordionItem>
+        ))}
+      </Accordion>
+    </div>
+  );
+}
