@@ -94,6 +94,8 @@ import { ScoreboardHero } from "@/components/sports/promo/ScoreboardHero";
 import { ScoreboardTicker } from "@/components/sports/promo/ScoreboardTicker";
 import { CarnivalTabs } from "@/components/sports/promo/CarnivalTabs";
 import { CarnivalPromoCard } from "@/components/sports/promo/CarnivalPromoCard";
+import { CarnivalFlagsMarquee } from "@/components/sports/promo/CarnivalFlagsMarquee";
+import { ConfettiLayer, TwinkleField } from "@/components/sports/promo/ConfettiLayer";
 import { OverviewSection } from "@/components/sports/promo/OverviewSection";
 
 export const Route = createFileRoute("/style-guide")({
@@ -1858,6 +1860,25 @@ function StyleGuide() {
                   ScoreboardHero — full
                 </div>
                 <ScoreboardHero />
+              </div>
+
+              <div>
+                <div className="mb-3 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+                  CarnivalFlagsMarquee — host nation flag track
+                </div>
+                <div className="overflow-hidden rounded border border-zinc-900 bg-black/60 p-1">
+                  <CarnivalFlagsMarquee />
+                </div>
+              </div>
+
+              <div>
+                <div className="mb-3 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+                  ConfettiLayer + TwinkleField — decorative overlays (pointer-events-none)
+                </div>
+                <div className="relative h-40 overflow-hidden rounded border border-zinc-900 bg-black">
+                  <TwinkleField />
+                  <ConfettiLayer count={18} />
+                </div>
               </div>
 
               <div>
