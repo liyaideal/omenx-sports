@@ -116,15 +116,14 @@ export function AppTopBar({
             <Link
               to="/promo/world-cup"
               search={{ tab: "overview" }}
-              className="group relative hidden shrink-0 items-center gap-1.5 whitespace-nowrap rounded-lg border border-[oklch(0.7_0.18_145)]/40 bg-[oklch(0.7_0.18_145)]/10 px-2.5 py-2 font-pitch text-[11px] font-bold uppercase tracking-[0.14em] text-[oklch(0.7_0.18_145)] transition-all hover:bg-[oklch(0.7_0.18_145)]/20 hover:text-white lg:flex xl:px-3.5 xl:text-xs"
+              className="group relative hidden shrink-0 items-center gap-1.5 whitespace-nowrap rounded-lg border border-[oklch(0.7_0.18_145)]/40 bg-[oklch(0.7_0.18_145)]/10 px-3 py-2 font-pitch text-xs font-bold uppercase tracking-[0.14em] text-[oklch(0.7_0.18_145)] transition-all hover:bg-[oklch(0.7_0.18_145)]/20 hover:text-white xl:flex xl:px-3.5"
               style={{
                 boxShadow:
                   "inset 0 0 0 1px oklch(0.7 0.18 145 / 0.3), 0 0 14px -6px oklch(0.7 0.18 145 / 0.55)",
               }}
             >
               <Trophy className="h-3.5 w-3.5" />
-              <span className="hidden xl:inline">World Cup Carnival</span>
-              <span className="xl:hidden">WC Carnival</span>
+              <span>World Cup Carnival</span>
               <span className="relative ml-0.5 inline-flex h-1.5 w-1.5">
                 <span className="absolute inset-0 animate-ping rounded-full bg-amber-400 opacity-80" />
                 <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-amber-400" />
