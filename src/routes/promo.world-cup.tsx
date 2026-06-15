@@ -10,6 +10,7 @@ import { LuckyBoxSection } from "@/components/sports/promo/LuckyBoxSection";
 import { CarnivalRulesSection } from "@/components/sports/promo/CarnivalRulesSection";
 import { ScoreboardHero } from "@/components/sports/promo/ScoreboardHero";
 import { ScoreboardTicker } from "@/components/sports/promo/ScoreboardTicker";
+import { CarnivalFlagsMarquee } from "@/components/sports/promo/CarnivalFlagsMarquee";
 import { ACCOUNT_STATS } from "@/data/sports-markets";
 import type { CarnivalTab } from "@/data/world-cup-carnival";
 
@@ -76,20 +77,29 @@ function CarnivalPage() {
 
 function CarnivalContent({ tab }: { tab: CarnivalTab }) {
   return (
-    <div className="space-y-6">
-      <CarnivalTabs current={tab} />
+    <div className="relative">
+      {/* Ambient stadium lighting at top + bottom */}
+      <div aria-hidden className="pointer-events-none absolute inset-x-0 top-0 h-72 bg-stadium-glow" />
+      <div aria-hidden className="pointer-events-none absolute inset-x-0 bottom-0 h-72 bg-stadium-glow rotate-180" />
 
-      {tab !== "overview" && (
-        <ScoreboardHero compact />
-      )}
+      <div className="relative space-y-6">
+        <CarnivalTabs current={tab} />
 
-      {tab === "overview" && <OverviewSection />}
-      {tab === "newbie" && <NewbieRewardsSection />}
-      {tab === "combo" && <ComboChallengeSection />}
-      {tab === "luckybox" && <LuckyBoxSection />}
-      {tab === "rules" && <CarnivalRulesSection />}
+        {/* Flag marquee just under the tab bar */}
+        <div className="relative -mt-2 overflow-hidden rounded-md border border-zinc-900 bg-black/60">
+          <CarnivalFlagsMarquee height={16} opacity={0.5} reverse />
+        </div>
 
-      {tab !== "overview" && <ScoreboardTicker />}
+        {tab !== "overview" && <ScoreboardHero compact />}
+
+        {tab === "overview" && <OverviewSection />}
+        {tab === "newbie" && <NewbieRewardsSection />}
+        {tab === "combo" && <ComboChallengeSection />}
+        {tab === "luckybox" && <LuckyBoxSection />}
+        {tab === "rules" && <CarnivalRulesSection />}
+
+        {tab !== "overview" && <ScoreboardTicker />}
+      </div>
     </div>
   );
 }
