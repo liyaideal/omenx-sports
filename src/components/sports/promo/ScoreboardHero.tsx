@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Trophy } from "lucide-react";
 import { CARNIVAL_PRIZE_POOL, CARNIVAL_ENDS_AT } from "@/data/world-cup-carnival";
 import { cn } from "@/lib/utils";
-import trophyAsset from "@/assets/carnival/wc26-trophy-hero.png.asset.json";
+import trophyAsset from "@/assets/carnival/wc26-trophy-landscape.png.asset.json";
 import stadiumAsset from "@/assets/carnival/hero-stadium-right.jpg.asset.json";
 import { CarnivalFlagsMarquee } from "./CarnivalFlagsMarquee";
 import { TwinkleField } from "./ConfettiLayer";
@@ -47,24 +47,15 @@ export function ScoreboardHero({ compact = false }: { compact?: boolean }) {
     >
       {/* Background split: left 1/3 trophy + right 2/3 stadium (direction A) */}
       <div aria-hidden className="absolute inset-0 flex">
-        {/* Left: trophy zone, anchored bottom-left, height tall enough that the
-            "FIFA WORLD" plaque at the base of the source image falls below the
-            crop and never leaks into the slab. */}
+        {/* Left: trophy zone — landscape source, full trophy centered, no
+            cropping or mask hack needed. */}
         <div className="relative h-full w-1/3 hidden md:block">
           <div
-            className="absolute inset-0 bg-contain bg-no-repeat bg-left-bottom opacity-95"
-            style={{
-              backgroundImage: `url(${trophyAsset.url})`,
-              // Hide the "FIFA WORLD" plaque at the bottom of the source image
-              // AND fade the top so the LIVE PRIZE POOL chip stays readable.
-              maskImage:
-                "linear-gradient(180deg, transparent 0%, rgba(0,0,0,0.6) 18%, rgba(0,0,0,1) 38%, rgba(0,0,0,1) 86%, transparent 96%)",
-              WebkitMaskImage:
-                "linear-gradient(180deg, transparent 0%, rgba(0,0,0,0.6) 18%, rgba(0,0,0,1) 38%, rgba(0,0,0,1) 86%, transparent 96%)",
-            }}
+            className="absolute inset-0 bg-contain bg-no-repeat bg-center"
+            style={{ backgroundImage: `url(${trophyAsset.url})` }}
           />
-          {/* fade trophy edge into the slab so the gold blends right */}
-          <div className="absolute inset-0 bg-gradient-to-r from-black/40 via-transparent to-black/60" />
+          {/* feather right edge into the slab */}
+          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-transparent to-black" />
         </div>
         {/* Right: stadium with vignette + a soft green atmosphere blob to kill
             the "dead green field" feeling. */}
@@ -87,7 +78,7 @@ export function ScoreboardHero({ compact = false }: { compact?: boolean }) {
           never crowds the number column. */}
       <div
         aria-hidden
-        className="absolute inset-y-0 left-0 w-1/2 bg-contain bg-no-repeat bg-left-bottom opacity-25 md:hidden"
+        className="absolute inset-y-0 left-0 w-1/2 bg-contain bg-no-repeat bg-center opacity-25 md:hidden"
         style={{ backgroundImage: `url(${trophyAsset.url})` }}
       />
       <div aria-hidden className="absolute inset-0 bg-led-matrix opacity-25" />
