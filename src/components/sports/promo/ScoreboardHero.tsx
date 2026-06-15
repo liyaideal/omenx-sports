@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Trophy } from "lucide-react";
 import { CARNIVAL_PRIZE_POOL, CARNIVAL_ENDS_AT } from "@/data/world-cup-carnival";
 import { cn } from "@/lib/utils";
-import trophyAsset from "@/assets/carnival/wc26-trophy-logo.png.asset.json";
+import trophyAsset from "@/assets/carnival/wc26-trophy-hero.png.asset.json";
 import stadiumAsset from "@/assets/carnival/hero-stadium-right.jpg.asset.json";
 import { CarnivalFlagsMarquee } from "./CarnivalFlagsMarquee";
 import { TwinkleField } from "./ConfettiLayer";
