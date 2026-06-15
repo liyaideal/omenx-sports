@@ -48,8 +48,8 @@ export function ScoreboardHero({ compact = false }: { compact?: boolean }) {
           night stadium on the right — one cohesive scene. */}
       <div
         aria-hidden
-        className="absolute inset-0 bg-cover bg-left opacity-55"
-        style={{ backgroundImage: `url(${heroBgAsset.url})` }}
+        className="absolute inset-0 bg-no-repeat bg-left bg-contain opacity-60"
+        style={{ backgroundImage: `url(${heroBgAsset.url})`, backgroundSize: "auto 100%" }}
       />
       {/* Dark veil so the LED numerals stay readable on top */}
       <div
