@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Trophy } from "lucide-react";
 import { CARNIVAL_PRIZE_POOL, CARNIVAL_ENDS_AT } from "@/data/world-cup-carnival";
 import { cn } from "@/lib/utils";
-import trophyAsset from "@/assets/carnival/wc26-trophy-hero.png.asset.json";
+import trophyAsset from "@/assets/carnival/wc26-trophy-landscape.png.asset.json";
 import stadiumAsset from "@/assets/carnival/hero-stadium-right.jpg.asset.json";
 import { CarnivalFlagsMarquee } from "./CarnivalFlagsMarquee";
 import { TwinkleField } from "./ConfettiLayer";
@@ -45,50 +45,42 @@ export function ScoreboardHero({ compact = false }: { compact?: boolean }) {
         "border-[#1a1a1a]",
       )}
     >
-      {/* Background split: left 1/3 trophy + right 2/3 stadium (direction A) */}
-      <div aria-hidden className="absolute inset-0 flex">
-        {/* Left: trophy zone, anchored bottom-left, height tall enough that the
-            "FIFA WORLD" plaque at the base of the source image falls below the
-            crop and never leaks into the slab. */}
-        <div className="relative h-full w-1/3 hidden md:block">
-          <div
-            className="absolute inset-0 bg-contain bg-no-repeat bg-left-bottom opacity-95"
-            style={{
-              backgroundImage: `url(${trophyAsset.url})`,
-              // Hide the "FIFA WORLD" plaque at the bottom of the source image
-              // AND fade the top so the LIVE PRIZE POOL chip stays readable.
-              maskImage:
-                "linear-gradient(180deg, transparent 0%, rgba(0,0,0,0.6) 18%, rgba(0,0,0,1) 38%, rgba(0,0,0,1) 86%, transparent 96%)",
-              WebkitMaskImage:
-                "linear-gradient(180deg, transparent 0%, rgba(0,0,0,0.6) 18%, rgba(0,0,0,1) 38%, rgba(0,0,0,1) 86%, transparent 96%)",
-            }}
-          />
-          {/* fade trophy edge into the slab so the gold blends right */}
-          <div className="absolute inset-0 bg-gradient-to-r from-black/40 via-transparent to-black/60" />
-        </div>
-        {/* Right: stadium with vignette + a soft green atmosphere blob to kill
-            the "dead green field" feeling. */}
-        <div className="relative h-full flex-1">
-          <div
-            className="absolute inset-0 bg-cover bg-center opacity-40 grayscale-[0.2]"
-            style={{ backgroundImage: `url(${stadiumAsset.url})` }}
-          />
-          <div className="absolute inset-0 bg-gradient-to-l from-black/80 via-black/20 to-black" />
-          <div
-            className="absolute top-1/4 right-1/4 h-40 w-40 rounded-full opacity-60"
-            style={{
-              background: "oklch(0.7 0.18 145 / 0.25)",
-              filter: "blur(80px)",
-            }}
-          />
-        </div>
+      {/* Background split — right 2/3 stadium */}
+      <div aria-hidden className="absolute inset-y-0 right-0 w-2/3">
+        <div
+          className="absolute inset-0 bg-cover bg-center opacity-40 grayscale-[0.2]"
+          style={{ backgroundImage: `url(${stadiumAsset.url})` }}
+        />
+        <div className="absolute inset-0 bg-gradient-to-l from-black/80 via-black/20 to-black" />
+        <div
+          className="absolute top-1/4 right-1/4 h-40 w-40 rounded-full opacity-60"
+          style={{
+            background: "oklch(0.7 0.18 145 / 0.25)",
+            filter: "blur(80px)",
+          }}
+        />
       </div>
+      {/* Left 1/3 trophy — landscape PNG, scaled to fill column height */}
+      <img
+        aria-hidden
+        src={trophyAsset.url}
+        alt=""
+        className="absolute inset-y-0 left-0 hidden h-full w-auto md:block"
+        style={{ maxWidth: "none" }}
+      />
+      <div
+        aria-hidden
+        className="absolute inset-y-0 left-0 hidden w-1/3 bg-gradient-to-r from-transparent via-transparent to-black md:block"
+      />
       {/* On mobile (< md) the trophy becomes a faint full-bleed watermark so it
           never crowds the number column. */}
       <div
         aria-hidden
-        className="absolute inset-y-0 left-0 w-1/2 bg-contain bg-no-repeat bg-left-bottom opacity-25 md:hidden"
-        style={{ backgroundImage: `url(${trophyAsset.url})` }}
+        className="absolute inset-y-0 left-0 w-1/2 bg-no-repeat bg-center opacity-25 md:hidden"
+        style={{
+          backgroundImage: `url(${trophyAsset.url})`,
+          backgroundSize: "auto 110%",
+        }}
       />
       <div aria-hidden className="absolute inset-0 bg-led-matrix opacity-25" />
       <TwinkleField count={compact ? 8 : 22} />
