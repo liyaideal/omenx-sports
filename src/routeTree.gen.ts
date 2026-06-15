@@ -14,6 +14,7 @@ import { Route as StyleGuideRouteImport } from './routes/style-guide'
 import { Route as FansRouteImport } from './routes/fans'
 import { Route as EventsRouteImport } from './routes/events'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as PromoWorldCupRouteImport } from './routes/promo.world-cup'
 import { Route as LeagueSlugRouteImport } from './routes/league.$slug'
 import { Route as EventIdRouteImport } from './routes/event.$id'
 
@@ -42,6 +43,11 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PromoWorldCupRoute = PromoWorldCupRouteImport.update({
+  id: '/promo/world-cup',
+  path: '/promo/world-cup',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const LeagueSlugRoute = LeagueSlugRouteImport.update({
   id: '/league/$slug',
   path: '/league/$slug',
@@ -61,6 +67,7 @@ export interface FileRoutesByFullPath {
   '/style-guide-homepage': typeof StyleGuideHomepageRoute
   '/event/$id': typeof EventIdRoute
   '/league/$slug': typeof LeagueSlugRoute
+  '/promo/world-cup': typeof PromoWorldCupRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -70,6 +77,7 @@ export interface FileRoutesByTo {
   '/style-guide-homepage': typeof StyleGuideHomepageRoute
   '/event/$id': typeof EventIdRoute
   '/league/$slug': typeof LeagueSlugRoute
+  '/promo/world-cup': typeof PromoWorldCupRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -80,6 +88,7 @@ export interface FileRoutesById {
   '/style-guide-homepage': typeof StyleGuideHomepageRoute
   '/event/$id': typeof EventIdRoute
   '/league/$slug': typeof LeagueSlugRoute
+  '/promo/world-cup': typeof PromoWorldCupRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -91,6 +100,7 @@ export interface FileRouteTypes {
     | '/style-guide-homepage'
     | '/event/$id'
     | '/league/$slug'
+    | '/promo/world-cup'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -100,6 +110,7 @@ export interface FileRouteTypes {
     | '/style-guide-homepage'
     | '/event/$id'
     | '/league/$slug'
+    | '/promo/world-cup'
   id:
     | '__root__'
     | '/'
@@ -109,6 +120,7 @@ export interface FileRouteTypes {
     | '/style-guide-homepage'
     | '/event/$id'
     | '/league/$slug'
+    | '/promo/world-cup'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -119,6 +131,7 @@ export interface RootRouteChildren {
   StyleGuideHomepageRoute: typeof StyleGuideHomepageRoute
   EventIdRoute: typeof EventIdRoute
   LeagueSlugRoute: typeof LeagueSlugRoute
+  PromoWorldCupRoute: typeof PromoWorldCupRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -158,6 +171,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/promo/world-cup': {
+      id: '/promo/world-cup'
+      path: '/promo/world-cup'
+      fullPath: '/promo/world-cup'
+      preLoaderRoute: typeof PromoWorldCupRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/league/$slug': {
       id: '/league/$slug'
       path: '/league/$slug'
@@ -183,17 +203,8 @@ const rootRouteChildren: RootRouteChildren = {
   StyleGuideHomepageRoute: StyleGuideHomepageRoute,
   EventIdRoute: EventIdRoute,
   LeagueSlugRoute: LeagueSlugRoute,
+  PromoWorldCupRoute: PromoWorldCupRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}

@@ -23,6 +23,7 @@ import {
 import { PropsGrid } from "@/components/sports/league/PropsGrid";
 import { BracketView } from "@/components/sports/league/BracketView";
 import { WorldCupBackdrop } from "@/components/sports/league/WorldCupAmbience";
+import { CarnivalPromoCard } from "@/components/sports/promo/CarnivalPromoCard";
 import { ACCOUNT_STATS, type SportsMarket } from "@/data/sports-markets";
 
 const USER_NAME = "Jeremy";
@@ -234,6 +235,7 @@ function HubContent({
         kickoffLabel={isWorldCup ? "Jun 11, 2026" : undefined}
         hostFlags={hostFlags}
         stats={heroStats}
+        promoSlot={isWorldCup ? <CarnivalPromoCard /> : undefined}
       />
       <HubTabs slug={league.slug} current={view} tabs={tabs} />
 

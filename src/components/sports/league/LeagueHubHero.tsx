@@ -1,4 +1,5 @@
 import { CalendarDays } from "lucide-react";
+import type { ReactNode } from "react";
 import type { LeagueHub } from "@/data/leagues";
 
 /**
@@ -15,6 +16,7 @@ export function LeagueHubHero({
   kickoffLabel,
   hostFlags,
   stats,
+  promoSlot,
 }: {
   league: LeagueHub;
   /** Tournament-only: short kickoff/venue label, e.g. "Jun 11 · MetLife". */
@@ -23,6 +25,11 @@ export function LeagueHubHero({
   hostFlags?: { code: string; name: string }[];
   /** Tournament-only: small stat strip ("48 nations", "104 matches", ...). */
   stats?: { label: string; value: string }[];
+  /**
+   * Optional right-side promo slot (e.g. WC2026 Carnival entry card).
+   * Floats right on md+, drops below the hero copy on small screens.
+   */
+  promoSlot?: ReactNode;
 }) {
   const accent = league.accent;
   const isTournament = league.kind === "tournament";
@@ -49,7 +56,8 @@ export function LeagueHubHero({
         </>
       )}
 
-      <div className="flex items-center gap-5 md:gap-7">
+      <div className="flex flex-col gap-6 md:flex-row md:items-center md:gap-7">
+        <div className="flex flex-1 items-center gap-5 md:gap-7">
         <span
           className="relative grid h-32 w-32 shrink-0 place-items-center overflow-hidden rounded-2xl bg-white/[0.06] ring-1 ring-white/15 md:h-44 md:w-44"
           style={{ boxShadow: `0 0 40px -10px oklch(${accent} / 0.6)` }}
@@ -115,6 +123,12 @@ export function LeagueHubHero({
             </div>
           )}
         </div>
+        </div>
+        {promoSlot && (
+          <div className="relative w-full shrink-0 md:w-auto md:max-w-sm">
+            {promoSlot}
+          </div>
+        )}
       </div>
     </header>
   );
