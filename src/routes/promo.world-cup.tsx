@@ -10,7 +10,6 @@ import { LuckyBoxSection } from "@/components/sports/promo/LuckyBoxSection";
 import { CarnivalRulesSection } from "@/components/sports/promo/CarnivalRulesSection";
 import { ScoreboardHero } from "@/components/sports/promo/ScoreboardHero";
 import { ScoreboardTicker } from "@/components/sports/promo/ScoreboardTicker";
-import { CarnivalFlagsMarquee } from "@/components/sports/promo/CarnivalFlagsMarquee";
 import { ACCOUNT_STATS } from "@/data/sports-markets";
 import type { CarnivalTab } from "@/data/world-cup-carnival";
 
