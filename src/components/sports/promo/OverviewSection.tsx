@@ -5,7 +5,6 @@ import {
   CARNIVAL_TABS,
   type CarnivalTab,
 } from "@/data/world-cup-carnival";
-import { ScoreboardHero } from "./ScoreboardHero";
 import { ScoreboardTicker } from "./ScoreboardTicker";
 import { ConfettiLayer } from "./ConfettiLayer";
 import welcomeAsset from "@/assets/carnival/card-welcome.jpg.asset.json";
@@ -69,7 +68,6 @@ export function OverviewSection() {
   return (
     <div className="relative flex flex-col gap-6">
       <ConfettiLayer count={20} className="z-0" />
-      <ScoreboardHero />
 
       <div className="relative z-10 grid grid-cols-1 gap-4 md:grid-cols-3">
         {SERIES.map((s) => (
