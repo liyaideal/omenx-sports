@@ -37,7 +37,7 @@ export function ShareDialog({ target, onClose }: ShareDialogProps) {
 
   return (
     <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
-      <DialogContent className="flex w-[min(92vw,28rem)] max-w-none flex-col gap-0 overflow-hidden border-2 border-amber-400/40 bg-[#0a0a0a] p-0 [&>button]:hidden">
+      <DialogContent className="flex max-h-[90vh] w-[min(92vw,28rem)] max-w-none flex-col gap-0 overflow-hidden border-2 border-amber-400/40 bg-[#0a0a0a] p-0 [&>button]:hidden">
         <DialogTitle className="sr-only">Share</DialogTitle>
         <DialogDescription className="sr-only">
           Share this on OMENX
