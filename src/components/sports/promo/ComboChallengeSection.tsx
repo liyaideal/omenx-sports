@@ -1071,61 +1071,6 @@ function MobileStickyBar({
   );
 }
 
-/* ============================================================ */
-/* ShareCardModal — 1080×1350 preview, scaled to viewport         */
-/* ============================================================ */
-
-function ShareCardModal({
-  ticket,
-  onClose,
-}: {
-  ticket: SubmittedTicket | null;
-  onClose: () => void;
-}) {
-  return (
-    <Dialog open={!!ticket} onOpenChange={(v) => !v && onClose()}>
-      <DialogContent className="max-w-md border-2 border-amber-400/60 bg-[#0a0a0a] p-4">
-        <DialogTitle className="sr-only">Share combo card preview</DialogTitle>
-        <div className="mb-3 flex items-center justify-between">
-          <div className="font-scoreboard text-[10px] font-bold tracking-[0.25em] text-amber-400">
-            SHARE CARD · 1080 × 1350
-          </div>
-          <span className="font-pitch text-[9px] font-semibold uppercase tracking-widest text-zinc-500">
-            Preview only
-          </span>
-        </div>
-        {ticket && <ShareCardPreview ticket={ticket} />}
-        <div className="mt-3 grid grid-cols-3 gap-1.5">
-          <button
-            type="button"
-            disabled
-            className="border border-zinc-800 bg-zinc-900 py-1.5 font-pitch text-[10px] font-bold uppercase tracking-widest text-zinc-500"
-          >
-            Download
-          </button>
-          <button
-            type="button"
-            disabled
-            className="border border-zinc-800 bg-zinc-900 py-1.5 font-pitch text-[10px] font-bold uppercase tracking-widest text-zinc-500"
-          >
-            Native share
-          </button>
-          <button
-            type="button"
-            disabled
-            className="border border-zinc-800 bg-zinc-900 py-1.5 font-pitch text-[10px] font-bold uppercase tracking-widest text-zinc-500"
-          >
-            Copy link
-          </button>
-        </div>
-        <p className="mt-2 font-pitch text-[10px] font-semibold uppercase tracking-widest text-zinc-600">
-          Download / native share / copy link land in Phase 1 ship — preview only for now.
-        </p>
-      </DialogContent>
-    </Dialog>
-  );
-}
-
 export function ShareCardPreview({ ticket }: { ticket: SubmittedTicket }) {
   const isWin = ticket.status === "SETTLED_WON";
   const profit = ticket.grossPayoutU - ticket.stakeU;
