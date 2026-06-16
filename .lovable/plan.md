@@ -1,12 +1,15 @@
-我会只调整 World Cup promo hero 的底图构图，不改业务逻辑。
+### 移除卡片图标
 
-实施计划：
-1. 重新生成/合成一张更适合 desktop 横幅比例的背景图：
-   - 大力神杯完整露出，尤其底部留足安全边距。
-   - 奖杯仍放左半边，但整体略缩小、略上移/居中，避免被底部旗帜条和容器裁切。
-   - 右半边继续保留球场灯光/看台氛围，不再丢失。
-2. 替换 `ScoreboardHero` 里的背景资源引用，保持现有 LED 数字、旗帜、倒计时和遮罩不变。
-3. 同步 `/style-guide` 中对应的 hero 展示，因为该组件也在那里预览。
-4. 在 `DESIGN.md` 追加一条锁定规则：WC2026 hero 背景必须保证奖杯完整可见，底部不得被旗帜条/容器裁掉。
-5. 顺手排查当前 `ScoreboardHero.tsx` 的 Vite 500 运行错误；如果是资源引用或语法导致，会在同一次改动里修掉。
-6. 用 desktop 预览截图验证：奖杯底部完整、右侧球场仍可见、中央奖金数字可读。
+文件：`src/components/sports/promo/OverviewSection.tsx`
+
+两组 SVG 装饰都删掉：
+1. **头图右上角**的 Lucide 角标（Sparkles / Zap / Trophy）
+2. **正文左上角**的形状图标（圆形 / 菱形 / 柱状）
+
+连带清理：
+- `SeriesEntry` 接口移除 `icon`、`iconShape`、`ornament` 字段
+- `SERIES` 数组移除对应值
+- `lucide-react` 中未使用的图标导入（Circle、Diamond、BarChart3、Sparkles、Zap、Trophy）
+- `cn` 工具若后续不再使用也一并移除
+
+清理后卡片结构：头图 + SEC 编号 → 标题 / 亮点 / 描述 / CTA。
