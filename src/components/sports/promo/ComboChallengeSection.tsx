@@ -39,6 +39,7 @@ import {
   type SubmittedTicket,
 } from "./combo/useComboState";
 import { ShareTrigger, shareCombo } from "@/components/sports/share";
+import omenxLogo from "@/assets/omenx-logo.svg";
 
 /* ============================================================
  * Top-level composition. Mirrors PRD §1.2:
@@ -1218,16 +1219,13 @@ export function ShareCardPreview({ ticket }: { ticket: SubmittedTicket }) {
         />
 
         <div className="relative flex h-full flex-col px-[6%] pt-[5%] pb-[4%]">
-          {/* === OMENX wordmark === */}
-          <div
-            className="text-center font-poster font-bold text-white leading-none"
-            style={{
-              fontSize: "14cqw",
-              letterSpacing: "0.04em",
-            }}
-          >
-            OMENX
-          </div>
+          {/* === OMENX wordmark (official logo) === */}
+          <img
+            src={omenxLogo}
+            alt="OMENX"
+            className="mx-auto block w-auto"
+            style={{ height: "11cqw" }}
+          />
 
           {/* trophy badge */}
           <div className="mt-[3%] flex flex-col items-center gap-1">
