@@ -1,7 +1,8 @@
 import { Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { Trophy, ArrowRight } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { CARNIVAL_PRIZE_POOL, CARNIVAL_ENDS_AT } from "@/data/world-cup-carnival";
+import trophyAsset from "@/assets/carnival/wc-trophy-gold.png.asset.json";
 
 function useCountdown(targetIso: string) {
   const [now, setNow] = useState<number | null>(null);
@@ -42,9 +43,13 @@ export function CarnivalPromoCard() {
         }}
       />
       <div className="relative flex items-center gap-4">
-        <div className="grid h-10 w-10 shrink-0 place-items-center rounded border border-amber-400/30 bg-amber-400/10">
-          <Trophy className="h-5 w-5 text-amber-400" />
-        </div>
+        <img
+          src={trophyAsset.url}
+          alt=""
+          aria-hidden
+          className="h-12 w-12 shrink-0 object-contain"
+          style={{ filter: "drop-shadow(0 0 10px rgba(242,208,36,0.45))" }}
+        />
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2">
             <span className="relative inline-flex h-1.5 w-1.5">
