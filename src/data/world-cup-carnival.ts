@@ -79,37 +79,306 @@ export const INVITE_PROGRESS = { current: 2, max: 10, voucherPerFriend: 50 };
 /*  Combo Challenge — 10 U → 500 U                                     */
 /* ------------------------------------------------------------------ */
 
-export interface ComboPick {
-  marketId: string;
-  matchLabel: string;
-  pickLabel: string;
-  /** Locked odds at the moment of selection. */
-  odds: number;
-  kickoff: string;
-}
-
-/** Sample picks that pre-populate the combo builder so the page demos well. */
-export const COMBO_SAMPLE_PICKS: ComboPick[] = [
-  { marketId: "wc26-grpa-mex-vs-cz", matchLabel: "Mexico vs Czechia", pickLabel: "Mexico", odds: 1.92, kickoff: "Jun 27 · 20:00" },
-  { marketId: "wc26-grpb-can-vs-pan", matchLabel: "Canada vs Panama", pickLabel: "Canada", odds: 1.55, kickoff: "Jun 27 · 22:00" },
-  { marketId: "wc26-grpc-bra-vs-kor", matchLabel: "Brazil vs South Korea", pickLabel: "Brazil", odds: 1.40, kickoff: "Jun 28 · 18:00" },
-  { marketId: "wc26-grpd-usa-vs-tur", matchLabel: "USA vs Türkiye", pickLabel: "USA", odds: 2.10, kickoff: "Jun 28 · 21:00" },
-];
+/**
+ * v2 — Frontend PRD-aligned model. Matches are first-class; markets nest
+ * under matches; only MONEYLINE markets are combo-eligible (PRD §0.2).
+ * SPREAD / TOTAL markets render as display-only reference data and are
+ * blocked from combos via `combo_eligible: false`.
+ */
 
 export const COMBO_MAX_ODDS = 50;
 export const COMBO_STAKE = 10;
 export const COMBO_MAX_PICKS = 4;
 export const COMBO_MAX_COMBOS_PER_USER = 3;
 
-/** Pickable outcomes for the slot picker (mock). */
-export const COMBO_PICK_CATALOG: ComboPick[] = [
-  ...COMBO_SAMPLE_PICKS,
-  { marketId: "wc26-grpe-ger-vs-ecu", matchLabel: "Germany vs Ecuador", pickLabel: "Germany", odds: 1.48, kickoff: "Jun 29 · 18:00" },
-  { marketId: "wc26-grpf-ned-vs-jpn", matchLabel: "Netherlands vs Japan", pickLabel: "Netherlands", odds: 1.68, kickoff: "Jun 29 · 21:00" },
-  { marketId: "wc26-grpg-bel-vs-egy", matchLabel: "Belgium vs Egypt", pickLabel: "Belgium", odds: 1.50, kickoff: "Jun 30 · 18:00" },
-  { marketId: "wc26-grph-esp-vs-uru", matchLabel: "Spain vs Uruguay", pickLabel: "Spain", odds: 1.35, kickoff: "Jun 30 · 21:00" },
-  { marketId: "wc26-grpi-fra-vs-nor", matchLabel: "France vs Norway", pickLabel: "France", odds: 1.42, kickoff: "Jul 1 · 18:00" },
-  { marketId: "wc26-grpj-arg-vs-aut", matchLabel: "Argentina vs Austria", pickLabel: "Argentina", odds: 1.30, kickoff: "Jul 1 · 21:00" },
+export const COMBO_STAKE_MIN = 1;
+export const COMBO_STAKE_MAX = 10;
+export const COMBO_STAKE_STEP = 0.1;
+
+export const COMBO_QUOTE_TTL_SEC = 60;
+export const COMBO_REQUOTE_PROBABILITY = 0.3;
+export const COMBO_REQUOTE_DRIFT_RANGE: [number, number] = [0.05, 0.15];
+
+export type WCStage = "GROUP" | "R32" | "R16" | "QF" | "SF" | "FINAL";
+export type MatchComboStatus = "AVAILABLE" | "MATCH_CUTOFF_REACHED" | "IN_PLAY";
+export type OutcomeSide = "HOME" | "DRAW" | "AWAY";
+export type WCMarketType = "MONEYLINE" | "SPREAD" | "TOTAL";
+
+export interface WCOutcome {
+  outcomeId: string;
+  label: string;
+  side: OutcomeSide;
+  /** 0..1 implied probability — drives display % and combo odds (1/p). */
+  probability: number;
+  selectable: boolean;
+  disabledReason?: string;
+}
+
+export interface WCMarket {
+  marketType: WCMarketType;
+  combo_eligible: boolean;
+  displayOnly?: boolean;
+  /** Plain English summary, used for display-only SPREAD/TOTAL chips. */
+  summary?: string;
+  outcomes?: WCOutcome[];
+}
+
+export interface WCMatch {
+  matchId: string;
+  stage: WCStage;
+  matchday: string; // YYYY-MM-DD
+  home: string;
+  away: string;
+  homeCode: string;
+  awayCode: string;
+  /** Kickoff label e.g. "Jun 15 · 20:00 ET". */
+  kickoff: string;
+  matchStartTimeMs: number;
+  matchComboStatus: MatchComboStatus;
+  markets: WCMarket[];
+}
+
+function ml(
+  home: { code: string; name: string; p: number },
+  draw: number,
+  away: { code: string; name: string; p: number },
+): WCMarket {
+  return {
+    marketType: "MONEYLINE",
+    combo_eligible: true,
+    outcomes: [
+      { outcomeId: `${home.code}_WIN`, label: `${home.name} Win`, side: "HOME", probability: home.p, selectable: true },
+      { outcomeId: "DRAW", label: "Draw", side: "DRAW", probability: draw, selectable: true },
+      { outcomeId: `${away.code}_WIN`, label: `${away.name} Win`, side: "AWAY", probability: away.p, selectable: true },
+    ],
+  };
+}
+
+function total(line: number, over: number): WCMarket {
+  return {
+    marketType: "TOTAL",
+    combo_eligible: false,
+    displayOnly: true,
+    summary: `O/U ${line.toFixed(1)} · Over ${(over * 100).toFixed(0)}%`,
+  };
+}
+
+function spread(team: string, line: number): WCMarket {
+  return {
+    marketType: "SPREAD",
+    combo_eligible: false,
+    displayOnly: true,
+    summary: `${team} ${line > 0 ? "+" : ""}${line.toFixed(1)}`,
+  };
+}
+
+/** Fixture: ~20 World Cup 2026 matches across stages, with cut-off + display-only mix. */
+export const WC_COMBO_MATCHES: WCMatch[] = [
+  // Matchday 1 — Group, today
+  {
+    matchId: "WC26_GRPA_ARG_MEX", stage: "GROUP", matchday: "2026-06-15",
+    home: "Argentina", away: "Mexico", homeCode: "ARG", awayCode: "MEX",
+    kickoff: "Jun 15 · 20:00 ET", matchStartTimeMs: Date.UTC(2026, 5, 16, 0, 0),
+    matchComboStatus: "AVAILABLE",
+    markets: [
+      ml({ code: "ARG", name: "Argentina", p: 0.52 }, 0.27, { code: "MEX", name: "Mexico", p: 0.21 }),
+      total(2.5, 0.55), spread("Argentina", -1.0),
+    ],
+  },
+  {
+    matchId: "WC26_GRPB_BRA_JPN", stage: "GROUP", matchday: "2026-06-15",
+    home: "Brazil", away: "Japan", homeCode: "BRA", awayCode: "JPN",
+    kickoff: "Jun 15 · 23:00 ET", matchStartTimeMs: Date.UTC(2026, 5, 16, 3, 0),
+    matchComboStatus: "AVAILABLE",
+    markets: [
+      ml({ code: "BRA", name: "Brazil", p: 0.62 }, 0.22, { code: "JPN", name: "Japan", p: 0.16 }),
+      total(2.5, 0.58),
+    ],
+  },
+  {
+    matchId: "WC26_GRPC_FRA_NOR", stage: "GROUP", matchday: "2026-06-15",
+    home: "France", away: "Norway", homeCode: "FRA", awayCode: "NOR",
+    kickoff: "Jun 15 · 17:00 ET", matchStartTimeMs: Date.UTC(2026, 5, 15, 21, 0),
+    // Already kicked off — locked from combo selection.
+    matchComboStatus: "MATCH_CUTOFF_REACHED",
+    markets: [
+      ml({ code: "FRA", name: "France", p: 0.58 }, 0.24, { code: "NOR", name: "Norway", p: 0.18 }),
+    ],
+  },
+  // Matchday 2 — tomorrow
+  {
+    matchId: "WC26_GRPD_ESP_USA", stage: "GROUP", matchday: "2026-06-16",
+    home: "Spain", away: "USA", homeCode: "ESP", awayCode: "USA",
+    kickoff: "Jun 16 · 20:00 ET", matchStartTimeMs: Date.UTC(2026, 5, 17, 0, 0),
+    matchComboStatus: "AVAILABLE",
+    markets: [
+      ml({ code: "ESP", name: "Spain", p: 0.55 }, 0.26, { code: "USA", name: "USA", p: 0.19 }),
+      total(2.5, 0.51), spread("Spain", -0.5),
+    ],
+  },
+  {
+    matchId: "WC26_GRPE_GER_CAN", stage: "GROUP", matchday: "2026-06-16",
+    home: "Germany", away: "Canada", homeCode: "GER", awayCode: "CAN",
+    kickoff: "Jun 16 · 17:00 ET", matchStartTimeMs: Date.UTC(2026, 5, 16, 21, 0),
+    matchComboStatus: "AVAILABLE",
+    markets: [
+      ml({ code: "GER", name: "Germany", p: 0.61 }, 0.23, { code: "CAN", name: "Canada", p: 0.16 }),
+    ],
+  },
+  {
+    matchId: "WC26_GRPF_POR_GHA", stage: "GROUP", matchday: "2026-06-16",
+    home: "Portugal", away: "Ghana", homeCode: "POR", awayCode: "GHA",
+    kickoff: "Jun 16 · 23:00 ET", matchStartTimeMs: Date.UTC(2026, 5, 17, 3, 0),
+    matchComboStatus: "AVAILABLE",
+    markets: [
+      ml({ code: "POR", name: "Portugal", p: 0.57 }, 0.24, { code: "GHA", name: "Ghana", p: 0.19 }),
+      total(2.5, 0.56),
+    ],
+  },
+  // Matchday 3
+  {
+    matchId: "WC26_GRPG_NED_KOR", stage: "GROUP", matchday: "2026-06-17",
+    home: "Netherlands", away: "South Korea", homeCode: "NED", awayCode: "KOR",
+    kickoff: "Jun 17 · 20:00 ET", matchStartTimeMs: Date.UTC(2026, 5, 18, 0, 0),
+    matchComboStatus: "AVAILABLE",
+    markets: [
+      ml({ code: "NED", name: "Netherlands", p: 0.54 }, 0.27, { code: "KOR", name: "South Korea", p: 0.19 }),
+    ],
+  },
+  {
+    matchId: "WC26_GRPH_BEL_EGY", stage: "GROUP", matchday: "2026-06-17",
+    home: "Belgium", away: "Egypt", homeCode: "BEL", awayCode: "EGY",
+    kickoff: "Jun 17 · 17:00 ET", matchStartTimeMs: Date.UTC(2026, 5, 17, 21, 0),
+    matchComboStatus: "AVAILABLE",
+    markets: [
+      ml({ code: "BEL", name: "Belgium", p: 0.59 }, 0.24, { code: "EGY", name: "Egypt", p: 0.17 }),
+      total(2.5, 0.49),
+    ],
+  },
+  {
+    matchId: "WC26_GRPI_ITA_AUS", stage: "GROUP", matchday: "2026-06-17",
+    home: "Italy", away: "Australia", homeCode: "ITA", awayCode: "AUS",
+    kickoff: "Jun 17 · 23:00 ET", matchStartTimeMs: Date.UTC(2026, 5, 18, 3, 0),
+    matchComboStatus: "AVAILABLE",
+    markets: [
+      ml({ code: "ITA", name: "Italy", p: 0.51 }, 0.28, { code: "AUS", name: "Australia", p: 0.21 }),
+    ],
+  },
+  {
+    matchId: "WC26_GRPJ_ENG_DEN", stage: "GROUP", matchday: "2026-06-18",
+    home: "England", away: "Denmark", homeCode: "ENG", awayCode: "DEN",
+    kickoff: "Jun 18 · 20:00 ET", matchStartTimeMs: Date.UTC(2026, 5, 19, 0, 0),
+    matchComboStatus: "AVAILABLE",
+    markets: [
+      ml({ code: "ENG", name: "England", p: 0.49 }, 0.29, { code: "DEN", name: "Denmark", p: 0.22 }),
+      total(2.5, 0.50), spread("England", -0.5),
+    ],
+  },
+  {
+    matchId: "WC26_GRPK_URU_CRO", stage: "GROUP", matchday: "2026-06-18",
+    home: "Uruguay", away: "Croatia", homeCode: "URU", awayCode: "CRO",
+    kickoff: "Jun 18 · 17:00 ET", matchStartTimeMs: Date.UTC(2026, 5, 18, 21, 0),
+    matchComboStatus: "AVAILABLE",
+    markets: [
+      ml({ code: "URU", name: "Uruguay", p: 0.44 }, 0.30, { code: "CRO", name: "Croatia", p: 0.26 }),
+    ],
+  },
+  {
+    matchId: "WC26_GRPL_MAR_SUI", stage: "GROUP", matchday: "2026-06-18",
+    home: "Morocco", away: "Switzerland", homeCode: "MAR", awayCode: "SUI",
+    kickoff: "Jun 18 · 23:00 ET", matchStartTimeMs: Date.UTC(2026, 5, 19, 3, 0),
+    matchComboStatus: "AVAILABLE",
+    markets: [
+      ml({ code: "MAR", name: "Morocco", p: 0.41 }, 0.30, { code: "SUI", name: "Switzerland", p: 0.29 }),
+    ],
+  },
+  // R16
+  {
+    matchId: "WC26_R16_BRA_POR", stage: "R16", matchday: "2026-06-30",
+    home: "Brazil", away: "Portugal", homeCode: "BRA", awayCode: "POR",
+    kickoff: "Jun 30 · 20:00 ET", matchStartTimeMs: Date.UTC(2026, 6, 1, 0, 0),
+    matchComboStatus: "AVAILABLE",
+    markets: [
+      ml({ code: "BRA", name: "Brazil", p: 0.53 }, 0.27, { code: "POR", name: "Portugal", p: 0.20 }),
+      total(2.5, 0.52),
+    ],
+  },
+  {
+    matchId: "WC26_R16_ARG_NED", stage: "R16", matchday: "2026-06-30",
+    home: "Argentina", away: "Netherlands", homeCode: "ARG", awayCode: "NED",
+    kickoff: "Jun 30 · 17:00 ET", matchStartTimeMs: Date.UTC(2026, 5, 30, 21, 0),
+    matchComboStatus: "AVAILABLE",
+    markets: [
+      ml({ code: "ARG", name: "Argentina", p: 0.48 }, 0.28, { code: "NED", name: "Netherlands", p: 0.24 }),
+    ],
+  },
+  {
+    matchId: "WC26_R16_FRA_BEL", stage: "R16", matchday: "2026-07-01",
+    home: "France", away: "Belgium", homeCode: "FRA", awayCode: "BEL",
+    kickoff: "Jul 1 · 20:00 ET", matchStartTimeMs: Date.UTC(2026, 6, 2, 0, 0),
+    matchComboStatus: "AVAILABLE",
+    markets: [
+      ml({ code: "FRA", name: "France", p: 0.50 }, 0.28, { code: "BEL", name: "Belgium", p: 0.22 }),
+    ],
+  },
+  {
+    matchId: "WC26_R16_ESP_ENG", stage: "R16", matchday: "2026-07-01",
+    home: "Spain", away: "England", homeCode: "ESP", awayCode: "ENG",
+    kickoff: "Jul 1 · 17:00 ET", matchStartTimeMs: Date.UTC(2026, 6, 1, 21, 0),
+    matchComboStatus: "AVAILABLE",
+    markets: [
+      ml({ code: "ESP", name: "Spain", p: 0.46 }, 0.29, { code: "ENG", name: "England", p: 0.25 }),
+    ],
+  },
+  // QF
+  {
+    matchId: "WC26_QF_BRA_FRA", stage: "QF", matchday: "2026-07-09",
+    home: "Brazil", away: "France", homeCode: "BRA", awayCode: "FRA",
+    kickoff: "Jul 9 · 20:00 ET", matchStartTimeMs: Date.UTC(2026, 6, 10, 0, 0),
+    matchComboStatus: "AVAILABLE",
+    markets: [
+      ml({ code: "BRA", name: "Brazil", p: 0.47 }, 0.28, { code: "FRA", name: "France", p: 0.25 }),
+    ],
+  },
+  {
+    matchId: "WC26_QF_ARG_ESP", stage: "QF", matchday: "2026-07-09",
+    home: "Argentina", away: "Spain", homeCode: "ARG", awayCode: "ESP",
+    kickoff: "Jul 9 · 17:00 ET", matchStartTimeMs: Date.UTC(2026, 6, 9, 21, 0),
+    matchComboStatus: "AVAILABLE",
+    markets: [
+      ml({ code: "ARG", name: "Argentina", p: 0.45 }, 0.29, { code: "ESP", name: "Spain", p: 0.26 }),
+    ],
+  },
+  // SF
+  {
+    matchId: "WC26_SF_BRA_ARG", stage: "SF", matchday: "2026-07-15",
+    home: "Brazil", away: "Argentina", homeCode: "BRA", awayCode: "ARG",
+    kickoff: "Jul 15 · 20:00 ET", matchStartTimeMs: Date.UTC(2026, 6, 16, 0, 0),
+    matchComboStatus: "AVAILABLE",
+    markets: [
+      ml({ code: "BRA", name: "Brazil", p: 0.44 }, 0.28, { code: "ARG", name: "Argentina", p: 0.28 }),
+    ],
+  },
+  // Final
+  {
+    matchId: "WC26_FINAL", stage: "FINAL", matchday: "2026-07-19",
+    home: "Brazil", away: "France", homeCode: "BRA", awayCode: "FRA",
+    kickoff: "Jul 19 · 16:00 ET", matchStartTimeMs: Date.UTC(2026, 6, 19, 20, 0),
+    matchComboStatus: "AVAILABLE",
+    markets: [
+      ml({ code: "BRA", name: "Brazil", p: 0.46 }, 0.28, { code: "FRA", name: "France", p: 0.26 }),
+      total(2.5, 0.50),
+    ],
+  },
+];
+
+export const WC_STAGES: { id: WCStage | "ALL"; label: string }[] = [
+  { id: "ALL", label: "All" },
+  { id: "GROUP", label: "Group" },
+  { id: "R16", label: "R16" },
+  { id: "QF", label: "QF" },
+  { id: "SF", label: "SF" },
+  { id: "FINAL", label: "Final" },
 ];
 
 /* ------------------------------------------------------------------ */
