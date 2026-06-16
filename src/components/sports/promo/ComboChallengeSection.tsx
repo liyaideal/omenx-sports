@@ -947,10 +947,8 @@ function TicketAcceptedModal({
 
 function TicketStatusList({
   tickets,
-  onShare,
 }: {
   tickets: SubmittedTicket[];
-  onShare: (t: SubmittedTicket) => void;
 }) {
   if (tickets.length === 0) return null;
   return (
@@ -963,14 +961,14 @@ function TicketStatusList({
       </div>
       <div className="mt-3 space-y-2">
         {tickets.map((t) => (
-          <TicketRow key={t.ticketId} ticket={t} onShare={() => onShare(t)} />
+          <TicketRow key={t.ticketId} ticket={t} />
         ))}
       </div>
     </div>
   );
 }
 
-function TicketRow({ ticket, onShare }: { ticket: SubmittedTicket; onShare: () => void }) {
+function TicketRow({ ticket }: { ticket: SubmittedTicket }) {
   const statusInfo = {
     ACCEPTED: { label: "Waiting for results", tone: "text-amber-400 border-amber-400/40 bg-amber-400/10" },
     SETTLED_WON: { label: "4/4 Correct — Won!", tone: "text-emerald-400 border-emerald-500/40 bg-emerald-500/10" },
