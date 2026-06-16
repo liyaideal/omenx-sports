@@ -237,6 +237,18 @@
 }
 .animate-carnival-spark { animation: carnival-spark 3.2s ease-out infinite; }
 
+@keyframes carnival-scan {
+  0% { transform: translateY(-100%); opacity: 0; }
+  50% { opacity: 0.5; }
+  100% { transform: translateY(500%); opacity: 0; }
+}
+.animate-carnival-scan { animation: carnival-scan 3.2s ease-in-out infinite; }
+
+@utility bg-carnival-led-dots {
+  background-image: radial-gradient(circle, oklch(0.7 0.18 145 / 0.18) 1px, transparent 1.2px);
+  background-size: 6px 6px;
+}
+
 /* Soft pitch stripes used as a watermark behind rules / cards */
 @utility bg-pitch-stripes {
   background-image: repeating-linear-gradient(

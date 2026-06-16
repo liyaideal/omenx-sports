@@ -28,29 +28,44 @@ function useCountdown(targetIso: string) {
 export function CarnivalPromoCard() {
   const left = useCountdown(CARNIVAL_ENDS_AT);
   return (
-    <Link
-      to="/promo/world-cup"
-      search={{ tab: "overview" }}
-      className="group relative block w-full max-w-sm overflow-hidden rounded-2xl border-2 border-[oklch(0.7_0.18_145)]/40 bg-black px-5 py-4 transition-colors hover:border-[oklch(0.7_0.18_145)]"
-    >
-      <div aria-hidden className="absolute inset-0 bg-led-matrix opacity-20" />
+    <div className="relative w-full max-w-sm">
       <div
         aria-hidden
-        className="absolute left-0 top-0 bottom-0 w-0.5"
-        style={{
-          backgroundImage:
-            "linear-gradient(180deg, transparent 0%, oklch(0.7 0.18 145) 50%, transparent 100%)",
-        }}
+        className="pointer-events-none absolute -inset-1 rounded-2xl bg-[oklch(0.7_0.18_145)]/20 blur-xl transition-opacity duration-500 group-hover/carnival:opacity-100"
       />
-      <div className="relative flex items-center gap-4">
-        <img
-          src={trophyAsset.url}
-          alt=""
+      <Link
+        to="/promo/world-cup"
+        search={{ tab: "overview" }}
+        className="group/carnival relative block w-full overflow-hidden rounded-2xl border-2 border-[oklch(0.7_0.18_145)]/40 bg-black px-5 py-4 transition-colors hover:border-[oklch(0.7_0.18_145)]"
+      >
+        <div aria-hidden className="absolute inset-0 bg-carnival-led-dots" />
+        <div
           aria-hidden
-          className="h-12 w-12 shrink-0 object-contain"
-          style={{ filter: "drop-shadow(0 0 10px rgba(242,208,36,0.45))" }}
+          className="pointer-events-none absolute inset-x-0 top-0 h-8 bg-gradient-to-b from-[oklch(0.7_0.18_145)]/40 to-transparent animate-carnival-scan"
         />
-        <div className="min-w-0 flex-1">
+        <div
+          aria-hidden
+          className="absolute left-0 top-0 bottom-0 w-0.5"
+          style={{
+            backgroundImage:
+              "linear-gradient(180deg, transparent 0%, oklch(0.7 0.18 145) 50%, transparent 100%)",
+          }}
+        />
+        <div className="relative flex items-center gap-4">
+          <div className="relative shrink-0">
+            <div
+              aria-hidden
+              className="absolute inset-0 -m-2 rounded-full bg-yellow-400/25 blur-2xl transition-transform duration-500 group-hover/carnival:scale-125"
+            />
+            <img
+              src={trophyAsset.url}
+              alt=""
+              aria-hidden
+              className="relative h-12 w-12 object-contain transition-transform duration-500 group-hover/carnival:scale-110"
+              style={{ filter: "drop-shadow(0 0 12px rgba(242,208,36,0.6))" }}
+            />
+          </div>
+          <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2">
             <span className="relative inline-flex h-1.5 w-1.5">
               <span className="absolute inset-0 animate-ping rounded-full bg-red-500 opacity-75" />
@@ -62,8 +77,8 @@ export function CarnivalPromoCard() {
           </div>
           <div className="mt-1 flex items-baseline gap-1">
             <span
-              className="font-scoreboard text-xl font-black italic tabular-nums text-[oklch(0.7_0.18_145)]"
-              style={{ filter: "drop-shadow(0 0 8px oklch(0.7 0.18 145 / 0.5))" }}
+                className="font-scoreboard text-xl font-black italic tabular-nums text-[oklch(0.7_0.18_145)] animate-pulse"
+                style={{ filter: "drop-shadow(0 0 10px oklch(0.7 0.18 145 / 0.7))" }}
             >
               {CARNIVAL_PRIZE_POOL.toLocaleString()}
             </span>
@@ -72,17 +87,18 @@ export function CarnivalPromoCard() {
               prize pool
             </span>
           </div>
-          <div
-            className="mt-0.5 font-scoreboard text-[10px] font-bold uppercase tracking-[0.2em] text-zinc-500"
-            suppressHydrationWarning
-          >
-            Ends in {left ?? "——"}
+            <div
+              className="mt-1 inline-flex items-center gap-1 rounded-md border border-white/10 bg-white/5 px-1.5 py-0.5 font-scoreboard text-[10px] font-bold uppercase tracking-[0.2em] text-zinc-400"
+              suppressHydrationWarning
+            >
+              Ends in {left ?? "——"}
+            </div>
           </div>
+          <span className="grid h-9 w-9 shrink-0 place-items-center rounded border border-[oklch(0.7_0.18_145)]/50 bg-[oklch(0.7_0.18_145)]/10 text-[oklch(0.7_0.18_145)] transition-all group-hover/carnival:translate-x-1 group-hover/carnival:bg-[oklch(0.7_0.18_145)] group-hover/carnival:text-black">
+            <ArrowRight className="h-4 w-4" />
+          </span>
         </div>
-        <span className="grid h-9 w-9 shrink-0 place-items-center rounded border border-[oklch(0.7_0.18_145)]/50 bg-[oklch(0.7_0.18_145)]/10 text-[oklch(0.7_0.18_145)] transition-colors group-hover:bg-[oklch(0.7_0.18_145)] group-hover:text-black">
-          <ArrowRight className="h-4 w-4" />
-        </span>
-      </div>
-    </Link>
+      </Link>
+    </div>
   );
 }
