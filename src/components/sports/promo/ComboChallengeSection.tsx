@@ -883,7 +883,7 @@ function TicketAcceptedModal({
             COMBO SUBMITTED
           </div>
           <p className="mt-1 font-pitch text-sm font-semibold text-zinc-300">
-            Ticket <span className="text-white">{ticket?.ticketId}</span>
+            Ticket <span className="text-white">{ticket ? formatTicketCode(ticket.ticketId) : ""}</span>
           </p>
         </div>
         {ticket && (
@@ -976,7 +976,7 @@ function TicketRow({ ticket, onShare }: { ticket: SubmittedTicket; onShare: () =
             {statusInfo.label}
           </span>
           <span className="font-scoreboard text-[10px] font-bold tracking-widest text-zinc-500">
-            {ticket.ticketId}
+            {formatTicketCode(ticket.ticketId)} · {formatRelativeTime(ticket.acceptedAtMs)}
           </span>
         </div>
         <div className="flex items-center gap-3">
