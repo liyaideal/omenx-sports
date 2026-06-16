@@ -1165,7 +1165,7 @@ export function ShareCardPreview({ ticket }: { ticket: SubmittedTicket }) {
   const referralCode = "ABCD2026";
 
   return (
-    <div className="mx-auto w-full" style={{ aspectRatio: "1080 / 1350" }}>
+    <div className="mx-auto w-full" style={{ aspectRatio: "1080 / 1400" }}>
       <div
         className="relative h-full w-full overflow-hidden"
         style={{
@@ -1379,11 +1379,8 @@ export function ShareCardPreview({ ticket }: { ticket: SubmittedTicket }) {
             </PosterTicketFrame>
           </div>
 
-          {/* spacer */}
-          <div className="flex-1" />
-
           {/* === Bottom SHARE & INVITE ticket === */}
-          <div className="mt-[4%]">
+          <div className="mt-auto pt-[4%]">
             <PosterTicketFrame>
               <div className="flex items-stretch gap-[3%] px-[3%] py-[3%]">
                 {/* left: referral */}
