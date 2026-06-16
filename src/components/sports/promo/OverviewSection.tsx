@@ -8,7 +8,7 @@ import { ScoreboardTicker } from "./ScoreboardTicker";
 import { ConfettiLayer } from "./ConfettiLayer";
 import welcomeAsset from "@/assets/carnival/card-welcome.jpg.asset.json";
 import comboAsset from "@/assets/carnival/card-combo.jpg.asset.json";
-import luckyboxAsset from "@/assets/carnival/card-luckybox.jpg.asset.json";
+import luckyboxAsset from "@/assets/carnival/card-luckybox-v2.jpg.asset.json";
 
 interface SeriesEntry {
   tab: CarnivalTab;
