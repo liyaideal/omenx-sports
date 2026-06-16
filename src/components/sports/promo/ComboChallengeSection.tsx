@@ -282,6 +282,26 @@ function formatMatchdayLabel(d: string): string {
   return date.toLocaleDateString("en-US", { month: "short", day: "numeric", timeZone: "UTC" });
 }
 
+/** Render an internal ticket id (e.g. "t_demo_won", "t_7_abc12") as a friendly
+ *  short code shown to the user, e.g. "#DEMOWON" → trimmed to last 6 chars. */
+function formatTicketCode(id: string): string {
+  const tail = id.replace(/^t_/, "").replace(/[^a-zA-Z0-9]/g, "");
+  const short = tail.slice(-6).toUpperCase() || "TICKET";
+  return `#${short}`;
+}
+
+function formatRelativeTime(ms: number): string {
+  const diff = Date.now() - ms;
+  const s = Math.max(1, Math.round(diff / 1000));
+  if (s < 60) return `${s}s ago`;
+  const m = Math.round(s / 60);
+  if (m < 60) return `${m}m ago`;
+  const h = Math.round(m / 60);
+  if (h < 48) return `${h}h ago`;
+  const d = Math.round(h / 24);
+  return `${d}d ago`;
+}
+
 /* ============================================================ */
 /* MatchSelector + MatchCard                                     */
 /* ============================================================ */
