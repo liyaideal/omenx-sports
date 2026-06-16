@@ -28,7 +28,7 @@ export function CarnivalFlagsMarquee({
     >
       <div
         className={
-          "flex w-max items-center gap-2 " +
+          "flex w-max items-center " +
           (reverse ? "animate-flag-marquee-reverse" : "animate-flag-marquee")
         }
         style={{ willChange: "transform" }}
@@ -39,7 +39,7 @@ export function CarnivalFlagsMarquee({
             src={`https://flagcdn.com/w40/${code}.png`}
             alt=""
             className="block shrink-0 rounded-[2px]"
-            style={{ height, width: "auto" }}
+            style={{ height, width: "auto", marginRight: 8 }}
             loading="lazy"
           />
         ))}
