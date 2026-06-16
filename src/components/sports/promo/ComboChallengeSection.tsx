@@ -1380,7 +1380,7 @@ export function ShareCardPreview({ ticket }: { ticket: SubmittedTicket }) {
           </div>
 
           {/* === Bottom SHARE & INVITE ticket === */}
-          <div className="mt-auto pt-[2%]">
+          <div className="mt-[3%] pt-[2%]">
             <PosterTicketFrame>
               <div className="flex items-stretch gap-[3%] px-[3%] py-[2%]">
                 {/* left: referral */}
