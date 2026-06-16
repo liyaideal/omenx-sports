@@ -82,7 +82,7 @@ function CarnivalContent({ tab }: { tab: CarnivalTab }) {
       <div aria-hidden className="pointer-events-none absolute inset-x-0 bottom-0 h-72 bg-stadium-glow rotate-180" />
 
       <div className="relative space-y-6">
-        <ScoreboardHero compact={tab !== "overview"} />
+        <ScoreboardHero />
 
         <CarnivalTabs current={tab} />
 
