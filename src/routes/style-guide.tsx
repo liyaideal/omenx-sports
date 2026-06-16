@@ -60,6 +60,7 @@ import { ShareCardPreview } from "@/components/sports/promo/ComboChallengeSectio
 import { getRelatedMarkets } from "@/components/sports/event/related-markets";
 import { MATCH_MARKETS, FEATURED_MATCH } from "@/data/sports-markets";
 import { MobileTopBar } from "@/components/sports/mobile/MobileTopBar";
+import omenxLogo from "@/assets/omenx-logo.svg";
 import { MobileBottomNav } from "@/components/sports/mobile/MobileBottomNav";
 import { MobileLiveHero } from "@/components/sports/mobile/MobileLiveHero";
 import { MeSheet } from "@/components/sports/mobile/MeSheet";
@@ -305,6 +306,22 @@ function StyleGuide() {
         <main>
           {/* BRAND */}
           <Section id="brand" title="Stadium Neon" kicker="01 — Brand & Tone">
+            <div className="mb-6 rounded-3xl border border-border bg-surface p-8 shadow-card">
+              <div className="text-[11px] font-mono uppercase tracking-[0.3em] text-muted-foreground">Official wordmark</div>
+              <div className="mt-4 grid gap-4 md:grid-cols-2">
+                <div className="grid place-items-center rounded-2xl bg-[#050505] p-8">
+                  <img src={omenxLogo} alt="OMENX" className="h-10 w-auto" />
+                </div>
+                <div className="grid place-items-center rounded-2xl border border-border bg-white p-8">
+                  <img src={omenxLogo} alt="OMENX" className="h-10 w-auto" style={{ filter: "invert(1)" }} />
+                </div>
+              </div>
+              <p className="mt-4 text-xs text-muted-foreground leading-relaxed">
+                Always import <code className="font-mono text-foreground">@/assets/omenx-logo.svg</code> wherever the OMENX wordmark appears
+                (top bars, share posters, promo headers, OG cards). Never re-type "OMENX" in Audiowide / Orbitron / any display font —
+                that's not the brand mark.
+              </p>
+            </div>
             <div className="relative overflow-hidden rounded-3xl border border-border bg-surface p-10 shadow-card bg-ambient">
               <div className="max-w-xl">
                 <div className="text-[11px] font-mono uppercase tracking-[0.3em] text-neon">design system</div>
