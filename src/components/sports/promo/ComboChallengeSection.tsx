@@ -7,7 +7,6 @@ import {
   Plus,
   RefreshCw,
   Search,
-  Share2,
   Sparkles,
   Ticket,
   Trophy,
@@ -36,6 +35,7 @@ import {
   type SelectedLeg,
   type SubmittedTicket,
 } from "./combo/useComboState";
+import { ShareTrigger, shareCombo } from "@/components/sports/share";
 
 /* ============================================================
  * Top-level composition. Mirrors PRD §1.2:
@@ -51,7 +51,6 @@ export function ComboChallengeSection() {
   const [query, setQuery] = useState("");
   const [onlyAvailable, setOnlyAvailable] = useState(false);
   const [confirmOpen, setConfirmOpen] = useState(false);
-  const [shareTicket, setShareTicket] = useState<SubmittedTicket | null>(null);
 
   const matchdays = useMemo(() => {
     const set = new Set<string>();
@@ -72,10 +71,6 @@ export function ComboChallengeSection() {
       return true;
     });
   }, [stage, matchday, query, onlyAvailable]);
-
-  function openShare(t: SubmittedTicket) {
-    setShareTicket(t);
-  }
 
   return (
     <div className="flex flex-col gap-6">
@@ -106,7 +101,7 @@ export function ComboChallengeSection() {
         </aside>
       </div>
 
-      <TicketStatusList tickets={ctrl.tickets} onShare={openShare} />
+      <TicketStatusList tickets={ctrl.tickets} />
 
       {/* Mobile sticky bottom bar */}
       <MobileStickyBar ctrl={ctrl} onCalculate={ctrl.requestPreview} onConfirm={() => setConfirmOpen(true)} />
@@ -133,10 +128,8 @@ export function ComboChallengeSection() {
         open={ctrl.pageState === "TICKET_ACCEPTED" && !!ctrl.lastAccepted}
         ticket={ctrl.lastAccepted}
         capReached={ctrl.participationCapReached}
-        onShare={() => ctrl.lastAccepted && openShare(ctrl.lastAccepted)}
         onAnother={ctrl.startNewCombo}
       />
-      <ShareCardModal ticket={shareTicket} onClose={() => setShareTicket(null)} />
     </div>
   );
 }
@@ -884,13 +877,11 @@ function TicketAcceptedModal({
   open,
   ticket,
   capReached,
-  onShare,
   onAnother,
 }: {
   open: boolean;
   ticket: SubmittedTicket | null;
   capReached: boolean;
-  onShare: () => void;
   onAnother: () => void;
 }) {
   return (
@@ -923,13 +914,14 @@ function TicketAcceptedModal({
           </div>
         )}
         <div className="space-y-2 border-t border-zinc-800 p-4">
-          <button
-            type="button"
-            onClick={onShare}
-            className="inline-flex w-full items-center justify-center gap-2 border-2 border-amber-400 bg-amber-400 py-2 font-pitch text-xs font-bold uppercase tracking-widest text-black hover:brightness-110"
-          >
-            <Share2 className="h-3.5 w-3.5" /> Share my combo
-          </button>
+          {ticket && (
+            <ShareTrigger
+              target={shareCombo({ ticket, poster: <ShareCardPreview ticket={ticket} /> })}
+              variant="wide"
+              label="Share my combo"
+              className="border-2 border-amber-400 bg-amber-400/10"
+            />
+          )}
           {capReached ? (
             <p className="text-center font-pitch text-[10px] font-semibold uppercase tracking-widest text-zinc-500">
               You have used all available combo entries for this matchday.
@@ -955,10 +947,8 @@ function TicketAcceptedModal({
 
 function TicketStatusList({
   tickets,
-  onShare,
 }: {
   tickets: SubmittedTicket[];
-  onShare: (t: SubmittedTicket) => void;
 }) {
   if (tickets.length === 0) return null;
   return (
@@ -971,14 +961,14 @@ function TicketStatusList({
       </div>
       <div className="mt-3 space-y-2">
         {tickets.map((t) => (
-          <TicketRow key={t.ticketId} ticket={t} onShare={() => onShare(t)} />
+          <TicketRow key={t.ticketId} ticket={t} />
         ))}
       </div>
     </div>
   );
 }
 
-function TicketRow({ ticket, onShare }: { ticket: SubmittedTicket; onShare: () => void }) {
+function TicketRow({ ticket }: { ticket: SubmittedTicket }) {
   const statusInfo = {
     ACCEPTED: { label: "Waiting for results", tone: "text-amber-400 border-amber-400/40 bg-amber-400/10" },
     SETTLED_WON: { label: "4/4 Correct — Won!", tone: "text-emerald-400 border-emerald-500/40 bg-emerald-500/10" },
@@ -1008,13 +998,10 @@ function TicketRow({ ticket, onShare }: { ticket: SubmittedTicket; onShare: () =
               pays {ticket.grossPayoutU.toFixed(0)} U
             </div>
           </div>
-          <button
-            type="button"
-            onClick={onShare}
-            className="inline-flex items-center gap-1 border border-zinc-700 bg-zinc-900 px-2 py-1 font-pitch text-[10px] font-bold uppercase tracking-widest text-zinc-300 hover:border-amber-400 hover:text-amber-400"
-          >
-            <Share2 className="h-3 w-3" /> Share
-          </button>
+          <ShareTrigger
+            target={shareCombo({ ticket, poster: <ShareCardPreview ticket={ticket} /> })}
+            variant="chip"
+          />
         </div>
       </div>
       <div className="mt-2 flex flex-wrap gap-1">
@@ -1081,61 +1068,6 @@ function MobileStickyBar({
         </button>
       </div>
     </div>
-  );
-}
-
-/* ============================================================ */
-/* ShareCardModal — 1080×1350 preview, scaled to viewport         */
-/* ============================================================ */
-
-function ShareCardModal({
-  ticket,
-  onClose,
-}: {
-  ticket: SubmittedTicket | null;
-  onClose: () => void;
-}) {
-  return (
-    <Dialog open={!!ticket} onOpenChange={(v) => !v && onClose()}>
-      <DialogContent className="max-w-md border-2 border-amber-400/60 bg-[#0a0a0a] p-4">
-        <DialogTitle className="sr-only">Share combo card preview</DialogTitle>
-        <div className="mb-3 flex items-center justify-between">
-          <div className="font-scoreboard text-[10px] font-bold tracking-[0.25em] text-amber-400">
-            SHARE CARD · 1080 × 1350
-          </div>
-          <span className="font-pitch text-[9px] font-semibold uppercase tracking-widest text-zinc-500">
-            Preview only
-          </span>
-        </div>
-        {ticket && <ShareCardPreview ticket={ticket} />}
-        <div className="mt-3 grid grid-cols-3 gap-1.5">
-          <button
-            type="button"
-            disabled
-            className="border border-zinc-800 bg-zinc-900 py-1.5 font-pitch text-[10px] font-bold uppercase tracking-widest text-zinc-500"
-          >
-            Download
-          </button>
-          <button
-            type="button"
-            disabled
-            className="border border-zinc-800 bg-zinc-900 py-1.5 font-pitch text-[10px] font-bold uppercase tracking-widest text-zinc-500"
-          >
-            Native share
-          </button>
-          <button
-            type="button"
-            disabled
-            className="border border-zinc-800 bg-zinc-900 py-1.5 font-pitch text-[10px] font-bold uppercase tracking-widest text-zinc-500"
-          >
-            Copy link
-          </button>
-        </div>
-        <p className="mt-2 font-pitch text-[10px] font-semibold uppercase tracking-widest text-zinc-600">
-          Download / native share / copy link land in Phase 1 ship — preview only for now.
-        </p>
-      </DialogContent>
-    </Dialog>
   );
 }
 

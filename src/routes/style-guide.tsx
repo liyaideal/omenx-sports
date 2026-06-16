@@ -47,6 +47,16 @@ import { LiveTape } from "@/components/sports/event/LiveTape";
 import { DepthBar } from "@/components/sports/event/DepthBar";
 import { PreMatchStrip } from "@/components/sports/event/PreMatchStrip";
 import { ShareButton } from "@/components/sports/event/ShareButton";
+import {
+  ShareTrigger,
+  shareEvent,
+  shareLeague,
+  sharePlayer,
+  shareCombo,
+  shareLuckyBox,
+  sharePromo,
+} from "@/components/sports/share";
+import { ShareCardPreview } from "@/components/sports/promo/ComboChallengeSection";
 import { getRelatedMarkets } from "@/components/sports/event/related-markets";
 import { MATCH_MARKETS, FEATURED_MATCH } from "@/data/sports-markets";
 import { MobileTopBar } from "@/components/sports/mobile/MobileTopBar";
@@ -2202,6 +2212,26 @@ function StyleGuide() {
             </div>
           </Section>
 
+          <Section id="share" title="Share dialog" kicker="25b — global share system">
+            <p className="mb-6 max-w-3xl text-sm text-muted-foreground">
+              One global share surface for every shareable object on the site (events, leagues, players, combo tickets,
+              lucky-box prizes, promos). Desktop renders a centred <code className="font-mono text-foreground">Dialog</code>,
+              mobile slides up a <code className="font-mono text-foreground">Sheet</code>. Triggers come in four variants
+              — drop them anywhere and they all open the same dialog through the <code className="font-mono text-foreground">useShare()</code> provider.
+            </p>
+            <ShareDemo />
+            <div className="mt-6 rounded-2xl border border-dashed border-white/15 bg-white/[0.02] p-5 text-xs">
+              <div className="mb-2 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">Rules</div>
+              <ul className="space-y-1.5 text-muted-foreground">
+                <li>• Wrap the app in <code className="font-mono text-foreground">&lt;ShareProvider&gt;</code> once (root layout). All triggers go through it.</li>
+                <li>• Imperative API: <code className="font-mono text-foreground">const &#123; share &#125; = useShare(); share(shareEvent(...))</code>.</li>
+                <li>• Declarative API: <code className="font-mono text-foreground">&lt;ShareTrigger target=&#123;shareCombo(&#123; ticket &#125;)&#125; variant="chip" /&gt;</code>.</li>
+                <li>• Channels: Copy link, Post on X, system Native share (mobile only), Download poster (only when the target ships one).</li>
+                <li>• Poster slot — pass any JSX in the target's <code className="font-mono text-foreground">poster</code> field; the combo flow reuses <code className="font-mono text-foreground">ShareCardPreview</code>. Artwork is owned per target, not by the dialog.</li>
+              </ul>
+            </div>
+          </Section>
+
           <Section id="production-inventory" title="Production Inventory" kicker="26 — playground ↔ product sync">
             <p className="mb-6 max-w-3xl text-sm text-muted-foreground">
               Components below are shipping in real routes but don't yet have a self-contained demo on this page.
@@ -2728,5 +2758,91 @@ function QuestionHeaderDemo({ market }: { market: SportsMarket }) {
       </div>
       <div className="pointer-events-none absolute bottom-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-primary/30 to-transparent" />
     </header>
+  );
+}
+
+/**
+ * Showcase for the global Share system. Renders every ShareTrigger variant
+ * plus one open-dialog button per target kind so the dialog states are all
+ * reachable from the playground.
+ */
+function ShareDemo() {
+  const sampleTicket = {
+    ticketId: "t_demo_share",
+    status: "SETTLED_WON" as const,
+    acceptedAtMs: Date.now() - 3_600_000,
+    stakeU: 10,
+    lockedActivityOdds: 14.2,
+    grossPayoutU: 142,
+    wonLegCount: 4,
+    legs: [
+      { matchId: "m1", outcomeId: "o1", outcomeSide: "HOME" as const, teamLabel: "Argentina Win", matchLabel: "Argentina vs Mexico", kickoff: "", probability: 0.55, displayProbability: "55%" },
+      { matchId: "m2", outcomeId: "o2", outcomeSide: "HOME" as const, teamLabel: "Brazil Win", matchLabel: "Brazil vs Japan", kickoff: "", probability: 0.6, displayProbability: "60%" },
+      { matchId: "m3", outcomeId: "o3", outcomeSide: "HOME" as const, teamLabel: "Spain Win", matchLabel: "Spain vs USA", kickoff: "", probability: 0.58, displayProbability: "58%" },
+      { matchId: "m4", outcomeId: "o4", outcomeSide: "HOME" as const, teamLabel: "Germany Win", matchLabel: "Germany vs Canada", kickoff: "", probability: 0.62, displayProbability: "62%" },
+    ],
+  };
+
+  const eventTarget = shareEvent({
+    id: "wc26-final",
+    title: "Will Brazil lift the World Cup?",
+    subtitle: "World Cup 2026 · Outright",
+    outcomeId: "yes",
+  });
+  const leagueTarget = shareLeague({
+    slug: "world-cup-2026",
+    title: "World Cup 2026",
+    subtitle: "48 teams · 104 matches",
+  });
+  const playerTarget = sharePlayer({
+    id: "messi",
+    title: "Lionel Messi",
+    subtitle: "Player props · World Cup 2026",
+  });
+  const comboTarget = shareCombo({
+    ticket: sampleTicket,
+    poster: <ShareCardPreview ticket={sampleTicket} />,
+  });
+  const luckyTarget = shareLuckyBox({
+    prizeId: "signed-jersey",
+    title: "Signed Argentina jersey",
+    subtitle: "Trophy Vault drop · Phase 2",
+  });
+  const promoTarget = sharePromo({
+    slug: "world-cup",
+    title: "World Cup Carnival",
+    subtitle: "3,000,000 U prize pool",
+  });
+
+  return (
+    <div className="space-y-6">
+      <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-5">
+        <div className="mb-3 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+          Trigger variants
+        </div>
+        <div className="flex flex-wrap items-center gap-3">
+          <ShareTrigger target={eventTarget} variant="icon" />
+          <ShareTrigger target={eventTarget} variant="chip" />
+          <ShareTrigger target={eventTarget} variant="ghost" />
+          <div className="w-full max-w-xs">
+            <ShareTrigger target={eventTarget} variant="wide" label="Share match snapshot" />
+          </div>
+        </div>
+      </div>
+
+      <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-5">
+        <div className="mb-3 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+          Target kinds
+        </div>
+        <div className="flex flex-wrap gap-2">
+          <ShareTrigger target={eventTarget} variant="chip" label="Event" />
+          <ShareTrigger target={leagueTarget} variant="chip" label="League" />
+          <ShareTrigger target={playerTarget} variant="chip" label="Player" />
+          <ShareTrigger target={comboTarget} variant="chip" label="Combo ticket" />
+          <ShareTrigger target={luckyTarget} variant="chip" label="Lucky box" />
+          <ShareTrigger target={promoTarget} variant="chip" label="Promo" />
+        </div>
+      </div>
+    </div>
   );
 }
