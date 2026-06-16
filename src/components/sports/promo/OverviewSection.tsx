@@ -1,6 +1,5 @@
 import { Link } from "@tanstack/react-router";
 import {
-  USER_CARNIVAL_STATE,
   CARNIVAL_TABS,
   type CarnivalTab,
 } from "@/data/world-cup-carnival";
@@ -59,10 +58,6 @@ export function OverviewSection() {
         {SERIES.map((s) => (
           <SeriesCard key={s.tab} entry={s} />
         ))}
-      </div>
-
-      <div className="relative z-10">
-        <FanStatusPanel />
       </div>
 
       <div className="relative z-10">
