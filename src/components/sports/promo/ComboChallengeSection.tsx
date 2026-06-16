@@ -1083,7 +1083,7 @@ function MobileStickyBar({
  * (#F2D024) headline + reward, "OMENX" wordmark on top,
  * 10U → 500U hero, 4 picks with flag circles, STAKE/ODDS/REWARD
  * row, SHARE & INVITE referral ticket with QR placeholder.
- * Render surface is 1080×1700 (≈9:14); rendered via aspect-ratio
+ * Render surface is 1080×1350 (4:5); rendered via aspect-ratio
  * so it scales to any container width.
  * ============================================================ */
 
@@ -1165,7 +1165,7 @@ export function ShareCardPreview({ ticket }: { ticket: SubmittedTicket }) {
   const referralCode = "ABCD2026";
 
   return (
-    <div className="mx-auto w-full" style={{ aspectRatio: "1080 / 1400" }}>
+    <div className="mx-auto w-full" style={{ aspectRatio: "4 / 5" }}>
       <div
         className="relative h-full w-full overflow-hidden"
         style={{
@@ -1189,20 +1189,20 @@ export function ShareCardPreview({ ticket }: { ticket: SubmittedTicket }) {
           style={{ border: `1px solid ${POSTER_NEON}33` }}
         />
 
-        <div className="relative flex h-full flex-col px-[6%] pt-[5%] pb-[4%]">
+        <div className="relative flex h-full flex-col px-[6%] pb-[3%] pt-[3.5%]" style={{ containerType: "inline-size" }}>
           {/* === OMENX wordmark (official logo) === */}
           <img
             src={omenxLogo}
             alt="OMENX"
             className="mx-auto block w-auto"
-            style={{ height: "11cqw" }}
+            style={{ height: "7.4cqw" }}
           />
 
           {/* trophy badge */}
-          <div className="mt-[3%] flex flex-col items-center gap-1">
+          <div className="mt-[1.5%] flex flex-col items-center gap-0.5">
             <div className="relative" style={{ padding: 6 }}>
               <Trophy
-                style={{ color: POSTER_GOLD, width: "8cqw", height: "8cqw" }}
+                style={{ color: POSTER_GOLD, width: "4.7cqw", height: "4.7cqw" }}
                 strokeWidth={2}
               />
               <span aria-hidden className="absolute" style={{ top: 0, left: 0, width: 10, height: 10, borderTop: `2px solid ${POSTER_GOLD}`, borderLeft: `2px solid ${POSTER_GOLD}` }} />
@@ -1211,7 +1211,7 @@ export function ShareCardPreview({ ticket }: { ticket: SubmittedTicket }) {
               <span aria-hidden className="absolute" style={{ bottom: 0, right: 0, width: 10, height: 10, borderBottom: `2px solid ${POSTER_GOLD}`, borderRight: `2px solid ${POSTER_GOLD}` }} />
             </div>
             <div
-              className="font-poster text-[2.2cqw] font-bold uppercase"
+              className="font-poster text-[1.65cqw] font-bold uppercase"
               style={{ color: POSTER_GOLD, letterSpacing: "0.25em" }}
             >
               World Cup 4-Leg Combo
@@ -1220,8 +1220,8 @@ export function ShareCardPreview({ ticket }: { ticket: SubmittedTicket }) {
 
           {/* === Hero stake → reward === */}
           <div
-            className="mt-[3%] flex items-center justify-center gap-[2%] font-poster font-bold leading-none"
-            style={{ fontSize: "14cqw" }}
+            className="mt-[1.5%] flex items-center justify-center gap-[2%] font-poster font-bold leading-none"
+            style={{ fontSize: "9.4cqw" }}
           >
             <span className="text-white">{stakeStr}</span>
             <span style={{ color: POSTER_GOLD }}>→</span>
@@ -1230,7 +1230,7 @@ export function ShareCardPreview({ ticket }: { ticket: SubmittedTicket }) {
 
           {/* subtitle */}
           <div
-            className="mt-[2%] text-center font-poster text-[3cqw] font-bold uppercase"
+            className="mt-[0.8%] text-center font-poster text-[2.25cqw] font-bold uppercase"
             style={{ color: POSTER_NEON, letterSpacing: "0.18em" }}
           >
             <span style={{ color: POSTER_GOLD }}>4</span> Picks. Hit All{" "}
@@ -1238,21 +1238,21 @@ export function ShareCardPreview({ ticket }: { ticket: SubmittedTicket }) {
           </div>
 
           {/* === Main ticket === */}
-          <div className="mt-[4%]">
+          <div className="mt-[1.6%]">
             <PosterTicketFrame>
-              <div className="px-[4%] py-[3%]">
+              <div className="px-[3.5%] py-[2%]">
                 {/* ticket title */}
-                <div className="mb-[3%] flex items-center justify-center gap-3">
+                  <div className="mb-[2%] flex items-center justify-center gap-2">
                   <span style={{ color: POSTER_NEON, opacity: 0.7, fontSize: "2.4cqw" }}>
                     {"//"}
                   </span>
                   <span
                     className="font-poster font-bold uppercase"
-                    style={{
-                      color: POSTER_NEON,
-                      fontSize: "3cqw",
-                      letterSpacing: "0.2em",
-                    }}
+                      style={{
+                        color: POSTER_NEON,
+                        fontSize: "2.6cqw",
+                        letterSpacing: "0.18em",
+                      }}
                   >
                     My 4-Leg Combo
                   </span>
@@ -1272,7 +1272,7 @@ export function ShareCardPreview({ ticket }: { ticket: SubmittedTicket }) {
                     return (
                       <div
                         key={i}
-                        className="flex items-center gap-[3%] px-[3%] py-[2.5%]"
+                        className="flex items-center gap-[2.5%] px-[2.5%] py-[1.2%]"
                         style={
                           last
                             ? undefined
@@ -1283,11 +1283,11 @@ export function ShareCardPreview({ ticket }: { ticket: SubmittedTicket }) {
                         <div
                           className="grid place-items-center font-poster font-bold"
                           style={{
-                            width: "8%",
+                            width: "6.3%",
                             aspectRatio: "1 / 1",
                             border: `2px solid ${POSTER_NEON}`,
                             color: POSTER_NEON,
-                            fontSize: "3cqw",
+                            fontSize: "2.5cqw",
                             clipPath:
                               "polygon(15% 0, 85% 0, 100% 50%, 85% 100%, 15% 100%, 0 50%)",
                           }}
@@ -1298,10 +1298,10 @@ export function ShareCardPreview({ ticket }: { ticket: SubmittedTicket }) {
                         <div
                           className="grid place-items-center overflow-hidden rounded-full bg-white"
                           style={{
-                            width: "9%",
+                            width: "7.2%",
                             aspectRatio: "1 / 1",
                             border: `2px solid ${POSTER_NEON}`,
-                            fontSize: "5cqw",
+                            fontSize: "4.2cqw",
                             lineHeight: 1,
                           }}
                         >
@@ -1311,13 +1311,13 @@ export function ShareCardPreview({ ticket }: { ticket: SubmittedTicket }) {
                         <div className="flex flex-1 items-center gap-[2%]">
                           <span
                             className="font-poster font-bold uppercase text-white"
-                            style={{ fontSize: "3.4cqw", letterSpacing: "0.04em" }}
+                            style={{ fontSize: "2.65cqw", letterSpacing: "0.04em" }}
                           >
                             {c.name}
                           </span>
                           <span
                             className="font-poster font-bold uppercase"
-                            style={{ color: POSTER_NEON, fontSize: "3.4cqw" }}
+                            style={{ color: POSTER_NEON, fontSize: "2.65cqw" }}
                           >
                             Win
                           </span>
@@ -1329,7 +1329,7 @@ export function ShareCardPreview({ ticket }: { ticket: SubmittedTicket }) {
 
                 {/* stats row */}
                 <div
-                  className="mt-[3%] grid grid-cols-3 rounded"
+                  className="mt-[2%] grid grid-cols-3 rounded"
                   style={{
                     border: `1px solid ${POSTER_NEON}66`,
                     background: "rgba(0,0,0,0.35)",
@@ -1344,7 +1344,7 @@ export function ShareCardPreview({ ticket }: { ticket: SubmittedTicket }) {
                     return (
                       <div
                         key={i}
-                        className="flex flex-col items-center gap-[6%] py-[4%]"
+                          className="flex flex-col items-center gap-[2%] py-[1.5%]"
                         style={
                           i < 2
                             ? { borderRight: `1px solid ${POSTER_NEON}33` }
@@ -1352,14 +1352,14 @@ export function ShareCardPreview({ ticket }: { ticket: SubmittedTicket }) {
                         }
                       >
                         <Icon
-                          style={{ color: POSTER_NEON, width: "5cqw", height: "5cqw" }}
+                          style={{ color: POSTER_NEON, width: "4cqw", height: "4cqw" }}
                           strokeWidth={2}
                         />
                         <div
                           className="font-poster uppercase"
                           style={{
                             color: "#9A9A9A",
-                            fontSize: "2.2cqw",
+                            fontSize: "1.9cqw",
                             letterSpacing: "0.2em",
                           }}
                         >
@@ -1367,7 +1367,7 @@ export function ShareCardPreview({ ticket }: { ticket: SubmittedTicket }) {
                         </div>
                         <div
                           className="font-poster font-bold"
-                          style={{ color: s.color, fontSize: "5.2cqw" }}
+                          style={{ color: s.color, fontSize: "4.4cqw" }}
                         >
                           {s.value}
                         </div>
@@ -1380,16 +1380,16 @@ export function ShareCardPreview({ ticket }: { ticket: SubmittedTicket }) {
           </div>
 
           {/* === Bottom SHARE & INVITE ticket === */}
-          <div className="mt-auto pt-[4%]">
+          <div className="mt-auto pt-[2%]">
             <PosterTicketFrame>
-              <div className="flex items-stretch gap-[3%] px-[3%] py-[3%]">
+              <div className="flex items-stretch gap-[3%] px-[3%] py-[2%]">
                 {/* left: referral */}
                 <div className="flex flex-1 flex-col justify-center gap-[3%]">
                   <div className="flex items-center gap-[2%]">
-                    <Users style={{ color: POSTER_NEON, width: "4cqw", height: "4cqw" }} />
+                    <Users style={{ color: POSTER_NEON, width: "3cqw", height: "3cqw" }} />
                     <span
                       className="font-poster font-bold uppercase text-white"
-                      style={{ fontSize: "2.8cqw", letterSpacing: "0.18em" }}
+                      style={{ fontSize: "2.25cqw", letterSpacing: "0.16em" }}
                     >
                       Share &amp; Invite
                     </span>
@@ -1398,7 +1398,7 @@ export function ShareCardPreview({ ticket }: { ticket: SubmittedTicket }) {
                     className="font-poster uppercase"
                     style={{
                       color: POSTER_NEON,
-                      fontSize: "2.2cqw",
+                      fontSize: "1.75cqw",
                       letterSpacing: "0.22em",
                     }}
                   >
@@ -1408,7 +1408,7 @@ export function ShareCardPreview({ ticket }: { ticket: SubmittedTicket }) {
                     className="rounded font-poster font-bold"
                     style={{
                       color: POSTER_GOLD,
-                      fontSize: "7cqw",
+                      fontSize: "5.1cqw",
                       letterSpacing: "0.06em",
                       border: `1px solid ${POSTER_NEON}55`,
                       padding: "1% 3%",
@@ -1423,8 +1423,8 @@ export function ShareCardPreview({ ticket }: { ticket: SubmittedTicket }) {
                   <div
                     className="grid place-items-center bg-white"
                     style={{
-                      width: "16cqw",
-                      height: "16cqw",
+                      width: "12cqw",
+                      height: "12cqw",
                       padding: "4%",
                     }}
                   >
@@ -1442,7 +1442,7 @@ export function ShareCardPreview({ ticket }: { ticket: SubmittedTicket }) {
                     className="font-poster uppercase"
                     style={{
                       color: POSTER_NEON,
-                      fontSize: "2cqw",
+                      fontSize: "1.55cqw",
                       letterSpacing: "0.2em",
                     }}
                   >

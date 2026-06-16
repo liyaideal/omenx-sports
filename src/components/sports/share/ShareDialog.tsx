@@ -37,7 +37,7 @@ export function ShareDialog({ target, onClose }: ShareDialogProps) {
 
   return (
     <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
-      <DialogContent className="flex max-h-[min(92vh,760px)] w-[min(92vw,28rem)] max-w-none flex-col gap-0 overflow-hidden border-2 border-amber-400/40 bg-[#0a0a0a] p-0 [&>button]:hidden">
+      <DialogContent className="flex h-[min(94vh,820px)] w-[min(94vw,36rem)] max-w-none flex-col gap-0 overflow-hidden border-2 border-amber-400/40 bg-[#0a0a0a] p-0 [&>button]:hidden">
         <DialogTitle className="sr-only">Share</DialogTitle>
         <DialogDescription className="sr-only">
           Share this on OMENX
@@ -91,7 +91,7 @@ function ShareBody({ target, onClose }: { target: ShareTarget; onClose: () => vo
   }
 
   return (
-    <div className="flex flex-col">
+    <div className="flex min-h-0 flex-1 flex-col">
       {/* Header */}
       <div className="flex items-start justify-between border-b border-zinc-800 px-5 pb-3 pt-4">
         <div className="min-w-0 flex-1 pr-3">
@@ -119,9 +119,9 @@ function ShareBody({ target, onClose }: { target: ShareTarget; onClose: () => vo
 
       {/* Poster preview */}
       {target.poster && (
-        <div className="flex min-h-0 flex-1 items-center justify-center border-b border-zinc-800 bg-black/40 p-4">
-          {/* Width clamped so width * (1400/1080) fits the available panel height (~62vh after header/channels/url rows). */}
-          <div className="w-[min(300px,calc((92vh-260px)*1080/1400))] max-w-full shrink-0">
+        <div className="flex min-h-0 flex-1 items-center justify-center border-b border-zinc-800 bg-black/40 p-3">
+          {/* Width clamped so the 4:5 poster fits above the channel and URL rows. */}
+          <div className="w-[min(360px,calc((94vh-250px)*4/5))] max-w-full shrink-0">
             {target.poster}
           </div>
         </div>
