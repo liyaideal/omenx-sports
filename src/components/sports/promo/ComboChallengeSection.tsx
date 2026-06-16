@@ -998,13 +998,10 @@ function TicketRow({ ticket }: { ticket: SubmittedTicket }) {
               pays {ticket.grossPayoutU.toFixed(0)} U
             </div>
           </div>
-          <button
-            type="button"
-            onClick={onShare}
-            className="inline-flex items-center gap-1 border border-zinc-700 bg-zinc-900 px-2 py-1 font-pitch text-[10px] font-bold uppercase tracking-widest text-zinc-300 hover:border-amber-400 hover:text-amber-400"
-          >
-            <Share2 className="h-3 w-3" /> Share
-          </button>
+          <ShareTrigger
+            target={shareCombo({ ticket, poster: <ShareCardPreview ticket={ticket} /> })}
+            variant="chip"
+          />
         </div>
       </div>
       <div className="mt-2 flex flex-wrap gap-1">
