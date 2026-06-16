@@ -7,7 +7,6 @@ import {
   Plus,
   RefreshCw,
   Search,
-  Share2,
   Sparkles,
   Ticket,
   Trophy,
@@ -36,6 +35,7 @@ import {
   type SelectedLeg,
   type SubmittedTicket,
 } from "./combo/useComboState";
+import { ShareTrigger, shareCombo } from "@/components/sports/share";
 
 /* ============================================================
  * Top-level composition. Mirrors PRD §1.2:
@@ -51,7 +51,6 @@ export function ComboChallengeSection() {
   const [query, setQuery] = useState("");
   const [onlyAvailable, setOnlyAvailable] = useState(false);
   const [confirmOpen, setConfirmOpen] = useState(false);
-  const [shareTicket, setShareTicket] = useState<SubmittedTicket | null>(null);
 
   const matchdays = useMemo(() => {
     const set = new Set<string>();
@@ -72,10 +71,6 @@ export function ComboChallengeSection() {
       return true;
     });
   }, [stage, matchday, query, onlyAvailable]);
-
-  function openShare(t: SubmittedTicket) {
-    setShareTicket(t);
-  }
 
   return (
     <div className="flex flex-col gap-6">
@@ -106,7 +101,7 @@ export function ComboChallengeSection() {
         </aside>
       </div>
 
-      <TicketStatusList tickets={ctrl.tickets} onShare={openShare} />
+      <TicketStatusList tickets={ctrl.tickets} />
 
       {/* Mobile sticky bottom bar */}
       <MobileStickyBar ctrl={ctrl} onCalculate={ctrl.requestPreview} onConfirm={() => setConfirmOpen(true)} />
@@ -133,10 +128,8 @@ export function ComboChallengeSection() {
         open={ctrl.pageState === "TICKET_ACCEPTED" && !!ctrl.lastAccepted}
         ticket={ctrl.lastAccepted}
         capReached={ctrl.participationCapReached}
-        onShare={() => ctrl.lastAccepted && openShare(ctrl.lastAccepted)}
         onAnother={ctrl.startNewCombo}
       />
-      <ShareCardModal ticket={shareTicket} onClose={() => setShareTicket(null)} />
     </div>
   );
 }
