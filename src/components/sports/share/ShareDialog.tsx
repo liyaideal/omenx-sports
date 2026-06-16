@@ -124,7 +124,7 @@ function ShareBody({ target, onClose }: { target: ShareTarget; onClose: () => vo
       )}
 
       {/* Channel row */}
-      <div className="grid grid-cols-4 gap-2 px-4 py-4">
+      <div className={cn("grid gap-2 px-4 py-4", showNative ? "grid-cols-4" : "grid-cols-3")}>
         <ChannelButton
           icon={copiedField === "channel" ? <Check className="h-4 w-4" /> : <Link2 className="h-4 w-4" />}
           label={copiedField === "channel" ? "Copied" : "Copy link"}
@@ -136,18 +136,11 @@ function ShareBody({ target, onClose }: { target: ShareTarget; onClose: () => vo
           label="Post on X"
           onClick={handleTwitter}
         />
-        {showNative ? (
+        {showNative && (
           <ChannelButton
             icon={<Share2 className="h-4 w-4" />}
             label="More…"
             onClick={handleNative}
-          />
-        ) : (
-          <ChannelButton
-            icon={<Share2 className="h-4 w-4" />}
-            label="More…"
-            disabled
-            hint="System share is only available on mobile."
           />
         )}
         {showDownload ? (
