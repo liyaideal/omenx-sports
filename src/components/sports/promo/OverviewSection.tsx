@@ -1,5 +1,4 @@
 import { Link } from "@tanstack/react-router";
-import { Circle, Diamond, BarChart3, Trophy, Sparkles, Zap } from "lucide-react";
 import {
   USER_CARNIVAL_STATE,
   CARNIVAL_TABS,
@@ -10,7 +9,6 @@ import { ConfettiLayer } from "./ConfettiLayer";
 import welcomeAsset from "@/assets/carnival/card-welcome.jpg.asset.json";
 import comboAsset from "@/assets/carnival/card-combo.jpg.asset.json";
 import luckyboxAsset from "@/assets/carnival/card-luckybox.jpg.asset.json";
-import { cn } from "@/lib/utils";
 
 interface SeriesEntry {
   tab: CarnivalTab;
@@ -19,10 +17,7 @@ interface SeriesEntry {
   highlight: string;
   body: string;
   accent: string; // OKLCH or hex
-  icon: React.ReactNode;
-  iconShape: "circle" | "diamond" | "bars";
   banner: string;
-  ornament: React.ReactNode;
 }
 
 const SERIES: SeriesEntry[] = [
@@ -33,10 +28,7 @@ const SERIES: SeriesEntry[] = [
     highlight: "Up to 560 U",
     body: "Register, deposit, trade & invite to stack position vouchers.",
     accent: "oklch(0.7 0.18 145)",
-    icon: <Circle className="h-3 w-3" />,
-    iconShape: "circle",
     banner: welcomeAsset.url,
-    ornament: <Sparkles className="h-4 w-4" />,
   },
   {
     tab: "combo",
@@ -45,10 +37,7 @@ const SERIES: SeriesEntry[] = [
     highlight: "10 U → 500 U",
     body: "Pick 4 World Cup outcomes. Land all 4 to win up to 50× your stake.",
     accent: "#facc15",
-    icon: <Diamond className="h-3.5 w-3.5" />,
-    iconShape: "diamond",
     banner: comboAsset.url,
-    ornament: <Zap className="h-4 w-4" />,
   },
   {
     tab: "luckybox",
@@ -57,10 +46,7 @@ const SERIES: SeriesEntry[] = [
     highlight: "Signed Jersey",
     body: "Hit daily volume to roll the trophy vault. Grand prize: signed kit.",
     accent: "#60a5fa",
-    icon: <BarChart3 className="h-3.5 w-3.5" />,
-    iconShape: "bars",
     banner: luckyboxAsset.url,
-    ornament: <Trophy className="h-4 w-4" />,
   },
 ];
 
@@ -114,16 +100,6 @@ function SeriesCard({ entry }: { entry: SeriesEntry }) {
           }}
         />
         <div aria-hidden className="absolute inset-0 bg-led-matrix opacity-20 mix-blend-overlay" />
-        <span
-          aria-hidden
-          className="absolute right-3 top-3 grid h-7 w-7 place-items-center rounded border border-zinc-700 bg-black/60 text-[color:var(--card-accent)] backdrop-blur-sm"
-          style={{
-            boxShadow:
-              "0 0 10px color-mix(in oklab, var(--card-accent) 40%, transparent)",
-          }}
-        >
-          {entry.ornament}
-        </span>
         <span className="absolute bottom-2 left-3 font-scoreboard text-[10px] font-bold tracking-[0.25em] text-zinc-300">
           {entry.sec}
         </span>
@@ -131,33 +107,7 @@ function SeriesCard({ entry }: { entry: SeriesEntry }) {
 
       <div className="relative flex flex-1 flex-col p-5">
         <div aria-hidden className="pointer-events-none absolute inset-0 bg-led-matrix opacity-[0.06]" />
-        <div className="relative flex items-start justify-between">
-          <span
-            className="grid h-8 w-8 place-items-center rounded border border-zinc-700 bg-zinc-900 text-[color:var(--card-accent)]"
-            aria-hidden
-          >
-            <span
-              className={cn(
-                entry.iconShape === "diamond" && "rotate-45",
-                entry.iconShape === "bars" && "flex items-end gap-0.5",
-              )}
-            >
-              {entry.iconShape === "bars" ? (
-                <>
-                  <span className="block h-4 w-1 bg-[color:var(--card-accent)]" />
-                  <span className="block h-2 w-1 bg-[color:var(--card-accent)]" />
-                  <span className="block h-3 w-1 bg-[color:var(--card-accent)]" />
-                </>
-              ) : entry.iconShape === "diamond" ? (
-                <span className="block h-3 w-3 bg-[color:var(--card-accent)]" />
-              ) : (
-                <span className="block h-3 w-3 rounded-full border-2 border-[color:var(--card-accent)]" />
-              )}
-            </span>
-          </span>
-        </div>
-
-        <h3 className="relative mt-4 font-pitch text-xl font-bold uppercase tracking-wide text-white transition-colors group-hover:text-[color:var(--card-accent)]">
+        <h3 className="relative font-pitch text-xl font-bold uppercase tracking-wide text-white transition-colors group-hover:text-[color:var(--card-accent)]">
           {entry.title}
         </h3>
         <div className="relative mt-1 font-scoreboard text-lg font-black italic tabular-nums text-[color:var(--card-accent)]">
