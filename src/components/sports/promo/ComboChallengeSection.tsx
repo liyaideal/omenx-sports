@@ -877,13 +877,11 @@ function TicketAcceptedModal({
   open,
   ticket,
   capReached,
-  onShare,
   onAnother,
 }: {
   open: boolean;
   ticket: SubmittedTicket | null;
   capReached: boolean;
-  onShare: () => void;
   onAnother: () => void;
 }) {
   return (
@@ -916,13 +914,14 @@ function TicketAcceptedModal({
           </div>
         )}
         <div className="space-y-2 border-t border-zinc-800 p-4">
-          <button
-            type="button"
-            onClick={onShare}
-            className="inline-flex w-full items-center justify-center gap-2 border-2 border-amber-400 bg-amber-400 py-2 font-pitch text-xs font-bold uppercase tracking-widest text-black hover:brightness-110"
-          >
-            <Share2 className="h-3.5 w-3.5" /> Share my combo
-          </button>
+          {ticket && (
+            <ShareTrigger
+              target={shareCombo({ ticket, poster: <ShareCardPreview ticket={ticket} /> })}
+              variant="wide"
+              label="Share my combo"
+              className="border-2 border-amber-400 bg-amber-400/10"
+            />
+          )}
           {capReached ? (
             <p className="text-center font-pitch text-[10px] font-semibold uppercase tracking-widest text-zinc-500">
               You have used all available combo entries for this matchday.
