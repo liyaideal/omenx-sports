@@ -47,6 +47,16 @@ import { LiveTape } from "@/components/sports/event/LiveTape";
 import { DepthBar } from "@/components/sports/event/DepthBar";
 import { PreMatchStrip } from "@/components/sports/event/PreMatchStrip";
 import { ShareButton } from "@/components/sports/event/ShareButton";
+import {
+  ShareTrigger,
+  shareEvent,
+  shareLeague,
+  sharePlayer,
+  shareCombo,
+  shareLuckyBox,
+  sharePromo,
+} from "@/components/sports/share";
+import { ShareCardPreview } from "@/components/sports/promo/ComboChallengeSection";
 import { getRelatedMarkets } from "@/components/sports/event/related-markets";
 import { MATCH_MARKETS, FEATURED_MATCH } from "@/data/sports-markets";
 import { MobileTopBar } from "@/components/sports/mobile/MobileTopBar";
