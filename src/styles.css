@@ -1,6 +1,7 @@
 @import "tailwindcss" source(none);
 @source "../src";
 @import "tw-animate-css";
+@import url("https://fonts.googleapis.com/css2?family=Audiowide&display=swap");
 
 @custom-variant dark (&:is(.dark *));
 
@@ -251,4 +252,14 @@
   background-image:
     radial-gradient(60% 60% at 20% 0%, oklch(0.7 0.18 145 / 0.18), transparent 70%),
     radial-gradient(50% 60% at 80% 100%, rgba(250, 204, 21, 0.12), transparent 70%);
+}
+
+/* Share poster — OMENX stadium look. Used by ShareCardPreview. */
+.font-poster {
+  font-family: "Audiowide", "Orbitron", system-ui, sans-serif;
+  letter-spacing: 0.02em;
+}
+.poster-dot-grid {
+  background-image: radial-gradient(rgba(198, 255, 61, 0.18) 1px, transparent 1px);
+  background-size: 8px 8px;
 }
