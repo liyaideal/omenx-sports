@@ -121,7 +121,7 @@ function ShareBody({ target, onClose }: { target: ShareTarget; onClose: () => vo
       {target.poster && (
         <div className="flex min-h-0 flex-1 items-center justify-center border-b border-zinc-800 bg-black/40 p-3">
           {/* Width clamped so the 4:5 poster fits above the channel and URL rows. */}
-          <div className="w-[min(360px,calc((94vh-250px)*4/5))] max-w-full shrink-0">
+          <div className="w-[min(360px,calc((94vh-250px)*4/5.3))] max-w-full shrink-0">
             {target.poster}
           </div>
         </div>

@@ -40,6 +40,7 @@ import {
 } from "./combo/useComboState";
 import { ShareTrigger, shareCombo } from "@/components/sports/share";
 import omenxLogo from "@/assets/omenx-logo.svg";
+import posterBgStadium from "@/assets/poster-bg-stadium.png.asset.json";
 
 /* ============================================================
  * Top-level composition. Mirrors PRD §1.2:
@@ -1165,22 +1166,30 @@ export function ShareCardPreview({ ticket }: { ticket: SubmittedTicket }) {
   const referralCode = "ABCD2026";
 
   return (
-    <div className="mx-auto w-full" style={{ aspectRatio: "4 / 5" }}>
+    <div className="mx-auto w-full" style={{ aspectRatio: "4 / 5.3" }}>
       <div
         className="relative h-full w-full overflow-hidden"
         style={{
           containerType: "inline-size",
           background: POSTER_BG,
-          // Two stadium-light cones top-left + top-right
-          backgroundImage: `
-            radial-gradient(60% 40% at 8% -5%, rgba(198,255,61,0.35) 0%, transparent 60%),
-            radial-gradient(60% 40% at 92% -5%, rgba(198,255,61,0.35) 0%, transparent 60%),
-            radial-gradient(80% 30% at 50% 0%, rgba(242,208,36,0.10) 0%, transparent 70%)
-          `,
         }}
       >
+        {/* stadium photographic background */}
+        <img
+          src={posterBgStadium.url}
+          alt=""
+          aria-hidden
+          className="pointer-events-none absolute inset-0 h-full w-full object-cover"
+        />
+        {/* subtle darken so text stays legible over bright spots */}
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-0"
+          style={{ background: "rgba(0,0,0,0.35)" }}
+        />
+
         {/* dot grid overlay */}
-        <div aria-hidden className="pointer-events-none absolute inset-0 poster-dot-grid opacity-30" />
+        <div aria-hidden className="pointer-events-none absolute inset-0 poster-dot-grid opacity-[0.15]" />
 
         {/* === Frame border on entire poster === */}
         <div
@@ -1189,17 +1198,20 @@ export function ShareCardPreview({ ticket }: { ticket: SubmittedTicket }) {
           style={{ border: `1px solid ${POSTER_NEON}33` }}
         />
 
-        <div className="relative flex h-full flex-col px-[6%] pb-[3%] pt-[3.5%]" style={{ containerType: "inline-size" }}>
+        <div className="relative flex h-full flex-col px-[7%] pb-[4.5%] pt-[5%]" style={{ containerType: "inline-size" }}>
           {/* === OMENX wordmark (official logo) === */}
           <img
             src={omenxLogo}
             alt="OMENX"
             className="mx-auto block w-auto"
-            style={{ height: "7.4cqw" }}
+            style={{
+              height: "12cqw",
+              filter: "drop-shadow(0 0 14px rgba(0,0,0,0.6))",
+            }}
           />
 
           {/* trophy badge */}
-          <div className="mt-[1.5%] flex flex-col items-center gap-0.5">
+          <div className="mt-[4%] flex flex-col items-center gap-[1.5%]">
             <div className="relative" style={{ padding: 6 }}>
               <Trophy
                 style={{ color: POSTER_GOLD, width: "4.7cqw", height: "4.7cqw" }}
@@ -1220,7 +1232,7 @@ export function ShareCardPreview({ ticket }: { ticket: SubmittedTicket }) {
 
           {/* === Hero stake → reward === */}
           <div
-            className="mt-[1.5%] flex items-center justify-center gap-[2%] font-poster font-bold leading-none"
+            className="mt-[4%] flex items-center justify-center gap-[2%] font-poster font-bold leading-none"
             style={{ fontSize: "9.4cqw" }}
           >
             <span className="text-white">{stakeStr}</span>
@@ -1230,7 +1242,7 @@ export function ShareCardPreview({ ticket }: { ticket: SubmittedTicket }) {
 
           {/* subtitle */}
           <div
-            className="mt-[0.8%] text-center font-poster text-[2.25cqw] font-bold uppercase"
+            className="mt-[1.5%] text-center font-poster text-[2.25cqw] font-bold uppercase"
             style={{ color: POSTER_NEON, letterSpacing: "0.18em" }}
           >
             <span style={{ color: POSTER_GOLD }}>4</span> Picks. Hit All{" "}
@@ -1238,9 +1250,9 @@ export function ShareCardPreview({ ticket }: { ticket: SubmittedTicket }) {
           </div>
 
           {/* === Main ticket === */}
-          <div className="mt-[1.6%]">
+          <div className="mt-[4.5%]">
             <PosterTicketFrame>
-              <div className="px-[3.5%] py-[2%]">
+              <div className="px-[4%] py-[3.5%]">
                 {/* ticket title */}
                   <div className="mb-[2%] flex items-center justify-center gap-2">
                   <span style={{ color: POSTER_NEON, opacity: 0.7, fontSize: "2.4cqw" }}>
@@ -1272,7 +1284,7 @@ export function ShareCardPreview({ ticket }: { ticket: SubmittedTicket }) {
                     return (
                       <div
                         key={i}
-                        className="flex items-center gap-[2.5%] px-[2.5%] py-[1.2%]"
+                        className="flex items-center gap-[2.5%] px-[2.5%] py-[1.8%]"
                         style={
                           last
                             ? undefined
@@ -1329,7 +1341,7 @@ export function ShareCardPreview({ ticket }: { ticket: SubmittedTicket }) {
 
                 {/* stats row */}
                 <div
-                  className="mt-[2%] grid grid-cols-3 rounded"
+                  className="mt-[3%] grid grid-cols-3 rounded"
                   style={{
                     border: `1px solid ${POSTER_NEON}66`,
                     background: "rgba(0,0,0,0.35)",
@@ -1344,7 +1356,7 @@ export function ShareCardPreview({ ticket }: { ticket: SubmittedTicket }) {
                     return (
                       <div
                         key={i}
-                          className="flex flex-col items-center gap-[2%] py-[1.5%]"
+                          className="flex flex-col items-center gap-[2%] py-[2.2%]"
                         style={
                           i < 2
                             ? { borderRight: `1px solid ${POSTER_NEON}33` }
@@ -1380,9 +1392,9 @@ export function ShareCardPreview({ ticket }: { ticket: SubmittedTicket }) {
           </div>
 
           {/* === Bottom SHARE & INVITE ticket === */}
-          <div className="mt-[1%]">
+          <div className="mt-[3.5%]">
             <PosterTicketFrame>
-              <div className="flex items-stretch gap-[3%] px-[3%] py-[2%]">
+              <div className="flex items-stretch gap-[3%] px-[4%] py-[3.5%]">
                 {/* left: referral */}
                 <div className="flex flex-1 flex-col justify-center gap-[3%]">
                   <div className="flex items-center gap-[2%]">
