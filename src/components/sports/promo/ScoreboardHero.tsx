@@ -103,8 +103,10 @@ export function ScoreboardHero({ compact = false }: { compact?: boolean }) {
       )}
 
       <div className={cn("relative grid gap-6 p-6 md:p-10", compact && "p-5 md:p-6")}>
-        {/* top row: live + edition + countdown */}
-        <div className="flex flex-wrap items-center justify-between gap-3">
+        {/* Unified header strip: label left, countdown right — sits directly
+            above the big number and shares its centered column, so the eye
+            reads label → amount → countdown as one block. */}
+        <div className="mx-auto flex w-full max-w-2xl items-end justify-between gap-3 border-b border-white/10 pb-2">
           <div className="flex items-center gap-2">
             <span className="relative inline-flex h-2 w-2">
               <span className="absolute inset-0 animate-ping rounded-full bg-red-500 opacity-75" />
@@ -114,12 +116,12 @@ export function ScoreboardHero({ compact = false }: { compact?: boolean }) {
               Live Prize Pool
             </span>
           </div>
-          <div className="flex min-w-[180px] flex-col items-center rounded border border-zinc-800 bg-black/90 px-4 py-2 shadow-2xl">
+          <div className="flex flex-col items-end">
             <span className="font-pitch text-[8px] font-bold uppercase tracking-[0.25em] text-zinc-500">
               Ends in
             </span>
             <span
-              className="font-scoreboard text-base font-bold text-[oklch(0.7_0.18_145)] tabular-nums leading-tight tracking-tight"
+              className="font-scoreboard text-sm font-bold text-[oklch(0.7_0.18_145)] tabular-nums leading-tight tracking-widest"
               suppressHydrationWarning
             >
               {c ? (
