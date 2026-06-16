@@ -2212,6 +2212,26 @@ function StyleGuide() {
             </div>
           </Section>
 
+          <Section id="share" title="Share dialog" kicker="25b — global share system">
+            <p className="mb-6 max-w-3xl text-sm text-muted-foreground">
+              One global share surface for every shareable object on the site (events, leagues, players, combo tickets,
+              lucky-box prizes, promos). Desktop renders a centred <code className="font-mono text-foreground">Dialog</code>,
+              mobile slides up a <code className="font-mono text-foreground">Sheet</code>. Triggers come in four variants
+              — drop them anywhere and they all open the same dialog through the <code className="font-mono text-foreground">useShare()</code> provider.
+            </p>
+            <ShareDemo />
+            <div className="mt-6 rounded-2xl border border-dashed border-white/15 bg-white/[0.02] p-5 text-xs">
+              <div className="mb-2 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">Rules</div>
+              <ul className="space-y-1.5 text-muted-foreground">
+                <li>• Wrap the app in <code className="font-mono text-foreground">&lt;ShareProvider&gt;</code> once (root layout). All triggers go through it.</li>
+                <li>• Imperative API: <code className="font-mono text-foreground">const &#123; share &#125; = useShare(); share(shareEvent(...))</code>.</li>
+                <li>• Declarative API: <code className="font-mono text-foreground">&lt;ShareTrigger target=&#123;shareCombo(&#123; ticket &#125;)&#125; variant="chip" /&gt;</code>.</li>
+                <li>• Channels: Copy link, Post on X, system Native share (mobile only), Download poster (only when the target ships one).</li>
+                <li>• Poster slot — pass any JSX in the target's <code className="font-mono text-foreground">poster</code> field; the combo flow reuses <code className="font-mono text-foreground">ShareCardPreview</code>. Artwork is owned per target, not by the dialog.</li>
+              </ul>
+            </div>
+          </Section>
+
           <Section id="production-inventory" title="Production Inventory" kicker="26 — playground ↔ product sync">
             <p className="mb-6 max-w-3xl text-sm text-muted-foreground">
               Components below are shipping in real routes but don't yet have a self-contained demo on this page.
