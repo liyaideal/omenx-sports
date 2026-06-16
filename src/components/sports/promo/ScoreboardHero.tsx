@@ -97,7 +97,7 @@ export function ScoreboardHero({ compact = false }: { compact?: boolean }) {
 
       {/* Flag marquee strip across the very top */}
       {!compact && (
-        <div className="relative border-b border-zinc-900/80">
+        <div className="relative">
           <CarnivalFlagsMarquee height={18} opacity={0.55} />
         </div>
       )}
@@ -187,7 +187,7 @@ export function ScoreboardHero({ compact = false }: { compact?: boolean }) {
 
       {/* Flag marquee strip across the very bottom — reverse direction */}
       {!compact && (
-        <div className="relative border-t border-zinc-900/80">
+        <div className="relative">
           <CarnivalFlagsMarquee height={14} opacity={0.4} reverse />
         </div>
       )}
