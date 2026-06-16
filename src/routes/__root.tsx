@@ -12,6 +12,7 @@ import appCss from "../styles.css?url";
 import { Toaster } from "@/components/ui/sonner";
 import { TradeDrawerProvider } from "@/components/sports/trade/TradeDrawerProvider";
 import { LiveStreamProvider } from "@/components/sports/live/LiveStreamProvider";
+import { ShareProvider } from "@/components/sports/share";
 
 function NotFoundComponent() {
   return (
@@ -128,8 +129,10 @@ function RootComponent() {
     <QueryClientProvider client={queryClient}>
       <TradeDrawerProvider>
         <LiveStreamProvider>
-          <Outlet />
-          <Toaster />
+          <ShareProvider>
+            <Outlet />
+            <Toaster />
+          </ShareProvider>
         </LiveStreamProvider>
       </TradeDrawerProvider>
     </QueryClientProvider>
