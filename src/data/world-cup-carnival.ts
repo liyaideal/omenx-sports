@@ -453,8 +453,6 @@ export const USER_CARNIVAL_STATE = {
   vouchersClaimed: 50,
   vouchersPending: 120,
   followedTeams: ["ARG", "FRA", "BRA", "ESP", "MEX", "USA"],
-  fanLevel: 24,
-  qualificationPercent: 65,
   hasSpunToday: false,
 };
 
