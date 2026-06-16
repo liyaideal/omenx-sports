@@ -1198,7 +1198,7 @@ export function ShareCardPreview({ ticket }: { ticket: SubmittedTicket }) {
           style={{ border: `1px solid ${POSTER_NEON}33` }}
         />
 
-        <div className="relative flex h-full flex-col px-[7%] pb-[4.5%] pt-[5%]" style={{ containerType: "inline-size" }}>
+        <div className="relative flex h-full flex-col px-[7%] pb-[4.5%] pt-[8%]" style={{ containerType: "inline-size" }}>
           {/* === OMENX wordmark (official logo) === */}
           <img
             src={omenxLogo}
