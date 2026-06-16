@@ -1197,6 +1197,7 @@ export function ShareCardPreview({ ticket }: { ticket: SubmittedTicket }) {
       <div
         className="relative h-full w-full overflow-hidden"
         style={{
+          containerType: "inline-size",
           background: POSTER_BG,
           // Two stadium-light cones top-left + top-right
           backgroundImage: `
@@ -1221,9 +1222,8 @@ export function ShareCardPreview({ ticket }: { ticket: SubmittedTicket }) {
           <div
             className="text-center font-poster font-bold text-white leading-none"
             style={{
-              fontSize: "clamp(48px, 14cqw, 140px)",
+              fontSize: "14cqw",
               letterSpacing: "0.04em",
-              containerType: "inline-size",
             }}
           >
             OMENX
@@ -1231,37 +1231,15 @@ export function ShareCardPreview({ ticket }: { ticket: SubmittedTicket }) {
 
           {/* trophy badge */}
           <div className="mt-[3%] flex flex-col items-center gap-1">
-            <div className="relative">
+            <div className="relative" style={{ padding: 6 }}>
               <Trophy
-                className="h-[8cqw] w-[8cqw] min-h-6 min-w-6"
-                style={{ color: POSTER_GOLD }}
+                style={{ color: POSTER_GOLD, width: "8cqw", height: "8cqw" }}
                 strokeWidth={2}
               />
-              {/* viewfinder corners */}
-              {[
-                { top: -4, left: -4, borderTop: 1, borderLeft: 1 },
-                { top: -4, right: -4, borderTop: 1, borderRight: 1 },
-                { bottom: -4, left: -4, borderBottom: 1, borderLeft: 1 },
-                { bottom: -4, right: -4, borderBottom: 1, borderRight: 1 },
-              ].map((s, i) => (
-                <span
-                  key={i}
-                  aria-hidden
-                  className="absolute"
-                  style={{
-                    width: 8,
-                    height: 8,
-                    ...s,
-                    borderColor: POSTER_GOLD,
-                    borderStyle: "solid",
-                    borderWidth: 0,
-                    ...(s.borderTop && { borderTopWidth: 2 }),
-                    ...(s.borderBottom && { borderBottomWidth: 2 }),
-                    ...(s.borderLeft && { borderLeftWidth: 2 }),
-                    ...(s.borderRight && { borderRightWidth: 2 }),
-                  }}
-                />
-              ))}
+              <span aria-hidden className="absolute" style={{ top: 0, left: 0, width: 10, height: 10, borderTop: `2px solid ${POSTER_GOLD}`, borderLeft: `2px solid ${POSTER_GOLD}` }} />
+              <span aria-hidden className="absolute" style={{ top: 0, right: 0, width: 10, height: 10, borderTop: `2px solid ${POSTER_GOLD}`, borderRight: `2px solid ${POSTER_GOLD}` }} />
+              <span aria-hidden className="absolute" style={{ bottom: 0, left: 0, width: 10, height: 10, borderBottom: `2px solid ${POSTER_GOLD}`, borderLeft: `2px solid ${POSTER_GOLD}` }} />
+              <span aria-hidden className="absolute" style={{ bottom: 0, right: 0, width: 10, height: 10, borderBottom: `2px solid ${POSTER_GOLD}`, borderRight: `2px solid ${POSTER_GOLD}` }} />
             </div>
             <div
               className="font-poster text-[2.2cqw] font-bold uppercase"
@@ -1274,7 +1252,7 @@ export function ShareCardPreview({ ticket }: { ticket: SubmittedTicket }) {
           {/* === Hero stake → reward === */}
           <div
             className="mt-[3%] flex items-center justify-center gap-[2%] font-poster font-bold leading-none"
-            style={{ fontSize: "clamp(40px, 14cqw, 150px)" }}
+            style={{ fontSize: "14cqw" }}
           >
             <span className="text-white">{stakeStr}</span>
             <span style={{ color: POSTER_GOLD }}>→</span>
@@ -1510,10 +1488,6 @@ export function ShareCardPreview({ ticket }: { ticket: SubmittedTicket }) {
           </div>
         </div>
 
-        {/* container query context for cqw units */}
-        <style>{`
-          [data-poster-cq] { container-type: inline-size; }
-        `}</style>
       </div>
     </div>
   );
