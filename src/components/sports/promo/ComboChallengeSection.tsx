@@ -1165,7 +1165,7 @@ export function ShareCardPreview({ ticket }: { ticket: SubmittedTicket }) {
   const referralCode = "ABCD2026";
 
   return (
-    <div className="mx-auto w-full" style={{ aspectRatio: "1080 / 1700" }}>
+    <div className="mx-auto w-full" style={{ aspectRatio: "1080 / 1350" }}>
       <div
         className="relative h-full w-full overflow-hidden"
         style={{
