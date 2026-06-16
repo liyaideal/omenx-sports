@@ -1,38 +1,21 @@
-## 问题分析
+## 方案 C：删掉 Fan Status 模块
 
-你看到的两个问题都在 `CarnivalFlagsMarquee` 和 `ScoreboardHero` 的国旗条上：
+### 改动范围
+1. **`src/components/sports/promo/OverviewSection.tsx`**
+   - 移除第 65 行的 `<FanStatusPanel />` 使用。
+   - 删掉第 130–189 行整个 `FanStatusPanel` 组件定义。
+   - 清理 `USER_CARNIVAL_STATE` 的 import（如果删完之后这个文件不再用到，否则保留——`OverviewSection` 里其他地方可能还在用，先 grep 确认）。
 
-### 1. 国旗上下的"黑线"
-在 `ScoreboardHero.tsx` 里，上下两条国旗轮播被包在带边框的容器里：
-- 顶部：`<div className="border-b border-zinc-900/80">`
-- 底部：`<div className="border-t border-zinc-900/80">`
+2. **`src/data/world-cup-carnival.ts`**
+   - 从 `USER_CARNIVAL_STATE` 里删掉只服务于 Fan Status 的两个字段：`fanLevel`、`qualificationPercent`。
+   - 保留 `followedTeams`（其他地方还会用到，且本身有意义）。
 
-这些 1px 的 `zinc-900` 深色边框在记分牌的黑色背景上看起来就是一条贴着国旗的黑线。设计原意是模拟 LED 屏的分隔线，但视觉上变成了"脏边"。
+3. **`/style-guide`**：当前没有 Fan Status 的独立 demo，无需改动。
 
-### 2. 国旗拼接处会"断"
-`CarnivalFlagsMarquee` 用的是经典"复制一份轨道 + `translateX(-50%)`"的无缝滚动写法，但 flex 容器用了 `gap-2`（每两面国旗之间 8px 间距）。
+### 不做的事
+- 不动 `followedTeams` 本身、不动 LuckyBox / Predictions / Combo 等其他模块。
+- 不引入新的"参与度"组件——按你的选择，先彻底拿掉，等之后有明确等级/奖励规则再补。
 
-问题是：`gap` 只在**相邻元素之间**生效，最后一面国旗和第二份轨道第一面国旗之间是有 8px 间距的，而第一份轨道**起点之前**没有间距。当动画从 `-50%` 跳回 `0` 时，这 8px 的不对称就导致视觉上会有"跳一下/对不上"的瞬间——就是你截图里的接缝错位。
-
-## 修改方案
-
-### A. 去掉黑线 — `src/components/sports/promo/ScoreboardHero.tsx`
-- 顶部条：去掉 `border-b border-zinc-900/80`，保留容器本身（仍需要它做 overflow 裁剪定位）。
-- 底部条：去掉 `border-t border-zinc-900/80`。
-- 这样国旗就和记分牌主体之间没有突兀的深色分隔线，过渡更顺滑。
-
-### B. 修接缝 — `src/components/sports/promo/CarnivalFlagsMarquee.tsx`
-把 flex 的 `gap-2` 去掉，改成给**每面国旗**加 `marginRight`（比如 8px）。这样：
-- 第一份轨道的最后一面国旗后面有 8px；
-- 第二份轨道的第一面国旗前面没有间距，但因为上一面国旗自带 mr-2，所以视觉上仍然是 8px；
-- `translateX(-50%)` 现在恰好等于"一份完整轨道（含末尾 margin）"的宽度，循环回到原点时位置完全一致，接缝消失。
-
-实现上保留现有的 `FLAG_CODES`、`reverse`、`opacity`、`height` 属性和动画 keyframes，不改 API、不改 `/style-guide` 的展示。
-
-### C. 验证
-- 打开 `/promo/world-cup`，看顶部 `ScoreboardHero`：
-  - 国旗条上下不再有黑色细线；
-  - 慢动作观察循环点（约 60s / 80s 一次），不再有跳动。
-- 顺便检查 `/style-guide` 中的 `CarnivalFlagsMarquee` demo 不受影响。
-
-不修改业务逻辑、不动其他模块，纯视觉修复。
+### 验证
+- 打开 `/promo/world-cup?tab=overview`，确认顶部那条 LVL 24 / Qualification Phase 进度条已经消失，下方的 Lucky Box、Predictions、Combo 等模块布局没有错位或留下空隙。
+- 跑一遍 typecheck，确认没有遗留的未使用 import / 字段引用。
