@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { Check, Copy, Download, Link2, Share2, X as XIcon } from "lucide-react";
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Sheet, SheetContent, SheetTitle, SheetDescription } from "@/components/ui/sheet";
@@ -37,7 +37,7 @@ export function ShareDialog({ target, onClose }: ShareDialogProps) {
 
   return (
     <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
-      <DialogContent className="flex w-[min(92vw,28rem)] max-w-none flex-col gap-0 overflow-hidden border-2 border-amber-400/40 bg-[#0a0a0a] p-0">
+      <DialogContent className="flex w-[min(92vw,28rem)] max-w-none flex-col gap-0 overflow-hidden border-2 border-amber-400/40 bg-[#0a0a0a] p-0 [&>button]:hidden">
         <DialogTitle className="sr-only">Share</DialogTitle>
         <DialogDescription className="sr-only">
           Share this on OMENX
@@ -49,8 +49,9 @@ export function ShareDialog({ target, onClose }: ShareDialogProps) {
 }
 
 function ShareBody({ target, onClose }: { target: ShareTarget; onClose: () => void }) {
+  const isMobile = useIsMobile();
   const [copiedField, setCopiedField] = useState<"channel" | "url" | null>(null);
-  const showNative = useMemo(() => canNativeShare(), []);
+  const showNative = isMobile && canNativeShare();
   const showDownload = typeof target.onDownload === "function";
 
   // Reset copied flag on target change.
