@@ -119,8 +119,8 @@ function ShareBody({ target, onClose }: { target: ShareTarget; onClose: () => vo
 
       {/* Poster preview */}
       {target.poster && (
-        <div className="flex justify-center border-b border-zinc-800 bg-black/40 p-4">
-          <div className="w-[260px] shrink-0">{target.poster}</div>
+        <div className="flex min-h-0 flex-1 justify-center overflow-y-auto border-b border-zinc-800 bg-black/40 p-4">
+          <div className="w-[240px] shrink-0">{target.poster}</div>
         </div>
       )}
 
