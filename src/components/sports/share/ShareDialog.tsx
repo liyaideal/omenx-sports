@@ -120,8 +120,8 @@ function ShareBody({ target, onClose }: { target: ShareTarget; onClose: () => vo
       {/* Poster preview */}
       {target.poster && (
         <div className="flex min-h-0 flex-1 items-center justify-center border-b border-zinc-800 bg-black/40 p-4">
-          {/* Width clamped so width * (1700/1080) fits the available panel height (~62vh after header/channels/url rows). */}
-          <div className="w-[min(240px,calc((92vh-260px)*1080/1350))] max-w-full shrink-0">
+          {/* Width clamped so width * (1400/1080) fits the available panel height (~62vh after header/channels/url rows). */}
+          <div className="w-[min(300px,calc((92vh-260px)*1080/1400))] max-w-full shrink-0">
             {target.poster}
           </div>
         </div>
