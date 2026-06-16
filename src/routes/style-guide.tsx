@@ -281,7 +281,7 @@ function StyleGuide() {
 
       <div className="mx-auto grid max-w-7xl grid-cols-[200px_minmax(0,1fr)] gap-10 px-6 py-10">
         {/* Section nav */}
-        <aside className="sticky top-24 hidden h-fit md:block">
+        <aside className="sticky top-24 hidden max-h-[calc(100vh-6rem)] overflow-y-auto pr-2 md:block">
           <div className="text-[11px] font-mono uppercase tracking-[0.25em] text-muted-foreground mb-3">Contents</div>
           <Link
             to="/style-guide-homepage"
