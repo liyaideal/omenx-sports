@@ -19,7 +19,11 @@ export function CarnivalFlagsMarquee({
   opacity?: number;
   height?: number;
 }) {
-  const track = [...FLAG_CODES, ...FLAG_CODES];
+  const flagWidth = Math.round(height * 1.5);
+  // Repeat several copies so even ultrawide viewports are covered before the
+  // ×2 duplicate that powers the seamless translateX(-50%) loop.
+  const singlePass = [...FLAG_CODES, ...FLAG_CODES, ...FLAG_CODES];
+  const track = [...singlePass, ...singlePass];
   return (
     <div
       aria-hidden
@@ -38,9 +42,12 @@ export function CarnivalFlagsMarquee({
             key={`${code}-${i}`}
             src={`https://flagcdn.com/w40/${code}.png`}
             alt=""
+            width={flagWidth}
+            height={height}
             className="block shrink-0 rounded-[2px]"
-            style={{ height, width: "auto", marginRight: 8 }}
-            loading="lazy"
+            style={{ height, width: flagWidth, marginRight: 8 }}
+            loading="eager"
+            decoding="async"
           />
         ))}
       </div>
