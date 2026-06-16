@@ -2213,6 +2213,10 @@ function StyleGuide() {
           </Section>
 
           <Section id="production-inventory" title="Production Inventory" kicker="26 — playground ↔ product sync">
+
+          </Section>
+
+          {/* Reset — see Share section below before the inventory wall. */}
             <p className="mb-6 max-w-3xl text-sm text-muted-foreground">
               Components below are shipping in real routes but don't yet have a self-contained demo on this page.
               They're listed with their canonical live location so contributors can see them in context. If you
