@@ -1141,15 +1141,8 @@ function extractCountry(leg: SelectedLeg): { name: string; flag: string } {
   return { name: raw.toUpperCase(), flag: countryToFlag(raw) };
 }
 
-function PosterTicketFrame({
-  children,
-  notchSize = 18,
-}: {
-  children: React.ReactNode;
-  notchSize?: number;
-}) {
-  // Ticket-stub bracket: 2px neon outline + 4 mid-edge die-cut notches
-  // (just centered on top/bottom/left/right edges of the inner stub).
+function PosterTicketFrame({ children }: { children: React.ReactNode }) {
+  // Clean neon-edged bracket — no decorative notches.
   return (
     <div
       className="relative"
@@ -1159,28 +1152,6 @@ function PosterTicketFrame({
         background: "rgba(0,0,0,0.4)",
       }}
     >
-      {/* mid-edge notches (top, bottom, left, right) */}
-      {(
-        [
-          { top: -notchSize / 2, left: "50%", marginLeft: -notchSize / 2 },
-          { bottom: -notchSize / 2, left: "50%", marginLeft: -notchSize / 2 },
-          { left: -notchSize / 2, top: "50%", marginTop: -notchSize / 2 },
-          { right: -notchSize / 2, top: "50%", marginTop: -notchSize / 2 },
-        ] as React.CSSProperties[]
-      ).map((pos, i) => (
-        <span
-          key={i}
-          aria-hidden
-          className="pointer-events-none absolute rounded-full"
-          style={{
-            width: notchSize,
-            height: notchSize,
-            background: POSTER_BG,
-            border: `2px solid ${POSTER_NEON}`,
-            ...pos,
-          }}
-        />
-      ))}
       {children}
     </div>
   );
