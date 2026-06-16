@@ -1272,7 +1272,7 @@ export function ShareCardPreview({ ticket }: { ticket: SubmittedTicket }) {
                     return (
                       <div
                         key={i}
-                        className="flex items-center gap-[2.5%] px-[2.5%] py-[1.6%]"
+                        className="flex items-center gap-[2.5%] px-[2.5%] py-[1.2%]"
                         style={
                           last
                             ? undefined
@@ -1283,7 +1283,7 @@ export function ShareCardPreview({ ticket }: { ticket: SubmittedTicket }) {
                         <div
                           className="grid place-items-center font-poster font-bold"
                           style={{
-                            width: "7%",
+                            width: "6.3%",
                             aspectRatio: "1 / 1",
                             border: `2px solid ${POSTER_NEON}`,
                             color: POSTER_NEON,
@@ -1298,7 +1298,7 @@ export function ShareCardPreview({ ticket }: { ticket: SubmittedTicket }) {
                         <div
                           className="grid place-items-center overflow-hidden rounded-full bg-white"
                           style={{
-                            width: "8%",
+                            width: "7.2%",
                             aspectRatio: "1 / 1",
                             border: `2px solid ${POSTER_NEON}`,
                             fontSize: "4.2cqw",
@@ -1311,13 +1311,13 @@ export function ShareCardPreview({ ticket }: { ticket: SubmittedTicket }) {
                         <div className="flex flex-1 items-center gap-[2%]">
                           <span
                             className="font-poster font-bold uppercase text-white"
-                            style={{ fontSize: "3cqw", letterSpacing: "0.04em" }}
+                            style={{ fontSize: "2.65cqw", letterSpacing: "0.04em" }}
                           >
                             {c.name}
                           </span>
                           <span
                             className="font-poster font-bold uppercase"
-                            style={{ color: POSTER_NEON, fontSize: "3cqw" }}
+                            style={{ color: POSTER_NEON, fontSize: "2.65cqw" }}
                           >
                             Win
                           </span>
@@ -1344,7 +1344,7 @@ export function ShareCardPreview({ ticket }: { ticket: SubmittedTicket }) {
                     return (
                       <div
                         key={i}
-                          className="flex flex-col items-center gap-[3%] py-[2%]"
+                          className="flex flex-col items-center gap-[2%] py-[1.5%]"
                         style={
                           i < 2
                             ? { borderRight: `1px solid ${POSTER_NEON}33` }
