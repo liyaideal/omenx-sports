@@ -1239,7 +1239,7 @@ export function ShareCardPreview({ ticket }: { ticket: SubmittedTicket }) {
 
           {/* === Main ticket === */}
           <div className="mt-[4%]">
-            <PosterTicketFrame notchSize={20}>
+            <PosterTicketFrame>
               <div className="px-[4%] py-[3%]">
                 {/* ticket title */}
                 <div className="mb-[3%] flex items-center justify-center gap-3">
@@ -1384,7 +1384,7 @@ export function ShareCardPreview({ ticket }: { ticket: SubmittedTicket }) {
 
           {/* === Bottom SHARE & INVITE ticket === */}
           <div className="mt-[4%]">
-            <PosterTicketFrame notchSize={16}>
+            <PosterTicketFrame>
               <div className="flex items-stretch gap-[3%] px-[3%] py-[3%]">
                 {/* left: referral */}
                 <div className="flex flex-1 flex-col justify-center gap-[3%]">
