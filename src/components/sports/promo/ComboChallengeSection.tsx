@@ -1189,20 +1189,20 @@ export function ShareCardPreview({ ticket }: { ticket: SubmittedTicket }) {
           style={{ border: `1px solid ${POSTER_NEON}33` }}
         />
 
-        <div className="relative flex h-full flex-col px-[6%] pb-[3%] pt-[4%]">
+        <div className="relative flex h-full flex-col px-[6%] pb-[3%] pt-[3.5%]" style={{ containerType: "inline-size" }}>
           {/* === OMENX wordmark (official logo) === */}
           <img
             src={omenxLogo}
             alt="OMENX"
             className="mx-auto block w-auto"
-            style={{ height: "10cqw" }}
+            style={{ height: "8.5cqw" }}
           />
 
           {/* trophy badge */}
-          <div className="mt-[2%] flex flex-col items-center gap-1">
+          <div className="mt-[1.5%] flex flex-col items-center gap-0.5">
             <div className="relative" style={{ padding: 6 }}>
               <Trophy
-                style={{ color: POSTER_GOLD, width: "7cqw", height: "7cqw" }}
+                style={{ color: POSTER_GOLD, width: "5.8cqw", height: "5.8cqw" }}
                 strokeWidth={2}
               />
               <span aria-hidden className="absolute" style={{ top: 0, left: 0, width: 10, height: 10, borderTop: `2px solid ${POSTER_GOLD}`, borderLeft: `2px solid ${POSTER_GOLD}` }} />
@@ -1211,7 +1211,7 @@ export function ShareCardPreview({ ticket }: { ticket: SubmittedTicket }) {
               <span aria-hidden className="absolute" style={{ bottom: 0, right: 0, width: 10, height: 10, borderBottom: `2px solid ${POSTER_GOLD}`, borderRight: `2px solid ${POSTER_GOLD}` }} />
             </div>
             <div
-              className="font-poster text-[2.2cqw] font-bold uppercase"
+              className="font-poster text-[1.9cqw] font-bold uppercase"
               style={{ color: POSTER_GOLD, letterSpacing: "0.25em" }}
             >
               World Cup 4-Leg Combo
@@ -1220,8 +1220,8 @@ export function ShareCardPreview({ ticket }: { ticket: SubmittedTicket }) {
 
           {/* === Hero stake → reward === */}
           <div
-            className="mt-[2%] flex items-center justify-center gap-[2%] font-poster font-bold leading-none"
-            style={{ fontSize: "13cqw" }}
+            className="mt-[1.5%] flex items-center justify-center gap-[2%] font-poster font-bold leading-none"
+            style={{ fontSize: "10.8cqw" }}
           >
             <span className="text-white">{stakeStr}</span>
             <span style={{ color: POSTER_GOLD }}>→</span>
@@ -1230,7 +1230,7 @@ export function ShareCardPreview({ ticket }: { ticket: SubmittedTicket }) {
 
           {/* subtitle */}
           <div
-            className="mt-[1.5%] text-center font-poster text-[3cqw] font-bold uppercase"
+            className="mt-[1%] text-center font-poster text-[2.5cqw] font-bold uppercase"
             style={{ color: POSTER_NEON, letterSpacing: "0.18em" }}
           >
             <span style={{ color: POSTER_GOLD }}>4</span> Picks. Hit All{" "}
@@ -1238,7 +1238,7 @@ export function ShareCardPreview({ ticket }: { ticket: SubmittedTicket }) {
           </div>
 
           {/* === Main ticket === */}
-          <div className="mt-[3%]">
+          <div className="mt-[2%]">
             <PosterTicketFrame>
               <div className="px-[4%] py-[2.4%]">
                 {/* ticket title */}
