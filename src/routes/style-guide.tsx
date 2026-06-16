@@ -2843,6 +2843,15 @@ function ShareDemo() {
           <ShareTrigger target={promoTarget} variant="chip" label="Promo" />
         </div>
       </div>
+
+      <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-5">
+        <div className="mb-3 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+          Share poster — OMENX stadium
+        </div>
+        <div className="mx-auto w-full max-w-[420px]">
+          <ShareCardPreview ticket={sampleTicket} />
+        </div>
+      </div>
     </div>
   );
 }

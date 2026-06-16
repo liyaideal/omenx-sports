@@ -1,96 +1,69 @@
-## Goal
+放弃 3 个变体。**严格 1:1 复刻你给的参考图**，不再二次发挥。
 
-Replace the ad-hoc "Share" buttons scattered across the app (event, league, players, combo tickets, lucky box, promo cards, etc.) with one cohesive, professional share component. Any "shareable" object on the site funnels through the same surface — desktop Dialog, mobile BottomSheet, embedded poster preview, four channels.
+## 仅改 1 个组件
 
-This pass builds the **share component infrastructure** only. The poster artwork stays as it is; you'll restyle it later via the slot the share component exposes.
+`src/components/sports/promo/ComboChallengeSection.tsx` 里的 `ShareCardPreview`（1074-1167 行）整段重写。同步 `src/routes/style-guide.tsx` 的 demo。
 
-## Files
+## 1:1 还原参考图
 
-New (under `src/components/sports/share/`):
+画布
+- 比例 **1080 × 1700**（≈9:14，按参考图测出），不是 4:5。
+- 背景 `#050505` 纯黑 + 顶部左右两束黄绿 radial 光锥 + 全幅细密点阵（4px grid，opacity 0.08）。
+- 调色板锁死：
+  - **金黄** `#F2D024`（OMENX 主标题分隔/REWARD/ABCD2026/箭头）
+  - **荧光绿** `#C6FF3D`（票券描边、WIN 文字、SHARE & INVITE 描边、序号方框）
+  - 白 `#FFFFFF`、灰 `#7A7A7A`
 
-- `ShareProvider.tsx` — top-level provider that owns the open/closed state for the global dialog and the current `ShareTarget`.
-- `useShare.ts` — `const { share, close } = useShare(); share(target)` opens the dialog from anywhere.
-- `ShareDialog.tsx` — the dialog itself. Picks `Dialog` on `md+`, `Sheet side="bottom"` on mobile (via `useIsMobile`). Contains poster preview slot + channel row + URL row.
-- `ShareTrigger.tsx` — `<ShareTrigger target={...} variant="icon|wide|ghost|chip" />`. Internally calls `useShare().share(target)`. Replaces every existing inline "Share" button.
-- `channels.ts` — pure helpers: `buildShareUrl`, `openTwitter`, `nativeShare`, `copyToClipboard`, `downloadPoster` (calls the poster's `onDownload` callback).
-- `share-targets.ts` — `ShareTarget` discriminated union + small builders (`shareEvent`, `shareLeague`, `sharePlayer`, `shareCombo`, `shareLuckyBox`, `sharePromo`).
+顶部
+- 巨大 "OMENX" 居中白色字 wordmark：用 Google Font **Saira Stencil One** 或 **Audiowide** 逼近参考图的切角字形（先用 Audiowide，离线兜底 `font-pitch`）。字号占画幅宽度约 85%。
+- 下方：小尺寸金色奖杯 icon（lucide `Trophy`，金黄描边）外加 4 个直角取景框角标（绝对定位 4 个 L 形短线）。
+- 再下一行小字 "WORLD CUP 4-LEG COMBO"，字间距 0.3em，金黄色。
 
-Touched:
+Hero
+- "10U → 500U" 单行：10U 白色 + 箭头金黄 + 500U 金黄。字号 ~140px，使用 Audiowide。
+- 副标题 "4 PICKS. HIT ALL 4." 居中，荧光绿。数字 "4" 用金黄。
 
-- `src/routes/__root.tsx` — wrap the app in `<ShareProvider>`.
-- `src/components/sports/event/ShareButton.tsx` — re-export `ShareTrigger` with `variant="wide"|"icon"` as the public API; old prop shape preserved (`outcomeId`, `label`, `variant`).
-- `src/components/sports/promo/ComboChallengeSection.tsx` — drop the bespoke `openShare` state + `ShareCardPreview` rendering inside `TicketSuccessPanel`. Replace ticket-row and success-modal "Share" buttons with `<ShareTrigger target={shareCombo(ticket)} />`. The existing `ShareCardPreview` component stays exported and is wired as the poster slot for combo targets — that's the artwork you'll restyle later.
-- `src/routes/style-guide.tsx` — new "Share" section showing the dialog open with each target type.
+主票券（绿色描边 + 四角缺口）
+- 外框：2px 荧光绿 `#C6FF3D`，圆角 8px。
+- 左右各两个外凹半圆缺口（绝对定位 4 个 `#050505` 圆点 + 1px 绿边）模拟票根。
+- 顶部居中 "« MY 4-LEG COMBO »"：荧光绿字 + 两侧用两组 `//` 斜线装饰（旋转 -20°）。
+- 内部 4 行 leg（横向分隔线荧光绿 0.5px）：
+  - 序号方框：32×32，2px 荧光绿描边，切上下两个角（clip-path 八边形），里面数字荧光绿。
+  - 国旗：40×40 圆形，2px 荧光绿描边，内嵌真国旗（先用 emoji flag 在白底圆里渲染，国家从 `ticket.legs[i]` 推断）。
+  - TEAM 名：白色 Audiowide 大字。
+  - WIN：右对齐，荧光绿。
+- 底部三列 STAKE / ODDS / REWARD，竖向荧光绿分隔线：
+  - 每列顶部一个小 icon（lucide `Coins` / `TrendingUp` / `Trophy`，荧光绿）
+  - 中间标签灰色小字
+  - 底部数值：STAKE/ODDS 白色，REWARD 金黄
 
-## ShareTarget shape
+底部 SHARE & INVITE 票券（独立小票）
+- 同样的荧光绿描边 + 四角缺口（更小）。
+- 左侧：lucide `Users` 荧光绿 icon + "SHARE & INVITE" 白字 → "REFERRAL CODE" 荧光绿小字 → "ABCD2026" 金黄大字（Audiowide）。
+- 右侧：白底 80×80 QR 占位（暂用 CSS 棋盘格图案，后续真 QR 留口子）+ "SCAN TO JOIN" 荧光绿小字。
 
-```ts
-type ShareTarget =
-  | { kind: "event";    id: string; title: string; subtitle?: string; outcomeId?: string; image?: string }
-  | { kind: "league";   slug: string; title: string; subtitle?: string; image?: string }
-  | { kind: "player";   id: string; title: string; subtitle?: string; image?: string }
-  | { kind: "combo";    ticket: SubmittedTicket } // poster = <ShareCardPreview ticket={...} />
-  | { kind: "luckybox"; prizeId: string; title: string; image?: string }
-  | { kind: "promo";    slug: string; title: string; subtitle?: string; image?: string }
-  | { kind: "custom";   title: string; subtitle?: string; url: string; poster?: ReactNode; tweet?: string };
-```
+## 字体策略
 
-Each target resolves to:
-- `url` — canonical deep link (`/event/:id?outcome=...`, `/league/:slug`, `/promo/world-cup?tab=combo&ticket=...`, etc.)
-- `tweet` — pre-filled X copy (e.g. "I locked a 14.20× 4-leg combo on OMENX — beat me ↘"). Per-kind sensible default; overridable.
-- `Poster` — React node rendered in the preview slot. Combo uses the existing `ShareCardPreview`; other kinds use a lightweight `<DefaultPoster title subtitle image />` placeholder we'll restyle later.
+- 新增 Google Font：`Audiowide`（标题）。在 `src/styles.css` 顶部加 `@import url('https://fonts.googleapis.com/css2?family=Audiowide&display=swap');`，注册 token `--font-poster: 'Audiowide', system-ui;` + 工具类 `.font-poster`。
+- 不引 Saira Stencil One；Audiowide 接近参考图的切角宽字感，体积小。
 
-## Dialog anatomy (md+ Dialog, mobile Sheet)
+## 国旗
 
-```text
-┌──────────────────────────────────────┐
-│  SHARE                            ✕  │   header: small uppercase label, close
-├──────────────────────────────────────┤
-│                                      │
-│        [ POSTER PREVIEW SLOT ]       │   scales to fit (max-w ≈ 360 mobile / 400 desktop)
-│        4:5 aspect by default         │
-│                                      │
-├──────────────────────────────────────┤
-│  [ Copy ]  [ X ]  [ Native ]  [ ⬇ ]  │   channel row (icon + label, equal width)
-├──────────────────────────────────────┤
-│  https://omenx…/event/123?outcome=y  │   readonly URL field + inline Copy
-└──────────────────────────────────────┘
-```
+`countryToFlagEmoji(team)` 局部 helper：从 leg.teamLabel 提国家 → 返回 emoji。覆盖 Argentina/Brazil/France/Spain/Portugal/Netherlands/Belgium/England/Germany/Italy。fallback 显示首字母。
 
-- Channels: **Copy Link**, **X / Twitter**, **Native Share** (hidden if `navigator.share` undefined, e.g. desktop), **Download Poster** (calls poster ref's `toPng` — for now the combo poster wires it; other targets show the button disabled with a tooltip "Coming soon" until the artwork lands).
-- Copy success → channel button briefly swaps to ✓ + "Copied" (1.6s). Same pattern as today's `ShareButton`.
-- X button: `window.open(\`https://twitter.com/intent/tweet?text=${tweet}&url=${url}\`, "_blank")`.
-- Native Share: `navigator.share({ title, text: tweet, url })`, falls back silently on AbortError.
-- Download: hidden on targets without a downloadable poster.
-- All actions fire an `onShared(channel)` callback on the target (optional) — useful for future analytics; no analytics wiring this round.
+## 数据接入
 
-## API recap
+参考图全部硬编码值都映射到 `ticket`：
+- "10U" ← `ticket.stakeU`
+- "500U" ← `ticket.grossPayoutU`
+- "50x" ← `ticket.lockedActivityOdds`
+- 4 行 ← `ticket.legs[0..3]`
+- "ABCD2026" ← `ticket.referralCode ?? "OMENX2026"`
 
-Imperative:
-```tsx
-const { share } = useShare();
-<Button onClick={() => share(shareCombo(ticket))}>Share</Button>
-```
+## 记忆
 
-Declarative:
-```tsx
-<ShareTrigger target={shareEvent({ id, title, outcomeId })} variant="icon" />
-<ShareTrigger target={shareCombo(ticket)} variant="wide" />
-```
+完成后写入 `mem://design/share-poster` 锁定海报样式（黄绿配色 + 票券缺口 + Audiowide），并在 index 加引用。Carnival LED 记忆不动（那是 hero 区域规则，海报例外明确写在新记忆里）。
 
-`variant`s:
-- `icon` — 32px square ghost icon button (used in card headers, ticket rows)
-- `chip` — pill with "Share" label + icon (used inside tables/lists)
-- `wide` — full-width cinematic CTA (preserves today's `event/ShareButton` wide look)
-- `ghost` — bare icon, no border (for compact toolbars)
+## 验收
 
-## Out of scope
-
-- Redesigning the poster artwork — only the preview slot is wired; existing `ShareCardPreview` stays untouched.
-- Real download (`html-to-image`). The download button is wired through a `onDownload` callback the poster can provide; combo poster will still log a "coming soon" toast for now to keep this round focused on the share frame.
-- Telegram / WhatsApp / FB / QR / Embed.
-- Analytics events.
-
-## Style guide
-
-Add a "Share" section to `/style-guide` with: every `ShareTrigger` variant inline, and a "Open dialog" button per kind (event, league, player, combo, luckybox, promo) so the dialog states are all reachable from one playground.
+跟参考图肉眼比对：OMENX 字形、票根缺口位置、4 行 leg 排版、三列 stats、底部 SHARE/QR 块都要 1:1 对得上。

@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import {
   Check,
+  Coins,
   Filter,
   Info,
   Lock,
@@ -9,7 +10,9 @@ import {
   Search,
   Sparkles,
   Ticket,
+  TrendingUp,
   Trophy,
+  Users,
   X,
 } from "lucide-react";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
@@ -1071,96 +1074,420 @@ function MobileStickyBar({
   );
 }
 
-export function ShareCardPreview({ ticket }: { ticket: SubmittedTicket }) {
-  const isWin = ticket.status === "SETTLED_WON";
-  const profit = ticket.grossPayoutU - ticket.stakeU;
-  // Render a 1080×1350 surface, scaled down to container width via CSS.
+/* ============================================================
+ * ShareCardPreview — OMENX stadium share poster.
+ *
+ * 1:1 replica of the user's reference: black stadium night
+ * background, neon yellow-green (#C6FF3D) ticket bracket, gold
+ * (#F2D024) headline + reward, "OMENX" wordmark on top,
+ * 10U → 500U hero, 4 picks with flag circles, STAKE/ODDS/REWARD
+ * row, SHARE & INVITE referral ticket with QR placeholder.
+ * Render surface is 1080×1700 (≈9:14); rendered via aspect-ratio
+ * so it scales to any container width.
+ * ============================================================ */
+
+const POSTER_GOLD = "#F2D024";
+const POSTER_NEON = "#C6FF3D";
+const POSTER_BG = "#050505";
+
+function countryToFlag(label: string): string {
+  const map: Record<string, string> = {
+    argentina: "🇦🇷",
+    brazil: "🇧🇷",
+    france: "🇫🇷",
+    spain: "🇪🇸",
+    portugal: "🇵🇹",
+    netherlands: "🇳🇱",
+    belgium: "🇧🇪",
+    england: "🏴󠁧󠁢󠁥󠁮󠁧󠁿",
+    germany: "🇩🇪",
+    italy: "🇮🇹",
+    croatia: "🇭🇷",
+    morocco: "🇲🇦",
+    japan: "🇯🇵",
+    korea: "🇰🇷",
+    mexico: "🇲🇽",
+    usa: "🇺🇸",
+    uruguay: "🇺🇾",
+    "saudi arabia": "🇸🇦",
+    poland: "🇵🇱",
+    denmark: "🇩🇰",
+    switzerland: "🇨🇭",
+    serbia: "🇷🇸",
+    senegal: "🇸🇳",
+    canada: "🇨🇦",
+    ecuador: "🇪🇨",
+    ghana: "🇬🇭",
+    iran: "🇮🇷",
+    qatar: "🇶🇦",
+    "costa rica": "🇨🇷",
+    cameroon: "🇨🇲",
+  };
+  const key = label.trim().toLowerCase();
+  for (const k of Object.keys(map)) {
+    if (key.startsWith(k)) return map[k];
+  }
+  return "⚽";
+}
+
+function extractCountry(leg: SelectedLeg): { name: string; flag: string } {
+  // teamLabel examples: "Brazil Win", "Draw", "Argentina Win".
+  // For "Draw" pull first home team from matchLabel.
+  let raw = leg.teamLabel.replace(/\s+(win|draw|lose|loss)$/i, "").trim();
+  if (!raw || /^draw$/i.test(leg.teamLabel)) {
+    raw = leg.matchLabel.split(" vs ")[0]?.trim() ?? raw;
+  }
+  return { name: raw.toUpperCase(), flag: countryToFlag(raw) };
+}
+
+function PosterTicketFrame({
+  children,
+  notchSize = 18,
+}: {
+  children: React.ReactNode;
+  notchSize?: number;
+}) {
+  // Ticket-stub bracket: 2px neon outline + 4 mid-edge die-cut notches
+  // (just centered on top/bottom/left/right edges of the inner stub).
   return (
-    <div className="mx-auto w-full" style={{ aspectRatio: "1080 / 1350" }}>
+    <div
+      className="relative"
+      style={{
+        border: `2px solid ${POSTER_NEON}`,
+        borderRadius: 10,
+        background: "rgba(0,0,0,0.4)",
+      }}
+    >
+      {/* mid-edge notches (top, bottom, left, right) */}
+      {(
+        [
+          { top: -notchSize / 2, left: "50%", marginLeft: -notchSize / 2 },
+          { bottom: -notchSize / 2, left: "50%", marginLeft: -notchSize / 2 },
+          { left: -notchSize / 2, top: "50%", marginTop: -notchSize / 2 },
+          { right: -notchSize / 2, top: "50%", marginTop: -notchSize / 2 },
+        ] as React.CSSProperties[]
+      ).map((pos, i) => (
+        <span
+          key={i}
+          aria-hidden
+          className="pointer-events-none absolute rounded-full"
+          style={{
+            width: notchSize,
+            height: notchSize,
+            background: POSTER_BG,
+            border: `2px solid ${POSTER_NEON}`,
+            ...pos,
+          }}
+        />
+      ))}
+      {children}
+    </div>
+  );
+}
+
+export function ShareCardPreview({ ticket }: { ticket: SubmittedTicket }) {
+  const legs = ticket.legs.slice(0, 4);
+  const stakeStr = `${Math.round(ticket.stakeU)}U`;
+  const rewardStr = `${Math.round(ticket.grossPayoutU)}U`;
+  const oddsStr = `${ticket.lockedActivityOdds.toFixed(0)}x`;
+  const referralCode = "ABCD2026";
+
+  return (
+    <div className="mx-auto w-full" style={{ aspectRatio: "1080 / 1700" }}>
       <div
-        className="relative h-full w-full overflow-hidden border-2 border-amber-400/40 bg-gradient-to-b from-[#0a0a0a] via-[#0f0a00] to-[#0a0a0a] p-5"
+        className="relative h-full w-full overflow-hidden"
         style={{
-          backgroundImage:
-            "radial-gradient(circle at 20% 0%, rgba(250,204,21,0.18) 0%, transparent 50%), radial-gradient(circle at 80% 100%, rgba(250,204,21,0.12) 0%, transparent 60%)",
+          containerType: "inline-size",
+          background: POSTER_BG,
+          // Two stadium-light cones top-left + top-right
+          backgroundImage: `
+            radial-gradient(60% 40% at 8% -5%, rgba(198,255,61,0.35) 0%, transparent 60%),
+            radial-gradient(60% 40% at 92% -5%, rgba(198,255,61,0.35) 0%, transparent 60%),
+            radial-gradient(80% 30% at 50% 0%, rgba(242,208,36,0.10) 0%, transparent 70%)
+          `,
         }}
       >
-        <div aria-hidden className="pointer-events-none absolute inset-0 bg-led-matrix opacity-[0.06]" />
-        <div className="relative flex h-full flex-col">
-          <div className="flex items-center justify-between">
-            <div>
-              <div className="font-scoreboard text-[9px] font-bold tracking-[0.3em] text-amber-400">
-                OMENX · WORLD CUP CARNIVAL
-              </div>
-              <h4 className="mt-1 font-pitch text-base font-bold uppercase tracking-wide text-white">
-                {isWin ? "4/4 Correct — Combo Won" : "My 4-Leg Combo"}
-              </h4>
+        {/* dot grid overlay */}
+        <div aria-hidden className="pointer-events-none absolute inset-0 poster-dot-grid opacity-30" />
+
+        {/* === Frame border on entire poster === */}
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-[3%] rounded-md"
+          style={{ border: `1px solid ${POSTER_NEON}33` }}
+        />
+
+        <div className="relative flex h-full flex-col px-[6%] pt-[5%] pb-[4%]">
+          {/* === OMENX wordmark === */}
+          <div
+            className="text-center font-poster font-bold text-white leading-none"
+            style={{
+              fontSize: "14cqw",
+              letterSpacing: "0.04em",
+            }}
+          >
+            OMENX
+          </div>
+
+          {/* trophy badge */}
+          <div className="mt-[3%] flex flex-col items-center gap-1">
+            <div className="relative" style={{ padding: 6 }}>
+              <Trophy
+                style={{ color: POSTER_GOLD, width: "8cqw", height: "8cqw" }}
+                strokeWidth={2}
+              />
+              <span aria-hidden className="absolute" style={{ top: 0, left: 0, width: 10, height: 10, borderTop: `2px solid ${POSTER_GOLD}`, borderLeft: `2px solid ${POSTER_GOLD}` }} />
+              <span aria-hidden className="absolute" style={{ top: 0, right: 0, width: 10, height: 10, borderTop: `2px solid ${POSTER_GOLD}`, borderRight: `2px solid ${POSTER_GOLD}` }} />
+              <span aria-hidden className="absolute" style={{ bottom: 0, left: 0, width: 10, height: 10, borderBottom: `2px solid ${POSTER_GOLD}`, borderLeft: `2px solid ${POSTER_GOLD}` }} />
+              <span aria-hidden className="absolute" style={{ bottom: 0, right: 0, width: 10, height: 10, borderBottom: `2px solid ${POSTER_GOLD}`, borderRight: `2px solid ${POSTER_GOLD}` }} />
             </div>
-            <div className="text-right">
-              <div className="font-scoreboard text-[9px] font-bold tracking-[0.25em] text-zinc-500">ODDS</div>
-              <div className="font-scoreboard text-xl font-black italic tabular-nums text-amber-400">
-                {ticket.lockedActivityOdds.toFixed(2)}×
-              </div>
+            <div
+              className="font-poster text-[2.2cqw] font-bold uppercase"
+              style={{ color: POSTER_GOLD, letterSpacing: "0.25em" }}
+            >
+              World Cup 4-Leg Combo
             </div>
           </div>
 
-          <div className="mt-3 grid flex-1 grid-cols-2 gap-1.5 content-start">
-            {ticket.legs.map((l, i) => (
-              <div key={i} className="border border-amber-400/30 bg-black/60 p-2">
-                <div className="font-scoreboard text-[9px] font-bold tracking-widest text-amber-400">
-                  PICK {String(i + 1).padStart(2, "0")}
-                </div>
-                <div className="mt-0.5 truncate font-pitch text-[11px] font-bold uppercase tracking-wide text-white">
-                  {l.teamLabel}
-                </div>
-                <div className="truncate font-pitch text-[9px] font-semibold text-zinc-500">
-                  {l.matchLabel}
-                </div>
-              </div>
-            ))}
+          {/* === Hero stake → reward === */}
+          <div
+            className="mt-[3%] flex items-center justify-center gap-[2%] font-poster font-bold leading-none"
+            style={{ fontSize: "14cqw" }}
+          >
+            <span className="text-white">{stakeStr}</span>
+            <span style={{ color: POSTER_GOLD }}>→</span>
+            <span style={{ color: POSTER_GOLD }}>{rewardStr}</span>
           </div>
 
-          <div className="mt-3 grid grid-cols-3 gap-2 border-t border-amber-400/30 pt-3">
-            <div>
-              <div className="font-scoreboard text-[9px] font-bold tracking-widest text-zinc-500">STAKE</div>
-              <div className="font-scoreboard text-base font-black tabular-nums text-white">
-                {ticket.stakeU.toFixed(0)} U
-              </div>
-            </div>
-            <div>
-              <div className="font-scoreboard text-[9px] font-bold tracking-widest text-zinc-500">
-                {isWin ? "WON" : "PAYS"}
-              </div>
-              <div className="font-scoreboard text-base font-black tabular-nums text-amber-400">
-                {ticket.grossPayoutU.toFixed(0)} U
-              </div>
-            </div>
-            {isWin && (
-              <div>
-                <div className="font-scoreboard text-[9px] font-bold tracking-widest text-zinc-500">PROFIT</div>
-                <div className="font-scoreboard text-base font-black tabular-nums text-emerald-400">
-                  +{profit.toFixed(0)} U
-                </div>
-              </div>
-            )}
+          {/* subtitle */}
+          <div
+            className="mt-[2%] text-center font-poster text-[3cqw] font-bold uppercase"
+            style={{ color: POSTER_NEON, letterSpacing: "0.18em" }}
+          >
+            <span style={{ color: POSTER_GOLD }}>4</span> Picks. Hit All{" "}
+            <span style={{ color: POSTER_GOLD }}>4</span>.
           </div>
 
-          <div className="mt-3 flex items-end justify-between">
-            <div>
-              <div className="font-scoreboard text-[8px] font-bold tracking-widest text-zinc-500">
-                REFERRAL
+          {/* === Main ticket === */}
+          <div className="mt-[4%]">
+            <PosterTicketFrame notchSize={20}>
+              <div className="px-[4%] py-[3%]">
+                {/* ticket title */}
+                <div className="mb-[3%] flex items-center justify-center gap-3">
+                  <span style={{ color: POSTER_NEON, opacity: 0.7, fontSize: "2.4cqw" }}>
+                    {"//"}
+                  </span>
+                  <span
+                    className="font-poster font-bold uppercase"
+                    style={{
+                      color: POSTER_NEON,
+                      fontSize: "3cqw",
+                      letterSpacing: "0.2em",
+                    }}
+                  >
+                    My 4-Leg Combo
+                  </span>
+                  <span style={{ color: POSTER_NEON, opacity: 0.7, fontSize: "2.4cqw" }}>
+                    {"//"}
+                  </span>
+                </div>
+
+                {/* legs */}
+                <div
+                  className="rounded"
+                  style={{ border: `1px solid ${POSTER_NEON}66`, background: "rgba(0,0,0,0.35)" }}
+                >
+                  {legs.map((leg, i) => {
+                    const c = extractCountry(leg);
+                    const last = i === legs.length - 1;
+                    return (
+                      <div
+                        key={i}
+                        className="flex items-center gap-[3%] px-[3%] py-[2.5%]"
+                        style={
+                          last
+                            ? undefined
+                            : { borderBottom: `1px solid ${POSTER_NEON}33` }
+                        }
+                      >
+                        {/* number chevron box */}
+                        <div
+                          className="grid place-items-center font-poster font-bold"
+                          style={{
+                            width: "8%",
+                            aspectRatio: "1 / 1",
+                            border: `2px solid ${POSTER_NEON}`,
+                            color: POSTER_NEON,
+                            fontSize: "3cqw",
+                            clipPath:
+                              "polygon(15% 0, 85% 0, 100% 50%, 85% 100%, 15% 100%, 0 50%)",
+                          }}
+                        >
+                          {i + 1}
+                        </div>
+                        {/* flag circle */}
+                        <div
+                          className="grid place-items-center overflow-hidden rounded-full bg-white"
+                          style={{
+                            width: "9%",
+                            aspectRatio: "1 / 1",
+                            border: `2px solid ${POSTER_NEON}`,
+                            fontSize: "5cqw",
+                            lineHeight: 1,
+                          }}
+                        >
+                          <span style={{ filter: "saturate(1.1)" }}>{c.flag}</span>
+                        </div>
+                        {/* team + WIN */}
+                        <div className="flex flex-1 items-center gap-[2%]">
+                          <span
+                            className="font-poster font-bold uppercase text-white"
+                            style={{ fontSize: "3.4cqw", letterSpacing: "0.04em" }}
+                          >
+                            {c.name}
+                          </span>
+                          <span
+                            className="font-poster font-bold uppercase"
+                            style={{ color: POSTER_NEON, fontSize: "3.4cqw" }}
+                          >
+                            Win
+                          </span>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+
+                {/* stats row */}
+                <div
+                  className="mt-[3%] grid grid-cols-3 rounded"
+                  style={{
+                    border: `1px solid ${POSTER_NEON}66`,
+                    background: "rgba(0,0,0,0.35)",
+                  }}
+                >
+                  {[
+                    { icon: Coins, label: "Stake", value: stakeStr, color: "#FFFFFF" },
+                    { icon: TrendingUp, label: "Odds", value: oddsStr, color: "#FFFFFF" },
+                    { icon: Trophy, label: "Reward", value: rewardStr, color: POSTER_GOLD },
+                  ].map((s, i) => {
+                    const Icon = s.icon;
+                    return (
+                      <div
+                        key={i}
+                        className="flex flex-col items-center gap-[6%] py-[4%]"
+                        style={
+                          i < 2
+                            ? { borderRight: `1px solid ${POSTER_NEON}33` }
+                            : undefined
+                        }
+                      >
+                        <Icon
+                          style={{ color: POSTER_NEON, width: "5cqw", height: "5cqw" }}
+                          strokeWidth={2}
+                        />
+                        <div
+                          className="font-poster uppercase"
+                          style={{
+                            color: "#9A9A9A",
+                            fontSize: "2.2cqw",
+                            letterSpacing: "0.2em",
+                          }}
+                        >
+                          {s.label}
+                        </div>
+                        <div
+                          className="font-poster font-bold"
+                          style={{ color: s.color, fontSize: "5.2cqw" }}
+                        >
+                          {s.value}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
               </div>
-              <div className="font-scoreboard text-xs font-bold tracking-widest text-amber-400">
-                JAMES123
-              </div>
-            </div>
-            <div className="grid h-12 w-12 place-items-center border border-amber-400/40 bg-white/95">
-              <span className="font-mono text-[8px] font-bold text-black">QR</span>
-            </div>
+            </PosterTicketFrame>
           </div>
-          <p className="mt-2 border-t border-amber-400/20 pt-2 font-pitch text-[8px] font-semibold uppercase tracking-widest text-zinc-500">
-            Odds locked at submission. All 4 picks must be correct.
-          </p>
+
+          {/* spacer */}
+          <div className="flex-1" />
+
+          {/* === Bottom SHARE & INVITE ticket === */}
+          <div className="mt-[4%]">
+            <PosterTicketFrame notchSize={16}>
+              <div className="flex items-stretch gap-[3%] px-[3%] py-[3%]">
+                {/* left: referral */}
+                <div className="flex flex-1 flex-col justify-center gap-[3%]">
+                  <div className="flex items-center gap-[2%]">
+                    <Users style={{ color: POSTER_NEON, width: "4cqw", height: "4cqw" }} />
+                    <span
+                      className="font-poster font-bold uppercase text-white"
+                      style={{ fontSize: "2.8cqw", letterSpacing: "0.18em" }}
+                    >
+                      Share &amp; Invite
+                    </span>
+                  </div>
+                  <div
+                    className="font-poster uppercase"
+                    style={{
+                      color: POSTER_NEON,
+                      fontSize: "2.2cqw",
+                      letterSpacing: "0.22em",
+                    }}
+                  >
+                    Referral Code
+                  </div>
+                  <div
+                    className="rounded font-poster font-bold"
+                    style={{
+                      color: POSTER_GOLD,
+                      fontSize: "7cqw",
+                      letterSpacing: "0.06em",
+                      border: `1px solid ${POSTER_NEON}55`,
+                      padding: "1% 3%",
+                      background: "rgba(0,0,0,0.4)",
+                    }}
+                  >
+                    {referralCode}
+                  </div>
+                </div>
+                {/* right: QR */}
+                <div className="flex flex-col items-center justify-center gap-[6%]">
+                  <div
+                    className="grid place-items-center bg-white"
+                    style={{
+                      width: "16cqw",
+                      height: "16cqw",
+                      padding: "4%",
+                    }}
+                  >
+                    <div
+                      style={{
+                        width: "100%",
+                        height: "100%",
+                        backgroundImage:
+                          "conic-gradient(#000 25%, #fff 0 50%, #000 0 75%, #fff 0)",
+                        backgroundSize: "20% 20%",
+                      }}
+                    />
+                  </div>
+                  <div
+                    className="font-poster uppercase"
+                    style={{
+                      color: POSTER_NEON,
+                      fontSize: "2cqw",
+                      letterSpacing: "0.2em",
+                    }}
+                  >
+                    Scan to Join
+                  </div>
+                </div>
+              </div>
+            </PosterTicketFrame>
+          </div>
         </div>
+
       </div>
     </div>
   );
