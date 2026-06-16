@@ -97,6 +97,7 @@ import { CarnivalPromoCard } from "@/components/sports/promo/CarnivalPromoCard";
 import { CarnivalFlagsMarquee } from "@/components/sports/promo/CarnivalFlagsMarquee";
 import { ConfettiLayer, TwinkleField } from "@/components/sports/promo/ConfettiLayer";
 import { OverviewSection } from "@/components/sports/promo/OverviewSection";
+import { ComboChallengeSection } from "@/components/sports/promo/ComboChallengeSection";
 
 export const Route = createFileRoute("/style-guide")({
   head: () => ({
@@ -1916,6 +1917,13 @@ function StyleGuide() {
                   OverviewSection — full composition (hero + 3 series cards + fan status + ticker)
                 </div>
                 <OverviewSection />
+              </div>
+
+              <div>
+                <div className="mb-3 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+                  ComboChallengeSection — 4-leg activity page: hero · filters · match selector · sticky builder · quote preview · submit/requote/success modals · ticket list · share card preview
+                </div>
+                <ComboChallengeSection />
               </div>
 
               <div className="rounded-2xl border border-dashed border-white/15 bg-white/[0.02] p-5 text-xs">
