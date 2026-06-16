@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import {
   Check,
+  Coins,
   Filter,
   Info,
   Lock,
@@ -9,7 +10,9 @@ import {
   Search,
   Sparkles,
   Ticket,
+  TrendingUp,
   Trophy,
+  Users,
   X,
 } from "lucide-react";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
