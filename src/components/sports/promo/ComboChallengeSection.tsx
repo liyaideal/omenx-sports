@@ -1083,7 +1083,7 @@ function MobileStickyBar({
  * (#F2D024) headline + reward, "OMENX" wordmark on top,
  * 10U → 500U hero, 4 picks with flag circles, STAKE/ODDS/REWARD
  * row, SHARE & INVITE referral ticket with QR placeholder.
- * Render surface is 1080×1700 (≈9:14); rendered via aspect-ratio
+ * Render surface is 1080×1350 (4:5); rendered via aspect-ratio
  * so it scales to any container width.
  * ============================================================ */
 
@@ -1165,7 +1165,7 @@ export function ShareCardPreview({ ticket }: { ticket: SubmittedTicket }) {
   const referralCode = "ABCD2026";
 
   return (
-    <div className="mx-auto w-full" style={{ aspectRatio: "1080 / 1400" }}>
+    <div className="mx-auto w-full" style={{ aspectRatio: "4 / 5" }}>
       <div
         className="relative h-full w-full overflow-hidden"
         style={{
@@ -1189,20 +1189,20 @@ export function ShareCardPreview({ ticket }: { ticket: SubmittedTicket }) {
           style={{ border: `1px solid ${POSTER_NEON}33` }}
         />
 
-        <div className="relative flex h-full flex-col px-[6%] pt-[5%] pb-[4%]">
+        <div className="relative flex h-full flex-col px-[6%] pb-[3%] pt-[4%]">
           {/* === OMENX wordmark (official logo) === */}
           <img
             src={omenxLogo}
             alt="OMENX"
             className="mx-auto block w-auto"
-            style={{ height: "11cqw" }}
+            style={{ height: "10cqw" }}
           />
 
           {/* trophy badge */}
-          <div className="mt-[3%] flex flex-col items-center gap-1">
+          <div className="mt-[2%] flex flex-col items-center gap-1">
             <div className="relative" style={{ padding: 6 }}>
               <Trophy
-                style={{ color: POSTER_GOLD, width: "8cqw", height: "8cqw" }}
+                style={{ color: POSTER_GOLD, width: "7cqw", height: "7cqw" }}
                 strokeWidth={2}
               />
               <span aria-hidden className="absolute" style={{ top: 0, left: 0, width: 10, height: 10, borderTop: `2px solid ${POSTER_GOLD}`, borderLeft: `2px solid ${POSTER_GOLD}` }} />
@@ -1220,8 +1220,8 @@ export function ShareCardPreview({ ticket }: { ticket: SubmittedTicket }) {
 
           {/* === Hero stake → reward === */}
           <div
-            className="mt-[3%] flex items-center justify-center gap-[2%] font-poster font-bold leading-none"
-            style={{ fontSize: "14cqw" }}
+            className="mt-[2%] flex items-center justify-center gap-[2%] font-poster font-bold leading-none"
+            style={{ fontSize: "13cqw" }}
           >
             <span className="text-white">{stakeStr}</span>
             <span style={{ color: POSTER_GOLD }}>→</span>
@@ -1230,7 +1230,7 @@ export function ShareCardPreview({ ticket }: { ticket: SubmittedTicket }) {
 
           {/* subtitle */}
           <div
-            className="mt-[2%] text-center font-poster text-[3cqw] font-bold uppercase"
+            className="mt-[1.5%] text-center font-poster text-[3cqw] font-bold uppercase"
             style={{ color: POSTER_NEON, letterSpacing: "0.18em" }}
           >
             <span style={{ color: POSTER_GOLD }}>4</span> Picks. Hit All{" "}
@@ -1238,11 +1238,11 @@ export function ShareCardPreview({ ticket }: { ticket: SubmittedTicket }) {
           </div>
 
           {/* === Main ticket === */}
-          <div className="mt-[4%]">
+          <div className="mt-[3%]">
             <PosterTicketFrame>
-              <div className="px-[4%] py-[3%]">
+              <div className="px-[4%] py-[2.4%]">
                 {/* ticket title */}
-                <div className="mb-[3%] flex items-center justify-center gap-3">
+                  <div className="mb-[2.4%] flex items-center justify-center gap-3">
                   <span style={{ color: POSTER_NEON, opacity: 0.7, fontSize: "2.4cqw" }}>
                     {"//"}
                   </span>
@@ -1272,7 +1272,7 @@ export function ShareCardPreview({ ticket }: { ticket: SubmittedTicket }) {
                     return (
                       <div
                         key={i}
-                        className="flex items-center gap-[3%] px-[3%] py-[2.5%]"
+                        className="flex items-center gap-[3%] px-[3%] py-[2.1%]"
                         style={
                           last
                             ? undefined
@@ -1329,7 +1329,7 @@ export function ShareCardPreview({ ticket }: { ticket: SubmittedTicket }) {
 
                 {/* stats row */}
                 <div
-                  className="mt-[3%] grid grid-cols-3 rounded"
+                  className="mt-[2.4%] grid grid-cols-3 rounded"
                   style={{
                     border: `1px solid ${POSTER_NEON}66`,
                     background: "rgba(0,0,0,0.35)",
@@ -1344,7 +1344,7 @@ export function ShareCardPreview({ ticket }: { ticket: SubmittedTicket }) {
                     return (
                       <div
                         key={i}
-                        className="flex flex-col items-center gap-[6%] py-[4%]"
+                          className="flex flex-col items-center gap-[5%] py-[3%]"
                         style={
                           i < 2
                             ? { borderRight: `1px solid ${POSTER_NEON}33` }
@@ -1380,7 +1380,7 @@ export function ShareCardPreview({ ticket }: { ticket: SubmittedTicket }) {
           </div>
 
           {/* === Bottom SHARE & INVITE ticket === */}
-          <div className="mt-auto pt-[4%]">
+          <div className="mt-auto pt-[3%]">
             <PosterTicketFrame>
               <div className="flex items-stretch gap-[3%] px-[3%] py-[3%]">
                 {/* left: referral */}
