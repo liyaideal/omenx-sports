@@ -17,12 +17,15 @@ import {
   TrendingUp,
   Trophy,
   Users,
+  Wallet,
+  ArrowUpRight,
   X,
 } from "lucide-react";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { cn } from "@/lib/utils";
+import { omenxUrl } from "@/lib/omenx";
 import {
   COMBO_MAX_COMBOS_PER_USER,
   COMBO_MAX_ODDS,
