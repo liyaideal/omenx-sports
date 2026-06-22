@@ -23,9 +23,8 @@ import {
   COMBO_MAX_COMBOS_PER_USER,
   COMBO_MAX_ODDS,
   COMBO_MAX_PICKS,
+  COMBO_STAKE,
   COMBO_STAKE_MAX,
-  COMBO_STAKE_MIN,
-  COMBO_STAKE_STEP,
   WC_COMBO_MATCHES,
   WC_STAGES,
   type WCMarket,
@@ -1180,9 +1179,7 @@ function MobileStickyBar({
           {cta}
         </button>
       </div>
-      <div className="mt-2">
-        <StakeInput value={ctrl.stakeInput} onChange={ctrl.setStakeInput} valid={ctrl.stakeValid} compact />
-      </div>
+      <StakeDisplay compact />
     </div>
   );
 }
