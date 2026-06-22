@@ -2975,6 +2975,25 @@ function ShareDemo() {
             grossPayoutU={sampleTicket.grossPayoutU}
           />
         </div>
+        <div className="mx-auto mt-6 w-full max-w-[420px]">
+          <div className="mb-2 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+            Mixed markets — moneyline · spread · total · draw
+          </div>
+          <ShareCardPreview
+            legs={[
+              { matchId: "mx1", outcomeId: "o1", marketId: "mx1:ML", marketType: "MONEYLINE", marketLabel: "Moneyline", outcomeSide: "HOME", teamLabel: "Brazil Win", matchLabel: "Brazil vs Argentina", kickoff: "", probability: 0.55, displayProbability: "55%" },
+              { matchId: "mx2", outcomeId: "o2", marketId: "mx2:SPR", marketType: "SPREAD", marketLabel: "Spread · France -1.5", outcomeSide: "HOME", teamLabel: "France -1.5", matchLabel: "France vs Morocco", kickoff: "", probability: 0.48, displayProbability: "48%" },
+              { matchId: "mx3", outcomeId: "o3", marketId: "mx3:TOT", marketType: "TOTAL", marketLabel: "Total · Over 2.5", outcomeSide: "HOME", teamLabel: "Over 2.5", matchLabel: "Spain vs Germany", kickoff: "", probability: 0.52, displayProbability: "52%" },
+              { matchId: "mx4", outcomeId: "o4", marketId: "mx4:ML", marketType: "MONEYLINE", marketLabel: "Moneyline", outcomeSide: "DRAW", teamLabel: "Draw", matchLabel: "Italy vs Croatia", kickoff: "", probability: 0.28, displayProbability: "28%" },
+            ]}
+            stakeU={10}
+            odds={32.4}
+            grossPayoutU={324}
+          />
+          <p className="mt-2 text-[11px] text-muted-foreground">
+            Spread/Total picks always render the matchLabel sub-line so the poster never collapses into a context-less "UNDER 0.5 WIN".
+          </p>
+        </div>
       </div>
     </div>
   );

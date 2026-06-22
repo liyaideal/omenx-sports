@@ -1396,6 +1396,45 @@ function extractCountry(leg: SelectedLeg): { name: string; flag: string } {
   return { name: raw.toUpperCase(), flag: countryToFlag(raw) };
 }
 
+/**
+ * Per-leg poster content. Branches on marketType so SPREAD/TOTAL keep
+ * full match context instead of collapsing into "UNDER 0.5 WIN".
+ */
+function getLegPosterContent(leg: SelectedLeg): {
+  flag: string;
+  primary: string;
+  suffix: string;
+  secondary: string;
+} {
+  const matchSub = leg.matchLabel.toUpperCase();
+  if (leg.marketType === "TOTAL") {
+    return {
+      flag: "⚽",
+      primary: leg.teamLabel.toUpperCase(), // "OVER 2.5" / "UNDER 0.5"
+      suffix: "Win",
+      secondary: matchSub,
+    };
+  }
+  if (leg.marketType === "SPREAD") {
+    // teamLabel e.g. "Brazil -1.5" / "Argentina +1.5"
+    const teamName = leg.teamLabel.replace(/\s+[+-]?\d+(\.\d+)?$/, "").trim();
+    return {
+      flag: countryToFlag(teamName),
+      primary: leg.teamLabel.toUpperCase(),
+      suffix: "Win",
+      secondary: matchSub,
+    };
+  }
+  // MONEYLINE (incl. Draw)
+  const c = extractCountry(leg);
+  return {
+    flag: c.flag,
+    primary: c.name,
+    suffix: "Win",
+    secondary: matchSub,
+  };
+}
+
 function PosterTicketFrame({ children }: { children: React.ReactNode }) {
   // Clean neon-edged bracket — no decorative notches.
   return (
@@ -1548,7 +1587,7 @@ export function ShareCardPreview(props: ShareCardPreviewProps) {
                   style={{ border: `1px solid ${POSTER_NEON}66`, background: "rgba(0,0,0,0.35)" }}
                 >
                   {legs.map((leg, i) => {
-                    const c = extractCountry(leg);
+                    const c = getLegPosterContent(leg);
                     const last = i === legs.length - 1;
                     return (
                       <div
@@ -1588,20 +1627,35 @@ export function ShareCardPreview(props: ShareCardPreviewProps) {
                         >
                           <span style={{ filter: "saturate(1.1)" }}>{c.flag}</span>
                         </div>
-                        {/* team + WIN */}
-                        <div className="flex flex-1 items-center gap-[2%]">
-                          <span
-                            className="font-poster font-bold uppercase text-white"
-                            style={{ fontSize: "2.65cqw", letterSpacing: "0.04em" }}
-                          >
-                            {c.name}
-                          </span>
-                          <span
-                            className="font-poster font-bold uppercase"
-                            style={{ color: POSTER_NEON, fontSize: "2.65cqw" }}
-                          >
-                            Win
-                          </span>
+                        {/* pick + match context */}
+                        <div className="flex flex-1 flex-col justify-center gap-[0.3%]">
+                          <div className="flex items-center gap-[2%]">
+                            <span
+                              className="font-poster font-bold uppercase text-white"
+                              style={{ fontSize: "2.65cqw", letterSpacing: "0.04em" }}
+                            >
+                              {c.primary}
+                            </span>
+                            <span
+                              className="font-poster font-bold uppercase"
+                              style={{ color: POSTER_NEON, fontSize: "2.65cqw" }}
+                            >
+                              {c.suffix}
+                            </span>
+                          </div>
+                          {c.secondary ? (
+                            <span
+                              className="font-poster font-semibold uppercase"
+                              style={{
+                                color: POSTER_NEON,
+                                opacity: 0.55,
+                                fontSize: "1.7cqw",
+                                letterSpacing: "0.06em",
+                              }}
+                            >
+                              {c.secondary}
+                            </span>
+                          ) : null}
                         </div>
                       </div>
                     );
