@@ -14,10 +14,25 @@ import {
   type LegendRoundStatus,
 } from "@/data/world-cup-carnival";
 import { cn } from "@/lib/utils";
+import * as FlatFlags from "country-flag-icons/react/3x2";
 
 const ACCENT = "#4ade80";
 const AMBER = "#facc15";
 const MISS = "#f87171";
+
+function FlagSvg({
+  code,
+  title,
+  className,
+}: {
+  code: string;
+  title?: string;
+  className?: string;
+}) {
+  const Cmp = (FlatFlags as Record<string, React.ComponentType<{ title?: string; className?: string }> | undefined>)[code];
+  if (!Cmp) return null;
+  return <Cmp title={title} className={className} />;
+}
 
 /* ----------------------------------------------------------------------- */
 /*  Tab root — Scoreboard chassis                                           */
@@ -291,25 +306,20 @@ function RoundLedTile({
         </div>
       ) : (
         <div
-          className="relative h-10 w-full overflow-hidden rounded-sm border border-black/60 sm:h-12"
+          className="relative h-9 w-full overflow-hidden rounded-[3px] border border-black/70 sm:h-11"
           style={{
             boxShadow: isHit
               ? `inset 0 1px 0 rgba(74,222,128,0.35), inset 0 0 0 1px rgba(0,0,0,0.6)`
               : isLive
                 ? `inset 0 1px 0 rgba(250,204,21,0.35), inset 0 0 0 1px rgba(0,0,0,0.6)`
                 : `inset 0 0 0 1px rgba(0,0,0,0.6)`,
+            filter: isMiss ? "grayscale(0.55) opacity(0.7)" : undefined,
           }}
         >
-          <img
-            src={country.flagImage}
-            alt={`${country.name} flag`}
-            className="h-full w-full object-cover"
-            style={{
-              filter: isMiss
-                ? "grayscale(0.55) opacity(0.7)"
-                : "contrast(1.05) saturate(1.1)",
-            }}
-            loading="lazy"
+          <FlagSvg
+            code={country.iso2}
+            title={country.name}
+            className="block h-full w-full"
           />
         </div>
       )}
