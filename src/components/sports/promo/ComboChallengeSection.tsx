@@ -62,6 +62,25 @@ export function ComboChallengeSection() {
   const [query, setQuery] = useState("");
   const [onlyAvailable, setOnlyAvailable] = useState(false);
   const [confirmOpen, setConfirmOpen] = useState(false);
+  const [highlightTicketId, setHighlightTicketId] = useState<string | null>(null);
+  const ticketsRef = useRef<HTMLDivElement>(null);
+
+  const revealLatestTicket = useCallback(() => {
+    const id = ctrl.lastAccepted?.ticketId ?? ctrl.tickets[0]?.ticketId ?? null;
+    if (!id) return;
+    setHighlightTicketId(id);
+    const reduced =
+      typeof window !== "undefined" &&
+      window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+    // Wait for the modal close animation to settle before scrolling.
+    window.setTimeout(() => {
+      ticketsRef.current?.scrollIntoView({
+        behavior: reduced ? "auto" : "smooth",
+        block: "start",
+      });
+    }, 80);
+    window.setTimeout(() => setHighlightTicketId(null), 2800);
+  }, [ctrl.lastAccepted, ctrl.tickets]);
 
   const matchdays = useMemo(() => {
     const set = new Set<string>();
@@ -112,7 +131,11 @@ export function ComboChallengeSection() {
         </aside>
       </div>
 
-      <TicketStatusList tickets={ctrl.tickets} />
+      <TicketStatusList
+        ref={ticketsRef}
+        tickets={ctrl.tickets}
+        highlightTicketId={highlightTicketId}
+      />
 
       {/* Mobile sticky bottom bar */}
       <MobileStickyBar ctrl={ctrl} onCalculate={ctrl.requestPreview} onConfirm={() => setConfirmOpen(true)} />
@@ -139,7 +162,14 @@ export function ComboChallengeSection() {
         open={ctrl.pageState === "TICKET_ACCEPTED" && !!ctrl.lastAccepted}
         ticket={ctrl.lastAccepted}
         capReached={ctrl.participationCapReached}
-        onAnother={ctrl.startNewCombo}
+        onAnother={() => {
+          revealLatestTicket();
+          ctrl.startNewCombo();
+        }}
+        onView={() => {
+          revealLatestTicket();
+          ctrl.startNewCombo();
+        }}
       />
     </div>
   );
