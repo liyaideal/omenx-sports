@@ -1,6 +1,8 @@
 import { useMemo, useState } from "react";
 import {
   Check,
+  ChevronLeft,
+  ChevronRight,
   Coins,
   Filter,
   Info,
@@ -27,6 +29,7 @@ import {
   WC_COMBO_MATCHES,
   WC_STAGES,
   type WCMarket,
+  type WCMarketLine,
   type WCMatch,
   type WCOutcome,
   type WCStage,
