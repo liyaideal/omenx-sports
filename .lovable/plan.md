@@ -1,47 +1,41 @@
-## 问题诊断
+## 改动
 
-进入 SEC-04 后看到的全是「猜测机制」（国旗 + 线索 + 4 候选），但**完全没说"猜对能拿什么"**。文案里隐含的奖励规则——*猜对解锁 1× Lucky Box Tier-01 抽奖位，而签名球衣本体在 Lucky Box 的奖池里*——只写在 `/style-guide` 的文档里，玩家在产品页根本看不到。"Guess the Legend" 在玩家脑中是断开的：它和抽奖之间缺了那根线。
+在 `src/routes/style-guide.tsx` 的 `LegendAssetsInventory` 末尾追加一个第 5 节 **"Per-Round Clue Script & Correct Legend"**，把每一轮的"正确球星 + 三条线索 + 解锁顺序"以表格形式落地。数据全部从 `LEGEND_ROUNDS` 直接 derive，不复制硬编码字符串。
 
-## 解决思路（纯前端文案 + 信息架构，不动玩法）
+## 规则前置说明（一句话写死在小节顶部）
 
-在现有 Scoreboard chassis 顶部插入一条新的 **Mission Brief 横条**（在 `RoundProgressHud` 之上、Chassis 之内），统一回答三个新人最先问的问题：
+> 三条线索的位置 + 顺序在所有 round 里是恒定的：
+> - **CLUE 1 · POSITION** — 一开局就解锁（reveal-on-launch）
+> - **CLUE 2 · PEAK CLUB** — 社区投票破 30% 后解锁
+> - **CLUE 3 · MAJOR TROPHY** — 社区投票破 60% 后解锁（最难的一条）
+>
+> 这套 idx → label 映射写死在 `LegendClueLabel` 类型里，前端不要重排。
+
+（30% / 60% 阈值来源于 round-03 `unlockHint` 文案"Unlocks after 60% community vote"，30% 是中间梯度，符合现有 round-01/02 全部 revealed 的渐进逻辑；如果需要精确数字我先标 30% 占位、等产品确认。）
+
+## 表格形态
+
+每一行对应一个 round，列结构：
 
 ```text
-┌──────────────────────────────────────────────────────────────┐
-│ MISSION                                                       │
-│ Crack the signed-jersey vault — one retired legend per round. │
-│                                                               │
-│ 🎯 Pick the right legend before reveal day                    │
-│ 🔓 Hit → 1× Lucky Box Tier-01 spin unlocks for you            │
-│ 👕 The signed jersey itself drops into the Lucky Box pool →   │
-│    [Open Lucky Box ↗] (anchor jump to SEC-03)                 │
-└──────────────────────────────────────────────────────────────┘
+ROUND │ COUNTRY │ CORRECT LEGEND │ CLUE 1 (open)  │ CLUE 2 (30%)   │ CLUE 3 (60%)
+#01   │ 🇫🇷 FRA  │ Patrick Vieira │ DEF MID        │ ARSENAL        │ EURO 2000
+#02   │ 🇦🇷 ARG  │ Javier Zanetti │ RIGHT BACK     │ INTER MILAN    │ COPA AMÉRICA 1991
+#03   │ 🇪🇸 ESP  │ Andrés Iniesta │ CENTRAL MID    │ BARCELONA      │ WORLD CUP 2010 🔒
+#04-08│  TBA   │ TBA            │ TBA            │ TBA            │ TBA
 ```
 
-设计落点：
-- 一句 mission line + 一行 stakes line + 一颗"Open Lucky Box →"按钮锚跳到 SEC-03（用现有 tab 状态切换，不改路由）。
-- 视觉上沿用 scoreboard 配色：`#0d0d0d` 底，amber 高亮关键词 "Lucky Box Tier-01 spin"，accent green 表示"reward unlocked"逻辑。
-- 默认展开，加一个 `?` icon 让老用户折叠（用 `useState`，无后端、无 storage）——本次先省略折叠，默认全展开就好。
-
-## 配套微调
-
-1. **Round bay 顶部右侧那行 `2 / 3 CLUES LIVE`**：在它旁边加一行更小字号的副标 `HIT → +1 LUCKY BOX SPIN`，把"猜对的回报"贴近用户正在操作的位置。
-2. **Lock-in 按钮文案**：从 `LOCK IN PICK` 改成 `LOCK IN · WIN 1 SPIN`，把奖励直接放进 CTA。
-3. **Toast 文案**：locked 之后的 `Pick locked — waiting for reveal day` → `Pick locked — hit on reveal day unlocks 1 Lucky Box spin`。
-
-不动玩法、不改数据、不动 Lucky Box / 其它 tab。
-
-## 文件范围
-
-- `src/components/sports/promo/GuessTheLegendTab.tsx` — 新增 `MissionBrief` 子组件并插入到 `ScoreboardChassis` 顶部；CTA 文案；toast 文案；Round bay 副标。
-- 锚跳 SEC-03 用现有 tab 切换 prop（如 `onSelectTab`）即可；如果父组件没暴露，就用 `window` 滚动到 SEC-03 卡片 / 或暂以 disabled badge 形式呈现，等下一轮再接 wiring。我会先读 parent 看怎么接最干净再实现。
-- `/style-guide` 的 Legend playground 同步加 `MissionBrief` 展示，保持 playground 与产品一致（遵循 Core memory 规则）。
+- 渲染时迭代 `LEGEND_ROUNDS`，活动/已揭晓的行直接取 `round.candidates.find(c => c.id === round.correctCandidateId).name` 和 `round.clues[i].value`。
+- locked 的 clue 单元格加一个 🔒 + 灰色 + 显示 `unlockHint`，让"哪条最后解锁"在视觉上立刻读出来。
+- upcoming 行用单一 `TBA` 占位行，避免重复 5 行噪音。
+- 配色复用 `ACCENT/AMBER/MISS`：hit 行左侧 accent 边条、miss 行 miss 边条、voting 行 amber 边条，与 HUD 视觉一致。
 
 ## 不动的
 
-- 数据 (`world-cup-carnival.ts`)、Lucky Box、奖品赔率、reveal 时机机制全部不动。
-- 不引入新插画/品牌图。
+- `LEGEND_ROUNDS` 数据 / `LegendClueLabel` 类型不改。
+- 产品页 `GuessTheLegendTab` 不动。
+- `LegendBayPlayground` 不动（它已经演示 4 个 state 切换，足够）。
 
 ## 验证
 
-到 `/promo/world-cup?tab=legend` 截图，确认：第一屏就能读到「猜中 → 1× Lucky Box Tier-01 spin」+ 「签名球衣本体在 Lucky Box 抽」+ 可一键跳过去看奖池。
+打开 `/style-guide#world-cup-carnival`，确认在 Assets & Tokens Inventory 下方新增了第 5 节，三行已开 round 的线索值与产品页 round bay 一致，第 3 列"MAJOR TROPHY 🔒"行显式标出"最后解锁"。
