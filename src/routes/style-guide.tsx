@@ -127,6 +127,7 @@ import {
   ActiveRoundBay,
   CandidateBoard,
   SignedArchiveStrip,
+  MissionBrief,
 } from "@/components/sports/promo/GuessTheLegendTab";
 
 export const Route = createFileRoute("/style-guide")({
@@ -2790,6 +2791,7 @@ function LegendScoreboardDemo() {
   return (
     <div className="mx-auto w-full max-w-3xl">
       <ScoreboardChassis>
+        <MissionBrief />
         <RoundProgressHud
           rounds={LEGEND_ROUNDS}
           activeRoundId={active.id}
