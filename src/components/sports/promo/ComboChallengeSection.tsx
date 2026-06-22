@@ -1222,12 +1222,11 @@ function MobileStickyBar({
           type="button"
           onClick={onClick ?? undefined}
           disabled={!onClick}
-          className="border-2 border-amber-400 bg-amber-400 px-4 py-2 font-pitch text-xs font-bold uppercase tracking-widest text-black disabled:cursor-not-allowed disabled:border-zinc-700 disabled:bg-zinc-800 disabled:text-zinc-500"
+          className="shrink-0 whitespace-nowrap border-2 border-amber-400 bg-amber-400 px-4 py-2 font-pitch text-xs font-bold uppercase tracking-widest text-black disabled:cursor-not-allowed disabled:border-zinc-700 disabled:bg-zinc-800 disabled:text-zinc-500"
         >
           {cta}
         </button>
       </div>
-      <StakeDisplay compact />
     </div>
   );
 }
