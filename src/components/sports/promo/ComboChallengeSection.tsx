@@ -799,8 +799,11 @@ function QuotePreviewPanel({ ctrl }: { ctrl: ComboController }) {
         <p className="mt-2 font-pitch text-sm font-semibold text-zinc-500">
           Pick 4 outcomes — odds lock in <span className="text-amber-400">automatically</span>.
         </p>
-        <p className="mt-1 font-pitch text-[10px] font-semibold uppercase tracking-widest text-zinc-600">
-          Max activity odds {COMBO_MAX_ODDS}× · payout caps at {COMBO_MAX_ODDS * COMBO_STAKE_MAX} U
+        <p className="mt-2 font-pitch text-[10px] font-semibold uppercase tracking-widest text-amber-400/80">
+          Activity cap · {COMBO_MAX_ODDS}× max odds · {COMBO_MAX_ODDS * COMBO_STAKE_MAX}U max payout
+        </p>
+        <p className="mt-1 font-pitch text-[10px] font-semibold uppercase tracking-widest text-zinc-500">
+          Fair odds above {COMBO_MAX_ODDS}× are shown for reference but settle at {COMBO_MAX_ODDS}×.
         </p>
       </div>
     );
