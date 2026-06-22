@@ -112,8 +112,8 @@ export function ComboChallengeSection() {
 
       {/* Mobile sticky bottom bar */}
       <MobileStickyBar ctrl={ctrl} onCalculate={ctrl.requestPreview} onConfirm={() => setConfirmOpen(true)} />
-      {/* Spacer so content isn't covered by the mobile bar + bottom nav */}
-      <div className="h-28 lg:hidden" aria-hidden />
+      {/* Spacer so content isn't covered by the mobile bar */}
+      <div className="h-20 lg:hidden" aria-hidden />
 
       {/* Modals */}
       <SubmitConfirmModal
@@ -1206,7 +1206,7 @@ function MobileStickyBar({
 
   return (
     <div
-      className="fixed inset-x-0 bottom-16 z-[60] border-t-2 border-amber-400/60 bg-[#0a0a0a]/95 p-3 backdrop-blur md:bottom-0 lg:hidden"
+      className="fixed inset-x-0 bottom-0 z-[60] border-t-2 border-amber-400/60 bg-[#0a0a0a]/95 p-3 backdrop-blur lg:hidden"
       style={{ paddingBottom: "max(env(safe-area-inset-bottom), 0.75rem)" }}
     >
       <div className="flex items-center gap-3">
