@@ -92,31 +92,33 @@ export function GuessTheLegendTab() {
   }
 
   return (
-    <div className="mx-auto w-full max-w-3xl">
+    <div className="w-full">
       <ScoreboardChassis>
-        <MissionBrief />
-        <RoundProgressHud
-          rounds={rounds}
-          activeRoundId={activeRound.id}
-          hits={hits}
-          completed={completed}
-          onSelectRound={setActiveRoundId}
-        />
+        <div className="mx-auto w-full max-w-3xl">
+          <MissionBrief />
+          <RoundProgressHud
+            rounds={rounds}
+            activeRoundId={activeRound.id}
+            hits={hits}
+            completed={completed}
+            onSelectRound={setActiveRoundId}
+          />
 
-        <ActiveRoundBay
-          round={activeRound}
-          effectiveStatus={effectiveStatus}
-        />
+          <ActiveRoundBay
+            round={activeRound}
+            effectiveStatus={effectiveStatus}
+          />
 
-        <CandidateBoard
-          round={activeRound}
-          effectiveStatus={effectiveStatus}
-          effectivePickId={effectivePickId}
-          onSelectCandidate={selectCandidate}
-          onLockIn={lockIn}
-        />
+          <CandidateBoard
+            round={activeRound}
+            effectiveStatus={effectiveStatus}
+            effectivePickId={effectivePickId}
+            onSelectCandidate={selectCandidate}
+            onLockIn={lockIn}
+          />
 
-        <SignedArchiveStrip rounds={rounds} />
+          <SignedArchiveStrip rounds={rounds} />
+        </div>
       </ScoreboardChassis>
     </div>
   );
