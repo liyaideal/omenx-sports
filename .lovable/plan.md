@@ -1,53 +1,58 @@
-## 问题
+## 背景
 
-`ShareCardPreview` 海报中的 leg 行目前只渲染 `extractCountry(leg)`（取 `teamLabel` 去掉 win/draw 后剩余的部分）+ 固定的 "WIN"。这套逻辑只对 MONEYLINE 有效：
-
-- MONEYLINE：`teamLabel = "Brazil Win"` → 显示 `🇧🇷 BRAZIL WIN` ✓
-- SPREAD：`teamLabel = "Brazil -1.5"` → 显示 `🇧🇷 BRAZIL -1.5 WIN`，但**丢失对手 / 赛事上下文**
-- TOTAL：`teamLabel = "Under 0.5"` → 显示 `⚽ UNDER 0.5 WIN`，**完全没有球队信息**（即截图反馈的问题）
+4腿 combo 下注成功后，`TicketAcceptedModal` 关闭，用户回到长页面。新生成的 ticket 出现在最底部的 `My Tickets` 区，桌面 / 移动端都没有任何视觉引导，用户不知道滚到底部去看。
 
 ## 方案
 
-只改 `src/components/sports/promo/ComboChallengeSection.tsx` 内的海报 leg 渲染（约 1550–1608 行）。不动 state / 数据层。
+在不改业务逻辑的前提下，给「ticket 落到 My Tickets」这一步加上**显式入口** + **自动定位** + **高亮脉冲**，desktop & mobile 同样表现。
 
-### 1. 新增 helper `getLegPosterContent(leg)`
+### 1. `TicketStatusList` 加锚点 + 高亮态
 
-按 `leg.marketType` 分支返回 `{ flag, primary, secondary, suffix }`：
+文件：`src/components/sports/promo/ComboChallengeSection.tsx`
 
-| marketType | flag                              | primary (大字) | suffix    | secondary (小字, 0.7 透明)        |
-| ---------- | --------------------------------- | -------------- | --------- | --------------------------------- |
-| MONEYLINE  | 选中方国旗 / Draw → ⚽            | `BRAZIL`/`DRAW`| `WIN`     | `BRA vs ARG`                      |
-| SPREAD     | 选中方国旗（解析 `teamLabel` 首词）| `BRAZIL -1.5`  | `WIN`     | `BRA vs ARG`                      |
-| TOTAL      | ⚽                                | `OVER 2.5` / `UNDER 0.5` | `WIN` | `BRA vs ARG`                |
+- 给容器加 `id="combo-my-tickets"` 和 `ref`，并通过 prop 接收 `highlightTicketId`。
+- `TicketRow` 接收 `highlight: boolean`：当 true 时在外层套一个 2s 的 amber 脉冲环（`ring-2 ring-amber-400/70 shadow-[0_0_24px_rgba(250,204,21,0.35)]` + `animate-pulse` 一次性，2.5s 后自动去掉）。
+- 不改 ticket 的数据结构，只是 UI 层。
 
-- 解析球队名：取 `teamLabel` 去掉尾部数字/符号（`/\s+[+-]?\d+(\.\d+)?$/`）；TOTAL 跳过球队解析。
-- `secondary` 统一从 `leg.matchLabel`（已是 `"Brazil vs Argentina"` 格式）取，转大写显示。
+### 2. Section 顶层管理高亮 / 滚动
 
-### 2. 调整 leg 行结构
+`PromoComboSection` 顶层：
 
-把现有「team + WIN」单行改为两行堆叠：
+- 新增 `const [highlightId, setHighlightId] = useState<string | null>(null);`
+- 新增 `const ticketsRef = useRef<HTMLDivElement>(null);` 并透传给 `TicketStatusList`。
+- 抽出 `revealLatestTicket()`：
+  1. `setHighlightId(ctrl.lastAccepted?.ticketId ?? null)`
+  2. `requestAnimationFrame(() => ticketsRef.current?.scrollIntoView({ behavior: prefersReducedMotion ? "auto" : "smooth", block: "start" }))`
+  3. `setTimeout(() => setHighlightId(null), 2800)`
+- 使用 `window.matchMedia("(prefers-reduced-motion: reduce)")` 判断 reduced-motion。
 
-```text
-[#] [flag]  PRIMARY  WIN          ← 现有字号 2.65cqw
-            BRA vs ARG            ← 新增 1.7cqw, POSTER_NEON opacity 0.55
-```
+### 3. `TicketAcceptedModal` 增加显式入口
 
-- 用 `flex-col` 包裹 primary/secondary；`secondary` 仅在非空时渲染。
-- 行高保持原 padding（`py-[1.8%]`）不变，因为多出一行小字仍在原视觉密度内（实测 4 行 × 多 ~1.7cqw 仍在 ticket frame 内）。
+在「Share my combo」下方、`Build another combo` 上方，新增第二个次级按钮 **「View my ticket」**：
+- 样式：`border border-amber-400/40 bg-transparent text-amber-300`，宽度 100%。
+- 点击：调用新 prop `onView()` → 父组件先关弹窗（`ctrl.startNewCombo` 已会把状态置回 IDLE），再调用 `revealLatestTicket()`。
+- 同时把弹窗的「关闭（点遮罩 / Esc / Build another）」也都走 `revealLatestTicket()`——只要用户离开弹窗，都自动滚到 My Tickets 并高亮新 ticket，确保「不看说明也能被引导到」。
 
-### 3. 同步 `/style-guide`
+### 4. Mobile 行为
 
-`src/routes/style-guide.tsx` 现有海报 demo 用的是 mock combo（4 条 moneyline）。新增一个 `ShareCardPreview` 变体 demo，使用混合 leg：1× MONEYLINE + 1× SPREAD + 1× TOTAL + 1× DRAW，展示新的两行结构。在 §海报 区域加一句话说明：「Spread/Total 必显示 matchLabel 副标题」。
+`MobileStickyBar` 在 sheet 形态下渲染同一个 `ResponsiveModal`，逻辑天然复用。`scrollIntoView({ block: "start" })` 在 mobile 也生效；mobile 底部有 sticky bar，给 `revealLatestTicket()` 的 scroll 额外 `setTimeout 50ms` 等待弹窗动画收起后再滚，避免动画打架。
 
-### 4. 不变
+### 5. Style-guide 同步
 
-- `LegSlot`（构建区）保持现状 —— 那边已经 render 了 `leg.matchLabel · leg.marketLabel`，信息完整。
-- 文案颜色 token（`POSTER_NEON`、`POSTER_GOLD`）保持。
-- 不动 `extractCountry`（仍被 ticket frame 标题外其他地方间接用？实际只此一处，但保留以免误删）—— 可在新 helper 内部调用 `countryToFlag`。
+文件：`src/routes/style-guide.tsx`
 
-## 验收
+在已有的 `My Tickets / TicketStatusList` 演示区下新增一段 demo：
+- 渲染 3 张 ticket，第一张通过 `highlightTicketId` 触发 amber 脉冲。
+- 加一段说明：「Combo 下注成功后，弹窗关闭 / 「View my ticket」点击都会自动滚动到该区块并对最新 ticket 做 2.5s 高亮脉冲，desktop 与 mobile 一致。」
 
-- `/promo/world-cup?tab=combo` 选 4 条全 TOTAL（Under/Over）→ 海报每行显示「OVER 2.5 WIN」+ 下方「BRA VS ARG」小字。
-- 选 SPREAD 时 → 「BRAZIL -1.5 WIN」+ 「BRA VS ARG」。
-- 纯 MONEYLINE 4 腿 → 视觉与现在一致，只是多了 matchLabel 副标题。
-- `/style-guide` 海报区出现混合 leg 变体。
+## 不在范围
+
+- 不改 `useComboState` 的状态机或 ticket 数据结构。
+- 不动 `ComboBuilder` / `QuotePreviewPanel` / 海报相关组件。
+- 不调整 `My Tickets` 在页面中的位置（保持现在底部）。
+
+## 验证
+
+- Playwright：mobile 1280×1800 — 选 4 腿 → 下注 → 关弹窗 → 截图确认页面已经滚到 My Tickets 且最新 ticket 周围有 amber 高亮。
+- 同流程在 desktop viewport 重复一次。
+- 触发「View my ticket」按钮路径单独跑一次。
