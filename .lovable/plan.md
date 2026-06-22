@@ -1,23 +1,30 @@
-## Goal
+## 问题
 
-Restore the documented unlock cadence for the LIVE round to its original rule: clues unlock progressively via community vote, with the 3rd clue gated by ≥60% vote. Fix the misleading "randomised per round" copy I added previously.
+Welcome Pack / Combo Challenge / Lucky Box 三个 tab 都是整宽布局（撑满 Carnival 容器），切到 Guess the Legend 时整个 scoreboard chassis 被 `mx-auto w-full max-w-3xl` 收成中等宽度居中，左右大量留白，tab 切换时视觉宽度突变，确实不和谐。
 
-## Scope (style-guide copy only)
+根因在 `GuessTheLegendTab` 根节点：
 
-Edit only `src/routes/style-guide.tsx` → `LegendClueScript` intro paragraph (lines 2959–2967). No data, no product UI, no component logic changes.
+```tsx
+// src/components/sports/promo/GuessTheLegendTab.tsx:95
+<div className="mx-auto w-full max-w-3xl">
+  <ScoreboardChassis>...</ScoreboardChassis>
+</div>
+```
 
-Underlying data already reflects the rule correctly: in `LEGEND_ROUNDS` round-03 (ESP / Iniesta, status `voting`), clue ① POSITION is `revealed`, ② PEAK CLUB is `revealed`, ③ MAJOR TROPHY is `locked` with `unlockHint: "Unlocks after 60% community vote"`. The table already renders this faithfully — only the prose above it needs to match.
+## 改动
 
-## New intro copy
+仅改两行 className，无逻辑 / 数据变更。
 
-Replace the current paragraph with:
+1. `GuessTheLegendTab` 根容器去掉 `max-w-3xl`，改为与其他 tab 一致的整宽：`w-full`。ScoreboardChassis 自身的边框/螺栓/扫描线保持不变，只是 chassis 现在跟着 Carnival 容器整宽延展。
+2. 内部 8 格 LED `RoundProgressHud` 当前是 `grid-cols-8`，在更宽的容器里每个 tile 会被拉得过大；保留 `grid-cols-8` 但给容器加 `max-w-3xl mx-auto` 让 HUD 内的 tile 保持现有手感（avoid 把单个国旗 tile 撑成 desktop 上的巨型方块）。同样的 `max-w-3xl mx-auto` 也包到 ActiveRoundBay / CandidateBoard / SignedArchiveStrip 的内部内容区——chassis 拉满，内部 layout 仍然居中阅读宽度。
 
-> Three clues per round, fixed labels: **POSITION · PEAK CLUB · MAJOR TROPHY**.
-> Within a LIVE round the clues unlock progressively via community vote — clue ① is open at launch, ② unlocks after ~30% vote, ③ unlocks after ≥60% vote (the final reveal before lock-in). Past rounds (HIT / MISS) show all three for archive review. Upcoming rounds (TBA) list the full clue set here for QA only; in product they stay hidden until the round goes live.
+  → 这样既解决"tab 切换时左右留白突变"，又保持 scoreboard 模块内部的紧凑节奏。
 
-## What stays unchanged
+3. `LegendScoreboardDemo`（style-guide § 1）与 `LegendBayPlayground` 同步去掉外层 `max-w-3xl` 限制，保持 playground 与产品一致（mem://index Core）。
 
-- `LEGEND_ROUNDS` data and clue `state` values
-- Table columns, status colors, lock icon + `unlockHint` rendering
-- `GuessTheLegendTab`, `LegendBayPlayground`, and all product components
-- Source-of-truth footnote at the bottom of the section
+## 不动
+
+- chassis 视觉（边框厚度、螺栓、扫描线、glare）
+- HUD / Bay / Board / Archive 五个模块的内部组件与数据
+- 其他三个 tab 的布局
+- DESIGN.md 的 scoreboard 视觉作用域规则
