@@ -2878,6 +2878,17 @@ function ShareDemo() {
         <div className="mx-auto w-full max-w-[420px]">
           <ShareCardPreview ticket={sampleTicket} />
         </div>
+        <div className="mx-auto mt-6 w-full max-w-[420px]">
+          <div className="mb-2 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+            Draft variant — pre-submit (same artwork)
+          </div>
+          <ShareCardPreview
+            legs={sampleTicket.legs}
+            stakeU={sampleTicket.stakeU}
+            odds={sampleTicket.lockedActivityOdds}
+            grossPayoutU={sampleTicket.grossPayoutU}
+          />
+        </div>
       </div>
     </div>
   );
