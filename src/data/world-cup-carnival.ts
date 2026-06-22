@@ -284,7 +284,7 @@ export const WC_COMBO_MATCHES: WCMatch[] = [
     matchComboStatus: "AVAILABLE",
     markets: [
       ml({ code: "ARG", name: "Argentina", p: 0.52 }, 0.27, { code: "MEX", name: "Mexico", p: 0.21 }),
-      total(2.5, 0.55), spread("Argentina", -1.0),
+
     ],
   },
   {
@@ -294,7 +294,7 @@ export const WC_COMBO_MATCHES: WCMatch[] = [
     matchComboStatus: "AVAILABLE",
     markets: [
       ml({ code: "BRA", name: "Brazil", p: 0.62 }, 0.22, { code: "JPN", name: "Japan", p: 0.16 }),
-      total(2.5, 0.58),
+
     ],
   },
   {
@@ -315,7 +315,7 @@ export const WC_COMBO_MATCHES: WCMatch[] = [
     matchComboStatus: "AVAILABLE",
     markets: [
       ml({ code: "ESP", name: "Spain", p: 0.55 }, 0.26, { code: "USA", name: "USA", p: 0.19 }),
-      total(2.5, 0.51), spread("Spain", -0.5),
+
     ],
   },
   {
@@ -334,7 +334,7 @@ export const WC_COMBO_MATCHES: WCMatch[] = [
     matchComboStatus: "AVAILABLE",
     markets: [
       ml({ code: "POR", name: "Portugal", p: 0.57 }, 0.24, { code: "GHA", name: "Ghana", p: 0.19 }),
-      total(2.5, 0.56),
+
     ],
   },
   // Matchday 3
@@ -354,7 +354,7 @@ export const WC_COMBO_MATCHES: WCMatch[] = [
     matchComboStatus: "AVAILABLE",
     markets: [
       ml({ code: "BEL", name: "Belgium", p: 0.59 }, 0.24, { code: "EGY", name: "Egypt", p: 0.17 }),
-      total(2.5, 0.49),
+
     ],
   },
   {
@@ -373,7 +373,7 @@ export const WC_COMBO_MATCHES: WCMatch[] = [
     matchComboStatus: "AVAILABLE",
     markets: [
       ml({ code: "ENG", name: "England", p: 0.49 }, 0.29, { code: "DEN", name: "Denmark", p: 0.22 }),
-      total(2.5, 0.50), spread("England", -0.5),
+
     ],
   },
   {
@@ -402,7 +402,7 @@ export const WC_COMBO_MATCHES: WCMatch[] = [
     matchComboStatus: "AVAILABLE",
     markets: [
       ml({ code: "BRA", name: "Brazil", p: 0.53 }, 0.27, { code: "POR", name: "Portugal", p: 0.20 }),
-      total(2.5, 0.52),
+
     ],
   },
   {
@@ -469,7 +469,7 @@ export const WC_COMBO_MATCHES: WCMatch[] = [
     matchComboStatus: "AVAILABLE",
     markets: [
       ml({ code: "BRA", name: "Brazil", p: 0.46 }, 0.28, { code: "FRA", name: "France", p: 0.26 }),
-      total(2.5, 0.50),
+
     ],
   },
 ];
