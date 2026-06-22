@@ -40,7 +40,7 @@ import {
   type SelectedLeg,
   type SubmittedTicket,
 } from "./combo/useComboState";
-import { ShareTrigger, shareCombo } from "@/components/sports/share";
+import { ShareTrigger, shareCombo, shareComboDraft } from "@/components/sports/share";
 import omenxLogo from "@/assets/omenx-logo.svg";
 import posterBgStadium from "@/assets/poster-bg-stadium.png.asset.json";
 
@@ -617,6 +617,7 @@ function ComboBuilder({
         ))}
       </div>
       <StakeDisplay />
+      <BuilderShareRow ctrl={ctrl} />
       <BuilderCTA ctrl={ctrl} onCalculate={onCalculate} onConfirm={onConfirm} />
     </div>
   );
@@ -742,6 +743,35 @@ function BuilderCTA({
   );
 }
 
+function BuilderShareRow({ ctrl }: { ctrl: ComboController }) {
+  const { selectedLegs, quote } = ctrl;
+  if (!quote || selectedLegs.length < COMBO_MAX_PICKS) return null;
+  return (
+    <div className="mt-3 flex items-center justify-between gap-2 border border-dashed border-zinc-800 bg-black px-2.5 py-2">
+      <span className="font-pitch text-[10px] font-semibold uppercase tracking-widest text-zinc-500">
+        Share this combo
+      </span>
+      <ShareTrigger
+        variant="chip"
+        label="Share"
+        target={shareComboDraft({
+          legs: selectedLegs,
+          odds: quote.activityOdds,
+          grossPayoutU: quote.grossPayoutU,
+          poster: (
+            <ShareCardPreview
+              legs={selectedLegs}
+              stakeU={quote.stakeU}
+              odds={quote.activityOdds}
+              grossPayoutU={quote.grossPayoutU}
+            />
+          ),
+        })}
+      />
+    </div>
+  );
+}
+
 /* ============================================================ */
 /* QuotePreviewPanel                                              */
 /* ============================================================ */
@@ -815,6 +845,28 @@ function QuotePreviewPanel({ ctrl }: { ctrl: ComboController }) {
         <Info className="mt-0.5 h-3 w-3 shrink-0 text-zinc-600" />
         Odds lock only after a successful submission.
       </p>
+      {pageState !== "REQUOTE_REQUIRED" && (
+        <div className="mt-3">
+          <ShareTrigger
+            variant="wide"
+            label="Share this combo"
+            className="border-amber-400/40 bg-amber-400/[0.04] hover:border-amber-400/70 hover:bg-amber-400/[0.08]"
+            target={shareComboDraft({
+              legs: ctrl.selectedLegs,
+              odds: quote.activityOdds,
+              grossPayoutU: quote.grossPayoutU,
+              poster: (
+                <ShareCardPreview
+                  legs={ctrl.selectedLegs}
+                  stakeU={quote.stakeU}
+                  odds={quote.activityOdds}
+                  grossPayoutU={quote.grossPayoutU}
+                />
+              ),
+            })}
+          />
+        </div>
+      )}
     </div>
   );
 }
@@ -1262,11 +1314,26 @@ function PosterTicketFrame({ children }: { children: React.ReactNode }) {
   );
 }
 
-export function ShareCardPreview({ ticket }: { ticket: SubmittedTicket }) {
-  const legs = ticket.legs.slice(0, 4);
-  const stakeStr = `${Math.round(ticket.stakeU)}U`;
-  const rewardStr = `${Math.round(ticket.grossPayoutU)}U`;
-  const oddsStr = `${ticket.lockedActivityOdds.toFixed(0)}x`;
+export interface ShareCardPreviewProps {
+  /** When provided, all other fields are derived from the ticket. */
+  ticket?: SubmittedTicket;
+  /** Required when `ticket` is not provided (pre-submit / draft poster). */
+  legs?: SelectedLeg[];
+  stakeU?: number;
+  odds?: number;
+  grossPayoutU?: number;
+}
+
+export function ShareCardPreview(props: ShareCardPreviewProps) {
+  const ticket = props.ticket;
+  const sourceLegs = ticket?.legs ?? props.legs ?? [];
+  const legs = sourceLegs.slice(0, 4);
+  const stakeU = ticket?.stakeU ?? props.stakeU ?? COMBO_STAKE;
+  const odds = ticket?.lockedActivityOdds ?? props.odds ?? 0;
+  const grossPayoutU = ticket?.grossPayoutU ?? props.grossPayoutU ?? 0;
+  const stakeStr = `${Math.round(stakeU)}U`;
+  const rewardStr = `${Math.round(grossPayoutU)}U`;
+  const oddsStr = `${odds.toFixed(0)}x`;
   const referralCode = "ABCD2026";
 
   return (
