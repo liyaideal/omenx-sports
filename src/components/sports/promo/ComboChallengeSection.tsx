@@ -743,6 +743,35 @@ function BuilderCTA({
   );
 }
 
+function BuilderShareRow({ ctrl }: { ctrl: ComboController }) {
+  const { selectedLegs, quote } = ctrl;
+  if (!quote || selectedLegs.length < COMBO_MAX_PICKS) return null;
+  return (
+    <div className="mt-3 flex items-center justify-between gap-2 border border-dashed border-zinc-800 bg-black px-2.5 py-2">
+      <span className="font-pitch text-[10px] font-semibold uppercase tracking-widest text-zinc-500">
+        Share this combo
+      </span>
+      <ShareTrigger
+        variant="chip"
+        label="Share"
+        target={shareComboDraft({
+          legs: selectedLegs,
+          odds: quote.activityOdds,
+          grossPayoutU: quote.grossPayoutU,
+          poster: (
+            <ShareCardPreview
+              legs={selectedLegs}
+              stakeU={quote.stakeU}
+              odds={quote.activityOdds}
+              grossPayoutU={quote.grossPayoutU}
+            />
+          ),
+        })}
+      />
+    </div>
+  );
+}
+
 /* ============================================================ */
 /* QuotePreviewPanel                                              */
 /* ============================================================ */
