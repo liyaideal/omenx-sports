@@ -654,12 +654,12 @@ function LegSlot({
           {leg.teamLabel}
         </div>
         <div className="truncate font-pitch text-[10px] font-semibold text-zinc-500">
-          {leg.matchLabel} · {leg.displayProbability}
+          {leg.matchLabel} · {leg.marketLabel} · {leg.displayProbability}
         </div>
       </div>
       <button
         type="button"
-        onClick={() => onRemove(leg.matchId)}
+        onClick={() => onRemove(leg.marketId)}
         aria-label="Remove leg"
         className="grid h-6 w-6 place-items-center rounded border border-zinc-800 bg-zinc-900 text-zinc-500 hover:border-red-500 hover:text-red-400"
       >
