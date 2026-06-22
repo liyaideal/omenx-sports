@@ -845,6 +845,28 @@ function QuotePreviewPanel({ ctrl }: { ctrl: ComboController }) {
         <Info className="mt-0.5 h-3 w-3 shrink-0 text-zinc-600" />
         Odds lock only after a successful submission.
       </p>
+      {pageState !== "REQUOTE_REQUIRED" && (
+        <div className="mt-3">
+          <ShareTrigger
+            variant="wide"
+            label="Share this combo"
+            className="border-amber-400/40 bg-amber-400/[0.04] hover:border-amber-400/70 hover:bg-amber-400/[0.08]"
+            target={shareComboDraft({
+              legs: ctrl.selectedLegs,
+              odds: quote.activityOdds,
+              grossPayoutU: quote.grossPayoutU,
+              poster: (
+                <ShareCardPreview
+                  legs={ctrl.selectedLegs}
+                  stakeU={quote.stakeU}
+                  odds={quote.activityOdds}
+                  grossPayoutU={quote.grossPayoutU}
+                />
+              ),
+            })}
+          />
+        </div>
+      )}
     </div>
   );
 }
