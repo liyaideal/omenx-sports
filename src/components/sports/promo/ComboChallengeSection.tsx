@@ -505,14 +505,14 @@ function LineStepper({
       >
         <ChevronLeft className="h-3.5 w-3.5" />
       </button>
-      <div className="flex flex-1 items-center justify-around gap-1">
+      <div className="flex flex-1 items-center justify-around gap-0.5 sm:gap-1">
         {lines.map((ln, i) => (
           <button
             key={ln.lineValue}
             type="button"
             onClick={() => onChange(i)}
             className={cn(
-              "px-1.5 py-0.5 font-scoreboard text-[11px] font-bold tabular-nums tracking-wider transition-colors",
+              "px-1 py-0.5 font-scoreboard text-[10px] font-bold tabular-nums tracking-wider transition-colors sm:px-1.5 sm:text-[11px]",
               i === activeIdx
                 ? "text-amber-400"
                 : "text-zinc-600 hover:text-zinc-300",
