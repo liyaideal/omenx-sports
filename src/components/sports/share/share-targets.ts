@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import type { SubmittedTicket } from "@/components/sports/promo/combo/useComboState";
+import type { SelectedLeg, SubmittedTicket } from "@/components/sports/promo/combo/useComboState";
 
 /**
  * Discriminated union of everything on the site that can be shared.
@@ -111,6 +111,28 @@ export function shareCombo({ ticket, poster, onDownload }: ShareComboInput): Sha
     subtitle: ticket.legs.map((l) => l.teamLabel).join(" · "),
     url: absolute(`/promo/world-cup?tab=combo&ticket=${encodeURIComponent(ticket.ticketId)}`),
     tweet: `${headline} on OMENX — beat me ↘`,
+    poster,
+    onDownload,
+  };
+}
+
+export interface ShareComboDraftInput {
+  legs: SelectedLeg[];
+  /** Activity odds locked in the preview (required — share is gated on having a quote). */
+  odds: number;
+  /** Projected payout in U at the current odds. */
+  grossPayoutU: number;
+  poster?: ReactNode;
+  onDownload?: () => void | Promise<void>;
+}
+export function shareComboDraft({ legs, odds, grossPayoutU, poster, onDownload }: ShareComboDraftInput): ShareTargetBase {
+  const headline = `My ${odds.toFixed(2)}× 4-leg combo — ${grossPayoutU.toFixed(0)} U if it hits`;
+  return {
+    kindLabel: "COMBO",
+    title: headline,
+    subtitle: legs.map((l) => l.teamLabel).join(" · "),
+    url: absolute(`/promo/world-cup?tab=combo`),
+    tweet: `${headline} on OMENX — can you beat it? ↘`,
     poster,
     onDownload,
   };
