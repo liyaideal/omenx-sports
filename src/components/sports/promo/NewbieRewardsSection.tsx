@@ -1,8 +1,15 @@
 import { useState } from "react";
-import { Check, Copy, Lock } from "lucide-react";
+import { Check, Copy, Lock, ArrowUpRight, Gift } from "lucide-react";
+import { Link } from "@tanstack/react-router";
 import { toast } from "sonner";
-import { NEWBIE_TASKS, INVITE_PROGRESS } from "@/data/world-cup-carnival";
+import {
+  NEWBIE_TASKS,
+  INVITE_PROGRESS,
+  type NewbieTask,
+} from "@/data/world-cup-carnival";
 import { cn } from "@/lib/utils";
+
+type TaskStatus = NewbieTask["status"];
 
 export function NewbieRewardsSection() {
   return (
@@ -17,15 +24,24 @@ export function NewbieRewardsSection() {
   );
 }
 
-function TaskCard({ task }: { task: (typeof NEWBIE_TASKS)[number] }) {
-  const done = task.status === "done";
+/**
+ * Welcome-pack task card. Rewards are NEVER auto-credited — even when the
+ * threshold is met, the user MUST click `Claim` to receive the voucher.
+ * Four states: locked → in-progress → claimable → claimed.
+ */
+export function TaskCard({ task }: { task: NewbieTask }) {
+  const claimed = task.status === "claimed";
+  const claimable = task.status === "claimable";
+  const locked = task.status === "locked";
+  const [hasClaimed, setHasClaimed] = useState(false);
+  const effectiveClaimed = claimed || hasClaimed;
   return (
     <div className="relative overflow-hidden border-2 border-zinc-800 bg-[#0a0a0a] p-5">
       <div className="flex items-start justify-between">
         <span className="font-scoreboard text-[10px] font-bold tracking-[0.25em] text-zinc-500">
           {task.code}
         </span>
-        <StatusPill status={task.status} />
+        <StatusPill status={effectiveClaimed ? "claimed" : task.status} />
       </div>
       <h3 className="mt-3 font-pitch text-lg font-bold uppercase tracking-wide text-white">
         {task.title}
@@ -39,10 +55,13 @@ function TaskCard({ task }: { task: (typeof NEWBIE_TASKS)[number] }) {
         </div>
         <div className="h-2 overflow-hidden rounded-full border border-zinc-800 bg-zinc-900">
           <div
-            className="h-full bg-[oklch(0.7_0.18_145)]"
+            className={cn(
+              "h-full",
+              locked ? "bg-zinc-700" : "bg-[oklch(0.7_0.18_145)]",
+            )}
             style={{
               width: `${Math.round(task.progress * 100)}%`,
-              boxShadow: "0 0 10px oklch(0.7 0.18 145 / 0.6)",
+              boxShadow: locked ? "none" : "0 0 10px oklch(0.7 0.18 145 / 0.6)",
             }}
           />
         </div>
@@ -52,45 +71,45 @@ function TaskCard({ task }: { task: (typeof NEWBIE_TASKS)[number] }) {
         <span className="font-pitch text-[10px] font-semibold uppercase tracking-widest text-zinc-500">
           {task.newOnly ? "New users only" : "All users"}
         </span>
-        <button
-          type="button"
-          disabled={done}
-          onClick={() => {
-            if (done) return;
-            toast.success(`${task.title} — opening flow`);
+        <TaskCta
+          task={task}
+          claimed={effectiveClaimed}
+          claimable={claimable}
+          locked={locked}
+          onClaim={() => {
+            setHasClaimed(true);
+            toast.success(`${task.rewardLabel} credited to your Wallet`);
           }}
-          className={cn(
-            "inline-flex items-center gap-1.5 border px-3 py-1.5 font-pitch text-[11px] font-bold uppercase tracking-[0.2em] transition-colors",
-            done
-              ? "cursor-not-allowed border-zinc-800 bg-zinc-900 text-zinc-600"
-              : "border-[oklch(0.7_0.18_145)] bg-transparent text-[oklch(0.7_0.18_145)] hover:bg-[oklch(0.7_0.18_145)] hover:text-black",
-          )}
-        >
-          {done && <Check className="h-3 w-3" />}
-          {task.cta}
-        </button>
+        />
       </div>
 
       <span
         aria-hidden
         className={cn(
           "absolute inset-x-0 bottom-0 h-0.5",
-          done ? "bg-[oklch(0.7_0.18_145)]" : "bg-zinc-800",
+          effectiveClaimed || claimable ? "bg-[oklch(0.7_0.18_145)]" : "bg-zinc-800",
         )}
       />
     </div>
   );
 }
 
-function StatusPill({ status }: { status: "todo" | "in-progress" | "done" }) {
-  if (status === "done") {
+function StatusPill({ status }: { status: TaskStatus }) {
+  if (status === "claimed") {
     return (
       <span className="inline-flex items-center gap-1 rounded border border-[oklch(0.7_0.18_145)]/40 bg-[oklch(0.7_0.18_145)]/10 px-2 py-0.5 font-pitch text-[9px] font-bold uppercase tracking-widest text-[oklch(0.7_0.18_145)]">
         <Check className="h-2.5 w-2.5" /> Claimed
       </span>
     );
   }
-  if (status === "todo") {
+  if (status === "claimable") {
+    return (
+      <span className="inline-flex items-center gap-1 rounded border border-[oklch(0.7_0.18_145)]/60 bg-[oklch(0.7_0.18_145)]/15 px-2 py-0.5 font-pitch text-[9px] font-bold uppercase tracking-widest text-[oklch(0.7_0.18_145)] animate-pulse">
+        <Gift className="h-2.5 w-2.5" /> Ready to claim
+      </span>
+    );
+  }
+  if (status === "locked") {
     return (
       <span className="inline-flex items-center gap-1 rounded border border-zinc-700 bg-zinc-900 px-2 py-0.5 font-pitch text-[9px] font-bold uppercase tracking-widest text-zinc-500">
         <Lock className="h-2.5 w-2.5" /> Locked
@@ -101,6 +120,103 @@ function StatusPill({ status }: { status: "todo" | "in-progress" | "done" }) {
     <span className="inline-flex items-center gap-1 rounded border border-amber-400/40 bg-amber-400/10 px-2 py-0.5 font-pitch text-[9px] font-bold uppercase tracking-widest text-amber-400">
       In progress
     </span>
+  );
+}
+
+function TaskCta({
+  task,
+  claimed,
+  claimable,
+  locked,
+  onClaim,
+}: {
+  task: NewbieTask;
+  claimed: boolean;
+  claimable: boolean;
+  locked: boolean;
+  onClaim: () => void;
+}) {
+  const baseClass =
+    "inline-flex items-center gap-1.5 border px-3 py-1.5 font-pitch text-[11px] font-bold uppercase tracking-[0.2em] transition-colors";
+
+  if (claimed) {
+    return (
+      <button
+        type="button"
+        disabled
+        className={cn(baseClass, "cursor-not-allowed border-zinc-800 bg-zinc-900 text-zinc-600")}
+      >
+        <Check className="h-3 w-3" />
+        Claimed
+      </button>
+    );
+  }
+
+  if (locked) {
+    return (
+      <button
+        type="button"
+        disabled
+        className={cn(baseClass, "cursor-not-allowed border-zinc-800 bg-zinc-900 text-zinc-600")}
+      >
+        <Lock className="h-3 w-3" />
+        Locked
+      </button>
+    );
+  }
+
+  if (claimable) {
+    return (
+      <button
+        type="button"
+        onClick={onClaim}
+        className={cn(
+          baseClass,
+          "border-[oklch(0.7_0.18_145)] bg-[oklch(0.7_0.18_145)] text-black hover:brightness-110",
+        )}
+      >
+        <Gift className="h-3 w-3" />
+        Claim {task.rewardLabel.replace(" Position Voucher", "")}
+      </button>
+    );
+  }
+
+  // in-progress — link to action surface
+  const actionClass = cn(
+    baseClass,
+    "border-[oklch(0.7_0.18_145)] bg-transparent text-[oklch(0.7_0.18_145)] hover:bg-[oklch(0.7_0.18_145)] hover:text-black",
+  );
+
+  if (task.ctaHref && task.ctaExternal) {
+    return (
+      <a
+        href={task.ctaHref}
+        target="_blank"
+        rel="noopener noreferrer"
+        className={actionClass}
+      >
+        {task.cta}
+        <ArrowUpRight className="h-3 w-3" />
+      </a>
+    );
+  }
+
+  if (task.ctaHref) {
+    return (
+      <Link to={task.ctaHref} className={actionClass}>
+        {task.cta}
+      </Link>
+    );
+  }
+
+  return (
+    <button
+      type="button"
+      onClick={() => toast.success(`${task.title} — opening flow`)}
+      className={actionClass}
+    >
+      {task.cta}
+    </button>
   );
 }
 
