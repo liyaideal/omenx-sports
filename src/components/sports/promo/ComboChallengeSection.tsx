@@ -221,8 +221,8 @@ function FilterBar(props: {
           </button>
         ))}
       </div>
-      <div className="flex flex-wrap items-center gap-2">
-        <div className="flex flex-wrap gap-1.5">
+      <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
+        <div className="-mx-1 flex gap-1.5 overflow-x-auto px-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden sm:mx-0 sm:flex-wrap sm:overflow-visible sm:px-0">
           <MatchdayChip active={props.matchday === "ALL"} onClick={() => props.setMatchday("ALL")} label="All days" />
           {props.matchdays.map((d) => (
             <MatchdayChip
@@ -233,12 +233,12 @@ function FilterBar(props: {
             />
           ))}
         </div>
-        <div className="ml-auto flex items-center gap-2">
+        <div className="flex items-center gap-2 sm:ml-auto">
           <button
             type="button"
             onClick={() => props.setOnlyAvailable(!props.onlyAvailable)}
             className={cn(
-              "border px-3 py-1.5 font-pitch text-[10px] font-bold uppercase tracking-widest",
+              "shrink-0 border px-3 py-1.5 font-pitch text-[10px] font-bold uppercase tracking-widest",
               props.onlyAvailable
                 ? "border-amber-400 bg-amber-400/10 text-amber-400"
                 : "border-zinc-700 bg-zinc-900 text-zinc-400 hover:border-zinc-600",
@@ -246,14 +246,14 @@ function FilterBar(props: {
           >
             Available only
           </button>
-          <label className="flex items-center gap-1 border-2 border-zinc-800 bg-black px-2">
+          <label className="flex flex-1 items-center gap-1 border-2 border-zinc-800 bg-black px-2 sm:flex-none">
             <Search className="h-3.5 w-3.5 text-zinc-500" />
             <input
               type="text"
               value={props.query}
               onChange={(e) => props.setQuery(e.target.value)}
               placeholder="Search team"
-              className="w-32 bg-transparent py-1.5 font-pitch text-xs font-semibold text-white placeholder:text-zinc-600 focus:outline-none"
+              className="w-full bg-transparent py-1.5 font-pitch text-xs font-semibold text-white placeholder:text-zinc-600 focus:outline-none sm:w-32"
             />
           </label>
         </div>
