@@ -730,9 +730,9 @@ export const LEGEND_ROUNDS: LegendRound[] = [
       { id: "makelele", name: "Claude Makélélé", club: "Chelsea", votePct: 0.09 },
     ],
     clues: [
-      { idx: 1, state: "revealed", text: "Won 3 Premier League titles with the Invincibles era." },
-      { idx: 2, state: "revealed", text: "Captained his national team to a European Championship." },
-      { idx: 3, state: "revealed", text: "Currently a head coach in Europe's top five leagues." },
+      { idx: 1, state: "revealed", label: "POSITION",      value: "DEFENSIVE MIDFIELDER" },
+      { idx: 2, state: "revealed", label: "PEAK CLUB",     value: "ARSENAL" },
+      { idx: 3, state: "revealed", label: "MAJOR TROPHY",  value: "EURO 2000" },
     ],
   },
   {
@@ -749,9 +749,9 @@ export const LEGEND_ROUNDS: LegendRound[] = [
       { id: "riquelme", name: "Juan Román Riquelme", club: "Boca Juniors", votePct: 0.16 },
     ],
     clues: [
-      { idx: 1, state: "revealed", text: "Spent nearly two decades at one Serie A club." },
-      { idx: 2, state: "revealed", text: "Wore the captain's armband for 145+ national-team caps." },
-      { idx: 3, state: "revealed", text: "Holds the appearance record for his club of his prime." },
+      { idx: 1, state: "revealed", label: "POSITION",      value: "RIGHT BACK" },
+      { idx: 2, state: "revealed", label: "PEAK CLUB",     value: "INTER MILAN" },
+      { idx: 3, state: "revealed", label: "MAJOR TROPHY",  value: "COPA AMÉRICA 1991" },
     ],
   },
   {
@@ -767,12 +767,13 @@ export const LEGEND_ROUNDS: LegendRound[] = [
       { id: "villa", name: "David Villa", club: "Valencia", votePct: 0.13 },
     ],
     clues: [
-      { idx: 1, state: "revealed", text: "Midfield maestro with 6 La Liga titles to his name." },
-      { idx: 2, state: "revealed", text: "Scored the winning goal in a World Cup final." },
+      { idx: 1, state: "revealed", label: "POSITION",   value: "CENTRAL MIDFIELDER" },
+      { idx: 2, state: "revealed", label: "PEAK CLUB",  value: "BARCELONA" },
       {
         idx: 3,
         state: "locked",
-        text: "Played his entire prime at one club's youth-to-first-team pipeline.",
+        label: "MAJOR TROPHY",
+        value: "WORLD CUP 2010",
         unlockHint: "Unlocks after 60% community vote",
       },
     ],
