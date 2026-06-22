@@ -114,8 +114,11 @@ import { NewbieRewardsSection, TaskCard } from "@/components/sports/promo/Newbie
 import type { NewbieTask, LegendRound, LegendRoundStatus } from "@/data/world-cup-carnival";
 import { LEGEND_ROUNDS } from "@/data/world-cup-carnival";
 import {
-  RoundCard as LegendRoundCard,
-  RevealWall as LegendRevealWall,
+  ScoreboardChassis,
+  RoundProgressHud,
+  ActiveRoundBay,
+  CandidateBoard,
+  SignedArchiveStrip,
 } from "@/components/sports/promo/GuessTheLegendTab";
 
 export const Route = createFileRoute("/style-guide")({
@@ -2147,18 +2150,20 @@ function StyleGuide() {
                 </ul>
               </div>
 
-              <div className="mt-10 space-y-6">
-                <div className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
-                  Guess the Legend — RoundCard 4-state playground (voting · locked-in · revealed-hit · revealed-miss)
+              <div className="mt-10 space-y-10">
+                <div className="space-y-3">
+                  <div className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+                    Guess the Legend — scoreboard chassis (HUD · bay · board · archive)
+                  </div>
+                  <LegendScoreboardDemo />
                 </div>
-                <LegendRoundCardPlayground />
-              </div>
 
-              <div className="mt-10 space-y-6">
-                <div className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
-                  Guess the Legend — RevealWall (locked · voting · revealed-hit · revealed-miss)
+                <div className="space-y-3">
+                  <div className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+                    ActiveRoundBay 3-state playground (voting · revealed-hit · revealed-miss)
+                  </div>
+                  <LegendBayPlayground />
                 </div>
-                <LegendRevealWallDemo />
               </div>
             </div>
           </Section>
