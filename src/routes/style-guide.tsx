@@ -2161,6 +2161,13 @@ function StyleGuide() {
               <div className="mt-10 space-y-10">
                 <div className="space-y-3">
                   <div className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+                    Assets & Tokens inventory (atoms used by HUD · bay · archive)
+                  </div>
+                  <LegendAssetsInventory />
+                </div>
+
+                <div className="space-y-3">
+                  <div className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
                     Guess the Legend — scoreboard chassis (HUD · bay · board · archive)
                   </div>
                   <LegendScoreboardDemo />
