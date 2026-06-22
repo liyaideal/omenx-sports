@@ -40,7 +40,7 @@ import {
   type SelectedLeg,
   type SubmittedTicket,
 } from "./combo/useComboState";
-import { ShareTrigger, shareCombo } from "@/components/sports/share";
+import { ShareTrigger, shareCombo, shareComboDraft } from "@/components/sports/share";
 import omenxLogo from "@/assets/omenx-logo.svg";
 import posterBgStadium from "@/assets/poster-bg-stadium.png.asset.json";
 
