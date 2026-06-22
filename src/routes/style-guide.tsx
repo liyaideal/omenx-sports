@@ -110,6 +110,7 @@ import { ConfettiLayer, TwinkleField } from "@/components/sports/promo/ConfettiL
 import { OverviewSection } from "@/components/sports/promo/OverviewSection";
 import { ComboChallengeSection } from "@/components/sports/promo/ComboChallengeSection";
 import { LuckyBoxSection } from "@/components/sports/promo/LuckyBoxSection";
+import { NewbieRewardsSection } from "@/components/sports/promo/NewbieRewardsSection";
 
 export const Route = createFileRoute("/style-guide")({
   head: () => ({
@@ -169,6 +170,25 @@ function Section({ id, title, kicker, children }: { id: string; title: string; k
       </div>
       {children}
     </section>
+  );
+}
+
+/**
+ * MobileFrame — renders any component inside a 390-wide framed surface so a
+ * desktop reviewer can see the mobile layout without resizing the window.
+ * Used in the World Cup Carnival "Mobile behavior" subsection.
+ */
+function MobileFrame({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <div>
+      <div className="mb-2 inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/[0.02] px-2.5 py-1 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+        <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
+        {label}
+      </div>
+      <div className="overflow-hidden rounded-2xl border border-dashed border-white/15 bg-black/30 p-3">
+        <div className="mx-auto w-full max-w-[390px]">{children}</div>
+      </div>
+    </div>
   );
 }
 
