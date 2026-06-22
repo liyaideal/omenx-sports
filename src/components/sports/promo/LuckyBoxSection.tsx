@@ -321,43 +321,43 @@ function TierCard({
         />
       )}
 
-      {/* Status corner badge */}
-      {isActive && (
-        <div
-          className="absolute right-3 top-3 z-[3] flex items-center gap-1 px-2 py-0.5 font-scoreboard text-[9px] font-bold tracking-[0.22em]"
-          style={{ background: accent, color: "black" }}
-        >
-          <Sparkles className="h-2.5 w-2.5" />
-          YOUR TIER
-        </div>
-      )}
-      {isSurpassed && (
-        <div className="absolute right-3 top-3 z-[3] flex items-center gap-1 border border-dashed border-zinc-500 px-2 py-0.5 font-scoreboard text-[9px] font-bold tracking-[0.22em] text-zinc-400">
-          <Check className="h-2.5 w-2.5" />
-          CLEARED
-        </div>
-      )}
-      {isLocked && (
-        <div className="absolute right-3 top-3 z-[3] flex items-center gap-1 border border-zinc-700 px-2 py-0.5 font-scoreboard text-[9px] font-bold tracking-[0.22em] text-zinc-500">
-          <Lock className="h-2.5 w-2.5" />
-          {isFirstUnreached ? "NEXT UP" : "LOCKED"}
-        </div>
-      )}
-
-      <div className="relative z-[3] flex items-start justify-between">
+      <div className="relative z-[3] flex items-center justify-between gap-2">
         <span
           className="font-scoreboard text-[10px] font-bold tracking-[0.25em]"
           style={{ color: isActive ? accent : "rgb(113 113 122)" }}
         >
           {tier.code}
         </span>
+        {isActive && (
+          <div
+            className="flex items-center gap-1 px-2 py-0.5 font-scoreboard text-[9px] font-bold tracking-[0.22em]"
+            style={{ background: accent, color: "black" }}
+          >
+            <Sparkles className="h-2.5 w-2.5" />
+            YOUR TIER
+          </div>
+        )}
+        {isSurpassed && (
+          <div className="flex items-center gap-1 border border-dashed border-zinc-500 px-2 py-0.5 font-scoreboard text-[9px] font-bold tracking-[0.22em] text-zinc-400">
+            <Check className="h-2.5 w-2.5" />
+            CLEARED
+          </div>
+        )}
+        {isLocked && (
+          <div className="flex items-center gap-1 border border-zinc-700 px-2 py-0.5 font-scoreboard text-[9px] font-bold tracking-[0.22em] text-zinc-500">
+            <Lock className="h-2.5 w-2.5" />
+            {isFirstUnreached ? "NEXT UP" : "LOCKED"}
+          </div>
+        )}
+      </div>
+      <div className="relative z-[3] flex items-end justify-between gap-2">
+        <h3 className="font-pitch text-xl font-bold uppercase tracking-wide text-white">
+          {tier.name}
+        </h3>
         <span className="font-pitch text-[10px] font-semibold uppercase tracking-widest text-zinc-500">
           {tier.poolLabel}
         </span>
       </div>
-      <h3 className="relative z-[3] font-pitch text-xl font-bold uppercase tracking-wide text-white">
-        {tier.name}
-      </h3>
 
       {/* Reel */}
       <div
