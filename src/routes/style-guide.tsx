@@ -111,7 +111,12 @@ import { OverviewSection } from "@/components/sports/promo/OverviewSection";
 import { ComboChallengeSection } from "@/components/sports/promo/ComboChallengeSection";
 import { LuckyBoxSection } from "@/components/sports/promo/LuckyBoxSection";
 import { NewbieRewardsSection, TaskCard } from "@/components/sports/promo/NewbieRewardsSection";
-import type { NewbieTask } from "@/data/world-cup-carnival";
+import type { NewbieTask, LegendRound, LegendRoundStatus } from "@/data/world-cup-carnival";
+import { LEGEND_ROUNDS } from "@/data/world-cup-carnival";
+import {
+  RoundCard as LegendRoundCard,
+  RevealWall as LegendRevealWall,
+} from "@/components/sports/promo/GuessTheLegendTab";
 
 export const Route = createFileRoute("/style-guide")({
   head: () => ({
@@ -2138,7 +2143,22 @@ function StyleGuide() {
                   <li>• <b>Post-submit ticket reveal</b>: after a combo is accepted, <code className="font-mono text-foreground">TicketAcceptedModal</code> footer is fixed at 2 rows — row 1 is the amber Share my combo primary CTA (<code className="font-mono text-foreground">ShareTrigger variant="wide" accent="amber" size="sm"</code> → amber border + amber/10 fill + amber label + amber arrow chip), row 2 is a <code className="font-mono text-foreground">grid-cols-2</code> of two zinc-outline secondary buttons (<b>View ticket</b> + <b>Build another</b>) that share an identical token: <code className="font-mono text-foreground">border border-zinc-700 bg-zinc-900/60 rounded-2xl py-3</code>, icon-left, same font/tracking. All three buttons share the same height (<code className="font-mono text-foreground">py-3</code>) — main CTA is signaled only by amber color, not by extra height. Closing the modal by any path (View, Build another, click-outside, Esc) auto-smooth-scrolls to <code className="font-mono text-foreground">#combo-my-tickets</code> and applies a 2.5s amber ring + glow + pulse to the newest <code className="font-mono text-foreground">TicketRow</code>. Respects <code className="font-mono text-foreground">prefers-reduced-motion</code>. <code className="font-mono text-foreground">capReached</code> disables Build another in place and shows a small caption below — never collapses the 2-row structure. Modal-footer rule for the whole app: max 1 amber primary CTA + 1 row of zinc-outline secondaries; same height across the row; never stack 3 full-width buttons; never mix amber/zinc outlines on secondaries.</li>
                   <li>• <b>Wallet trail on tickets</b>: every settled or open ticket explicitly surfaces where the money goes. <code className="font-mono text-foreground">WalletLine</code> sits at the bottom of each <code className="font-mono text-foreground">TicketRow</code> and links to <code className="font-mono text-foreground">omenxUrl.wallet()</code> in a new tab. Three tones by status: <span className="text-emerald-300">SETTLED_WON</span> = "+N U credited to your Wallet" (emerald, strong), <span className="text-zinc-300">SETTLED_LOST</span> = "−N U from stake · View in Wallet" (zinc, medium), <span className="text-zinc-400">ACCEPTED</span> = "−N U held · settles on result · Wallet" (zinc, faint). <code className="font-mono text-foreground">TicketAcceptedModal</code> also shows an amber "Payouts settle automatically to your Wallet" hint right below the locked-odds row. No duplicate section-header link — per-ticket entry points are enough, and Wallet on OmenX is view-only (not actually "manageable"), so the redundant "Manage in Wallet" CTA was removed.</li>
                   <li>• <b>Welcome / quest tasks never auto-credit</b>. <code className="font-mono text-foreground">NewbieTask.status</code> is a 4-state machine: <code className="font-mono text-foreground">locked → in-progress → claimable → claimed</code>. Reaching the threshold moves a task to <code className="font-mono text-foreground">claimable</code> and shows a pulsing green <b>Ready to claim</b> pill + filled <b>Claim</b> button — the user MUST click to receive the voucher. Action CTAs on <code className="font-mono text-foreground">in-progress</code> use real links: T-02 <b>Deposit now</b> → <code className="font-mono text-foreground">omenxUrl.wallet()</code> (external, new tab, ArrowUpRight icon), T-03 <b>Open events</b> → <code className="font-mono text-foreground">/league/world-cup-2026?view=games</code> (internal). Implementing "complete → auto-grant" is a bug — see the 4-state playground above.</li>
+                  <li>• <b>Guess the Legend — country-by-country, never 8-in-1</b>. Each round shows ONE country flag + 4 retired-legend candidates (real names from that country's retired pool; distractors are frontend fiction, not actual signees). 3 progressive clues unlock via community vote thresholds — never via wall-clock countdown. Reveal cadence is INTENTIONALLY random because each player signs on his own availability — UI must show <code className="font-mono text-foreground">next reveal · TBA</code>, never a numeric timer. Correct guess on reveal day grants <b>1× Tier-01 Basic Vault spin</b> — never the signed jersey itself. Pre-warm strip surfaces already-signed memorabilia (Vieira in main pool, Y.Touré as bonus outside the 8) — bonus pre-warm legends never enter the round queue.</li>
                 </ul>
+              </div>
+
+              <div className="mt-10 space-y-6">
+                <div className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+                  Guess the Legend — RoundCard 4-state playground (voting · locked-in · revealed-hit · revealed-miss)
+                </div>
+                <LegendRoundCardPlayground />
+              </div>
+
+              <div className="mt-10 space-y-6">
+                <div className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+                  Guess the Legend — RevealWall (locked · voting · revealed-hit · revealed-miss)
+                </div>
+                <LegendRevealWallDemo />
               </div>
             </div>
           </Section>
@@ -2738,6 +2758,65 @@ function PanelVariant({ market }: { market: SportsMarket }) {
         </div>
       </div>
     </div>
+  );
+}
+
+/* -------------------------------------------------------------------- */
+/*  Guess the Legend playground helpers                                  */
+/* -------------------------------------------------------------------- */
+
+function LegendRoundCardPlayground() {
+  const baseRound =
+    LEGEND_ROUNDS.find((r) => r.status === "voting") ?? LEGEND_ROUNDS[0];
+  const states: { label: LegendRoundStatus; description: string }[] = [
+    { label: "voting", description: "Candidates clickable, CTA armed" },
+    { label: "locked-in", description: "Pick locked, dimmed siblings, CTA disabled" },
+    { label: "revealed-hit", description: "Correct candidate crowned, success banner" },
+    { label: "revealed-miss", description: "Correct candidate crowned, user's wrong pick marked ✗" },
+  ];
+  return (
+    <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+      {states.map((s) => {
+        const round: LegendRound = {
+          ...baseRound,
+          status: s.label,
+          userPickId:
+            s.label === "revealed-miss"
+              ? baseRound.candidates.find(
+                  (c) => c.id !== baseRound.correctCandidateId,
+                )?.id
+              : baseRound.correctCandidateId,
+        };
+        const pickId =
+          s.label === "voting" ? undefined : round.userPickId;
+        return (
+          <div key={s.label} className="space-y-2">
+            <div className="font-mono text-[10px] uppercase tracking-widest text-amber-400/80">
+              {s.label} · {s.description}
+            </div>
+            <LegendRoundCard
+              round={round}
+              effectiveStatus={s.label}
+              effectivePickId={pickId}
+              onSelectCandidate={() => {}}
+              onLockIn={() => {}}
+            />
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+function LegendRevealWallDemo() {
+  return (
+    <LegendRevealWall
+      rounds={LEGEND_ROUNDS}
+      activeRoundId={LEGEND_ROUNDS.find((r) => r.status === "voting")?.id ?? LEGEND_ROUNDS[0].id}
+      onSelectRound={() => {}}
+      hits={1}
+      completed={2}
+    />
   );
 }
 

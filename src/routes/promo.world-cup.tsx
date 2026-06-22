@@ -8,6 +8,7 @@ import { NewbieRewardsSection } from "@/components/sports/promo/NewbieRewardsSec
 import { ComboChallengeSection } from "@/components/sports/promo/ComboChallengeSection";
 import { LuckyBoxSection } from "@/components/sports/promo/LuckyBoxSection";
 import { CarnivalRulesSection } from "@/components/sports/promo/CarnivalRulesSection";
+import { GuessTheLegendTab } from "@/components/sports/promo/GuessTheLegendTab";
 import { ScoreboardHero } from "@/components/sports/promo/ScoreboardHero";
 import { ScoreboardTicker } from "@/components/sports/promo/ScoreboardTicker";
 import { ACCOUNT_STATS } from "@/data/sports-markets";
@@ -18,7 +19,13 @@ const USER_AVATAR =
   "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=120&h=120&fit=crop&crop=faces&q=80";
 
 function normalizeTab(raw: unknown): CarnivalTab {
-  if (raw === "newbie" || raw === "combo" || raw === "luckybox" || raw === "rules") {
+  if (
+    raw === "newbie" ||
+    raw === "combo" ||
+    raw === "luckybox" ||
+    raw === "legend" ||
+    raw === "rules"
+  ) {
     return raw;
   }
   return "overview";
@@ -90,6 +97,7 @@ function CarnivalContent({ tab }: { tab: CarnivalTab }) {
         {tab === "newbie" && <NewbieRewardsSection />}
         {tab === "combo" && <ComboChallengeSection />}
         {tab === "luckybox" && <LuckyBoxSection />}
+        {tab === "legend" && <GuessTheLegendTab />}
         {tab === "rules" && <CarnivalRulesSection />}
 
         {tab !== "overview" && <ScoreboardTicker />}

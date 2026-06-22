@@ -15,3 +15,4 @@ OMENX wordmark = always `@/assets/omenx-logo.svg`. Never render "OMENX" in Audio
 - [Share poster](mem://design/share-poster)
 - [OMENX logo usage](mem://design/omenx-logo) — always use the official SVG wordmark, never font-set "OMENX"
 - [Quest task rewards never auto-grant](mem://rules/quest-no-auto-grant) — NewbieTask 4-state machine; threshold → claimable, user must click Claim
+- [Guess the Legend reveal](mem://features/signed-jersey-reveal) — /promo/world-cup `legend` tab; 1 country + 4 candidates + 3 clues per round; correct → 1× Tier-01 Basic Vault spin; never 8-in-1; reveal cadence random (no countdown)

@@ -12,7 +12,7 @@ export function CarnivalTabs({ current }: { current: CarnivalTab }) {
     <nav
       role="tablist"
       aria-label="Carnival sections"
-      className="-mx-4 flex snap-x snap-mandatory gap-2 overflow-x-auto px-4 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden md:mx-0 md:grid md:grid-cols-5 md:overflow-visible md:px-0 md:pb-0"
+      className="-mx-4 flex snap-x snap-mandatory gap-2 overflow-x-auto px-4 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden md:mx-0 md:grid md:grid-cols-6 md:overflow-visible md:px-0 md:pb-0"
     >
       {CARNIVAL_TABS.map((t) => {
         const active = t.id === current;
