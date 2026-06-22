@@ -14,3 +14,4 @@ OMENX wordmark = always `@/assets/omenx-logo.svg`. Never render "OMENX" in Audio
 - [Carnival LED visuals](mem://design/carnival-led)
 - [Share poster](mem://design/share-poster)
 - [OMENX logo usage](mem://design/omenx-logo) — always use the official SVG wordmark, never font-set "OMENX"
+- [Quest task rewards never auto-grant](mem://rules/quest-no-auto-grant) — NewbieTask 4-state machine; threshold → claimable, user must click Claim
