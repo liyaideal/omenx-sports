@@ -1262,11 +1262,26 @@ function PosterTicketFrame({ children }: { children: React.ReactNode }) {
   );
 }
 
-export function ShareCardPreview({ ticket }: { ticket: SubmittedTicket }) {
-  const legs = ticket.legs.slice(0, 4);
-  const stakeStr = `${Math.round(ticket.stakeU)}U`;
-  const rewardStr = `${Math.round(ticket.grossPayoutU)}U`;
-  const oddsStr = `${ticket.lockedActivityOdds.toFixed(0)}x`;
+export interface ShareCardPreviewProps {
+  /** When provided, all other fields are derived from the ticket. */
+  ticket?: SubmittedTicket;
+  /** Required when `ticket` is not provided (pre-submit / draft poster). */
+  legs?: SelectedLeg[];
+  stakeU?: number;
+  odds?: number;
+  grossPayoutU?: number;
+}
+
+export function ShareCardPreview(props: ShareCardPreviewProps) {
+  const ticket = props.ticket;
+  const sourceLegs = ticket?.legs ?? props.legs ?? [];
+  const legs = sourceLegs.slice(0, 4);
+  const stakeU = ticket?.stakeU ?? props.stakeU ?? COMBO_STAKE;
+  const odds = ticket?.lockedActivityOdds ?? props.odds ?? 0;
+  const grossPayoutU = ticket?.grossPayoutU ?? props.grossPayoutU ?? 0;
+  const stakeStr = `${Math.round(stakeU)}U`;
+  const rewardStr = `${Math.round(grossPayoutU)}U`;
+  const oddsStr = `${odds.toFixed(0)}x`;
   const referralCode = "ABCD2026";
 
   return (
