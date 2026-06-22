@@ -403,12 +403,9 @@ export function ActiveRoundBay({
                 </span>
               </div>
             )}
-            <div className="absolute bottom-1.5 left-1.5 right-1.5 flex items-center justify-between gap-2">
+            <div className="absolute bottom-1.5 left-1.5 right-1.5 flex items-center">
               <span className="bg-black/70 px-1.5 py-0.5 font-scoreboard text-[9px] font-bold tracking-[0.22em] text-white backdrop-blur-sm">
                 {country.name.toUpperCase()}
-              </span>
-              <span className="bg-black/70 px-1.5 py-0.5 font-scoreboard text-[9px] font-bold tracking-[0.22em] text-zinc-400 backdrop-blur-sm">
-                {country.region}
               </span>
             </div>
           </div>
