@@ -575,15 +575,6 @@ function OutcomeButton({
   );
 }
 
-function DisplayOnlyChip({ market }: { market: WCMarket }) {
-  return (
-    <span className="inline-flex items-center gap-1 border border-zinc-800 bg-zinc-950 px-2 py-0.5 font-pitch text-[9px] font-bold uppercase tracking-widest text-zinc-500">
-      <span className="text-zinc-600">{market.marketType}</span>
-      <span className="text-zinc-400">{market.summary}</span>
-    </span>
-  );
-}
-
 function StageBadge({ stage }: { stage: WCStage }) {
   return (
     <span className="border border-amber-400/40 bg-amber-400/10 px-1.5 py-0.5 font-scoreboard text-[9px] font-bold tracking-widest text-amber-400">
