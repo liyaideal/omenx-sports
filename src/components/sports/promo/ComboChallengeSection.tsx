@@ -889,7 +889,7 @@ function SubmitConfirmModal({
         </div>
         <div className="space-y-1 p-4">
           {ctrl.selectedLegs.map((l, i) => (
-            <div key={l.matchId} className="flex items-center gap-2 border border-zinc-800 bg-black px-2 py-1.5">
+            <div key={l.marketId} className="flex items-center gap-2 border border-zinc-800 bg-black px-2 py-1.5">
               <span className="font-scoreboard text-[10px] font-bold tracking-widest text-amber-400">
                 {String(i + 1).padStart(2, "0")}
               </span>
