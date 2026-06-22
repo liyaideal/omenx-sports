@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { motion } from "motion/react";
-import { Trophy, Sparkles, Gift, Check, Lock } from "lucide-react";
+import { Trophy, Sparkles, Gift, Check, Lock, ChevronRight } from "lucide-react";
+import { Link } from "@tanstack/react-router";
 import { toast } from "sonner";
 import {
   LUCKY_BOX_TIERS,
@@ -439,6 +440,17 @@ function TierCard({
           </li>
         ))}
       </ul>
+
+      {tier.id === "grand" && (
+        <Link
+          to="/promo/world-cup"
+          search={{ tab: "legend" }}
+          className="relative z-[3] flex items-center justify-between gap-2 border border-dashed border-zinc-700 px-3 py-2 font-scoreboard text-[10px] font-bold tracking-[0.22em] text-amber-400 transition-colors hover:border-amber-400 hover:bg-amber-400/5"
+        >
+          <span>GUESS WHO'S NEXT →</span>
+          <ChevronRight className="h-3 w-3" />
+        </Link>
+      )}
 
       <button
         type="button"
