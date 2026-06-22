@@ -101,7 +101,7 @@ export function ComboChallengeSection() {
 
         {/* Right: Sticky Builder + Preview + CTA (desktop only — mobile uses bottom bar) */}
         <aside className="hidden lg:block">
-          <div className="sticky top-24 space-y-4">
+          <div className="sticky top-24 max-h-[calc(100vh-7rem)] space-y-4 overflow-y-auto pr-1 [scrollbar-gutter:stable]">
             <ComboBuilder ctrl={ctrl} onCalculate={ctrl.requestPreview} onConfirm={() => setConfirmOpen(true)} />
             <QuotePreviewPanel ctrl={ctrl} />
           </div>
