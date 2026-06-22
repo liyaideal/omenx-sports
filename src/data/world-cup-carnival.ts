@@ -275,7 +275,7 @@ function enrichMatch(m: WCMatch): WCMatch {
 }
 
 /** Fixture: ~20 World Cup 2026 matches across stages, with cut-off + display-only mix. */
-export const WC_COMBO_MATCHES: WCMatch[] = [
+const RAW_WC_MATCHES: WCMatch[] = [
   // Matchday 1 — Group, today
   {
     matchId: "WC26_GRPA_ARG_MEX", stage: "GROUP", matchday: "2026-06-15",
