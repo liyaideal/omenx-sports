@@ -88,7 +88,7 @@ export function GuessTheLegendTab() {
       return;
     }
     setLockedRounds((m) => ({ ...m, [activeRound.id]: true }));
-    toast.success("Pick locked — waiting for reveal day");
+    toast.success("Pick locked — hit on reveal day unlocks 1 Lucky Box spin");
   }
 
   return (
@@ -412,12 +412,19 @@ export function ActiveRoundBay({
 
   return (
     <div className="border-b-2 border-[#161616] bg-[#0a0a0a] px-5 py-5 sm:px-7 sm:py-6">
-      <div className="mb-3 flex items-center justify-between font-scoreboard text-[10px] font-bold tracking-[0.3em] text-zinc-600">
+      <div className="mb-3 flex items-center justify-between gap-3 font-scoreboard text-[10px] font-bold tracking-[0.3em] text-zinc-600">
         <span style={{ color: AMBER }}>
           ROUND #{String(round.roundNumber).padStart(2, "0")}
         </span>
-        <span>
-          {isRevealed ? "REVEALED" : `${revealedCount} / 3 CLUES LIVE`}
+        <span className="flex items-center gap-3">
+          {!isRevealed && (
+            <span className="hidden sm:inline" style={{ color: ACCENT }}>
+              HIT → +1 SPIN
+            </span>
+          )}
+          <span>
+            {isRevealed ? "REVEALED" : `${revealedCount} / 3 CLUES LIVE`}
+          </span>
         </span>
       </div>
 
@@ -634,7 +641,7 @@ export function CandidateBoard({
           }}
         >
           {effectiveStatus === "voting"
-            ? "Lock in pick"
+            ? "Lock in · win 1 Lucky Box spin"
             : effectiveStatus === "locked-in"
               ? "Pick locked · waiting for reveal"
               : "Round closed"}
