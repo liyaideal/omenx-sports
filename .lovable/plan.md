@@ -1,118 +1,77 @@
-## 目标
-把"猜球星"从 LuckyBox Tier-03 下挂的小卡片，升级为 `/promo/world-cup` 活动页的独立 tab——容器变大、决策从 1/8 降到 1/4、按国家分轮，悬念和命中率都更合理。
+## 方向
 
-## 已确认决策
-1. 同一国家可重复揭晓（例：巴西出现 Kaká 一轮、Carlos 一轮）
-2. 干扰项球星由我从该国退役名宿池里挑（纯前端假数据，不涉及合作）
-3. 揭晓顺序完全随机，UI 不显示倒计时数字，用 `next reveal: TBA`
+按 v1 「复古球场记分牌 + 翻牌线索 + 签名档案」重做 `/promo/world-cup?tab=legend`。  
+保留现有数据模型（8 国 × 4 候选 × 3 线索 × Tier-01 spin 奖励），重做视觉壳层和图像元素。
 
-## 已确认 8 国主池（含可能扩到 9）
-Brazil（Kaká, Roberto Carlos）/ Spain（Iniesta）/ France（Vieira）/ Argentina（Zanetti）/ Germany（Lahm）/ England（Terry）/ Netherlands（Bergkamp）/ Portugal（Figo）
-
-## 结构方案：单列 + 历史墙（Wordle Daily 风格）
-不做三栏 broadcast 也不做满宽 album，原因：
-- 三栏在 ≤1024 宽断点会被迫 stack，反而碎；
-- 满宽 album 视觉重，和 LuckyBox 兄弟 tab 不一致；
-- 单列窄容器（max-w-3xl 居中）能在桌面/移动一致，焦点清晰，符合"每周来揭晓一次"的克制感。
-
-### 页面分区（自上而下）
+## 视觉锚点（翻译自 v1）
 
 ```text
-┌─────────────────────────────────────────────┐
-│ Round Header                                │
-│  Round #03 · clue 2 of 3 live   · next: TBA │
-│  🇪🇸 SPAIN  (巨型国旗 + 国家名)              │
-├─────────────────────────────────────────────┤
-│ Clue Stack (3 行渐进式)                      │
-│  ✓ C1  Midfield maestro, 6 La Liga titles   │
-│  ✓ C2  Scored a World Cup winning goal 2010 │
-│  🔒 C3  Unlocks after 60% community vote     │
-├─────────────────────────────────────────────┤
-│ Candidates (2×2 网格，4 张该国退役球星卡)     │
-│  [Iniesta 42%] [Xavi 31%]                   │
-│  [Puyol 14%]   [Villa 13%]                  │
-│  选中态：琥珀描边 + 角标 ●                    │
-├─────────────────────────────────────────────┤
-│ Lock-in CTA (大琥珀按钮)                     │
-│   "Lock in pick"                            │
-│   Correct → 1× Tier-01 Basic Vault spin     │
-├─────────────────────────────────────────────┤
-│ Reveal Wall (横向 8 槽位 dot 进度)           │
-│  ● ● ● ○ ○ ○ ○ ○      Your record: 1/2 hits │
-│  hover 任一已揭晓 dot → 浮层显示该轮国家+球员 │
-│  +用户当时的猜测对错                         │
-├─────────────────────────────────────────────┤
-│ Pre-warm Strip (窄行)                       │
-│  ✦ Already signed for OmenX                 │
-│  [Vieira 缩略图] [Y.Touré 缩略图]            │
-└─────────────────────────────────────────────┘
+┌─[scoreboard chassis · 12px frame · corner bolts]──────────┐
+│ SERIES PROGRESS                       LIVE FEED · GUES-77 │
+│ [01🟢][02🟡][03·][04·][05·][06·][07·][08·]                │
+├──────────────────────────────────────────────────────────┤
+│  ┌──────────┐  ┌──────────────────────────────────────┐  │
+│  │   FLAG   │  │ ▌POSITION         ATTACKER           │  │
+│  │  (BRAZIL)│  │ ▌PEAK CLUB        AC MILAN           │  │
+│  │          │  │ ▌MAJOR TROPHY     ━━━ (locked)       │  │
+│  └──────────┘  └──────────────────────────────────────┘  │
+│  REGION · CONMEBOL                                        │
+├──────────────────────────────────────────────────────────┤
+│  [ KAKÁ      42% ▓▓▓▓░ ]  [ RONALDO      28% ▓▓░░░ ]    │
+│  [ ZICO      18% ▓░░░░ ]  [ ROMÁRIO      12% ▓░░░░ ]    │
+├──────────────────────────────────────────────────────────┤
+│  SIGNED ARCHIVE                                           │
+│  [PELÉ] [CRUYFF] [ZIDANE] [MESSI·active]                  │
+└──────────────────────────────────────────────────────────┘
 ```
 
-### 4 种轮次状态（同一组件不同 state，会做到 /style-guide）
-| 状态 | 触发 | 视觉 |
-|---|---|---|
-| `voting` | 当前轮进行中 | 候选卡可点，CTA 亮 |
-| `locked-in` | 用户已锁选 | 已选卡保持高亮 + ✓徽章，其他卡变灰，CTA 变成 "Pick locked · waiting reveal" disabled |
-| `revealed-hit` | 揭晓且用户猜对 | 正确卡翻转露出 ✓，错误卡灰；顶部横幅 "You hit it! 1× Tier-01 spin granted →" |
-| `revealed-miss` | 揭晓且用户没猜对 | 正确卡翻转露出 ✓+王冠，用户原选卡显示 ✗；横幅 "Better luck next round" |
+## 图像资源（`src/assets/legend-reveal/`）
 
-## 技术拆解（user 可跳过）
+**只生成 2 类素材，规避肖像权：**
 
-### 文件改动
-1. **`src/data/world-cup-carnival.ts`** — 重写之前的 `SIGNED_JERSEY_REVEALS`：
-   - 新 type `LegendRound { id, roundNumber, country, correctLegend, candidates[4], clues[3], status, userPick?, communityVote% }`
-   - `LEGEND_ROUNDS: LegendRound[]` — 至少 5 条（2 已揭晓 + 1 当前 voting + 2 locked future placeholder）
-   - 每国干扰项从这些退役名宿里挑（举例池）：
-     - BRA: Kaká / R.Carlos / Cafu / Ronaldinho / Rivaldo
-     - ESP: Iniesta / Xavi / Puyol / Villa
-     - FRA: Vieira / Henry / Thuram / Makelele
-     - ARG: Zanetti / Verón / Crespo / Riquelme
-     - GER: Lahm / Schweinsteiger / Klose / Ballack
-     - ENG: Terry / Lampard / Gerrard / Beckham
-     - NED: Bergkamp / Seedorf / Davids / van der Sar
-     - POR: Figo / Deco / Rui Costa / Nuno Gomes
-   - `PREWARM_LEGENDS`: Vieira（已在主池）+ Y.Touré（不在主池，仅预热）
-   - 不再删除 LuckyBox Tier-03 的 jersey 文案；只是不再下挂猜球星模块
+1. **8 国旗帜纹理板**（`flag-{brazil|spain|france|argentina|germany|england|netherlands|portugal}.jpg`）  
+   - 256×160 横版，做旧、做暗、带运动模糊，匹配 LED 记分牌色调  
+   - `imagegen` standard，~8 张
 
-2. **`src/components/sports/promo/GuessTheLegendTab.tsx`**（新文件）
-   - 拼上面 6 个分区
-   - 子组件：`RoundHeader` / `ClueStack` / `CandidateCard` / `RevealWall` / `PrewarmStrip`
-   - 状态管理：本地 `useState` 模拟 voting → locked-in 转换（纯前端 demo，不入库）
+2. **签名档案缩略图**（`signed-{slug}.jpg`）  
+   - 80×112 竖版，**风格化插画半身像**（不写实，避免真实球员肖像），背景叠国旗色  
+   - 已签的 8 位正确答案 + 2 位 prewarm = ~10 张  
+   - `imagegen` standard，统一画风（哑光做旧、签名笔触叠层）
 
-3. **`src/routes/promo.world-cup.tsx`**（已存在，需读后改）
-   - tabs 数组新增 `{ id: "guess-legend", label: "Guess the Legend", icon: ... }`
-   - 插在 LuckyBox 之后
-   - URL 参数 `?tab=guess-legend` 可直达
+**候选卡和正解头像都不出真人图**（用文字 + 国旗色块）— 这样既省成本，也保留悬念，也不踩肖像权。
 
-4. **`src/components/sports/promo/LuckyBoxSection.tsx`**
-   - **撤掉**之前在 Tier-03 下挂的 `GuessTheNextLegendSection`（如果已加）
-   - Tier-03 文案保留"signed jersey"作为奖项展示
-   - 加一行小字 link："Guess who's next →" 跳到新 tab
+## 文件改动
 
-5. **`src/routes/style-guide.tsx`**
-   - 新增 "Guess the Legend — Round 4 状态" demo（voting / locked-in / revealed-hit / revealed-miss）
-   - 新增 "Reveal Wall — dot 三态" demo
-   - 删除之前的 8 选 1 playground
+### 1. `src/data/world-cup-carnival.ts`
+- `LegendCountry` 新增 `flagImage: string`（指向 import 的旗帜纹理）
+- `LegendCandidate` 新增 `position?: string`、`peakClub?: string`、`majorTrophy?: string` —— 3 个线索全部结构化为「key → value」（正解才填，其他候选不需要）
+- `Round` 的 `clues[]` 改成 `{ label: 'POSITION'|'PEAK CLUB'|'MAJOR TROPHY', value: string, unlocked: boolean }[]`
+- `PrewarmLegend` / 正解球员 新增 `signedImage: string`
 
-6. **`DESIGN.md` §7 Don'ts** 追加：
-   - 猜球星模块禁止 8 选 1 全量曝光，必须按国家分轮 4 选 1
-   - 禁止显示具体倒计时数字（揭晓周期不固定）
-   - 干扰项必须是该国家真实退役名宿，不能虚构
+### 2. `src/components/sports/promo/GuessTheLegendTab.tsx`（重写）
+- 整个容器换成 v1 chassis 壳：`border-[12px] border-[#1a1a1a]` + 4 个螺栓圆点 + 内阴影 + 顶部反光 + 极轻 scanlines（opacity 10%）
+- `RoundProgressHud`：替换现在的 `RevealWall` 圆点墙 → 8 格 LED 方块（hit=#4ade80、active=#facc15 pulse、miss=#f87171、upcoming=zinc-950）+ 右上 `LIVE FEED · GUES-{round}` 字样
+- `ActiveRoundBay`：5 列 grid，左 2 列国旗图，右 3 列 3 行 split-flap 线索条（左侧 amber 立柱 + label/value 两端对齐）
+- `CandidateBoard`：保留 2×2，但每张换成 v1 的扁平 + 进度条 + hover amber 描边样式
+- `SignedArchiveStrip`：底部横条，每张缩略图 48×64，amber 描边 = 最新一张
+- 拆 4 个子组件（chassis、hud、bay、archive）放同文件，~400 行
 
-7. **`mem://features/signed-jersey-reveal`** 更新：从"8 选 1 + 投票"改为"按国家分轮 4 选 1 + 独立 tab + Tier-01 spin 奖励"
+### 3. `src/routes/style-guide.tsx`
+镜像新增：chassis 壳 demo、LED 进度灯 4 态、split-flap 线索行 3 态、签名档案缩略图
 
-### 不在本次范围
-- 真实投票后端存储（纯前端 mock %）
-- 跨用户排行榜（仅"Your record"）
-- 实际 spin 发放管线（仅 UI 提示）
-- Y.Touré 头像生成（用占位 + 之前用户上传的现场签名照）
+### 4. `DESIGN.md` §4 / §7
+- §4 加 "Legend Scoreboard Chassis" 规格（border、bolt、scanline opacity 上限）
+- §7 Don't：候选卡不放真人头像；候选不暴露 position/club/trophy；scanline 不超过 10% opacity
 
-## 实施顺序
-1. 数据层（`world-cup-carnival.ts`）
-2. 子组件 + Tab 主组件
-3. 接入 `promo.world-cup.tsx` tabs
-4. 撤掉 LuckyBox 下挂模块、加跳转 link
-5. 镜像到 `/style-guide`
-6. 更新 DESIGN.md + memory
+### 5. `mem://design/legend-scoreboard`
+固化壳层规则（chassis + LED 进度 + split-flap 线索）
 
-批准就开工。
+## 不动
+
+- 路由 / tab 结构 / LuckyBox 入口
+- 奖励机制（Tier-01 spin）
+- 数据 mock 的 8 国名单和 prewarm（Vieira / Y. Touré）
+
+## 风险
+
+- 8 张旗帜 + 10 张人像生成 ≈ 18 次 standard imagegen，需要 1–2 分钟。可以接受？

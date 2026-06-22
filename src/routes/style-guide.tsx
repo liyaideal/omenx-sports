@@ -114,8 +114,11 @@ import { NewbieRewardsSection, TaskCard } from "@/components/sports/promo/Newbie
 import type { NewbieTask, LegendRound, LegendRoundStatus } from "@/data/world-cup-carnival";
 import { LEGEND_ROUNDS } from "@/data/world-cup-carnival";
 import {
-  RoundCard as LegendRoundCard,
-  RevealWall as LegendRevealWall,
+  ScoreboardChassis,
+  RoundProgressHud,
+  ActiveRoundBay,
+  CandidateBoard,
+  SignedArchiveStrip,
 } from "@/components/sports/promo/GuessTheLegendTab";
 
 export const Route = createFileRoute("/style-guide")({
@@ -2147,18 +2150,20 @@ function StyleGuide() {
                 </ul>
               </div>
 
-              <div className="mt-10 space-y-6">
-                <div className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
-                  Guess the Legend — RoundCard 4-state playground (voting · locked-in · revealed-hit · revealed-miss)
+              <div className="mt-10 space-y-10">
+                <div className="space-y-3">
+                  <div className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+                    Guess the Legend — scoreboard chassis (HUD · bay · board · archive)
+                  </div>
+                  <LegendScoreboardDemo />
                 </div>
-                <LegendRoundCardPlayground />
-              </div>
 
-              <div className="mt-10 space-y-6">
-                <div className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
-                  Guess the Legend — RevealWall (locked · voting · revealed-hit · revealed-miss)
+                <div className="space-y-3">
+                  <div className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+                    ActiveRoundBay 3-state playground (voting · revealed-hit · revealed-miss)
+                  </div>
+                  <LegendBayPlayground />
                 </div>
-                <LegendRevealWallDemo />
               </div>
             </div>
           </Section>
@@ -2765,17 +2770,42 @@ function PanelVariant({ market }: { market: SportsMarket }) {
 /*  Guess the Legend playground helpers                                  */
 /* -------------------------------------------------------------------- */
 
-function LegendRoundCardPlayground() {
+function LegendScoreboardDemo() {
+  const active = LEGEND_ROUNDS.find((r) => r.status === "voting") ?? LEGEND_ROUNDS[0];
+  return (
+    <div className="mx-auto w-full max-w-3xl">
+      <ScoreboardChassis>
+        <RoundProgressHud
+          rounds={LEGEND_ROUNDS}
+          activeRoundId={active.id}
+          hits={1}
+          completed={2}
+          onSelectRound={() => {}}
+        />
+        <ActiveRoundBay round={active} effectiveStatus={active.status} />
+        <CandidateBoard
+          round={active}
+          effectiveStatus={active.status}
+          effectivePickId={undefined}
+          onSelectCandidate={() => {}}
+          onLockIn={() => {}}
+        />
+        <SignedArchiveStrip rounds={LEGEND_ROUNDS} />
+      </ScoreboardChassis>
+    </div>
+  );
+}
+
+function LegendBayPlayground() {
   const baseRound =
     LEGEND_ROUNDS.find((r) => r.status === "voting") ?? LEGEND_ROUNDS[0];
   const states: { label: LegendRoundStatus; description: string }[] = [
-    { label: "voting", description: "Candidates clickable, CTA armed" },
-    { label: "locked-in", description: "Pick locked, dimmed siblings, CTA disabled" },
-    { label: "revealed-hit", description: "Correct candidate crowned, success banner" },
-    { label: "revealed-miss", description: "Correct candidate crowned, user's wrong pick marked ✗" },
+    { label: "voting", description: "Active round — clues unlock, candidates clickable" },
+    { label: "revealed-hit", description: "Reveal day — user picked correctly" },
+    { label: "revealed-miss", description: "Reveal day — user missed" },
   ];
   return (
-    <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+    <div className="grid grid-cols-1 gap-6 lg:grid-cols-1">
       {states.map((s) => {
         const round: LegendRound = {
           ...baseRound,
@@ -2787,36 +2817,26 @@ function LegendRoundCardPlayground() {
                 )?.id
               : baseRound.correctCandidateId,
         };
-        const pickId =
-          s.label === "voting" ? undefined : round.userPickId;
+        const pickId = s.label === "voting" ? undefined : round.userPickId;
         return (
           <div key={s.label} className="space-y-2">
             <div className="font-mono text-[10px] uppercase tracking-widest text-amber-400/80">
               {s.label} · {s.description}
             </div>
-            <LegendRoundCard
-              round={round}
-              effectiveStatus={s.label}
-              effectivePickId={pickId}
-              onSelectCandidate={() => {}}
-              onLockIn={() => {}}
-            />
+            <ScoreboardChassis>
+              <ActiveRoundBay round={round} effectiveStatus={s.label} />
+              <CandidateBoard
+                round={round}
+                effectiveStatus={s.label}
+                effectivePickId={pickId}
+                onSelectCandidate={() => {}}
+                onLockIn={() => {}}
+              />
+            </ScoreboardChassis>
           </div>
         );
       })}
     </div>
-  );
-}
-
-function LegendRevealWallDemo() {
-  return (
-    <LegendRevealWall
-      rounds={LEGEND_ROUNDS}
-      activeRoundId={LEGEND_ROUNDS.find((r) => r.status === "voting")?.id ?? LEGEND_ROUNDS[0].id}
-      onSelectRound={() => {}}
-      hits={1}
-      completed={2}
-    />
   );
 }
 

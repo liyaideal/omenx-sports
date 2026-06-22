@@ -598,16 +598,59 @@ export const CARNIVAL_TICKER_LINES = [
 export type LegendCountryCode =
   | "BRA" | "ESP" | "FRA" | "ARG" | "GER" | "ENG" | "NED" | "POR";
 
-export const LEGEND_COUNTRIES: Record<LegendCountryCode, { name: string; flag: string }> = {
-  BRA: { name: "Brazil", flag: "🇧🇷" },
-  ESP: { name: "Spain", flag: "🇪🇸" },
-  FRA: { name: "France", flag: "🇫🇷" },
-  ARG: { name: "Argentina", flag: "🇦🇷" },
-  GER: { name: "Germany", flag: "🇩🇪" },
-  ENG: { name: "England", flag: "🏴󠁧󠁢󠁥󠁮󠁧󠁿" },
-  NED: { name: "Netherlands", flag: "🇳🇱" },
-  POR: { name: "Portugal", flag: "🇵🇹" },
+import flagBra from "@/assets/legend-reveal/flag-bra.jpg";
+import flagEsp from "@/assets/legend-reveal/flag-esp.jpg";
+import flagFra from "@/assets/legend-reveal/flag-fra.jpg";
+import flagArg from "@/assets/legend-reveal/flag-arg.jpg";
+import flagGer from "@/assets/legend-reveal/flag-ger.jpg";
+import flagEng from "@/assets/legend-reveal/flag-eng.jpg";
+import flagNed from "@/assets/legend-reveal/flag-ned.jpg";
+import flagPor from "@/assets/legend-reveal/flag-por.jpg";
+import signedBra from "@/assets/legend-reveal/signed-bra.jpg";
+import signedEsp from "@/assets/legend-reveal/signed-esp.jpg";
+import signedFra from "@/assets/legend-reveal/signed-fra.jpg";
+import signedArg from "@/assets/legend-reveal/signed-arg.jpg";
+import signedGer from "@/assets/legend-reveal/signed-ger.jpg";
+import signedEng from "@/assets/legend-reveal/signed-eng.jpg";
+import signedNed from "@/assets/legend-reveal/signed-ned.jpg";
+import signedPor from "@/assets/legend-reveal/signed-por.jpg";
+import signedCiv from "@/assets/legend-reveal/signed-civ.jpg";
+import signedMystery from "@/assets/legend-reveal/signed-mystery.jpg";
+
+export interface LegendCountry {
+  name: string;
+  flag: string;
+  /** Confederation tag shown beneath the flag plate (REGION · CONMEBOL etc.). */
+  region: string;
+  /** Weathered banner image used as the round's hero visual. */
+  flagImage: string;
+}
+
+export const LEGEND_COUNTRIES: Record<LegendCountryCode, LegendCountry> = {
+  BRA: { name: "Brazil",      flag: "🇧🇷", region: "CONMEBOL", flagImage: flagBra },
+  ESP: { name: "Spain",       flag: "🇪🇸", region: "UEFA",     flagImage: flagEsp },
+  FRA: { name: "France",      flag: "🇫🇷", region: "UEFA",     flagImage: flagFra },
+  ARG: { name: "Argentina",   flag: "🇦🇷", region: "CONMEBOL", flagImage: flagArg },
+  GER: { name: "Germany",     flag: "🇩🇪", region: "UEFA",     flagImage: flagGer },
+  ENG: { name: "England",     flag: "🏴󠁧󠁢󠁥󠁮󠁧󠁿", region: "UEFA",     flagImage: flagEng },
+  NED: { name: "Netherlands", flag: "🇳🇱", region: "UEFA",     flagImage: flagNed },
+  POR: { name: "Portugal",    flag: "🇵🇹", region: "UEFA",     flagImage: flagPor },
 };
+
+/** Per-country signed portrait used in the archive strip when a round is revealed. */
+export const LEGEND_SIGNED_IMAGES: Record<LegendCountryCode, string> = {
+  BRA: signedBra,
+  ESP: signedEsp,
+  FRA: signedFra,
+  ARG: signedArg,
+  GER: signedGer,
+  ENG: signedEng,
+  NED: signedNed,
+  POR: signedPor,
+};
+
+/** Halftone silhouette + ? — used on the active-round hero visual until reveal. */
+export const LEGEND_MYSTERY_PORTRAIT = signedMystery;
 
 export interface LegendCandidate {
   /** Stable id, lowercase-dashed (e.g. "iniesta"). */
@@ -619,17 +662,20 @@ export interface LegendCandidate {
   votePct: number;
 }
 
+/**
+ * A clue row in the scoreboard "split-flap" stack. Always 3 per round, always
+ * the same three labels in the same order so the UI can rely on positional
+ * stability. `value` is hidden when state === "locked".
+ */
+export type LegendClueLabel = "POSITION" | "PEAK CLUB" | "MAJOR TROPHY";
+
 export interface LegendClue {
-  /** 1..3. Clue index inside the round. */
   idx: 1 | 2 | 3;
-  text: string;
-  /**
-   * `revealed` clues are visible. `locked` clues display the unlock condition
-   * (e.g. "Unlocks after 60% community vote"). The unlock condition itself
-   * is mock; this field is the only switch that matters in the UI.
-   */
+  label: LegendClueLabel;
+  /** The revealed value, e.g. "ATTACKER" or "AC MILAN". Empty when locked. */
+  value: string;
   state: "revealed" | "locked";
-  /** Human-readable unlock condition shown on locked clues. */
+  /** Shown on locked rows, e.g. "Unlocks after 60% community vote". */
   unlockHint?: string;
 }
 
@@ -684,9 +730,9 @@ export const LEGEND_ROUNDS: LegendRound[] = [
       { id: "makelele", name: "Claude Makélélé", club: "Chelsea", votePct: 0.09 },
     ],
     clues: [
-      { idx: 1, state: "revealed", text: "Won 3 Premier League titles with the Invincibles era." },
-      { idx: 2, state: "revealed", text: "Captained his national team to a European Championship." },
-      { idx: 3, state: "revealed", text: "Currently a head coach in Europe's top five leagues." },
+      { idx: 1, state: "revealed", label: "POSITION",      value: "DEFENSIVE MIDFIELDER" },
+      { idx: 2, state: "revealed", label: "PEAK CLUB",     value: "ARSENAL" },
+      { idx: 3, state: "revealed", label: "MAJOR TROPHY",  value: "EURO 2000" },
     ],
   },
   {
@@ -703,9 +749,9 @@ export const LEGEND_ROUNDS: LegendRound[] = [
       { id: "riquelme", name: "Juan Román Riquelme", club: "Boca Juniors", votePct: 0.16 },
     ],
     clues: [
-      { idx: 1, state: "revealed", text: "Spent nearly two decades at one Serie A club." },
-      { idx: 2, state: "revealed", text: "Wore the captain's armband for 145+ national-team caps." },
-      { idx: 3, state: "revealed", text: "Holds the appearance record for his club of his prime." },
+      { idx: 1, state: "revealed", label: "POSITION",      value: "RIGHT BACK" },
+      { idx: 2, state: "revealed", label: "PEAK CLUB",     value: "INTER MILAN" },
+      { idx: 3, state: "revealed", label: "MAJOR TROPHY",  value: "COPA AMÉRICA 1991" },
     ],
   },
   {
@@ -721,12 +767,13 @@ export const LEGEND_ROUNDS: LegendRound[] = [
       { id: "villa", name: "David Villa", club: "Valencia", votePct: 0.13 },
     ],
     clues: [
-      { idx: 1, state: "revealed", text: "Midfield maestro with 6 La Liga titles to his name." },
-      { idx: 2, state: "revealed", text: "Scored the winning goal in a World Cup final." },
+      { idx: 1, state: "revealed", label: "POSITION",   value: "CENTRAL MIDFIELDER" },
+      { idx: 2, state: "revealed", label: "PEAK CLUB",  value: "BARCELONA" },
       {
         idx: 3,
         state: "locked",
-        text: "Played his entire prime at one club's youth-to-first-team pipeline.",
+        label: "MAJOR TROPHY",
+        value: "WORLD CUP 2010",
         unlockHint: "Unlocks after 60% community vote",
       },
     ],
@@ -786,6 +833,8 @@ export interface PrewarmLegend {
   /** True if the legend is part of the 8-country main pool (Vieira). */
   inMainPool: boolean;
   caption: string;
+  /** Halftone portrait used in the archive strip. */
+  signedImage: string;
 }
 
 /**
@@ -802,6 +851,7 @@ export const PREWARM_LEGENDS: PrewarmLegend[] = [
     flag: "🇫🇷",
     inMainPool: true,
     caption: "Round #01 reward — already in the vault",
+    signedImage: signedFra,
   },
   {
     id: "y-toure",
@@ -810,6 +860,7 @@ export const PREWARM_LEGENDS: PrewarmLegend[] = [
     flag: "🇨🇮",
     inMainPool: false,
     caption: "Pre-warm bonus — not part of the 8-country main pool",
+    signedImage: signedCiv,
   },
 ];
 

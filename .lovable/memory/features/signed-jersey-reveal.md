@@ -44,7 +44,25 @@ Independent tab `legend` on `/promo/world-cup` (SEC-04). Owned by
 ## Cross-links
 
 - LuckyBox Tier-03 card has a small "GUESS WHO'S NEXT →" link to this tab.
-- Style-guide demos: RoundCard 4-state playground + RevealWall demo.
+- Style-guide demos: `LegendScoreboardDemo` (full chassis) + `LegendBayPlayground` (3-state bay).
+
+## Visual shell (locked)
+
+The tab MUST render inside the **scoreboard chassis** (12px `#1a1a1a` frame,
+4 corner bolts, ≤ 8% scanline overlay). Required image elements:
+
+1. **8-tile LED progress row** at the top — green=hit, amber=live (pulse),
+   red=miss, zinc=upcoming. Click-jumps active round.
+2. **Active round hero plate** uses the country's weathered flag image
+   (`src/assets/legend-reveal/flag-{code}.jpg`) with a dark gradient. AFTER
+   reveal, the right half is replaced by `signed-{code}.jpg` portrait.
+3. **Clues** are 3 split-flap rows with fixed labels `POSITION`, `PEAK CLUB`,
+   `MAJOR TROPHY`. Never free-text sentences.
+4. **Signed archive strip** at the bottom — portrait cards drawn from
+   revealed rounds + prewarm bonus. R## chip = amber, BONUS chip = violet.
+
+Candidate cards never carry portraits (anti-spoiler + portrait-rights). Only
+the archive strip and the post-reveal hero do.
 
 ## Don't
 
