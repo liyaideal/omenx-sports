@@ -620,6 +620,8 @@ import signedMystery from "@/assets/legend-reveal/signed-mystery.jpg";
 export interface LegendCountry {
   name: string;
   flag: string;
+  /** ISO 3166-1 alpha-2 (or GB-ENG subdivision) for flat SVG flags in the HUD. */
+  iso2: string;
   /** Confederation tag shown beneath the flag plate (REGION · CONMEBOL etc.). */
   region: string;
   /** Weathered banner image used as the round's hero visual. */
@@ -627,14 +629,14 @@ export interface LegendCountry {
 }
 
 export const LEGEND_COUNTRIES: Record<LegendCountryCode, LegendCountry> = {
-  BRA: { name: "Brazil",      flag: "🇧🇷", region: "CONMEBOL", flagImage: flagBra },
-  ESP: { name: "Spain",       flag: "🇪🇸", region: "UEFA",     flagImage: flagEsp },
-  FRA: { name: "France",      flag: "🇫🇷", region: "UEFA",     flagImage: flagFra },
-  ARG: { name: "Argentina",   flag: "🇦🇷", region: "CONMEBOL", flagImage: flagArg },
-  GER: { name: "Germany",     flag: "🇩🇪", region: "UEFA",     flagImage: flagGer },
-  ENG: { name: "England",     flag: "🏴󠁧󠁢󠁥󠁮󠁧󠁿", region: "UEFA",     flagImage: flagEng },
-  NED: { name: "Netherlands", flag: "🇳🇱", region: "UEFA",     flagImage: flagNed },
-  POR: { name: "Portugal",    flag: "🇵🇹", region: "UEFA",     flagImage: flagPor },
+  BRA: { name: "Brazil",      flag: "🇧🇷", iso2: "BR",     region: "CONMEBOL", flagImage: flagBra },
+  ESP: { name: "Spain",       flag: "🇪🇸", iso2: "ES",     region: "UEFA",     flagImage: flagEsp },
+  FRA: { name: "France",      flag: "🇫🇷", iso2: "FR",     region: "UEFA",     flagImage: flagFra },
+  ARG: { name: "Argentina",   flag: "🇦🇷", iso2: "AR",     region: "CONMEBOL", flagImage: flagArg },
+  GER: { name: "Germany",     flag: "🇩🇪", iso2: "DE",     region: "UEFA",     flagImage: flagGer },
+  ENG: { name: "England",     flag: "🏴󠁧󠁢󠁥󠁮󠁧󠁿", iso2: "GB-ENG", region: "UEFA",     flagImage: flagEng },
+  NED: { name: "Netherlands", flag: "🇳🇱", iso2: "NL",     region: "UEFA",     flagImage: flagNed },
+  POR: { name: "Portugal",    flag: "🇵🇹", iso2: "PT",     region: "UEFA",     flagImage: flagPor },
 };
 
 /** Per-country signed portrait used in the archive strip when a round is revealed. */
