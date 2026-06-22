@@ -17,12 +17,15 @@ import {
   TrendingUp,
   Trophy,
   Users,
+  Wallet,
+  ArrowUpRight,
   X,
 } from "lucide-react";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { cn } from "@/lib/utils";
+import { omenxUrl } from "@/lib/omenx";
 import {
   COMBO_MAX_COMBOS_PER_USER,
   COMBO_MAX_ODDS,
@@ -1199,6 +1202,20 @@ function TicketAcceptedModal({
             </div>
           </div>
         )}
+        {ticket && (
+          <div className="px-4 pb-3 -mt-1">
+            <a
+              href={omenxUrl.wallet()}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center justify-center gap-1.5 font-pitch text-[10px] font-semibold uppercase tracking-widest text-amber-300/80 transition-colors hover:text-amber-300"
+            >
+              <Wallet className="h-3 w-3" />
+              Payouts settle automatically to your Wallet
+              <ArrowUpRight className="h-3 w-3" />
+            </a>
+          </div>
+        )}
         <div className="space-y-2 border-t border-zinc-800 p-4">
           {ticket && (
             <ShareTrigger
@@ -1258,11 +1275,23 @@ function TicketStatusList({
   if (tickets.length === 0) return null;
   return (
     <div ref={ref} id="combo-my-tickets" className="scroll-mt-20 border-2 border-zinc-800 bg-[#0a0a0a] p-4">
-      <div className="flex items-center gap-2">
-        <Ticket className="h-3.5 w-3.5 text-amber-400" />
-        <div className="font-scoreboard text-[10px] font-bold tracking-[0.25em] text-amber-400">
-          MY TICKETS
+      <div className="flex items-center justify-between gap-2">
+        <div className="flex items-center gap-2">
+          <Ticket className="h-3.5 w-3.5 text-amber-400" />
+          <div className="font-scoreboard text-[10px] font-bold tracking-[0.25em] text-amber-400">
+            MY TICKETS
+          </div>
         </div>
+        <a
+          href={omenxUrl.wallet()}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex items-center gap-1 font-pitch text-[10px] font-semibold uppercase tracking-widest text-zinc-500 transition-colors hover:text-amber-400"
+        >
+          <Wallet className="h-3 w-3" />
+          Manage in Wallet
+          <ArrowUpRight className="h-3 w-3" />
+        </a>
       </div>
       <div className="mt-3 space-y-2">
         {tickets.map((t) => (
@@ -1329,7 +1358,39 @@ function TicketRow({ ticket, highlight = false }: { ticket: SubmittedTicket; hig
           </span>
         ))}
       </div>
+      <WalletLine ticket={ticket} />
     </div>
+  );
+}
+
+function WalletLine({ ticket }: { ticket: SubmittedTicket }) {
+  const stake = ticket.stakeU.toFixed(0);
+  let text: string;
+  let tone: string;
+  if (ticket.status === "SETTLED_WON") {
+    text = `+${ticket.grossPayoutU.toFixed(0)} U credited to your Wallet`;
+    tone = "text-emerald-300 hover:text-emerald-200";
+  } else if (ticket.status === "SETTLED_LOST") {
+    text = `−${stake} U from stake · View in Wallet`;
+    tone = "text-zinc-400 hover:text-zinc-200";
+  } else {
+    text = `−${stake} U held · settles on result · Wallet`;
+    tone = "text-zinc-500 hover:text-zinc-300";
+  }
+  return (
+    <a
+      href={omenxUrl.wallet()}
+      target="_blank"
+      rel="noopener noreferrer"
+      className={cn(
+        "mt-2 flex items-center gap-1.5 border-t border-zinc-900 pt-2 font-pitch text-[10px] font-semibold uppercase tracking-widest transition-colors underline-offset-4 hover:underline",
+        tone,
+      )}
+    >
+      <Wallet className="h-3 w-3" />
+      <span>{text}</span>
+      <ArrowUpRight className="h-3 w-3" />
+    </a>
   );
 }
 
