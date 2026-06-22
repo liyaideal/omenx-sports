@@ -350,11 +350,11 @@ function TierCard({
           </div>
         )}
       </div>
-      <div className="relative z-[3] flex items-end justify-between gap-2">
-        <h3 className="font-pitch text-xl font-bold uppercase tracking-wide text-white">
+      <div className="relative z-[3] flex flex-wrap items-end justify-between gap-x-2 gap-y-1">
+        <h3 className="min-w-0 truncate font-pitch text-xl font-bold uppercase tracking-wide text-white">
           {tier.name}
         </h3>
-        <span className="font-pitch text-[10px] font-semibold uppercase tracking-widest text-zinc-500">
+        <span className="whitespace-nowrap font-pitch text-[10px] font-semibold uppercase tracking-widest text-zinc-500">
           {tier.poolLabel}
         </span>
       </div>
