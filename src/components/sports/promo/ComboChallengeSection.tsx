@@ -1205,6 +1205,8 @@ function TicketAcceptedModal({
               target={shareCombo({ ticket, poster: <ShareCardPreview ticket={ticket} /> })}
               variant="wide"
               label="Share my combo"
+              accent="amber"
+              size="sm"
             />
           )}
           <div className="grid grid-cols-2 gap-2">
