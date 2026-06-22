@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { Link } from "@tanstack/react-router";
 import {
   Check,
   ChevronLeft,
@@ -733,15 +734,23 @@ function BuilderCTA({
   }
 
   return (
-    <button
-      type="button"
-      onClick={onClick}
-      disabled={disabled}
-      className="mt-3 inline-flex w-full items-center justify-center gap-2 border-2 border-amber-400 bg-amber-400 py-2.5 font-pitch text-sm font-bold uppercase tracking-[0.2em] text-black transition-colors hover:brightness-110 disabled:cursor-not-allowed disabled:border-zinc-700 disabled:bg-zinc-800 disabled:text-zinc-500"
-    >
-      {pageState === "PREVIEW_READY" ? <Lock className="h-4 w-4" /> : <Sparkles className="h-4 w-4" />}
-      {label}
-    </button>
+    <div className="mt-3">
+      {quote?.oddsCapApplied && (pageState === "PREVIEW_READY" || pageState === "SUBMITTING") && (
+        <div className="mb-1.5 flex items-center justify-center gap-1.5 font-pitch text-[10px] font-bold uppercase tracking-widest text-amber-400/90">
+          <Info className="h-3 w-3" />
+          Activity cap applied · fair odds {quote.rawComboOdds.toFixed(2)}×
+        </div>
+      )}
+      <button
+        type="button"
+        onClick={onClick}
+        disabled={disabled}
+        className="inline-flex w-full items-center justify-center gap-2 border-2 border-amber-400 bg-amber-400 py-2.5 font-pitch text-sm font-bold uppercase tracking-[0.2em] text-black transition-colors hover:brightness-110 disabled:cursor-not-allowed disabled:border-zinc-700 disabled:bg-zinc-800 disabled:text-zinc-500"
+      >
+        {pageState === "PREVIEW_READY" ? <Lock className="h-4 w-4" /> : <Sparkles className="h-4 w-4" />}
+        {label}
+      </button>
+    </div>
   );
 }
 
@@ -790,8 +799,11 @@ function QuotePreviewPanel({ ctrl }: { ctrl: ComboController }) {
         <p className="mt-2 font-pitch text-sm font-semibold text-zinc-500">
           Pick 4 outcomes — odds lock in <span className="text-amber-400">automatically</span>.
         </p>
-        <p className="mt-1 font-pitch text-[10px] font-semibold uppercase tracking-widest text-zinc-600">
-          Max activity odds {COMBO_MAX_ODDS}× · payout caps at {COMBO_MAX_ODDS * COMBO_STAKE_MAX} U
+        <p className="mt-2 font-pitch text-[10px] font-semibold uppercase tracking-widest text-amber-400/80">
+          Activity cap · {COMBO_MAX_ODDS}× max odds · {COMBO_MAX_ODDS * COMBO_STAKE_MAX}U max payout
+        </p>
+        <p className="mt-1 font-pitch text-[10px] font-semibold uppercase tracking-widest text-zinc-500">
+          Fair odds above {COMBO_MAX_ODDS}× are shown for reference but settle at {COMBO_MAX_ODDS}×.
         </p>
       </div>
     );
@@ -826,8 +838,8 @@ function QuotePreviewPanel({ ctrl }: { ctrl: ComboController }) {
             {quote.activityOdds.toFixed(2)}×
           </div>
           {quote.oddsCapApplied && (
-            <div className="font-pitch text-[10px] font-semibold uppercase tracking-widest text-amber-400/80">
-              Capped at {COMBO_MAX_ODDS}× max
+            <div className="mt-0.5 font-pitch text-[11px] font-bold tabular-nums text-zinc-500 line-through">
+              {quote.rawComboOdds.toFixed(2)}× raw
             </div>
           )}
         </div>
@@ -838,15 +850,43 @@ function QuotePreviewPanel({ ctrl }: { ctrl: ComboController }) {
           <div className="font-scoreboard text-2xl font-black tabular-nums text-white">
             {quote.grossPayoutU.toFixed(2)} U
           </div>
-          <div className="font-pitch text-[10px] font-semibold uppercase tracking-widest text-zinc-500">
-            stake {quote.stakeU.toFixed(2)} U
-          </div>
+          {quote.oddsCapApplied ? (
+            <div className="mt-0.5 font-pitch text-[11px] font-bold tabular-nums text-zinc-500 line-through">
+              {(quote.rawComboOdds * quote.stakeU).toFixed(2)} U raw
+            </div>
+          ) : (
+            <div className="font-pitch text-[10px] font-semibold uppercase tracking-widest text-zinc-500">
+              stake {quote.stakeU.toFixed(2)} U
+            </div>
+          )}
         </div>
       </div>
-      <p className="mt-3 flex items-start gap-1 border-t border-zinc-800 pt-2 font-pitch text-[10px] font-semibold uppercase tracking-widest text-zinc-500">
-        <Info className="mt-0.5 h-3 w-3 shrink-0 text-zinc-600" />
-        Odds lock only after a successful submission.
-      </p>
+      {quote.oddsCapApplied ? (
+        <div className="mt-3 border-t border-amber-400/30 pt-2">
+          <p className="flex items-start gap-1.5 font-pitch text-[10px] font-bold uppercase tracking-widest text-amber-400">
+            <Info className="mt-0.5 h-3 w-3 shrink-0" />
+            <span>
+              Activity caps payout at {COMBO_MAX_ODDS}× / {COMBO_MAX_ODDS * COMBO_STAKE_MAX}U per combo. Your fair odds {quote.rawComboOdds.toFixed(2)}× settle at {COMBO_MAX_ODDS}×.{" "}
+              <Link
+                to="/promo/world-cup"
+                search={{ tab: "rules" }}
+                className="underline decoration-amber-400/60 underline-offset-2 hover:text-amber-300"
+              >
+                See rules
+              </Link>
+            </span>
+          </p>
+          <p className="mt-1.5 flex items-start gap-1.5 font-pitch text-[10px] font-semibold uppercase tracking-widest text-zinc-500">
+            <Info className="mt-0.5 h-3 w-3 shrink-0 text-zinc-600" />
+            Odds lock only after a successful submission.
+          </p>
+        </div>
+      ) : (
+        <p className="mt-3 flex items-start gap-1 border-t border-zinc-800 pt-2 font-pitch text-[10px] font-semibold uppercase tracking-widest text-zinc-500">
+          <Info className="mt-0.5 h-3 w-3 shrink-0 text-zinc-600" />
+          Odds lock only after a successful submission.
+        </p>
+      )}
       {pageState !== "REQUOTE_REQUIRED" && (
         <div className="mt-3">
           <ShareTrigger
