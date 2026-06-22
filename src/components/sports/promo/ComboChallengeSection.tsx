@@ -889,9 +889,12 @@ function SubmitConfirmModal({
   onSubmit: () => void;
 }) {
   return (
-    <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
-      <DialogContent className="max-w-md border-2 border-amber-400/60 bg-[#0a0a0a] p-0">
-        <DialogTitle className="sr-only">Confirm 4-pick combo</DialogTitle>
+    <ResponsiveModal
+      open={open}
+      onOpenChange={(v) => !v && onClose()}
+      accent="amber-400/60"
+      title="Confirm 4-pick combo"
+    >
         <div className="border-b border-zinc-800 p-4">
           <div className="font-scoreboard text-[10px] font-bold tracking-[0.25em] text-amber-400">
             CONFIRM 4-LEG COMBO
@@ -949,8 +952,7 @@ function SubmitConfirmModal({
             Submit Combo
           </button>
         </div>
-      </DialogContent>
-    </Dialog>
+    </ResponsiveModal>
   );
 }
 
@@ -970,9 +972,12 @@ function RequoteModal({
   onRebuild: () => void;
 }) {
   return (
-    <Dialog open={open} onOpenChange={(v) => !v && onRebuild()}>
-      <DialogContent className="max-w-md border-2 border-red-500/60 bg-[#0a0a0a] p-0">
-        <DialogTitle className="sr-only">Odds changed — confirm again</DialogTitle>
+    <ResponsiveModal
+      open={open}
+      onOpenChange={(v) => !v && onRebuild()}
+      accent="red-500/60"
+      title="Odds changed — confirm again"
+    >
         <div className="border-b border-zinc-800 p-4">
           <div className="font-scoreboard text-[10px] font-bold tracking-[0.25em] text-red-400">
             ODDS CHANGED
@@ -1019,8 +1024,7 @@ function RequoteModal({
             Confirm new odds
           </button>
         </div>
-      </DialogContent>
-    </Dialog>
+    </ResponsiveModal>
   );
 }
 
@@ -1040,9 +1044,12 @@ function TicketAcceptedModal({
   onAnother: () => void;
 }) {
   return (
-    <Dialog open={open} onOpenChange={(v) => !v && onAnother()}>
-      <DialogContent className="max-w-md border-2 border-emerald-500/60 bg-[#0a0a0a] p-0">
-        <DialogTitle className="sr-only">Combo submitted</DialogTitle>
+    <ResponsiveModal
+      open={open}
+      onOpenChange={(v) => !v && onAnother()}
+      accent="emerald-500/60"
+      title="Combo submitted"
+    >
         <div className="border-b border-zinc-800 p-4 text-center">
           <Trophy className="mx-auto h-10 w-10 text-emerald-400" />
           <div className="mt-2 font-scoreboard text-[10px] font-bold tracking-[0.25em] text-emerald-400">
@@ -1096,8 +1103,7 @@ function TicketAcceptedModal({
             </button>
           )}
         </div>
-      </DialogContent>
-    </Dialog>
+    </ResponsiveModal>
   );
 }
 
