@@ -2859,7 +2859,7 @@ function LegendAssetsInventory() {
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
           {codes.map((code) => {
             const c = LEGEND_COUNTRIES[code];
-            const Flag = (FlatFlags as Record<string, React.ComponentType<{ className?: string; title?: string }> | undefined>)[c.iso2];
+            const Flag = (FlatFlags as Record<string, React.ComponentType<{ className?: string; title?: string }> | undefined>)[c.iso2.replace(/-/g, "_")];
             return (
               <div key={code} className="rounded-md border border-border bg-[#0a0a0a] p-2">
                 <div className="overflow-hidden rounded-sm border border-black/70">
