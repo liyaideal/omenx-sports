@@ -838,8 +838,8 @@ function QuotePreviewPanel({ ctrl }: { ctrl: ComboController }) {
             {quote.activityOdds.toFixed(2)}×
           </div>
           {quote.oddsCapApplied && (
-            <div className="font-pitch text-[10px] font-semibold uppercase tracking-widest text-amber-400/80">
-              Capped at {COMBO_MAX_ODDS}× max
+            <div className="mt-0.5 font-pitch text-[11px] font-bold tabular-nums text-zinc-500 line-through">
+              {quote.rawComboOdds.toFixed(2)}× raw
             </div>
           )}
         </div>
@@ -850,15 +850,43 @@ function QuotePreviewPanel({ ctrl }: { ctrl: ComboController }) {
           <div className="font-scoreboard text-2xl font-black tabular-nums text-white">
             {quote.grossPayoutU.toFixed(2)} U
           </div>
-          <div className="font-pitch text-[10px] font-semibold uppercase tracking-widest text-zinc-500">
-            stake {quote.stakeU.toFixed(2)} U
-          </div>
+          {quote.oddsCapApplied ? (
+            <div className="mt-0.5 font-pitch text-[11px] font-bold tabular-nums text-zinc-500 line-through">
+              {(quote.rawComboOdds * quote.stakeU).toFixed(2)} U raw
+            </div>
+          ) : (
+            <div className="font-pitch text-[10px] font-semibold uppercase tracking-widest text-zinc-500">
+              stake {quote.stakeU.toFixed(2)} U
+            </div>
+          )}
         </div>
       </div>
-      <p className="mt-3 flex items-start gap-1 border-t border-zinc-800 pt-2 font-pitch text-[10px] font-semibold uppercase tracking-widest text-zinc-500">
-        <Info className="mt-0.5 h-3 w-3 shrink-0 text-zinc-600" />
-        Odds lock only after a successful submission.
-      </p>
+      {quote.oddsCapApplied ? (
+        <div className="mt-3 border-t border-amber-400/30 pt-2">
+          <p className="flex items-start gap-1.5 font-pitch text-[10px] font-bold uppercase tracking-widest text-amber-400">
+            <Info className="mt-0.5 h-3 w-3 shrink-0" />
+            <span>
+              Activity caps payout at {COMBO_MAX_ODDS}× / {COMBO_MAX_ODDS * COMBO_STAKE_MAX}U per combo. Your fair odds {quote.rawComboOdds.toFixed(2)}× settle at {COMBO_MAX_ODDS}×.{" "}
+              <Link
+                to="/promo/world-cup"
+                search={{ tab: "rules" }}
+                className="underline decoration-amber-400/60 underline-offset-2 hover:text-amber-300"
+              >
+                See rules
+              </Link>
+            </span>
+          </p>
+          <p className="mt-1.5 flex items-start gap-1.5 font-pitch text-[10px] font-semibold uppercase tracking-widest text-zinc-500">
+            <Info className="mt-0.5 h-3 w-3 shrink-0 text-zinc-600" />
+            Odds lock only after a successful submission.
+          </p>
+        </div>
+      ) : (
+        <p className="mt-3 flex items-start gap-1 border-t border-zinc-800 pt-2 font-pitch text-[10px] font-semibold uppercase tracking-widest text-zinc-500">
+          <Info className="mt-0.5 h-3 w-3 shrink-0 text-zinc-600" />
+          Odds lock only after a successful submission.
+        </p>
+      )}
       {pageState !== "REQUOTE_REQUIRED" && (
         <div className="mt-3">
           <ShareTrigger
