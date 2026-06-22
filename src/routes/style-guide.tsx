@@ -111,7 +111,12 @@ import { OverviewSection } from "@/components/sports/promo/OverviewSection";
 import { ComboChallengeSection } from "@/components/sports/promo/ComboChallengeSection";
 import { LuckyBoxSection } from "@/components/sports/promo/LuckyBoxSection";
 import { NewbieRewardsSection, TaskCard } from "@/components/sports/promo/NewbieRewardsSection";
-import type { NewbieTask } from "@/data/world-cup-carnival";
+import type { NewbieTask, LegendRound, LegendRoundStatus } from "@/data/world-cup-carnival";
+import { LEGEND_ROUNDS } from "@/data/world-cup-carnival";
+import {
+  RoundCard as LegendRoundCard,
+  RevealWall as LegendRevealWall,
+} from "@/components/sports/promo/GuessTheLegendTab";
 
 export const Route = createFileRoute("/style-guide")({
   head: () => ({
