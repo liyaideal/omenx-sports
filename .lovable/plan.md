@@ -1,24 +1,29 @@
-目标：移除 "Calculate odds" 这一步。用户凑齐 4 腿后自动出 odds 与 payout，单按钮即可下单。
+## 目标
+统一 Combo 下注成功弹窗底部两个操作按钮（Share my combo / Build another combo）的视觉样式，消除当前的高度、圆角、图标位置不一致带来的违和感。
 
-实施：
+## 当前问题（见用户截图）
+- **高度不同**：Share 按钮使用 `ShareTrigger variant="wide"`，内边距 `py-4`；Build another 按钮是手写 `<button>`，`py-2`。
+- **圆角不同**：Share 是 `rounded-2xl`；Build another 是直角/方角。
+- **图标位置相反**：Share 图标在文字右侧；Build another 图标在文字左侧。
 
-1. `src/components/sports/promo/combo/useComboState.ts`
-   - 新增 effect：当 `filled === COMBO_MAX_PICKS` 且 `pageState === "READY"` 时，自动调用 `requestPreview()`。
-   - 同样在 `pageState === "PREVIEW_EXPIRED"` 时自动重新 preview，让倒计时过期后自然续期。
-   - leg 列表变更（替换/删除）现有逻辑已经把 pageState 回到 READY 并清空 quote，所以会自动触发上面的 effect，重新拿 quote。
-   - 用 250ms debounce 包住自动 preview 调用，避免快速连点造成多次请求。
+## 修改方案
+仅修改 `src/components/sports/promo/ComboChallengeSection.tsx` 中 `SuccessModal` 的底部按钮区。
 
-2. `src/components/sports/promo/ComboChallengeSection.tsx`
-   - `BuilderCTA`（桌面侧栏）状态机改为：
-     • filled < 4 → "Add N more pick(s)"，disabled
-     • PREVIEW_LOADING → "Locking odds…"，disabled
-     • PREVIEW_READY / PREVIEW_EXPIRED → "Place 10U · {odds}× → {payout}U"，启用，onClick = onConfirm
-     • SUBMITTING → "Submitting…"，disabled
-     • REQUOTE_REQUIRED → "Review new odds"，启用
-   - 删除 onCalculate 分支文案；保留 onConfirm 行为不变。
-   - `MobileStickyBar` 文案同步：去掉 "Calculate odds"，直接显示 "Place 10U"。
-   - `QuotePreviewPanel` 空态文案改为 "Pick 4 outcomes — odds lock in automatically."；其他视觉不变。
+1. **统一按钮结构**
+   - 两个按钮都使用相同外层结构：`w-full`、相同垂直内边距（`py-4`）、相同圆角（`rounded-2xl`）、相同字体排版（`font-mono text-[11px] font-bold uppercase tracking-[0.25em]`）。
+2. **图标统一放在右侧**
+   - 与当前 Share 按钮保持一致，两个按钮的文字在左、图标在右。
+   - 图标外都套 `h-6 w-6 rounded-lg` 的容器井，保持视觉重量一致。
+3. **保留语义色**
+   - Share 按钮保持 amber 描边/背景（强调主操作）。
+   - Build another 按钮保持 zinc/中性描边与背景（次要操作）。
+4. **代码组织**
+   - 不新增共享组件；将 Build another 按钮改为内联 JSX，与 Share 按钮的 DOM 结构对齐，避免引入抽象层。
 
-不动：
-- stake 固定 10U、4 腿上限、requote 弹窗、ticket 渲染、style-guide。
-- previewQuote / submitTicket mock 接口、quote 倒计时显示。
+## 预期结果
+弹窗底部两个按钮等高、等圆角、图标同侧，视觉上形成统一的操作面板，不再割裂。
+
+## 不涉及的范围
+- 不改动分享逻辑、海报生成、`ShareTrigger` 其他变体。
+- 不改动成功弹窗其余文案、赔率数字、关闭逻辑。
+- 不改动 `/style-guide`（这不是新增可复用组件，只是局部对齐两个现有按钮）。

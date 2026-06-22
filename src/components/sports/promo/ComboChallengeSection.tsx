@@ -1031,9 +1031,14 @@ function TicketAcceptedModal({
             <button
               type="button"
               onClick={onAnother}
-              className="inline-flex w-full items-center justify-center gap-2 border-2 border-zinc-700 bg-zinc-900 py-2 font-pitch text-xs font-bold uppercase tracking-widest text-zinc-300 hover:border-zinc-500"
+              className="group flex w-full items-center justify-center gap-4 rounded-2xl border-2 border-zinc-700 bg-zinc-900/60 py-4 transition-all duration-300 hover:border-zinc-500 hover:bg-zinc-900 active:scale-[0.98]"
             >
-              <RefreshCw className="h-3.5 w-3.5" /> Build another combo
+              <span className="font-mono text-[11px] font-bold uppercase tracking-[0.25em] text-zinc-300 transition-colors group-hover:text-foreground">
+                Build another combo
+              </span>
+              <span className="grid h-6 w-6 place-items-center rounded-lg bg-white/10 transition-colors group-hover:bg-white/20">
+                <RefreshCw className="h-3.5 w-3.5 text-zinc-200" />
+              </span>
             </button>
           )}
         </div>
