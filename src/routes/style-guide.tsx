@@ -110,7 +110,8 @@ import { ConfettiLayer, TwinkleField } from "@/components/sports/promo/ConfettiL
 import { OverviewSection } from "@/components/sports/promo/OverviewSection";
 import { ComboChallengeSection } from "@/components/sports/promo/ComboChallengeSection";
 import { LuckyBoxSection } from "@/components/sports/promo/LuckyBoxSection";
-import { NewbieRewardsSection } from "@/components/sports/promo/NewbieRewardsSection";
+import { NewbieRewardsSection, TaskCard } from "@/components/sports/promo/NewbieRewardsSection";
+import type { NewbieTask } from "@/data/world-cup-carnival";
 
 export const Route = createFileRoute("/style-guide")({
   head: () => ({
