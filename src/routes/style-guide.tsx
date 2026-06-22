@@ -2058,6 +2058,7 @@ function StyleGuide() {
                   <li>• Series accent green = SEC-01 (Welcome Pack), amber = SEC-02 (Combo Challenge), blue = SEC-03 (Lucky Box). Pin one accent per series, never mix.</li>
                   <li>• Every interactive card has a bottom 1px LED bar that lights with the card's accent on hover/active.</li>
                   <li>• Countdown ticks against <code className="font-mono text-foreground">CARNIVAL_ENDS_AT</code> (2026-07-19). Live red dot uses <code className="font-mono text-foreground">animate-ping</code>, never a solid red.</li>
+                  <li>• <b>Odds cap disclosure</b>: when a 4-leg combo's fair odds exceed <code className="font-mono text-foreground">COMBO_MAX_ODDS</code> (50×), <code className="font-mono text-foreground">QuotePreviewPanel</code> shows the raw odds/payout struck through under the capped values, an amber explanation strip ("Activity caps payout at 50× / 500U… See rules"), and the PLACE button gets a small "Activity cap applied · fair odds 177.71×" caption above it. Empty preview state preemptively states the cap. Never silently clip — users must see why their 4-leg ≠ what they multiplied in their head.</li>
                 </ul>
               </div>
             </div>
