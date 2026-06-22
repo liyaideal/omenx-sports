@@ -700,7 +700,7 @@ function BuilderCTA({
   onCalculate: () => void;
   onConfirm: () => void;
 }) {
-  const { filled, pageState, canPreview } = ctrl;
+  const { filled, pageState, quote } = ctrl;
   if (ctrl.participationCapReached) {
     return (
       <div className="mt-3 border border-zinc-800 bg-zinc-950 p-2.5 text-center font-pitch text-[10px] font-bold uppercase tracking-widest text-zinc-500">
@@ -715,25 +715,18 @@ function BuilderCTA({
 
   if (filled < COMBO_MAX_PICKS) {
     label = `Add ${COMBO_MAX_PICKS - filled} more pick${COMBO_MAX_PICKS - filled > 1 ? "s" : ""}`;
-  } else if (pageState === "READY") {
-    label = "Calculate odds";
-    disabled = !canPreview;
-    onClick = onCalculate;
-  } else if (pageState === "PREVIEW_LOADING") {
-    label = "Calculating…";
-  } else if (pageState === "PREVIEW_READY") {
-    label = "Confirm Combo";
+  } else if (pageState === "READY" || pageState === "PREVIEW_LOADING" || pageState === "PREVIEW_EXPIRED") {
+    label = "Locking odds…";
+  } else if (pageState === "PREVIEW_READY" && quote) {
+    label = `Place 10U · ${quote.activityOdds.toFixed(2)}× → ${quote.grossPayoutU.toFixed(0)}U`;
     disabled = false;
     onClick = onConfirm;
-  } else if (pageState === "PREVIEW_EXPIRED") {
-    label = "Refresh odds";
-    disabled = false;
-    onClick = onCalculate;
   } else if (pageState === "SUBMITTING") {
     label = "Submitting…";
   } else if (pageState === "REQUOTE_REQUIRED") {
     label = "Review new odds";
     disabled = false;
+    onClick = onConfirm;
   }
 
   return (
@@ -763,7 +756,7 @@ function QuotePreviewPanel({ ctrl }: { ctrl: ComboController }) {
           QUOTE PREVIEW
         </div>
         <p className="mt-2 font-pitch text-sm font-semibold text-zinc-500">
-          Fill 4 picks + a valid stake, then tap <span className="text-amber-400">Calculate odds</span>.
+          Pick 4 outcomes — odds lock in <span className="text-amber-400">automatically</span>.
         </p>
         <p className="mt-1 font-pitch text-[10px] font-semibold uppercase tracking-widest text-zinc-600">
           Max activity odds {COMBO_MAX_ODDS}× · payout caps at {COMBO_MAX_ODDS * COMBO_STAKE_MAX} U
@@ -1143,17 +1136,16 @@ function MobileStickyBar({
   let cta = "Select 4 picks";
   let onClick: (() => void) | null = null;
   if (filled < COMBO_MAX_PICKS) cta = `Add ${COMBO_MAX_PICKS - filled} more`;
-  else if (pageState === "READY") {
-    cta = "Calculate odds";
-    onClick = onCalculate;
-  } else if (pageState === "PREVIEW_LOADING") cta = "Calculating…";
-  else if (pageState === "PREVIEW_READY") {
-    cta = "Confirm combo";
+  else if (pageState === "READY" || pageState === "PREVIEW_LOADING" || pageState === "PREVIEW_EXPIRED") {
+    cta = "Locking odds…";
+  } else if (pageState === "PREVIEW_READY") {
+    cta = "Place 10U";
     onClick = onConfirm;
-  } else if (pageState === "PREVIEW_EXPIRED") {
-    cta = "Refresh odds";
-    onClick = onCalculate;
   } else if (pageState === "SUBMITTING") cta = "Submitting…";
+  else if (pageState === "REQUOTE_REQUIRED") {
+    cta = "Review new odds";
+    onClick = onConfirm;
+  }
 
   return (
     <div
