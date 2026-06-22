@@ -112,7 +112,15 @@ import { ComboChallengeSection } from "@/components/sports/promo/ComboChallengeS
 import { LuckyBoxSection } from "@/components/sports/promo/LuckyBoxSection";
 import { NewbieRewardsSection, TaskCard } from "@/components/sports/promo/NewbieRewardsSection";
 import type { NewbieTask, LegendRound, LegendRoundStatus } from "@/data/world-cup-carnival";
-import { LEGEND_ROUNDS } from "@/data/world-cup-carnival";
+import {
+  LEGEND_ROUNDS,
+  LEGEND_COUNTRIES,
+  LEGEND_SIGNED_IMAGES,
+  LEGEND_MYSTERY_PORTRAIT,
+  type LegendCountryCode,
+} from "@/data/world-cup-carnival";
+import signedCivAsset from "@/assets/legend-reveal/signed-civ.jpg";
+import * as FlatFlags from "country-flag-icons/react/3x2";
 import {
   ScoreboardChassis,
   RoundProgressHud,
