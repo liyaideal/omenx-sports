@@ -1,10 +1,11 @@
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import {
   Check,
   ChevronLeft,
   ChevronRight,
   Coins,
+  Eye,
   Filter,
   Info,
   Lock,
@@ -61,6 +62,25 @@ export function ComboChallengeSection() {
   const [query, setQuery] = useState("");
   const [onlyAvailable, setOnlyAvailable] = useState(false);
   const [confirmOpen, setConfirmOpen] = useState(false);
+  const [highlightTicketId, setHighlightTicketId] = useState<string | null>(null);
+  const ticketsRef = useRef<HTMLDivElement>(null);
+
+  const revealLatestTicket = useCallback(() => {
+    const id = ctrl.lastAccepted?.ticketId ?? ctrl.tickets[0]?.ticketId ?? null;
+    if (!id) return;
+    setHighlightTicketId(id);
+    const reduced =
+      typeof window !== "undefined" &&
+      window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+    // Wait for the modal close animation to settle before scrolling.
+    window.setTimeout(() => {
+      ticketsRef.current?.scrollIntoView({
+        behavior: reduced ? "auto" : "smooth",
+        block: "start",
+      });
+    }, 80);
+    window.setTimeout(() => setHighlightTicketId(null), 2800);
+  }, [ctrl.lastAccepted, ctrl.tickets]);
 
   const matchdays = useMemo(() => {
     const set = new Set<string>();
@@ -111,7 +131,11 @@ export function ComboChallengeSection() {
         </aside>
       </div>
 
-      <TicketStatusList tickets={ctrl.tickets} />
+      <TicketStatusList
+        ref={ticketsRef}
+        tickets={ctrl.tickets}
+        highlightTicketId={highlightTicketId}
+      />
 
       {/* Mobile sticky bottom bar */}
       <MobileStickyBar ctrl={ctrl} onCalculate={ctrl.requestPreview} onConfirm={() => setConfirmOpen(true)} />
@@ -138,7 +162,14 @@ export function ComboChallengeSection() {
         open={ctrl.pageState === "TICKET_ACCEPTED" && !!ctrl.lastAccepted}
         ticket={ctrl.lastAccepted}
         capReached={ctrl.participationCapReached}
-        onAnother={ctrl.startNewCombo}
+        onAnother={() => {
+          revealLatestTicket();
+          ctrl.startNewCombo();
+        }}
+        onView={() => {
+          revealLatestTicket();
+          ctrl.startNewCombo();
+        }}
       />
     </div>
   );
@@ -1128,16 +1159,18 @@ function TicketAcceptedModal({
   ticket,
   capReached,
   onAnother,
+  onView,
 }: {
   open: boolean;
   ticket: SubmittedTicket | null;
   capReached: boolean;
   onAnother: () => void;
+  onView: () => void;
 }) {
   return (
     <ResponsiveModal
       open={open}
-      onOpenChange={(v) => !v && onAnother()}
+      onOpenChange={(v) => !v && onView()}
       accent="emerald-500/60"
       title="Combo submitted"
     >
@@ -1175,6 +1208,16 @@ function TicketAcceptedModal({
               className="border-2 border-amber-400 bg-amber-400/10"
             />
           )}
+          <button
+            type="button"
+            onClick={onView}
+            className="group flex w-full items-center justify-center gap-3 rounded-2xl border border-amber-400/40 bg-transparent py-3 transition-all duration-200 hover:border-amber-400 hover:bg-amber-400/10"
+          >
+            <Eye className="h-3.5 w-3.5 text-amber-300" />
+            <span className="font-mono text-[11px] font-bold uppercase tracking-[0.25em] text-amber-300">
+              View my ticket
+            </span>
+          </button>
           {capReached ? (
             <p className="text-center font-pitch text-[10px] font-semibold uppercase tracking-widest text-zinc-500">
               You have used all available combo entries for this matchday.
@@ -1204,12 +1247,16 @@ function TicketAcceptedModal({
 
 function TicketStatusList({
   tickets,
+  highlightTicketId,
+  ref,
 }: {
   tickets: SubmittedTicket[];
+  highlightTicketId?: string | null;
+  ref?: React.Ref<HTMLDivElement>;
 }) {
   if (tickets.length === 0) return null;
   return (
-    <div className="border-2 border-zinc-800 bg-[#0a0a0a] p-4">
+    <div ref={ref} id="combo-my-tickets" className="scroll-mt-20 border-2 border-zinc-800 bg-[#0a0a0a] p-4">
       <div className="flex items-center gap-2">
         <Ticket className="h-3.5 w-3.5 text-amber-400" />
         <div className="font-scoreboard text-[10px] font-bold tracking-[0.25em] text-amber-400">
@@ -1218,14 +1265,18 @@ function TicketStatusList({
       </div>
       <div className="mt-3 space-y-2">
         {tickets.map((t) => (
-          <TicketRow key={t.ticketId} ticket={t} />
+          <TicketRow
+            key={t.ticketId}
+            ticket={t}
+            highlight={t.ticketId === highlightTicketId}
+          />
         ))}
       </div>
     </div>
   );
 }
 
-function TicketRow({ ticket }: { ticket: SubmittedTicket }) {
+function TicketRow({ ticket, highlight = false }: { ticket: SubmittedTicket; highlight?: boolean }) {
   const statusInfo = {
     ACCEPTED: { label: "Waiting for results", tone: "text-amber-400 border-amber-400/40 bg-amber-400/10" },
     SETTLED_WON: { label: "4/4 Correct — Won!", tone: "text-emerald-400 border-emerald-500/40 bg-emerald-500/10" },
@@ -1236,7 +1287,13 @@ function TicketRow({ ticket }: { ticket: SubmittedTicket }) {
   }[ticket.status];
 
   return (
-    <div className="border border-zinc-800 bg-black p-3">
+    <div
+      className={cn(
+        "border border-zinc-800 bg-black p-3 transition-shadow duration-500",
+        highlight &&
+          "ring-2 ring-amber-400/70 shadow-[0_0_24px_rgba(250,204,21,0.35)] animate-pulse",
+      )}
+    >
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div className="flex items-center gap-2">
           <span className={cn("border px-2 py-0.5 font-pitch text-[10px] font-bold uppercase tracking-widest", statusInfo.tone)}>
