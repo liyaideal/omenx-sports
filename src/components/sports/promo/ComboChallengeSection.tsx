@@ -734,15 +734,23 @@ function BuilderCTA({
   }
 
   return (
-    <button
-      type="button"
-      onClick={onClick}
-      disabled={disabled}
-      className="mt-3 inline-flex w-full items-center justify-center gap-2 border-2 border-amber-400 bg-amber-400 py-2.5 font-pitch text-sm font-bold uppercase tracking-[0.2em] text-black transition-colors hover:brightness-110 disabled:cursor-not-allowed disabled:border-zinc-700 disabled:bg-zinc-800 disabled:text-zinc-500"
-    >
-      {pageState === "PREVIEW_READY" ? <Lock className="h-4 w-4" /> : <Sparkles className="h-4 w-4" />}
-      {label}
-    </button>
+    <div className="mt-3">
+      {quote?.oddsCapApplied && (pageState === "PREVIEW_READY" || pageState === "SUBMITTING") && (
+        <div className="mb-1.5 flex items-center justify-center gap-1.5 font-pitch text-[10px] font-bold uppercase tracking-widest text-amber-400/90">
+          <Info className="h-3 w-3" />
+          Activity cap applied · fair odds {quote.rawComboOdds.toFixed(2)}×
+        </div>
+      )}
+      <button
+        type="button"
+        onClick={onClick}
+        disabled={disabled}
+        className="inline-flex w-full items-center justify-center gap-2 border-2 border-amber-400 bg-amber-400 py-2.5 font-pitch text-sm font-bold uppercase tracking-[0.2em] text-black transition-colors hover:brightness-110 disabled:cursor-not-allowed disabled:border-zinc-700 disabled:bg-zinc-800 disabled:text-zinc-500"
+      >
+        {pageState === "PREVIEW_READY" ? <Lock className="h-4 w-4" /> : <Sparkles className="h-4 w-4" />}
+        {label}
+      </button>
+    </div>
   );
 }
 
