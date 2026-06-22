@@ -673,18 +673,22 @@ function StakeInput({
   value,
   onChange,
   valid,
+  compact,
 }: {
   value: string;
   onChange: (v: string) => void;
   valid: boolean;
+  compact?: boolean;
 }) {
+  const presets = useMemo(() => [1, 5, 10], []);
+  const numeric = Number(value);
   return (
-    <div className="mt-3 border border-zinc-800 bg-black p-2.5">
+    <div className={cn("border border-zinc-800 bg-black", compact ? "p-2" : "p-2.5")}>
       <div className="flex items-center justify-between">
-        <span className="font-scoreboard text-[10px] font-bold tracking-widest text-zinc-500">
+        <span className={cn("font-scoreboard font-bold tracking-widest text-zinc-500", compact ? "text-[9px]" : "text-[10px]")}>
           STAKE (U)
         </span>
-        <span className="font-pitch text-[10px] font-semibold uppercase tracking-widest text-zinc-600">
+        <span className={cn("font-pitch font-semibold uppercase tracking-widest text-zinc-600", compact ? "text-[9px]" : "text-[10px]")}>
           {COMBO_STAKE_MIN}–{COMBO_STAKE_MAX} · step {COMBO_STAKE_STEP}
         </span>
       </div>
@@ -697,25 +701,35 @@ function StakeInput({
           value={value}
           onChange={(e) => onChange(e.target.value)}
           className={cn(
-            "w-full bg-transparent font-scoreboard text-2xl font-black tabular-nums text-white focus:outline-none",
+            "w-full bg-transparent font-scoreboard font-black tabular-nums text-white focus:outline-none",
             !valid && "text-red-400",
+            compact ? "text-xl" : "text-2xl",
           )}
         />
         <div className="flex gap-1">
-          {[1, 5, 10].map((v) => (
-            <button
-              key={v}
-              type="button"
-              onClick={() => onChange(String(v))}
-              className="border border-zinc-700 bg-zinc-900 px-2 py-1 font-pitch text-[10px] font-bold uppercase tracking-widest text-zinc-400 hover:border-amber-400 hover:text-amber-400"
-            >
-              {v}U
-            </button>
-          ))}
+          {presets.map((v) => {
+            const active = Number(value) === v;
+            return (
+              <button
+                key={v}
+                type="button"
+                onClick={() => onChange(String(v))}
+                className={cn(
+                  "border px-2 py-1 font-pitch font-bold uppercase tracking-widest transition-colors",
+                  compact ? "text-[9px]" : "text-[10px]",
+                  active
+                    ? "border-amber-400 bg-amber-400 text-black"
+                    : "border-zinc-700 bg-zinc-900 text-zinc-400 hover:border-amber-400 hover:text-amber-400",
+                )}
+              >
+                {v}U
+              </button>
+            );
+          })}
         </div>
       </div>
       {!valid && (
-        <p className="mt-1 font-pitch text-[10px] font-semibold text-red-400">
+        <p className={cn("mt-1 font-pitch font-semibold text-red-400", compact ? "text-[9px]" : "text-[10px]")}>
           Stake must be {COMBO_STAKE_MIN}–{COMBO_STAKE_MAX} U in steps of {COMBO_STAKE_STEP}.
         </p>
       )}
