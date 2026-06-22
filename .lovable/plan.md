@@ -1,31 +1,33 @@
 ## 问题
 
-GUES-01..08 进度 HUD 里的国旗目前是 emoji（`country.flag`），尺寸只占瓦片很小一块，和下方"做旧国旗大图 + 复古记分牌"的整体视觉不在一个量级，显得寒酸。
+当前 HUD 用的是做旧"博物馆挂旗"纹理图，在 ~80px 宽的小瓦片里被压暗、被周边阴影吃掉，国旗本身几乎看不清，识别率比 emoji 还低。"做旧"风只适合下方 Active Bay 的大图。
 
-## 方案
+## 方案：HUD 改用扁平矢量国旗
 
-把 HUD 里每个已揭晓 / 进行中 / 已锁单 tile 的 emoji 换成已有的做旧旗帜纹理 `country.flagImage`（即 Active Bay 用的同一张图），并明显放大。
+HUD 瓦片只需要"一眼识别是哪个国家"，所以把 HUD 那一处（且仅那一处）换成**扁平矢量 ISO 国旗 SVG**，下方 Active Bay 的大幅做旧挂旗保持不变 —— 形成"远看清晰 / 近看有质感"的层次。
 
-### 修改点（单文件）
+### 实现
 
-`src/components/sports/promo/GuessTheLegendTab.tsx` 的 `RoundTile`：
+1. 新增依赖：`country-flag-icons`（轻量，按国家 code 暴露纯 SVG React 组件，无需自带 CSS / 字体）。
+2. `src/data/world-cup-carnival.ts`：给 `LegendCountry` 增加 `iso2` 字段（FR / AR / ES / BR / DE / EN→GB-ENG / NL / PT / CI…），保留现有 `flag` emoji 和 `flagImage` 做旧图。
+   - 英格兰用 `country-flag-icons` 的 `GB-ENG` 子区域旗（库里支持）。
+3. `GuessTheLegendTab.tsx` 的 `RoundLedTile`：
+   - 把当前 `<img src={flagImage}>` 块替换成 `<FlagIcon country={iso2} />`（即库提供的 SVG 组件）。
+   - 容器：`h-9 sm:h-11`，`rounded-[3px]`，外加 1px `border-black/70` + 极淡 inset shadow，保持复古面板贴合感。
+   - 状态视觉只动包裹层不动旗本身：
+     - revealed-miss：包裹层加 `grayscale(0.55) opacity(0.7)`
+     - revealed-hit：保留绿底条 + 顶部 1px 极淡绿 inset
+     - voting/locked-in：保留琥珀底条 + 顶部 1px 极淡琥珀 inset
+     - upcoming：继续 "?" 不放旗
+   - 移除之前给旗加的 `contrast/saturate` 滤镜——扁平旗本来就是干净纯色。
+4. Active Bay / Signed Archive / 数据接口、`/style-guide` 演示都**不动**——它们用的是做旧大图，本来就清楚。
 
-- 替换 emoji 区块：用 `<img src={country.flagImage}>`，`w-full h-12`（瓦片宽度的 80%+，相对当前 emoji 大概 2× 视觉体量），`object-cover`，`rounded-sm`，外加 1px 暗色描边贴合复古面板。
-- 状态滤镜：
-  - voting / locked-in：原色 + 轻微 `contrast(1.05) saturate(1.1)`
-  - revealed-hit：原色 + 顶部一道极淡绿色 inset 光
-  - revealed-miss：`grayscale(0.5) opacity(0.7)`
-  - upcoming：继续显示大号"?"，不放图（保持神秘）
-- 瓦片内部 padding 微调（`p-2` → `px-1.5 pt-1.5 pb-2`），让回合编号、旗、底色条三者节奏更紧凑。
-- 底部彩条 + 外框色保持现状（已经能传达 hit/miss/active 状态）。
+### 不动 / 不引入
 
-### 不动的部分
-
-- 数据结构 / 路由 / Active Bay / Archive 全部不动。
-- emoji 字段 `country.flag` 保留（其它地方可能还在用）。
-- DESIGN.md 不改（这是同一套规则的更忠实执行，不是新规则）。
-- `/style-guide` 里的 `LegendScoreboardDemo` 因为复用同一组件会自动同步，无需单独改。
+- 不删现有做旧旗资源（Active Bay 还在用）。
+- 不引 CSS spritesheet 方案（flag-icons），SVG 组件更轻、可独立 tree-shake。
+- DESIGN.md §4 加一句小补丁："Scoreboard HUD tiles use flat ISO SVG flags; weathered textures are reserved for Active Bay only." 一行。
 
 ### 验证
 
-改完用 Playwright 截 `/promo/world-cup?tab=legend` 桌面态确认 HUD 旗帜明显变大、与下方主旗风格一致。
+`bun add country-flag-icons` → 改完后 Playwright 截 `/promo/world-cup?tab=legend` 桌面态，确认 8 个 tile 里前 3 个能一眼分辨出 FR/AR/ES。
