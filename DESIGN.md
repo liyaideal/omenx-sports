@@ -430,6 +430,26 @@ Rules:
   filters with >12 options + search) follows the same sheet-on-mobile,
   dialog-on-desktop split.
 
+### Modal footer button stack
+
+Any `ResponsiveModal` / `Dialog` / `Sheet` footer caps at **1 primary CTA +
+1 row of ≤2 secondary buttons**.
+
+- Primary CTA: at most one, full-width, in the brand/series accent
+  (amber for Combo, magenta `--neon` for events, etc.). Use the canonical
+  variant (e.g. `ShareTrigger variant="wide"`) — do not re-skin it with
+  extra borders.
+- Secondaries: rendered in a single `grid grid-cols-2 gap-2` row, sharing
+  one zinc-outline token: `border border-zinc-700 bg-zinc-900/60
+  rounded-2xl py-3`, icon-left at `h-3.5 w-3.5`, label
+  `font-mono text-[11px] font-bold uppercase tracking-[0.25em]`.
+- Never stack 3+ full-width buttons in a footer — it reads as a long
+  laundry list and flattens hierarchy.
+- Never mix amber and zinc outlines on the secondary row; the accent
+  color is reserved for the primary CTA only.
+- Disabled states stay in place (don't collapse the row); add a small
+  caption underneath if a reason needs to be shown.
+
 ## 9. Agent Prompt Guide
 
 Paste this block into design prompts for consistency:
