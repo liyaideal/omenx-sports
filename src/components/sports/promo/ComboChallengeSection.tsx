@@ -166,7 +166,7 @@ function CampaignHero({ ctrl }: { ctrl: ComboController }) {
             Pick 4 matches. All correct wins. 10 U can pay up to {COMBO_MAX_ODDS * 10} U.
           </p>
         </div>
-        <div className="text-right">
+        <div className="text-left sm:text-right">
           <div className="font-scoreboard text-[10px] font-bold tracking-[0.25em] text-zinc-500">
             ENTRIES LEFT THIS PERIOD
           </div>
