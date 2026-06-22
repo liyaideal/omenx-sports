@@ -2761,6 +2761,65 @@ function PanelVariant({ market }: { market: SportsMarket }) {
   );
 }
 
+/* -------------------------------------------------------------------- */
+/*  Guess the Legend playground helpers                                  */
+/* -------------------------------------------------------------------- */
+
+function LegendRoundCardPlayground() {
+  const baseRound =
+    LEGEND_ROUNDS.find((r) => r.status === "voting") ?? LEGEND_ROUNDS[0];
+  const states: { label: LegendRoundStatus; description: string }[] = [
+    { label: "voting", description: "Candidates clickable, CTA armed" },
+    { label: "locked-in", description: "Pick locked, dimmed siblings, CTA disabled" },
+    { label: "revealed-hit", description: "Correct candidate crowned, success banner" },
+    { label: "revealed-miss", description: "Correct candidate crowned, user's wrong pick marked ✗" },
+  ];
+  return (
+    <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+      {states.map((s) => {
+        const round: LegendRound = {
+          ...baseRound,
+          status: s.label,
+          userPickId:
+            s.label === "revealed-miss"
+              ? baseRound.candidates.find(
+                  (c) => c.id !== baseRound.correctCandidateId,
+                )?.id
+              : baseRound.correctCandidateId,
+        };
+        const pickId =
+          s.label === "voting" ? undefined : round.userPickId;
+        return (
+          <div key={s.label} className="space-y-2">
+            <div className="font-mono text-[10px] uppercase tracking-widest text-amber-400/80">
+              {s.label} · {s.description}
+            </div>
+            <LegendRoundCard
+              round={round}
+              effectiveStatus={s.label}
+              effectivePickId={pickId}
+              onSelectCandidate={() => {}}
+              onLockIn={() => {}}
+            />
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+function LegendRevealWallDemo() {
+  return (
+    <LegendRevealWall
+      rounds={LEGEND_ROUNDS}
+      activeRoundId={LEGEND_ROUNDS.find((r) => r.status === "voting")?.id ?? LEGEND_ROUNDS[0].id}
+      onSelectRound={() => {}}
+      hits={1}
+      completed={2}
+    />
+  );
+}
+
 function EventOutcomesPanelDemo() {
   const binary = MATCH_MARKETS.find((m) => m.outcomes.length === 2) ?? FEATURED_MATCH;
   const threeWay = MATCH_MARKETS.find((m) => m.outcomes.length === 3) ?? FEATURED_MATCH;
