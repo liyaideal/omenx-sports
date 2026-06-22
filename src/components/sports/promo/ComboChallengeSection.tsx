@@ -113,8 +113,8 @@ export function ComboChallengeSection() {
 
       {/* Mobile sticky bottom bar */}
       <MobileStickyBar ctrl={ctrl} onCalculate={ctrl.requestPreview} onConfirm={() => setConfirmOpen(true)} />
-      {/* Spacer so content isn't covered by the mobile bar */}
-      <div className="h-36 lg:hidden" aria-hidden />
+      {/* Spacer so content isn't covered by the mobile bar + bottom nav */}
+      <div className="h-44 lg:hidden" aria-hidden />
 
       {/* Modals */}
       <SubmitConfirmModal
