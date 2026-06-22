@@ -187,27 +187,6 @@ function VolumeLadder({
         )}
       </div>
 
-      {/* LED beam from token → active card */}
-      {activeIndex >= 0 && (
-        <motion.div
-          aria-hidden
-          initial={{ opacity: 0, scaleY: 0 }}
-          animate={{ opacity: 1, scaleY: 1 }}
-          transition={{ duration: 0.5, delay: 1.2 }}
-          className="pointer-events-none absolute z-10 hidden md:block"
-          style={{
-            left: posExpr(tokenPct),
-            top: "calc(100% + 2px)",
-            height: "22px",
-            width: "2px",
-            background: `linear-gradient(180deg, ${activeColor}, transparent)`,
-            boxShadow: `0 0 10px ${activeColor}`,
-            transformOrigin: "top center",
-            transform: "translateX(-50%)",
-          }}
-        />
-      )}
-
       {/* Caption */}
       <div className="mt-2 font-pitch text-[11px] uppercase tracking-[0.18em] text-zinc-500">
         {activeTier ? (
