@@ -2789,25 +2789,27 @@ function PanelVariant({ market }: { market: SportsMarket }) {
 function LegendScoreboardDemo() {
   const active = LEGEND_ROUNDS.find((r) => r.status === "voting") ?? LEGEND_ROUNDS[0];
   return (
-    <div className="mx-auto w-full max-w-3xl">
+    <div className="w-full">
       <ScoreboardChassis>
-        <MissionBrief />
-        <RoundProgressHud
-          rounds={LEGEND_ROUNDS}
-          activeRoundId={active.id}
-          hits={1}
-          completed={2}
-          onSelectRound={() => {}}
-        />
-        <ActiveRoundBay round={active} effectiveStatus={active.status} />
-        <CandidateBoard
-          round={active}
-          effectiveStatus={active.status}
-          effectivePickId={undefined}
-          onSelectCandidate={() => {}}
-          onLockIn={() => {}}
-        />
-        <SignedArchiveStrip rounds={LEGEND_ROUNDS} />
+        <div className="mx-auto w-full max-w-3xl">
+          <MissionBrief />
+          <RoundProgressHud
+            rounds={LEGEND_ROUNDS}
+            activeRoundId={active.id}
+            hits={1}
+            completed={2}
+            onSelectRound={() => {}}
+          />
+          <ActiveRoundBay round={active} effectiveStatus={active.status} />
+          <CandidateBoard
+            round={active}
+            effectiveStatus={active.status}
+            effectivePickId={undefined}
+            onSelectCandidate={() => {}}
+            onLockIn={() => {}}
+          />
+          <SignedArchiveStrip rounds={LEGEND_ROUNDS} />
+        </div>
       </ScoreboardChassis>
     </div>
   );
