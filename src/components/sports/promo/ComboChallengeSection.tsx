@@ -1159,16 +1159,18 @@ function TicketAcceptedModal({
   ticket,
   capReached,
   onAnother,
+  onView,
 }: {
   open: boolean;
   ticket: SubmittedTicket | null;
   capReached: boolean;
   onAnother: () => void;
+  onView: () => void;
 }) {
   return (
     <ResponsiveModal
       open={open}
-      onOpenChange={(v) => !v && onAnother()}
+      onOpenChange={(v) => !v && onView()}
       accent="emerald-500/60"
       title="Combo submitted"
     >
@@ -1206,6 +1208,16 @@ function TicketAcceptedModal({
               className="border-2 border-amber-400 bg-amber-400/10"
             />
           )}
+          <button
+            type="button"
+            onClick={onView}
+            className="group flex w-full items-center justify-center gap-3 rounded-2xl border border-amber-400/40 bg-transparent py-3 transition-all duration-200 hover:border-amber-400 hover:bg-amber-400/10"
+          >
+            <Eye className="h-3.5 w-3.5 text-amber-300" />
+            <span className="font-mono text-[11px] font-bold uppercase tracking-[0.25em] text-amber-300">
+              View my ticket
+            </span>
+          </button>
           {capReached ? (
             <p className="text-center font-pitch text-[10px] font-semibold uppercase tracking-widest text-zinc-500">
               You have used all available combo entries for this matchday.
