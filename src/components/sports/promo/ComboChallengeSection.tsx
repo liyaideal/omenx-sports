@@ -348,12 +348,12 @@ function MatchCard({ match, ctrl }: { match: WCMatch; ctrl: ComboController }) {
               {match.kickoff}
             </span>
           </div>
-          <div className="mt-1.5 font-pitch text-base font-bold uppercase tracking-wide text-white">
+          <div className="mt-1.5 min-w-0 truncate font-pitch text-base font-bold uppercase tracking-wide text-white sm:whitespace-normal">
             {match.home} <span className="text-zinc-600">vs</span> {match.away}
           </div>
         </div>
         {isLocked && (
-          <span className="flex items-center gap-1 border border-zinc-700 bg-zinc-900 px-2 py-0.5 font-pitch text-[9px] font-bold uppercase tracking-widest text-zinc-500">
+          <span className="flex shrink-0 items-center gap-1 border border-zinc-700 bg-zinc-900 px-2 py-0.5 font-pitch text-[9px] font-bold uppercase tracking-widest text-zinc-500">
             <Lock className="h-2.5 w-2.5" /> Locked
           </span>
         )}
