@@ -617,7 +617,7 @@ function ComboBuilder({
           <LegSlot key={i} index={i} leg={ctrl.selectedLegs[i]} onRemove={ctrl.removeLeg} />
         ))}
       </div>
-      <StakeInput value={ctrl.stakeInput} onChange={ctrl.setStakeInput} valid={ctrl.stakeValid} />
+      <StakeDisplay />
       <BuilderCTA ctrl={ctrl} onCalculate={onCalculate} onConfirm={onConfirm} />
     </div>
   );
@@ -669,70 +669,25 @@ function LegSlot({
   );
 }
 
-function StakeInput({
-  value,
-  onChange,
-  valid,
-  compact,
-}: {
-  value: string;
-  onChange: (v: string) => void;
-  valid: boolean;
-  compact?: boolean;
-}) {
-  const presets = useMemo(() => [1, 5, 10], []);
-  const numeric = Number(value);
+function StakeDisplay({ compact }: { compact?: boolean }) {
   return (
-    <div className={cn("border border-zinc-800 bg-black", compact ? "p-2" : "p-2.5")}>
+    <div className={cn("mt-2 border border-zinc-800 bg-black", compact ? "p-2" : "p-2.5")}>
       <div className="flex items-center justify-between">
         <span className={cn("font-scoreboard font-bold tracking-widest text-zinc-500", compact ? "text-[9px]" : "text-[10px]")}>
           STAKE (U)
         </span>
         <span className={cn("font-pitch font-semibold uppercase tracking-widest text-zinc-600", compact ? "text-[9px]" : "text-[10px]")}>
-          {COMBO_STAKE_MIN}–{COMBO_STAKE_MAX} · step {COMBO_STAKE_STEP}
+          Fixed · 10U per entry
         </span>
       </div>
-      <div className="mt-1.5 flex items-center gap-2">
-        <input
-          type="number"
-          min={COMBO_STAKE_MIN}
-          max={COMBO_STAKE_MAX}
-          step={COMBO_STAKE_STEP}
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
-          className={cn(
-            "w-full rounded border border-transparent bg-transparent px-1 py-0.5 font-scoreboard font-black tabular-nums text-white focus:border-amber-400/50 focus:outline-none",
-            !valid && "text-red-400",
-            compact ? "text-xl" : "text-2xl",
-          )}
-        />
-        <div className="flex gap-1">
-          {presets.map((v) => {
-            const active = Number(value) === v;
-            return (
-              <button
-                key={v}
-                type="button"
-                onClick={() => onChange(String(v))}
-                className={cn(
-                  "border px-2 py-1 font-pitch font-bold uppercase tracking-widest transition-colors",
-                  compact ? "text-[9px]" : "text-[10px]",
-                  active
-                    ? "border-amber-400 bg-amber-400 text-black"
-                    : "border-zinc-700 bg-zinc-900 text-zinc-400 hover:border-amber-400 hover:text-amber-400",
-                )}
-              >
-                {v}U
-              </button>
-            );
-          })}
-        </div>
+      <div className="mt-1.5 flex items-baseline gap-2">
+        <span className={cn("font-scoreboard font-black tabular-nums text-white", compact ? "text-xl" : "text-2xl")}>
+          {COMBO_STAKE}
+        </span>
+        <span className={cn("font-pitch font-bold uppercase tracking-widest text-zinc-500", compact ? "text-[10px]" : "text-xs")}>
+          U
+        </span>
       </div>
-      {!valid && (
-        <p className={cn("mt-1 font-pitch font-semibold text-red-400", compact ? "text-[9px]" : "text-[10px]")}>
-          Stake must be {COMBO_STAKE_MIN}–{COMBO_STAKE_MAX} U in steps of {COMBO_STAKE_STEP}.
-        </p>
-      )}
     </div>
   );
 }
@@ -746,7 +701,7 @@ function BuilderCTA({
   onCalculate: () => void;
   onConfirm: () => void;
 }) {
-  const { filled, stakeValid, pageState, canPreview } = ctrl;
+  const { filled, pageState, canPreview } = ctrl;
   if (ctrl.participationCapReached) {
     return (
       <div className="mt-3 border border-zinc-800 bg-zinc-950 p-2.5 text-center font-pitch text-[10px] font-bold uppercase tracking-widest text-zinc-500">
@@ -761,8 +716,6 @@ function BuilderCTA({
 
   if (filled < COMBO_MAX_PICKS) {
     label = `Add ${COMBO_MAX_PICKS - filled} more pick${COMBO_MAX_PICKS - filled > 1 ? "s" : ""}`;
-  } else if (!stakeValid) {
-    label = "Enter valid stake";
   } else if (pageState === "READY") {
     label = "Calculate odds";
     disabled = !canPreview;
