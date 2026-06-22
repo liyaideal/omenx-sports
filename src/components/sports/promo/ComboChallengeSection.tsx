@@ -877,6 +877,57 @@ function QuotePreviewPanel({ ctrl }: { ctrl: ComboController }) {
 /* SubmitConfirmModal                                            */
 /* ============================================================ */
 
+/**
+ * Responsive modal surface — bottom Sheet on mobile, centered Dialog on md+.
+ * Enforces the project rule: mobile has no center modals.
+ */
+function ResponsiveModal({
+  open,
+  onOpenChange,
+  accent,
+  title,
+  children,
+}: {
+  open: boolean;
+  onOpenChange: (v: boolean) => void;
+  accent: "amber-400/60" | "red-500/60" | "emerald-500/60";
+  title: string;
+  children: React.ReactNode;
+}) {
+  const isMobile = useIsMobile();
+  const borderClass =
+    accent === "amber-400/60"
+      ? "border-amber-400/60"
+      : accent === "red-500/60"
+        ? "border-red-500/60"
+        : "border-emerald-500/60";
+  if (isMobile) {
+    return (
+      <Sheet open={open} onOpenChange={onOpenChange}>
+        <SheetContent
+          side="bottom"
+          className={cn(
+            "max-h-[92vh] overflow-y-auto rounded-t-2xl border-t-2 bg-[#0a0a0a] p-0",
+            borderClass,
+          )}
+          style={{ paddingBottom: "max(env(safe-area-inset-bottom), 1rem)" }}
+        >
+          <SheetTitle className="sr-only">{title}</SheetTitle>
+          {children}
+        </SheetContent>
+      </Sheet>
+    );
+  }
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className={cn("max-w-md border-2 bg-[#0a0a0a] p-0", borderClass)}>
+        <DialogTitle className="sr-only">{title}</DialogTitle>
+        {children}
+      </DialogContent>
+    </Dialog>
+  );
+}
+
 function SubmitConfirmModal({
   open,
   ctrl,
