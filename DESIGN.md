@@ -449,6 +449,10 @@ Any `ResponsiveModal` / `Dialog` / `Sheet` footer caps at **1 primary CTA +
   color is reserved for the primary CTA only.
 - Disabled states stay in place (don't collapse the row); add a small
   caption underneath if a reason needs to be shown.
+- Primary CTA and secondaries share the **same height** (`py-3`). The
+  primary is distinguished by color only (amber fill/border/label), never
+  by extra vertical padding — height mismatches read as a visual seam
+  across the footer.
 
 ## 9. Agent Prompt Guide
 
