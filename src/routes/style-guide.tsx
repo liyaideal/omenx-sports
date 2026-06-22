@@ -109,6 +109,7 @@ import { CarnivalFlagsMarquee } from "@/components/sports/promo/CarnivalFlagsMar
 import { ConfettiLayer, TwinkleField } from "@/components/sports/promo/ConfettiLayer";
 import { OverviewSection } from "@/components/sports/promo/OverviewSection";
 import { ComboChallengeSection } from "@/components/sports/promo/ComboChallengeSection";
+import { LuckyBoxSection } from "@/components/sports/promo/LuckyBoxSection";
 
 export const Route = createFileRoute("/style-guide")({
   head: () => ({
@@ -1961,6 +1962,30 @@ function StyleGuide() {
                   ComboChallengeSection — 4-leg activity page: hero · filters · match selector · sticky builder · quote preview · submit/requote/success modals · ticket list · share card preview
                 </div>
                 <ComboChallengeSection />
+              </div>
+
+              <div className="space-y-6">
+                <div className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+                  LuckyBoxSection — daily vault: volume ladder links your today's U to the one tier that applies; surpassed/locked tiers dim out, only the active card spins
+                </div>
+                <div className="space-y-3">
+                  <div className="font-mono text-[10px] uppercase tracking-widest text-blue-400/70">
+                    State A · todayVolume = 80 U — no tier reached yet (NEXT UP on Basic)
+                  </div>
+                  <LuckyBoxSection volumeOverride={80} />
+                </div>
+                <div className="space-y-3">
+                  <div className="font-mono text-[10px] uppercase tracking-widest text-amber-400/80">
+                    State B · todayVolume = 1,240 U — Premium active, Basic surpassed, Grand locked (production default)
+                  </div>
+                  <LuckyBoxSection volumeOverride={1240} />
+                </div>
+                <div className="space-y-3">
+                  <div className="font-mono text-[10px] uppercase tracking-widest text-emerald-400/80">
+                    State C · todayVolume = 6,000 U — Grand active, two lower tiers surpassed
+                  </div>
+                  <LuckyBoxSection volumeOverride={6000} />
+                </div>
               </div>
 
               <div className="rounded-2xl border border-dashed border-white/15 bg-white/[0.02] p-5 text-xs">
