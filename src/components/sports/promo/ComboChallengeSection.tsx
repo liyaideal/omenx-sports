@@ -327,15 +327,17 @@ function MatchSelector({ matches, ctrl }: { matches: WCMatch[]; ctrl: ComboContr
 
 function MatchCard({ match, ctrl }: { match: WCMatch; ctrl: ComboController }) {
   const moneyline = match.markets.find((mk) => mk.marketType === "MONEYLINE");
-  const displayMarkets = match.markets.filter((mk) => mk.displayOnly);
-  const selectedLeg = ctrl.selectedLegs.find((l) => l.matchId === match.matchId);
+  const spread = match.markets.find((mk) => mk.marketType === "SPREAD");
+  const total = match.markets.find((mk) => mk.marketType === "TOTAL");
+  const matchSelectedLegs = ctrl.selectedLegs.filter((l) => l.matchId === match.matchId);
+  const hasAnySelection = matchSelectedLegs.length > 0;
   const isLocked = match.matchComboStatus !== "AVAILABLE";
 
   return (
     <div
       className={cn(
         "relative flex flex-col gap-3 border-2 bg-[#0a0a0a] p-4 transition-colors",
-        selectedLeg ? "border-amber-400/70" : "border-zinc-800",
+        hasAnySelection ? "border-amber-400/70" : "border-zinc-800",
         isLocked && "opacity-60",
       )}
     >
@@ -359,36 +361,177 @@ function MatchCard({ match, ctrl }: { match: WCMatch; ctrl: ComboController }) {
       </div>
 
       {moneyline?.outcomes && (
-        <div className="grid grid-cols-3 gap-1.5">
-          {moneyline.outcomes.map((o) => {
-            const isSelected = selectedLeg?.outcomeId === o.outcomeId;
-            return (
-              <OutcomeButton
-                key={o.outcomeId}
-                outcome={o}
-                selected={isSelected}
-                disabled={isLocked}
-                onClick={() => ctrl.selectOutcome(match, o)}
-              />
-            );
-          })}
-        </div>
+        <MoneylineSection
+          match={match}
+          market={moneyline}
+          ctrl={ctrl}
+          disabled={isLocked}
+        />
+      )}
+      {spread?.lines && (
+        <LinedMarketSection
+          title="Spread"
+          match={match}
+          market={spread}
+          ctrl={ctrl}
+          disabled={isLocked}
+        />
+      )}
+      {total?.lines && (
+        <LinedMarketSection
+          title="Total"
+          match={match}
+          market={total}
+          ctrl={ctrl}
+          disabled={isLocked}
+        />
       )}
 
-      {displayMarkets.length > 0 && (
-        <div className="flex flex-wrap items-center gap-1.5 border-t border-zinc-800 pt-2">
-          <span className="font-scoreboard text-[9px] font-bold tracking-widest text-zinc-600">
-            REFERENCE
-          </span>
-          {displayMarkets.map((mk, i) => (
-            <DisplayOnlyChip key={i} market={mk} />
+      {hasAnySelection && (
+        <span aria-hidden className="absolute inset-x-0 bottom-0 h-0.5 bg-amber-400" />
+      )}
+    </div>
+  );
+}
+
+function MoneylineSection({
+  match,
+  market,
+  ctrl,
+  disabled,
+}: {
+  match: WCMatch;
+  market: WCMarket;
+  ctrl: ComboController;
+  disabled: boolean;
+}) {
+  const selected = ctrl.selectedLegs.find((l) => l.marketId === market.marketId);
+  return (
+    <div className="flex flex-col gap-1.5">
+      <SectionHeader title="Moneyline" />
+      <div className="grid grid-cols-3 gap-1.5">
+        {(market.outcomes ?? []).map((o) => (
+          <OutcomeButton
+            key={o.outcomeId}
+            outcome={o}
+            selected={selected?.outcomeId === o.outcomeId}
+            disabled={disabled}
+            onClick={() => ctrl.selectOutcome(match, market, o)}
+          />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function LinedMarketSection({
+  title,
+  match,
+  market,
+  ctrl,
+  disabled,
+}: {
+  title: string;
+  match: WCMatch;
+  market: WCMarket;
+  ctrl: ComboController;
+  disabled: boolean;
+}) {
+  const lines = market.lines ?? [];
+  const selected = ctrl.selectedLegs.find((l) => l.marketId === market.marketId);
+  // If a leg is already selected for this market, snap the stepper to its line.
+  const selectedLineIdx = selected
+    ? lines.findIndex((ln) =>
+        ln.outcomes.some((o) => o.outcomeId === selected.outcomeId),
+      )
+    : -1;
+  const [lineIdx, setLineIdx] = useState<number>(
+    Math.max(0, market.defaultLineIndex ?? Math.floor(lines.length / 2)),
+  );
+  const activeIdx = selectedLineIdx >= 0 ? selectedLineIdx : lineIdx;
+  const activeLine: WCMarketLine | undefined = lines[activeIdx];
+
+  return (
+    <div className="flex flex-col gap-1.5 border-t border-zinc-800 pt-2">
+      <SectionHeader title={title} />
+      <LineStepper
+        lines={lines}
+        activeIdx={activeIdx}
+        onChange={(i) => setLineIdx(i)}
+      />
+      {activeLine && (
+        <div className="grid grid-cols-2 gap-1.5">
+          {activeLine.outcomes.map((o) => (
+            <OutcomeButton
+              key={o.outcomeId}
+              outcome={o}
+              selected={selected?.outcomeId === o.outcomeId}
+              disabled={disabled}
+              onClick={() => ctrl.selectOutcome(match, market, o)}
+            />
           ))}
         </div>
       )}
+    </div>
+  );
+}
 
-      {selectedLeg && (
-        <span aria-hidden className="absolute inset-x-0 bottom-0 h-0.5 bg-amber-400" />
-      )}
+function SectionHeader({ title }: { title: string }) {
+  return (
+    <div className="font-scoreboard text-[9px] font-bold tracking-[0.22em] text-zinc-500">
+      {title.toUpperCase()}
+    </div>
+  );
+}
+
+function LineStepper({
+  lines,
+  activeIdx,
+  onChange,
+}: {
+  lines: WCMarketLine[];
+  activeIdx: number;
+  onChange: (i: number) => void;
+}) {
+  const canPrev = activeIdx > 0;
+  const canNext = activeIdx < lines.length - 1;
+  return (
+    <div className="flex items-center gap-1 border border-zinc-800 bg-black px-1.5 py-1">
+      <button
+        type="button"
+        onClick={() => canPrev && onChange(activeIdx - 1)}
+        disabled={!canPrev}
+        aria-label="Previous line"
+        className="grid h-5 w-5 place-items-center text-zinc-500 hover:text-amber-400 disabled:cursor-not-allowed disabled:opacity-30"
+      >
+        <ChevronLeft className="h-3.5 w-3.5" />
+      </button>
+      <div className="flex flex-1 items-center justify-around gap-1">
+        {lines.map((ln, i) => (
+          <button
+            key={ln.lineValue}
+            type="button"
+            onClick={() => onChange(i)}
+            className={cn(
+              "px-1.5 py-0.5 font-scoreboard text-[11px] font-bold tabular-nums tracking-wider transition-colors",
+              i === activeIdx
+                ? "text-amber-400"
+                : "text-zinc-600 hover:text-zinc-300",
+            )}
+          >
+            {ln.lineValue.toFixed(1)}
+          </button>
+        ))}
+      </div>
+      <button
+        type="button"
+        onClick={() => canNext && onChange(activeIdx + 1)}
+        disabled={!canNext}
+        aria-label="Next line"
+        className="grid h-5 w-5 place-items-center text-zinc-500 hover:text-amber-400 disabled:cursor-not-allowed disabled:opacity-30"
+      >
+        <ChevronRight className="h-3.5 w-3.5" />
+      </button>
     </div>
   );
 }
