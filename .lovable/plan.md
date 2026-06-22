@@ -1,15 +1,19 @@
-World Cup mobile has no bottom tab bar (`MobileChrome hideBottomNav`). The combo sticky bar is still offset by `bottom-16` to clear the now-removed tab bar, leaving a gap. Plan:
+Establish "mobile = bottom sheet, never modal" as a core project rule, then apply it to the World Cup combo flow.
 
-1. **`src/components/sports/promo/ComboChallengeSection.tsx`**
-   - Change `MobileStickyBar` from `fixed bottom-16` to `fixed bottom-0` on mobile.
-   - Reduce the mobile spacer below the bar from `h-28` to `h-20` since it no longer needs to clear the bottom nav.
-   - Keep the safe-area padding and desktop behavior unchanged.
+## Memory
 
-2. **`src/routes/style-guide.tsx`**
-   - Update the `MobileStickyBar` documentation to reflect the two modes:
-     - Default mobile routes: `bottom-16` to clear `MobileBottomNav`, spacer `h-28`.
-     - Promo/campaign pages with `hideBottomNav` (e.g. `/promo/world-cup`): `bottom-0`, spacer `h-20`.
+1. **Update `mem://index.md`** — add a Core rule: "Mobile has no center modals. Any Dialog used in the app must render as a bottom sheet on mobile (Sheet `side="bottom"`) and Dialog only on md+. Mirror the existing `ShareDialog` pattern via `useIsMobile`."
+2. **Create `mem://rules/mobile-bottom-sheet`** — detailed entry referencing `ShareDialog` as the canonical pattern, with the Sheet styling we use (`rounded-t-2xl`, `border-t-2`, safe-area, `max-h-[92vh]`).
 
-3. **Verify**
-   - Preview `/promo/world-cup?tab=combo` at mobile width.
-   - Confirm the combo bar sits flush against the bottom and no runtime errors appear.
+## Code
+
+3. **`src/components/sports/promo/ComboChallengeSection.tsx`** — convert the three remaining center modals to the responsive pattern:
+   - `SubmitConfirmModal`
+   - `RequoteModal`
+   - `TicketAcceptedModal`
+
+   For each: import `Sheet`/`SheetContent`/`SheetTitle` and `useIsMobile`. When `isMobile`, render the same body inside a bottom `SheetContent` (`rounded-t-2xl`, colored top border matching the modal's accent, `max-h-[92vh] overflow-y-auto`, `pb-[max(env(safe-area-inset-bottom),1rem)]`). Otherwise keep the existing `Dialog`/`DialogContent`. Body markup stays identical.
+
+4. **`src/routes/style-guide.tsx`** — add a short note under the mobile behavior section: campaign confirm / requote / ticket-accepted surfaces use bottom sheet on mobile, dialog on md+, per the global rule.
+
+No business logic, data, or desktop styling changes.
