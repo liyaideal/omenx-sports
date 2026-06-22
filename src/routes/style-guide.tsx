@@ -2957,13 +2957,13 @@ function LegendClueScript() {
         5 · Per-round clue script & correct legend
       </div>
       <p className="mb-3 max-w-3xl text-xs text-muted-foreground">
-        Three clues per round, fixed labels encoded by{" "}
-        <code className="font-mono text-foreground">LegendClueLabel</code> ={" "}
+        Three clues per round, fixed labels:{" "}
         <code className="font-mono text-foreground">POSITION · PEAK CLUB · MAJOR TROPHY</code>.
-        The reveal order within a round is <b>randomised per round</b> — any of the three may
-        unlock first / last, and reveals are gated by community vote thresholds, never by a
-        wall-clock timer. Don't document a per-clue unlock round here; the truth is the live
-        community vote.
+        Within a <b>LIVE</b> round the clues unlock progressively via community vote — clue ① is
+        open at launch, ② unlocks after ~30% vote, ③ unlocks after ≥60% vote (the final reveal
+        before lock-in). Past rounds (HIT / MISS) show all three for archive review. Upcoming
+        rounds (TBA) list the full clue set here for QA only; in product they stay hidden until
+        the round goes live.
       </p>
       <div className="overflow-x-auto rounded-md border border-border">
         <table className="w-full min-w-[760px] border-collapse text-left font-mono text-[11px]">
