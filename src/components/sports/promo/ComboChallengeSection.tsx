@@ -1202,6 +1202,20 @@ function TicketAcceptedModal({
             </div>
           </div>
         )}
+        {ticket && (
+          <div className="px-4 pb-3 -mt-1">
+            <a
+              href={omenxUrl.wallet()}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center justify-center gap-1.5 font-pitch text-[10px] font-semibold uppercase tracking-widest text-amber-300/80 transition-colors hover:text-amber-300"
+            >
+              <Wallet className="h-3 w-3" />
+              Payouts settle automatically to your Wallet
+              <ArrowUpRight className="h-3 w-3" />
+            </a>
+          </div>
+        )}
         <div className="space-y-2 border-t border-zinc-800 p-4">
           {ticket && (
             <ShareTrigger
