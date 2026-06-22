@@ -2951,37 +2951,20 @@ function LegendClueScript() {
     return { color: "#3f3f46", label: "TBA" };
   }
 
-  const announced = LEGEND_ROUNDS.filter((r) => r.status !== "upcoming");
-  const upcomingCount = LEGEND_ROUNDS.length - announced.length;
-
   return (
     <div>
       <div className="mb-2 font-mono text-[10px] uppercase tracking-widest text-amber-400/80">
         5 · Per-round clue script & correct legend
       </div>
       <p className="mb-3 max-w-3xl text-xs text-muted-foreground">
-        Three clues per round, fixed positional order encoded by{" "}
-        <code className="font-mono text-foreground">LegendClueLabel</code>. The unlock cadence is
-        the same for every round and does not depend on real time — only on community vote share:
+        Three clues per round, fixed labels encoded by{" "}
+        <code className="font-mono text-foreground">LegendClueLabel</code> ={" "}
+        <code className="font-mono text-foreground">POSITION · PEAK CLUB · MAJOR TROPHY</code>.
+        The reveal order within a round is <b>randomised per round</b> — any of the three may
+        unlock first / last, and reveals are gated by community vote thresholds, never by a
+        wall-clock timer. Don't document a per-clue unlock round here; the truth is the live
+        community vote.
       </p>
-      <ul className="mb-4 grid grid-cols-1 gap-2 text-xs text-muted-foreground sm:grid-cols-3">
-        <li className="rounded border border-border bg-[#0a0a0a] px-3 py-2">
-          <div className="font-mono text-[10px] font-bold" style={{ color: ACCENT }}>CLUE 1 · POSITION</div>
-          <div className="mt-0.5">Open on launch — given for free so players can start narrowing.</div>
-        </li>
-        <li className="rounded border border-border bg-[#0a0a0a] px-3 py-2">
-          <div className="font-mono text-[10px] font-bold" style={{ color: AMBER }}>CLUE 2 · PEAK CLUB</div>
-          <div className="mt-0.5">Unlocks once community vote crosses ~30% on any candidate.</div>
-        </li>
-        <li className="rounded border border-border bg-[#0a0a0a] px-3 py-2">
-          <div className="font-mono text-[10px] font-bold" style={{ color: MISS }}>CLUE 3 · MAJOR TROPHY</div>
-          <div className="mt-0.5">
-            Last to unlock — gated at 60% community vote (see{" "}
-            <code className="font-mono text-foreground">unlockHint</code> on round-03). Hardest tell.
-          </div>
-        </li>
-      </ul>
-
       <div className="overflow-x-auto rounded-md border border-border">
         <table className="w-full min-w-[760px] border-collapse text-left font-mono text-[11px]">
           <thead className="bg-[#0d0d0d] text-[10px] uppercase tracking-widest text-zinc-500">
@@ -2989,16 +2972,18 @@ function LegendClueScript() {
               <th className="px-3 py-2 font-semibold">Round</th>
               <th className="px-3 py-2 font-semibold">Country</th>
               <th className="px-3 py-2 font-semibold">Correct legend</th>
-              <th className="px-3 py-2 font-semibold" style={{ color: ACCENT }}>① POSITION <span className="text-zinc-600">(open)</span></th>
-              <th className="px-3 py-2 font-semibold" style={{ color: AMBER }}>② PEAK CLUB <span className="text-zinc-600">(30%)</span></th>
-              <th className="px-3 py-2 font-semibold" style={{ color: MISS }}>③ MAJOR TROPHY <span className="text-zinc-600">(60% · last)</span></th>
+              <th className="px-3 py-2 font-semibold text-zinc-300">POSITION</th>
+              <th className="px-3 py-2 font-semibold text-zinc-300">PEAK CLUB</th>
+              <th className="px-3 py-2 font-semibold text-zinc-300">MAJOR TROPHY</th>
+              <th className="px-3 py-2 font-semibold">Distractors</th>
             </tr>
           </thead>
           <tbody>
-            {announced.map((r) => {
+            {LEGEND_ROUNDS.map((r) => {
               const meta = statusMeta(r.status);
               const country = LEGEND_COUNTRIES[r.country];
               const correct = r.candidates.find((c) => c.id === r.correctCandidateId);
+              const distractors = r.candidates.filter((c) => c.id !== r.correctCandidateId);
               const clueByIdx = (idx: 1 | 2 | 3) => r.clues.find((c) => c.idx === idx);
               return (
                 <tr key={r.id} className="border-t border-border bg-[#0a0a0a] align-top">
@@ -3029,20 +3014,14 @@ function LegendClueScript() {
                       </td>
                     );
                   })}
+                  <td className="px-3 py-2 text-[10px] text-muted-foreground">
+                    {distractors.length === 0
+                      ? "—"
+                      : distractors.map((d) => d.name).join(" · ")}
+                  </td>
                 </tr>
               );
             })}
-            <tr className="border-t border-dashed border-border bg-[#080808] text-zinc-500">
-              <td className="px-3 py-2" style={{ borderLeft: "3px dashed #3f3f46" }}>
-                <div className="font-bold">#04–#08</div>
-                <div className="text-[10px] uppercase tracking-widest">TBA</div>
-              </td>
-              <td className="px-3 py-2 text-zinc-600">— ({upcomingCount} rounds)</td>
-              <td className="px-3 py-2 text-zinc-600">Country + legend announced on round drop</td>
-              <td className="px-3 py-2 text-zinc-600">—</td>
-              <td className="px-3 py-2 text-zinc-600">—</td>
-              <td className="px-3 py-2 text-zinc-600">—</td>
-            </tr>
           </tbody>
         </table>
       </div>
@@ -3050,6 +3029,8 @@ function LegendClueScript() {
         Source of truth: <code className="font-mono text-foreground">LEGEND_ROUNDS</code> in{" "}
         <code className="font-mono text-foreground">src/data/world-cup-carnival.ts</code>. Edit clue copy / correct
         candidate there; this table mirrors the data and stays in sync automatically.
+        Upcoming rounds (TBA) keep <code className="font-mono text-foreground">status: "upcoming"</code> in product
+        UI — the country/legend/clues are documented here for QA + content review only.
       </p>
     </div>
   );
