@@ -2951,9 +2951,6 @@ function LegendClueScript() {
     return { color: "#3f3f46", label: "TBA" };
   }
 
-  const announced = LEGEND_ROUNDS.filter((r) => r.status !== "upcoming");
-  const upcomingCount = LEGEND_ROUNDS.length - announced.length;
-
   return (
     <div>
       <div className="mb-2 font-mono text-[10px] uppercase tracking-widest text-amber-400/80">
