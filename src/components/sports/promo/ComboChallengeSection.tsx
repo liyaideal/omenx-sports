@@ -701,7 +701,7 @@ function StakeInput({
           value={value}
           onChange={(e) => onChange(e.target.value)}
           className={cn(
-            "w-full bg-transparent font-scoreboard font-black tabular-nums text-white focus:outline-none",
+            "w-full rounded border border-transparent bg-transparent px-1 py-0.5 font-scoreboard font-black tabular-nums text-white focus:border-amber-400/50 focus:outline-none",
             !valid && "text-red-400",
             compact ? "text-xl" : "text-2xl",
           )}
