@@ -3,9 +3,6 @@ import { toast } from "sonner";
 import {
   COMBO_MAX_PICKS,
   COMBO_STAKE,
-  COMBO_STAKE_MAX,
-  COMBO_STAKE_MIN,
-  COMBO_STAKE_STEP,
   COMBO_MAX_COMBOS_PER_USER,
   WC_COMBO_MATCHES,
   type OutcomeSide,
@@ -83,14 +80,6 @@ function legFromOutcome(
   };
 }
 
-function isValidStake(stake: number): boolean {
-  if (!Number.isFinite(stake)) return false;
-  if (stake < COMBO_STAKE_MIN || stake > COMBO_STAKE_MAX) return false;
-  // Step check with floating tolerance.
-  const ratio = stake / COMBO_STAKE_STEP;
-  return Math.abs(ratio - Math.round(ratio)) < 1e-6;
-}
-
 /** Three sample tickets seeded for the TicketStatusList demo. */
 function seedTickets(): SubmittedTicket[] {
   const find = (id: string) => WC_COMBO_MATCHES.find((m) => m.matchId === id)!;
@@ -159,7 +148,11 @@ export interface RequoteState {
 
 export function useComboState() {
   const [selectedLegs, setSelectedLegs] = useState<SelectedLeg[]>([]);
-  const [stakeInput, setStakeInput] = useState<string>(String(COMBO_STAKE));
+  // Stake is fixed at COMBO_STAKE (10U). No user input.
+  const stakeInput = String(COMBO_STAKE);
+  const setStakeInput = useCallback((_v: string) => {
+    /* no-op: stake is fixed */
+  }, []);
   const [pageState, setPageState] = useState<PageState>("READY");
   const [quote, setQuote] = useState<PreviewQuote | null>(null);
   const [requote, setRequote] = useState<RequoteState | null>(null);
@@ -193,8 +186,8 @@ export function useComboState() {
     }
   }, [selectedLegs, stakeInput, pageState]);
 
-  const stake = Number(stakeInput);
-  const stakeValid = isValidStake(stake);
+  const stake = COMBO_STAKE;
+  const stakeValid = true;
   const filled = selectedLegs.length;
   const remainingEntries = Math.max(0, COMBO_MAX_COMBOS_PER_USER - tickets.filter((t) => !t.ticketId.startsWith("t_demo_")).length);
   const participationCapReached = remainingEntries <= 0;
@@ -335,7 +328,6 @@ export function useComboState() {
 
   const startNewCombo = useCallback(() => {
     setSelectedLegs([]);
-    setStakeInput(String(COMBO_STAKE));
     setQuote(null);
     setRequote(null);
     setLastAccepted(null);
