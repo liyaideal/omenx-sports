@@ -1396,6 +1396,45 @@ function extractCountry(leg: SelectedLeg): { name: string; flag: string } {
   return { name: raw.toUpperCase(), flag: countryToFlag(raw) };
 }
 
+/**
+ * Per-leg poster content. Branches on marketType so SPREAD/TOTAL keep
+ * full match context instead of collapsing into "UNDER 0.5 WIN".
+ */
+function getLegPosterContent(leg: SelectedLeg): {
+  flag: string;
+  primary: string;
+  suffix: string;
+  secondary: string;
+} {
+  const matchSub = leg.matchLabel.toUpperCase();
+  if (leg.marketType === "TOTAL") {
+    return {
+      flag: "⚽",
+      primary: leg.teamLabel.toUpperCase(), // "OVER 2.5" / "UNDER 0.5"
+      suffix: "Win",
+      secondary: matchSub,
+    };
+  }
+  if (leg.marketType === "SPREAD") {
+    // teamLabel e.g. "Brazil -1.5" / "Argentina +1.5"
+    const teamName = leg.teamLabel.replace(/\s+[+-]?\d+(\.\d+)?$/, "").trim();
+    return {
+      flag: countryToFlag(teamName),
+      primary: leg.teamLabel.toUpperCase(),
+      suffix: "Win",
+      secondary: matchSub,
+    };
+  }
+  // MONEYLINE (incl. Draw)
+  const c = extractCountry(leg);
+  return {
+    flag: c.flag,
+    primary: c.name,
+    suffix: "Win",
+    secondary: matchSub,
+  };
+}
+
 function PosterTicketFrame({ children }: { children: React.ReactNode }) {
   // Clean neon-edged bracket — no decorative notches.
   return (
