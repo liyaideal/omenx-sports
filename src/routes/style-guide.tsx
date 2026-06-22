@@ -1469,6 +1469,7 @@ function StyleGuide() {
                     <li>• Account data (equity / positions / PnL) appears ONLY in `MeSheet` on mobile; `BridgeStrip` is desktop-only.</li>
                     <li>• Bottom tabs never include cross-OmenX destinations — those belong in `MeSheet`.</li>
                     <li>• Mobile event grid collapses to single column; live cards become the dedicated `MobileLiveHero`, not `LiveStreamCard`.</li>
+                    <li>• <b>Promo / campaign pages</b> (e.g. <code className="font-mono text-foreground">/promo/world-cup</code>) render <code className="font-mono text-foreground">{'<MobileChrome hideBottomNav>'}</code>: top bar stays (avatar still opens MeSheet), bottom tab bar is hidden, and main bottom padding shrinks from <code className="font-mono text-foreground">pb-24</code> to <code className="font-mono text-foreground">pb-8</code>. Use for self-contained campaign flows that have their own in-page tabs and shouldn't compete with the global nav.</li>
                   </ul>
                 </div>
                 <MeSheetPreviewLauncher />
