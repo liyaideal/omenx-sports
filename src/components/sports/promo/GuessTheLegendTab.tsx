@@ -29,7 +29,8 @@ function FlagSvg({
   title?: string;
   className?: string;
 }) {
-  const Cmp = (FlatFlags as Record<string, React.ComponentType<{ title?: string; className?: string }> | undefined>)[code];
+  const key = code.replace(/-/g, "_");
+  const Cmp = (FlatFlags as Record<string, React.ComponentType<{ title?: string; className?: string }> | undefined>)[key];
   if (!Cmp) return null;
   return <Cmp title={title} className={className} />;
 }
