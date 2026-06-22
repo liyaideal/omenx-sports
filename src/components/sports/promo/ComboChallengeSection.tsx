@@ -1275,11 +1275,23 @@ function TicketStatusList({
   if (tickets.length === 0) return null;
   return (
     <div ref={ref} id="combo-my-tickets" className="scroll-mt-20 border-2 border-zinc-800 bg-[#0a0a0a] p-4">
-      <div className="flex items-center gap-2">
-        <Ticket className="h-3.5 w-3.5 text-amber-400" />
-        <div className="font-scoreboard text-[10px] font-bold tracking-[0.25em] text-amber-400">
-          MY TICKETS
+      <div className="flex items-center justify-between gap-2">
+        <div className="flex items-center gap-2">
+          <Ticket className="h-3.5 w-3.5 text-amber-400" />
+          <div className="font-scoreboard text-[10px] font-bold tracking-[0.25em] text-amber-400">
+            MY TICKETS
+          </div>
         </div>
+        <a
+          href={omenxUrl.wallet()}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex items-center gap-1 font-pitch text-[10px] font-semibold uppercase tracking-widest text-zinc-500 transition-colors hover:text-amber-400"
+        >
+          <Wallet className="h-3 w-3" />
+          Manage in Wallet
+          <ArrowUpRight className="h-3 w-3" />
+        </a>
       </div>
       <div className="mt-3 space-y-2">
         {tickets.map((t) => (
