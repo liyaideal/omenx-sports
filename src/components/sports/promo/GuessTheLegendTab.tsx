@@ -700,9 +700,6 @@ function CandidateCard({
           <div className="font-pitch text-sm font-bold uppercase tracking-wide text-white">
             {candidate.name}
           </div>
-          <div className="mt-0.5 font-scoreboard text-[9px] font-bold tracking-[0.22em] text-zinc-500">
-            {candidate.club.toUpperCase()}
-          </div>
         </div>
         {correct && (
           <span
