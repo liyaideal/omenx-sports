@@ -400,6 +400,20 @@ Section 7 is append-only. Every regression the user catches gets pinned here.
   (sports sub-domain, e.g. `/league/world-cup-2026?view=games`) is a
   same-tab nav. See the 4-state playground in `/style-guide` → World Cup
   Carnival.
+- Don't expose all 8 signed-jersey legends at once. The "Guess the Legend"
+  tab on `/promo/world-cup` runs ONE country per round with 4 retired-legend
+  candidates — never an 8-in-1 grid. Distractor candidates must be real
+  retired legends from the same country (frontend fiction; not actual
+  signees). Don't render a numeric countdown for the next round — reveal
+  schedule depends on each player's signing window, so the only correct
+  copy is `next reveal · TBA` plus `clue X of 3 live` for the current
+  round. Clue unlocks happen on community-vote thresholds, never on
+  wall-clock timers. Correct guess on reveal day grants `1× Tier-01 Basic
+  Vault spin` — never grant the signed jersey itself (jerseys ship via
+  the LuckyBox Tier-03 vault). Pre-warm strip may show already-signed
+  bonus legends OUTSIDE the 8-country pool (e.g. Yaya Touré) to seed
+  trust, but those bonus legends must never enter the round queue or
+  appear as candidates.
 
 ## 8. Responsive Behavior
 
