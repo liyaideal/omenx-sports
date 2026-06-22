@@ -385,6 +385,12 @@ Section 7 is append-only. Every regression the user catches gets pinned here.
   caption on the video surface, and the amber notice in the trade drawer.
 - Don't ship a new live chip or video surface without `LiveDelayInfo`.
   The icon is part of the chip, not optional polish.
+- Don't show a money event (payout credited, stake deducted, refund)
+  without a `Wallet ↗` link to `omenxUrl.wallet()` (new tab). Settlement
+  happens on the OmenX main site; the sports sub-domain UI must always
+  hand off the trail — otherwise users open support tickets asking
+  "where did my N U go". Applies to: ticket rows (per status tone),
+  ticket list section header, post-submit acceptance modal.
 
 ## 8. Responsive Behavior
 
