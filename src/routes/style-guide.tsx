@@ -2018,6 +2018,81 @@ function StyleGuide() {
                 <OverviewSection />
               </div>
 
+              <div className="space-y-3">
+                <div className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+                  Newbie TaskCard — 4-state playground (locked · in-progress · claimable · claimed)
+                </div>
+                <div className="rounded-md border border-amber-400/30 bg-amber-400/5 p-3 text-[11px] text-amber-200/90">
+                  CRITICAL — rewards are NEVER auto-credited. Even when the threshold is met the
+                  task moves to <code className="font-mono text-foreground">claimable</code> and the
+                  user MUST click <b>Claim</b> to receive the voucher. Implementing "complete →
+                  auto-grant" is a bug.
+                </div>
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                  {(
+                    [
+                      {
+                        id: "first-deposit",
+                        code: "T-02",
+                        title: "First deposit ≥ 20 U",
+                        description: "Locked — waiting on T-01 registration to clear KYC first.",
+                        rewardLabel: "20 U Position Voucher",
+                        progress: 0,
+                        status: "locked",
+                        cta: "Locked",
+                        newOnly: true,
+                      },
+                      {
+                        id: "first-deposit",
+                        code: "T-02",
+                        title: "First deposit ≥ 20 U",
+                        description: "In progress — Deposit now opens the OmenX Wallet in a new tab.",
+                        rewardLabel: "20 U Position Voucher",
+                        progress: 0.4,
+                        status: "in-progress",
+                        cta: "Deposit now",
+                        ctaHref: "https://omenx.lovable.app/wallet",
+                        ctaExternal: true,
+                        newOnly: true,
+                      },
+                      {
+                        id: "first-deposit",
+                        code: "T-02",
+                        title: "First deposit ≥ 20 U",
+                        description: "Threshold reached — user must click Claim. Voucher does NOT auto-drop.",
+                        rewardLabel: "20 U Position Voucher",
+                        progress: 1,
+                        status: "claimable",
+                        cta: "Claim",
+                        newOnly: true,
+                      },
+                      {
+                        id: "first-deposit",
+                        code: "T-02",
+                        title: "First deposit ≥ 20 U",
+                        description: "Claimed — voucher dispatched to Wallet, button disabled.",
+                        rewardLabel: "20 U Position Voucher",
+                        progress: 1,
+                        status: "claimed",
+                        cta: "Claimed",
+                        newOnly: true,
+                      },
+                    ] satisfies NewbieTask[]
+                  ).map((t, i) => (
+                    <TaskCard key={`${t.status}-${i}`} task={t} />
+                  ))}
+                </div>
+                <div className="rounded-md border border-white/10 bg-white/[0.02] p-3 text-[11px] text-muted-foreground">
+                  CTA jump map: <b>T-02 Deposit now</b> →{" "}
+                  <code className="font-mono text-foreground">https://omenx.lovable.app/wallet</code>{" "}
+                  (external, new tab). <b>T-03 Open events</b> →{" "}
+                  <code className="font-mono text-foreground">/league/world-cup-2026?view=games</code>{" "}
+                  (internal sports sub-domain). External links always carry the{" "}
+                  <code className="font-mono text-foreground">ArrowUpRight</code> icon so users
+                  know the tab will leave the carnival.
+                </div>
+              </div>
+
               <div>
                 <div className="mb-3 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
                   ComboChallengeSection — 4-leg activity page: hero · filters · match selector · sticky builder · quote preview · submit/requote/success modals · ticket list · share card preview
