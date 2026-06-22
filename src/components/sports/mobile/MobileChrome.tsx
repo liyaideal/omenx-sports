@@ -16,7 +16,13 @@ const USER_AVATAR =
  *
  * Hidden ≥ md — desktop renders its own AppTopBar inside each page.
  */
-export function MobileChrome({ children }: { children: ReactNode }) {
+export function MobileChrome({
+  children,
+  hideBottomNav = false,
+}: {
+  children: ReactNode;
+  hideBottomNav?: boolean;
+}) {
   const [meOpen, setMeOpen] = useState(false);
   return (
     <div className="md:hidden">
@@ -25,8 +31,12 @@ export function MobileChrome({ children }: { children: ReactNode }) {
         userAvatar={USER_AVATAR}
         onAvatarClick={() => setMeOpen(true)}
       />
-      <main className="space-y-8 px-4 pb-24 pt-5">{children}</main>
-      <MobileBottomNav onMeClick={() => setMeOpen(true)} />
+      <main
+        className={`space-y-8 px-4 pt-5 ${hideBottomNav ? "pb-8" : "pb-24"}`}
+      >
+        {children}
+      </main>
+      {!hideBottomNav && <MobileBottomNav onMeClick={() => setMeOpen(true)} />}
       <MeSheet
         open={meOpen}
         onOpenChange={setMeOpen}

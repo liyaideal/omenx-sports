@@ -63,7 +63,7 @@ function CarnivalPage() {
         />
       </div>
 
-      <MobileChrome>
+      <MobileChrome hideBottomNav>
         <CarnivalContent tab={tab} />
       </MobileChrome>
 
