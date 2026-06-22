@@ -741,7 +741,7 @@ function ArchiveCard({ entry }: { entry: SignedArchiveEntry }) {
   return (
     <div
       className={cn(
-        "group relative w-20 shrink-0 overflow-hidden border bg-[#0d0d0d] transition-all",
+        "group relative w-24 shrink-0 overflow-hidden border bg-[#0d0d0d] transition-all",
         entry.active
           ? "border-amber-400 shadow-[0_0_15px_rgba(250,204,21,0.25)]"
           : "border-[#1f1f1f]",
@@ -761,20 +761,26 @@ function ArchiveCard({ entry }: { entry: SignedArchiveEntry }) {
               : "grayscale group-hover:grayscale-0",
           )}
         />
-        <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-black/95 via-black/60 to-transparent" />
-        <div className="absolute inset-x-1 bottom-1">
+        <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-black/95 via-black/70 to-transparent" />
+        <div className="absolute inset-x-1 bottom-1 space-y-0.5">
           <div
             className="truncate font-pitch text-[10px] font-bold uppercase leading-tight tracking-wide text-white"
             title={entry.name}
           >
             {entry.name}
           </div>
-          <div className="flex items-center justify-between font-scoreboard text-[8px] font-bold tracking-[0.2em]">
-            <span className="text-zinc-400">{entry.countryLabel}</span>
-            <span style={{ color: entry.bonus ? "#a78bfa" : AMBER }}>
-              {entry.roundLabel}
-            </span>
+          <div className="truncate font-scoreboard text-[8px] font-bold tracking-[0.18em] text-zinc-400">
+            {entry.countryLabel}
           </div>
+        </div>
+        <div
+          className="absolute left-1 top-1 px-1 py-px font-scoreboard text-[8px] font-bold tracking-[0.2em]"
+          style={{
+            background: entry.bonus ? "rgba(167,139,250,0.85)" : "rgba(250,204,21,0.9)",
+            color: "black",
+          }}
+        >
+          {entry.roundLabel}
         </div>
         {entry.active && (
           <div
