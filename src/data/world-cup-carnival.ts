@@ -19,9 +19,18 @@ export interface NewbieTask {
   rewardLabel: string;
   /** 0..1 mock progress so the LED bars have something to fill. */
   progress: number;
-  status: "todo" | "in-progress" | "done";
+  /**
+   * 4-state machine. CRITICAL: rewards are NEVER auto-credited.
+   * - `locked`        — prerequisites unmet (e.g. T-02 before T-01 done)
+   * - `in-progress`   — user is working toward the threshold
+   * - `claimable`     — threshold reached, **waiting for the user to click Claim**
+   * - `claimed`       — voucher dispatched
+   */
+  status: "locked" | "in-progress" | "claimable" | "claimed";
   cta: string;
   ctaHref?: string;
+  /** true = OmenX main site (open in new tab); false/undefined = same sports sub-domain (TanStack Link). */
+  ctaExternal?: boolean;
   newOnly: boolean;
 }
 
@@ -33,7 +42,7 @@ export const NEWBIE_TASKS: NewbieTask[] = [
     description: "Open an OMENX account and verify your email to claim your welcome voucher.",
     rewardLabel: "10 U Position Voucher",
     progress: 1,
-    status: "done",
+    status: "claimed",
     cta: "Claimed",
     newOnly: true,
   },
@@ -46,6 +55,8 @@ export const NEWBIE_TASKS: NewbieTask[] = [
     progress: 0.4,
     status: "in-progress",
     cta: "Deposit now",
+    ctaHref: "https://omenx.lovable.app/wallet",
+    ctaExternal: true,
     newOnly: true,
   },
   {
@@ -57,7 +68,8 @@ export const NEWBIE_TASKS: NewbieTask[] = [
     progress: 0.15,
     status: "in-progress",
     cta: "Open events",
-    ctaHref: "/events",
+    ctaHref: "/league/world-cup-2026?view=games",
+    ctaExternal: false,
     newOnly: true,
   },
   {

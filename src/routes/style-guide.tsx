@@ -110,7 +110,8 @@ import { ConfettiLayer, TwinkleField } from "@/components/sports/promo/ConfettiL
 import { OverviewSection } from "@/components/sports/promo/OverviewSection";
 import { ComboChallengeSection } from "@/components/sports/promo/ComboChallengeSection";
 import { LuckyBoxSection } from "@/components/sports/promo/LuckyBoxSection";
-import { NewbieRewardsSection } from "@/components/sports/promo/NewbieRewardsSection";
+import { NewbieRewardsSection, TaskCard } from "@/components/sports/promo/NewbieRewardsSection";
+import type { NewbieTask } from "@/data/world-cup-carnival";
 
 export const Route = createFileRoute("/style-guide")({
   head: () => ({
@@ -2017,6 +2018,81 @@ function StyleGuide() {
                 <OverviewSection />
               </div>
 
+              <div className="space-y-3">
+                <div className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+                  Newbie TaskCard — 4-state playground (locked · in-progress · claimable · claimed)
+                </div>
+                <div className="rounded-md border border-amber-400/30 bg-amber-400/5 p-3 text-[11px] text-amber-200/90">
+                  CRITICAL — rewards are NEVER auto-credited. Even when the threshold is met the
+                  task moves to <code className="font-mono text-foreground">claimable</code> and the
+                  user MUST click <b>Claim</b> to receive the voucher. Implementing "complete →
+                  auto-grant" is a bug.
+                </div>
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                  {(
+                    [
+                      {
+                        id: "first-deposit",
+                        code: "T-02",
+                        title: "First deposit ≥ 20 U",
+                        description: "Locked — waiting on T-01 registration to clear KYC first.",
+                        rewardLabel: "20 U Position Voucher",
+                        progress: 0,
+                        status: "locked",
+                        cta: "Locked",
+                        newOnly: true,
+                      },
+                      {
+                        id: "first-deposit",
+                        code: "T-02",
+                        title: "First deposit ≥ 20 U",
+                        description: "In progress — Deposit now opens the OmenX Wallet in a new tab.",
+                        rewardLabel: "20 U Position Voucher",
+                        progress: 0.4,
+                        status: "in-progress",
+                        cta: "Deposit now",
+                        ctaHref: "https://omenx.lovable.app/wallet",
+                        ctaExternal: true,
+                        newOnly: true,
+                      },
+                      {
+                        id: "first-deposit",
+                        code: "T-02",
+                        title: "First deposit ≥ 20 U",
+                        description: "Threshold reached — user must click Claim. Voucher does NOT auto-drop.",
+                        rewardLabel: "20 U Position Voucher",
+                        progress: 1,
+                        status: "claimable",
+                        cta: "Claim",
+                        newOnly: true,
+                      },
+                      {
+                        id: "first-deposit",
+                        code: "T-02",
+                        title: "First deposit ≥ 20 U",
+                        description: "Claimed — voucher dispatched to Wallet, button disabled.",
+                        rewardLabel: "20 U Position Voucher",
+                        progress: 1,
+                        status: "claimed",
+                        cta: "Claimed",
+                        newOnly: true,
+                      },
+                    ] satisfies NewbieTask[]
+                  ).map((t, i) => (
+                    <TaskCard key={`${t.status}-${i}`} task={t} />
+                  ))}
+                </div>
+                <div className="rounded-md border border-white/10 bg-white/[0.02] p-3 text-[11px] text-muted-foreground">
+                  CTA jump map: <b>T-02 Deposit now</b> →{" "}
+                  <code className="font-mono text-foreground">https://omenx.lovable.app/wallet</code>{" "}
+                  (external, new tab). <b>T-03 Open events</b> →{" "}
+                  <code className="font-mono text-foreground">/league/world-cup-2026?view=games</code>{" "}
+                  (internal sports sub-domain). External links always carry the{" "}
+                  <code className="font-mono text-foreground">ArrowUpRight</code> icon so users
+                  know the tab will leave the carnival.
+                </div>
+              </div>
+
               <div>
                 <div className="mb-3 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
                   ComboChallengeSection — 4-leg activity page: hero · filters · match selector · sticky builder · quote preview · submit/requote/success modals · ticket list · share card preview
@@ -2061,6 +2137,7 @@ function StyleGuide() {
                   <li>• <b>Odds cap disclosure</b>: when a 4-leg combo's fair odds exceed <code className="font-mono text-foreground">COMBO_MAX_ODDS</code> (50×), <code className="font-mono text-foreground">QuotePreviewPanel</code> shows the raw odds/payout struck through under the capped values, an amber explanation strip ("Activity caps payout at 50× / 500U… See rules"), and the PLACE button gets a small "Activity cap applied · fair odds 177.71×" caption above it. Empty preview state preemptively states the cap. Never silently clip — users must see why their 4-leg ≠ what they multiplied in their head.</li>
                   <li>• <b>Post-submit ticket reveal</b>: after a combo is accepted, <code className="font-mono text-foreground">TicketAcceptedModal</code> footer is fixed at 2 rows — row 1 is the amber Share my combo primary CTA (<code className="font-mono text-foreground">ShareTrigger variant="wide" accent="amber" size="sm"</code> → amber border + amber/10 fill + amber label + amber arrow chip), row 2 is a <code className="font-mono text-foreground">grid-cols-2</code> of two zinc-outline secondary buttons (<b>View ticket</b> + <b>Build another</b>) that share an identical token: <code className="font-mono text-foreground">border border-zinc-700 bg-zinc-900/60 rounded-2xl py-3</code>, icon-left, same font/tracking. All three buttons share the same height (<code className="font-mono text-foreground">py-3</code>) — main CTA is signaled only by amber color, not by extra height. Closing the modal by any path (View, Build another, click-outside, Esc) auto-smooth-scrolls to <code className="font-mono text-foreground">#combo-my-tickets</code> and applies a 2.5s amber ring + glow + pulse to the newest <code className="font-mono text-foreground">TicketRow</code>. Respects <code className="font-mono text-foreground">prefers-reduced-motion</code>. <code className="font-mono text-foreground">capReached</code> disables Build another in place and shows a small caption below — never collapses the 2-row structure. Modal-footer rule for the whole app: max 1 amber primary CTA + 1 row of zinc-outline secondaries; same height across the row; never stack 3 full-width buttons; never mix amber/zinc outlines on secondaries.</li>
                   <li>• <b>Wallet trail on tickets</b>: every settled or open ticket explicitly surfaces where the money goes. <code className="font-mono text-foreground">WalletLine</code> sits at the bottom of each <code className="font-mono text-foreground">TicketRow</code> and links to <code className="font-mono text-foreground">omenxUrl.wallet()</code> in a new tab. Three tones by status: <span className="text-emerald-300">SETTLED_WON</span> = "+N U credited to your Wallet" (emerald, strong), <span className="text-zinc-300">SETTLED_LOST</span> = "−N U from stake · View in Wallet" (zinc, medium), <span className="text-zinc-400">ACCEPTED</span> = "−N U held · settles on result · Wallet" (zinc, faint). <code className="font-mono text-foreground">TicketAcceptedModal</code> also shows an amber "Payouts settle automatically to your Wallet" hint right below the locked-odds row. No duplicate section-header link — per-ticket entry points are enough, and Wallet on OmenX is view-only (not actually "manageable"), so the redundant "Manage in Wallet" CTA was removed.</li>
+                  <li>• <b>Welcome / quest tasks never auto-credit</b>. <code className="font-mono text-foreground">NewbieTask.status</code> is a 4-state machine: <code className="font-mono text-foreground">locked → in-progress → claimable → claimed</code>. Reaching the threshold moves a task to <code className="font-mono text-foreground">claimable</code> and shows a pulsing green <b>Ready to claim</b> pill + filled <b>Claim</b> button — the user MUST click to receive the voucher. Action CTAs on <code className="font-mono text-foreground">in-progress</code> use real links: T-02 <b>Deposit now</b> → <code className="font-mono text-foreground">omenxUrl.wallet()</code> (external, new tab, ArrowUpRight icon), T-03 <b>Open events</b> → <code className="font-mono text-foreground">/league/world-cup-2026?view=games</code> (internal). Implementing "complete → auto-grant" is a bug — see the 4-state playground above.</li>
                 </ul>
               </div>
             </div>

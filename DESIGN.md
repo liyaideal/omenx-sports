@@ -391,6 +391,15 @@ Section 7 is append-only. Every regression the user catches gets pinned here.
   hand off the trail — otherwise users open support tickets asking
   "where did my N U go". Applies to: ticket rows (per status tone),
   ticket list section header, post-submit acceptance modal.
+- Don't auto-credit welcome / quest task rewards. `NewbieTask` is a 4-state
+  machine (`locked → in-progress → claimable → claimed`). Reaching the
+  threshold MUST move the card to `claimable` and require the user to click
+  `Claim` — never skip straight to `claimed`. Action CTAs on `in-progress`
+  must be real links, not placeholder toasts: external (OmenX main site,
+  e.g. Wallet) opens in a new tab with the `ArrowUpRight` icon; internal
+  (sports sub-domain, e.g. `/league/world-cup-2026?view=games`) is a
+  same-tab nav. See the 4-state playground in `/style-guide` → World Cup
+  Carnival.
 
 ## 8. Responsive Behavior
 
