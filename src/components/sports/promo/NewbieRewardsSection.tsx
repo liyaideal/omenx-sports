@@ -130,7 +130,7 @@ function InvitePanel() {
         <button
           type="button"
           onClick={copy}
-          className="inline-flex items-center gap-2 border border-[oklch(0.7_0.18_145)] bg-[oklch(0.7_0.18_145)] px-4 py-2 font-pitch text-xs font-bold uppercase tracking-[0.2em] text-black hover:brightness-110"
+          className="inline-flex w-full items-center justify-center gap-2 border border-[oklch(0.7_0.18_145)] bg-[oklch(0.7_0.18_145)] px-4 py-2 font-pitch text-xs font-bold uppercase tracking-[0.2em] text-black hover:brightness-110 sm:w-auto"
         >
           {copied ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
           {copied ? "Copied" : "Copy invite link"}
