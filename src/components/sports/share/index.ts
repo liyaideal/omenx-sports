@@ -7,6 +7,7 @@ export {
   shareLeague,
   sharePlayer,
   shareCombo,
+  shareComboDraft,
   shareLuckyBox,
   sharePromo,
   shareCustom,
