@@ -1136,17 +1136,16 @@ function MobileStickyBar({
   let cta = "Select 4 picks";
   let onClick: (() => void) | null = null;
   if (filled < COMBO_MAX_PICKS) cta = `Add ${COMBO_MAX_PICKS - filled} more`;
-  else if (pageState === "READY") {
-    cta = "Calculate odds";
-    onClick = onCalculate;
-  } else if (pageState === "PREVIEW_LOADING") cta = "Calculating…";
-  else if (pageState === "PREVIEW_READY") {
-    cta = "Confirm combo";
+  else if (pageState === "READY" || pageState === "PREVIEW_LOADING" || pageState === "PREVIEW_EXPIRED") {
+    cta = "Locking odds…";
+  } else if (pageState === "PREVIEW_READY") {
+    cta = "Place 10U";
     onClick = onConfirm;
-  } else if (pageState === "PREVIEW_EXPIRED") {
-    cta = "Refresh odds";
-    onClick = onCalculate;
   } else if (pageState === "SUBMITTING") cta = "Submitting…";
+  else if (pageState === "REQUOTE_REQUIRED") {
+    cta = "Review new odds";
+    onClick = onConfirm;
+  }
 
   return (
     <div
