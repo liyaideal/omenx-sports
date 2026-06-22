@@ -1,10 +1,11 @@
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import {
   Check,
   ChevronLeft,
   ChevronRight,
   Coins,
+  Eye,
   Filter,
   Info,
   Lock,
