@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { Check, Copy, Lock, ArrowUpRight, Gift } from "lucide-react";
-import { Link } from "@tanstack/react-router";
 import { toast } from "sonner";
 import {
   NEWBIE_TASKS,
@@ -202,10 +201,12 @@ function TaskCta({
   }
 
   if (task.ctaHref) {
+    // Internal sports sub-domain link. Use <a> with hard nav so query strings
+    // and route activation behave consistently with the league page.
     return (
-      <Link to={task.ctaHref} className={actionClass}>
+      <a href={task.ctaHref} className={actionClass}>
         {task.cta}
-      </Link>
+      </a>
     );
   }
 
