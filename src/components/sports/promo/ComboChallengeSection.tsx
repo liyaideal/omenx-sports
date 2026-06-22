@@ -630,7 +630,7 @@ function LegSlot({
 }: {
   index: number;
   leg?: SelectedLeg;
-  onRemove: (matchId: string) => void;
+  onRemove: (marketId: string) => void;
 }) {
   if (!leg) {
     return (
