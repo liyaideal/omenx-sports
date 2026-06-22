@@ -285,12 +285,34 @@ function RoundLedTile({
       >
         {String(round.roundNumber).padStart(2, "0")}
       </div>
-      <div
-        className="grid h-4 w-4 place-items-center text-[10px] sm:h-5 sm:w-5 sm:text-xs"
-        style={{ filter: round.status === "upcoming" ? "grayscale(1) opacity(0.4)" : undefined }}
-      >
-        {round.status === "upcoming" ? "?" : country.flag}
-      </div>
+      {round.status === "upcoming" ? (
+        <div className="grid h-10 w-full place-items-center text-base font-scoreboard text-zinc-700 sm:h-12">
+          ?
+        </div>
+      ) : (
+        <div
+          className="relative h-10 w-full overflow-hidden rounded-sm border border-black/60 sm:h-12"
+          style={{
+            boxShadow: isHit
+              ? `inset 0 1px 0 rgba(74,222,128,0.35), inset 0 0 0 1px rgba(0,0,0,0.6)`
+              : isLive
+                ? `inset 0 1px 0 rgba(250,204,21,0.35), inset 0 0 0 1px rgba(0,0,0,0.6)`
+                : `inset 0 0 0 1px rgba(0,0,0,0.6)`,
+          }}
+        >
+          <img
+            src={country.flagImage}
+            alt={`${country.name} flag`}
+            className="h-full w-full object-cover"
+            style={{
+              filter: isMiss
+                ? "grayscale(0.55) opacity(0.7)"
+                : "contrast(1.05) saturate(1.1)",
+            }}
+            loading="lazy"
+          />
+        </div>
+      )}
       <div
         className="h-1 w-full"
         style={{
