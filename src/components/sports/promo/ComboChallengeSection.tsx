@@ -1587,7 +1587,7 @@ export function ShareCardPreview(props: ShareCardPreviewProps) {
                   style={{ border: `1px solid ${POSTER_NEON}66`, background: "rgba(0,0,0,0.35)" }}
                 >
                   {legs.map((leg, i) => {
-                    const c = extractCountry(leg);
+                    const c = getLegPosterContent(leg);
                     const last = i === legs.length - 1;
                     return (
                       <div
@@ -1627,20 +1627,35 @@ export function ShareCardPreview(props: ShareCardPreviewProps) {
                         >
                           <span style={{ filter: "saturate(1.1)" }}>{c.flag}</span>
                         </div>
-                        {/* team + WIN */}
-                        <div className="flex flex-1 items-center gap-[2%]">
-                          <span
-                            className="font-poster font-bold uppercase text-white"
-                            style={{ fontSize: "2.65cqw", letterSpacing: "0.04em" }}
-                          >
-                            {c.name}
-                          </span>
-                          <span
-                            className="font-poster font-bold uppercase"
-                            style={{ color: POSTER_NEON, fontSize: "2.65cqw" }}
-                          >
-                            Win
-                          </span>
+                        {/* pick + match context */}
+                        <div className="flex flex-1 flex-col justify-center gap-[0.3%]">
+                          <div className="flex items-center gap-[2%]">
+                            <span
+                              className="font-poster font-bold uppercase text-white"
+                              style={{ fontSize: "2.65cqw", letterSpacing: "0.04em" }}
+                            >
+                              {c.primary}
+                            </span>
+                            <span
+                              className="font-poster font-bold uppercase"
+                              style={{ color: POSTER_NEON, fontSize: "2.65cqw" }}
+                            >
+                              {c.suffix}
+                            </span>
+                          </div>
+                          {c.secondary ? (
+                            <span
+                              className="font-poster font-semibold uppercase"
+                              style={{
+                                color: POSTER_NEON,
+                                opacity: 0.55,
+                                fontSize: "1.7cqw",
+                                letterSpacing: "0.06em",
+                              }}
+                            >
+                              {c.secondary}
+                            </span>
+                          ) : null}
                         </div>
                       </div>
                     );
