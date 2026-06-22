@@ -23,7 +23,7 @@ export function ShareDialog({ target, onClose }: ShareDialogProps) {
       <Sheet open={open} onOpenChange={(v) => !v && onClose()}>
         <SheetContent
           side="bottom"
-          className="max-h-[92vh] overflow-y-auto rounded-t-2xl border-t-2 border-amber-400/40 bg-[#0a0a0a] p-0"
+          className="max-h-[92vh] overflow-y-auto rounded-t-2xl border-t-2 border-amber-400/40 bg-[#0a0a0a] p-0 [&>button]:hidden"
         >
           <SheetTitle className="sr-only">Share</SheetTitle>
           <SheetDescription className="sr-only">
