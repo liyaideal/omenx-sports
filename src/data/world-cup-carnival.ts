@@ -833,6 +833,8 @@ export interface PrewarmLegend {
   /** True if the legend is part of the 8-country main pool (Vieira). */
   inMainPool: boolean;
   caption: string;
+  /** Halftone portrait used in the archive strip. */
+  signedImage: string;
 }
 
 /**
@@ -849,6 +851,7 @@ export const PREWARM_LEGENDS: PrewarmLegend[] = [
     flag: "🇫🇷",
     inMainPool: true,
     caption: "Round #01 reward — already in the vault",
+    signedImage: signedFra,
   },
   {
     id: "y-toure",
@@ -857,6 +860,7 @@ export const PREWARM_LEGENDS: PrewarmLegend[] = [
     flag: "🇨🇮",
     inMainPool: false,
     caption: "Pre-warm bonus — not part of the 8-country main pool",
+    signedImage: signedCiv,
   },
 ];
 
