@@ -107,18 +107,19 @@ function VolumeLadder({
   const activeTier = activeIndex >= 0 ? LUCKY_BOX_TIERS[activeIndex] : null;
   const activeColor = activeTier ? ACCENT[activeTier.accent] : "#facc15";
 
-  // Express positions as `calc(... * (100% - 32px) + 16px)` so nodes align
-  // with the track inset (px-4 padding).
+  // Express positions as `calc(... * (100% - 40px) + 20px)` so nodes align
+  // with the track inset (px-5 padding).
   const posExpr = (pct: number) =>
-    `calc(${pct.toFixed(3)}% * (100% - 32px) / 100% + 16px)`;
+    `calc(${pct.toFixed(3)}% * (100% - 40px) / 100% + 20px)`;
+  const tokenAtEdge = tokenPct > 92;
 
   return (
     <div className="relative">
-      <div className="relative h-14 overflow-hidden border-2 border-zinc-800 bg-[#0a0a0a] px-4">
+      <div className="relative h-16 overflow-hidden border-2 border-zinc-800 bg-[#0a0a0a] px-5 sm:h-14">
         <div aria-hidden className="absolute inset-0 bg-led-matrix opacity-25" />
 
         {/* Track baseline */}
-        <div className="absolute left-4 right-4 top-1/2 h-[3px] -translate-y-1/2 overflow-hidden rounded-full border border-zinc-800 bg-zinc-900">
+        <div className="absolute left-5 right-5 top-1/2 h-[3px] -translate-y-1/2 overflow-hidden rounded-full border border-zinc-800 bg-zinc-900">
           <div
             className="h-full"
             style={{
@@ -135,6 +136,15 @@ function VolumeLadder({
           const pct = (t.volumeUnlock / MAX_THRESHOLD) * 100;
           const reached = i <= activeIndex;
           const color = ACCENT[t.accent];
+          const isLast = i === LUCKY_BOX_TIERS.length - 1;
+          // Alternate labels above/below to avoid collision when thresholds
+          // sit close together (e.g. 100U vs 1,000U on a 5,000U scale).
+          const labelBelow = i % 2 === 0;
+          const labelPos = labelBelow ? "top-4" : "bottom-4";
+          // Last node anchors its label to the right edge so it can't overflow.
+          const labelAlign = isLast
+            ? "right-0 translate-x-0 text-right"
+            : "left-1/2 -translate-x-1/2";
           return (
             <div
               key={t.id}
@@ -153,7 +163,11 @@ function VolumeLadder({
                 }}
               />
               <div
-                className="absolute left-1/2 top-4 -translate-x-1/2 whitespace-nowrap font-scoreboard text-[9px] font-bold tracking-[0.18em]"
+                className={cn(
+                  "absolute whitespace-nowrap font-scoreboard text-[9px] font-bold tracking-[0.18em]",
+                  labelPos,
+                  labelAlign,
+                )}
                 style={{ color: reached ? color : "rgb(113 113 122)" }}
               >
                 {t.volumeUnlock.toLocaleString()} U
@@ -168,10 +182,13 @@ function VolumeLadder({
             initial={{ left: "16px", opacity: 0 }}
             animate={{ left: posExpr(tokenPct), opacity: 1 }}
             transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1], delay: 0.1 }}
-            className="absolute top-1/2 -translate-x-1/2 -translate-y-1/2"
+            className={cn(
+              "absolute top-1/2 -translate-y-1/2",
+              tokenAtEdge ? "translate-x-[-90%]" : "-translate-x-1/2",
+            )}
           >
             <div
-              className="relative grid h-7 w-16 place-items-center"
+              className="relative grid h-6 w-14 place-items-center sm:h-7 sm:w-16"
               style={{
                 clipPath:
                   "polygon(12% 0%, 88% 0%, 100% 50%, 88% 100%, 12% 100%, 0% 50%)",
@@ -179,7 +196,7 @@ function VolumeLadder({
                 boxShadow: `0 0 18px ${activeColor}`,
               }}
             >
-              <span className="font-scoreboard text-[10px] font-black italic tabular-nums text-black">
+              <span className="font-scoreboard text-[9px] sm:text-[10px] font-black italic tabular-nums text-black">
                 {volume.toLocaleString()} U
               </span>
             </div>
@@ -191,11 +208,15 @@ function VolumeLadder({
       <div className="mt-2 font-pitch text-[11px] uppercase tracking-[0.18em] text-zinc-500">
         {activeTier ? (
           <>
-            Your vault today ·{" "}
+            Your vault today
+            <span className="hidden sm:inline"> · </span>
+            <br className="sm:hidden" />
             <span style={{ color: activeColor }}>
               {activeTier.code} {activeTier.name}
-            </span>{" "}
-            · only this vault applies
+            </span>
+            <span className="hidden sm:inline"> · </span>
+            <br className="sm:hidden" />
+            only this vault applies
           </>
         ) : (
           <>
@@ -329,11 +350,11 @@ function TierCard({
           </div>
         )}
       </div>
-      <div className="relative z-[3] flex items-end justify-between gap-2">
-        <h3 className="font-pitch text-xl font-bold uppercase tracking-wide text-white">
+      <div className="relative z-[3] flex flex-wrap items-end justify-between gap-x-2 gap-y-1">
+        <h3 className="min-w-0 truncate font-pitch text-xl font-bold uppercase tracking-wide text-white">
           {tier.name}
         </h3>
-        <span className="font-pitch text-[10px] font-semibold uppercase tracking-widest text-zinc-500">
+        <span className="whitespace-nowrap font-pitch text-[10px] font-semibold uppercase tracking-widest text-zinc-500">
           {tier.poolLabel}
         </span>
       </div>

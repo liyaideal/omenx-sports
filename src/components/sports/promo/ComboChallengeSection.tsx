@@ -113,7 +113,7 @@ export function ComboChallengeSection() {
       {/* Mobile sticky bottom bar */}
       <MobileStickyBar ctrl={ctrl} onCalculate={ctrl.requestPreview} onConfirm={() => setConfirmOpen(true)} />
       {/* Spacer so content isn't covered by the mobile bar + bottom nav */}
-      <div className="h-44 lg:hidden" aria-hidden />
+      <div className="h-28 lg:hidden" aria-hidden />
 
       {/* Modals */}
       <SubmitConfirmModal
@@ -166,7 +166,7 @@ function CampaignHero({ ctrl }: { ctrl: ComboController }) {
             Pick 4 matches. All correct wins. 10 U can pay up to {COMBO_MAX_ODDS * 10} U.
           </p>
         </div>
-        <div className="text-right">
+        <div className="text-left sm:text-right">
           <div className="font-scoreboard text-[10px] font-bold tracking-[0.25em] text-zinc-500">
             ENTRIES LEFT THIS PERIOD
           </div>
@@ -221,8 +221,8 @@ function FilterBar(props: {
           </button>
         ))}
       </div>
-      <div className="flex flex-wrap items-center gap-2">
-        <div className="flex flex-wrap gap-1.5">
+      <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
+        <div className="-mx-1 flex gap-1.5 overflow-x-auto px-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden sm:mx-0 sm:flex-wrap sm:overflow-visible sm:px-0">
           <MatchdayChip active={props.matchday === "ALL"} onClick={() => props.setMatchday("ALL")} label="All days" />
           {props.matchdays.map((d) => (
             <MatchdayChip
@@ -233,12 +233,12 @@ function FilterBar(props: {
             />
           ))}
         </div>
-        <div className="ml-auto flex items-center gap-2">
+        <div className="flex items-center gap-2 sm:ml-auto">
           <button
             type="button"
             onClick={() => props.setOnlyAvailable(!props.onlyAvailable)}
             className={cn(
-              "border px-3 py-1.5 font-pitch text-[10px] font-bold uppercase tracking-widest",
+              "shrink-0 border px-3 py-1.5 font-pitch text-[10px] font-bold uppercase tracking-widest",
               props.onlyAvailable
                 ? "border-amber-400 bg-amber-400/10 text-amber-400"
                 : "border-zinc-700 bg-zinc-900 text-zinc-400 hover:border-zinc-600",
@@ -246,14 +246,14 @@ function FilterBar(props: {
           >
             Available only
           </button>
-          <label className="flex items-center gap-1 border-2 border-zinc-800 bg-black px-2">
+          <label className="flex flex-1 items-center gap-1 border-2 border-zinc-800 bg-black px-2 sm:flex-none">
             <Search className="h-3.5 w-3.5 text-zinc-500" />
             <input
               type="text"
               value={props.query}
               onChange={(e) => props.setQuery(e.target.value)}
               placeholder="Search team"
-              className="w-32 bg-transparent py-1.5 font-pitch text-xs font-semibold text-white placeholder:text-zinc-600 focus:outline-none"
+              className="w-full bg-transparent py-1.5 font-pitch text-xs font-semibold text-white placeholder:text-zinc-600 focus:outline-none sm:w-32"
             />
           </label>
         </div>
@@ -348,12 +348,12 @@ function MatchCard({ match, ctrl }: { match: WCMatch; ctrl: ComboController }) {
               {match.kickoff}
             </span>
           </div>
-          <div className="mt-1.5 font-pitch text-base font-bold uppercase tracking-wide text-white">
+          <div className="mt-1.5 min-w-0 truncate font-pitch text-base font-bold uppercase tracking-wide text-white sm:whitespace-normal">
             {match.home} <span className="text-zinc-600">vs</span> {match.away}
           </div>
         </div>
         {isLocked && (
-          <span className="flex items-center gap-1 border border-zinc-700 bg-zinc-900 px-2 py-0.5 font-pitch text-[9px] font-bold uppercase tracking-widest text-zinc-500">
+          <span className="flex shrink-0 items-center gap-1 border border-zinc-700 bg-zinc-900 px-2 py-0.5 font-pitch text-[9px] font-bold uppercase tracking-widest text-zinc-500">
             <Lock className="h-2.5 w-2.5" /> Locked
           </span>
         )}
@@ -505,14 +505,14 @@ function LineStepper({
       >
         <ChevronLeft className="h-3.5 w-3.5" />
       </button>
-      <div className="flex flex-1 items-center justify-around gap-1">
+      <div className="flex flex-1 items-center justify-around gap-0.5 sm:gap-1">
         {lines.map((ln, i) => (
           <button
             key={ln.lineValue}
             type="button"
             onClick={() => onChange(i)}
             className={cn(
-              "px-1.5 py-0.5 font-scoreboard text-[11px] font-bold tabular-nums tracking-wider transition-colors",
+              "px-1 py-0.5 font-scoreboard text-[10px] font-bold tabular-nums tracking-wider transition-colors sm:px-1.5 sm:text-[11px]",
               i === activeIdx
                 ? "text-amber-400"
                 : "text-zinc-600 hover:text-zinc-300",
@@ -1222,12 +1222,11 @@ function MobileStickyBar({
           type="button"
           onClick={onClick ?? undefined}
           disabled={!onClick}
-          className="border-2 border-amber-400 bg-amber-400 px-4 py-2 font-pitch text-xs font-bold uppercase tracking-widest text-black disabled:cursor-not-allowed disabled:border-zinc-700 disabled:bg-zinc-800 disabled:text-zinc-500"
+          className="shrink-0 whitespace-nowrap border-2 border-amber-400 bg-amber-400 px-4 py-2 font-pitch text-xs font-bold uppercase tracking-widest text-black disabled:cursor-not-allowed disabled:border-zinc-700 disabled:bg-zinc-800 disabled:text-zinc-500"
         >
           {cta}
         </button>
       </div>
-      <StakeDisplay compact />
     </div>
   );
 }

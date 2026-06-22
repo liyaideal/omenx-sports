@@ -12,7 +12,7 @@ export function CarnivalTabs({ current }: { current: CarnivalTab }) {
     <nav
       role="tablist"
       aria-label="Carnival sections"
-      className="grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-5"
+      className="-mx-4 flex snap-x snap-mandatory gap-2 overflow-x-auto px-4 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden md:mx-0 md:grid md:grid-cols-5 md:overflow-visible md:px-0 md:pb-0"
     >
       {CARNIVAL_TABS.map((t) => {
         const active = t.id === current;
@@ -24,7 +24,7 @@ export function CarnivalTabs({ current }: { current: CarnivalTab }) {
             role="tab"
             aria-selected={active}
             className={cn(
-              "group relative flex flex-col items-start gap-1 overflow-hidden border-2 bg-[#0a0a0a] px-3 py-3 transition-colors",
+              "group relative flex min-w-[44%] shrink-0 snap-start flex-col items-start gap-1 overflow-hidden border-2 bg-[#0a0a0a] px-3 py-3 transition-colors md:min-w-0 md:shrink",
               active
                 ? "border-[oklch(0.7_0.18_145)]"
                 : "border-zinc-800 hover:border-zinc-600",

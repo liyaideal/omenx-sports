@@ -102,22 +102,22 @@ export function ScoreboardHero({ compact = false }: { compact?: boolean }) {
         </div>
       )}
 
-      <div className={cn("relative grid gap-6 p-6 md:p-10", compact && "p-5 md:p-6")}>
+      <div className={cn("relative grid gap-6 p-4 sm:p-6 md:p-10", compact && "p-4 sm:p-5 md:p-6")}>
         {/* Unified header strip: label left, countdown right — sits directly
             above the big number and shares its centered column, so the eye
             reads label → amount → countdown as one block. */}
-        <div className="mx-auto flex w-full max-w-2xl items-end justify-between gap-3 border-b border-white/10 pb-2">
+        <div className="mx-auto flex w-full max-w-2xl flex-wrap items-end justify-between gap-x-3 gap-y-1 border-b border-white/10 pb-2">
           <div className="flex items-center gap-2">
             <span className="relative inline-flex h-2 w-2">
               <span className="absolute inset-0 animate-ping rounded-full bg-red-500 opacity-75" />
               <span className="relative inline-flex h-2 w-2 rounded-full bg-red-600" />
             </span>
-            <span className="font-pitch text-[10px] font-bold uppercase tracking-[0.3em] text-zinc-500">
+            <span className="font-pitch text-[10px] font-bold uppercase tracking-[0.18em] sm:tracking-[0.3em] text-zinc-500">
               Live Prize Pool
             </span>
           </div>
           <div className="flex flex-col items-end">
-            <span className="font-pitch text-[8px] font-bold uppercase tracking-[0.25em] text-zinc-500">
+            <span className="font-pitch text-[8px] font-bold uppercase tracking-[0.18em] sm:tracking-[0.25em] text-zinc-500">
               Ends in
             </span>
             <span
@@ -126,12 +126,18 @@ export function ScoreboardHero({ compact = false }: { compact?: boolean }) {
             >
               {c ? (
                 <>
-                  {pad(c.days)} <span className="text-zinc-700">:</span> {pad(c.hours)}{" "}
-                  <span className="text-zinc-700">:</span> {pad(c.minutes)}{" "}
-                  <span className="text-zinc-700">:</span> {pad(c.seconds)}
+                  <span className="hidden sm:inline">
+                    {pad(c.days)} <span className="text-zinc-700">:</span>{" "}
+                  </span>
+                  {pad(c.hours)} <span className="text-zinc-700">:</span>{" "}
+                  {pad(c.minutes)} <span className="text-zinc-700">:</span>{" "}
+                  {pad(c.seconds)}
                 </>
               ) : (
-                "—— : —— : —— : ——"
+                <>
+                  <span className="hidden sm:inline">—— : </span>
+                  —— : —— : ——
+                </>
               )}
             </span>
           </div>
@@ -139,7 +145,7 @@ export function ScoreboardHero({ compact = false }: { compact?: boolean }) {
 
         {/* big number */}
         <div className="flex flex-col items-center text-center">
-          <div className="flex items-center gap-4">
+          <div className="flex min-w-0 max-w-full items-center gap-2 sm:gap-4">
             {/* left neon rail anchor */}
             <span
               aria-hidden
@@ -152,7 +158,7 @@ export function ScoreboardHero({ compact = false }: { compact?: boolean }) {
             <span
               className={cn(
                 "font-scoreboard font-black italic tracking-tighter text-[oklch(0.7_0.18_145)] tabular-nums",
-                compact ? "text-4xl md:text-5xl" : "text-6xl md:text-8xl",
+                compact ? "text-3xl sm:text-4xl md:text-5xl" : "text-[2.5rem] leading-none sm:text-6xl md:text-8xl",
               )}
               style={{ filter: "drop-shadow(0 0 18px oklch(0.7 0.18 145 / 0.45))" }}
             >
@@ -161,7 +167,7 @@ export function ScoreboardHero({ compact = false }: { compact?: boolean }) {
             <span
               className={cn(
                 "font-scoreboard font-bold text-zinc-400",
-                compact ? "text-xl" : "text-3xl md:text-4xl",
+                compact ? "text-lg sm:text-xl" : "text-2xl sm:text-3xl md:text-4xl",
               )}
             >
               U
@@ -176,9 +182,9 @@ export function ScoreboardHero({ compact = false }: { compact?: boolean }) {
               }}
             />
           </div>
-          <div className="mt-3 inline-flex items-center gap-2 rounded border border-zinc-800 bg-[#0e0e0e] px-3 py-1">
-            <Trophy className="h-3 w-3 text-amber-400" />
-            <span className="font-scoreboard text-[10px] font-bold uppercase tracking-[0.25em] text-[oklch(0.7_0.18_145)]">
+          <div className="mt-3 inline-flex max-w-full items-center gap-2 rounded border border-zinc-800 bg-[#0e0e0e] px-3 py-1">
+            <Trophy className="h-3 w-3 shrink-0 text-amber-400" />
+            <span className="font-scoreboard text-center text-[9px] font-bold uppercase tracking-[0.18em] sm:text-[10px] sm:tracking-[0.25em] text-[oklch(0.7_0.18_145)] whitespace-normal">
               Jackpot accumulating · World Cup 2026 edition
             </span>
           </div>
