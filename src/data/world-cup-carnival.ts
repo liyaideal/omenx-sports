@@ -474,6 +474,8 @@ const RAW_WC_MATCHES: WCMatch[] = [
   },
 ];
 
+export const WC_COMBO_MATCHES: WCMatch[] = RAW_WC_MATCHES.map(enrichMatch);
+
 export const WC_STAGES: { id: WCStage | "ALL"; label: string }[] = [
   { id: "ALL", label: "All" },
   { id: "GROUP", label: "Group" },
