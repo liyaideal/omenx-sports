@@ -247,6 +247,18 @@ export function useComboState() {
     }
   }, [canPreview, selectedLegs, stake]);
 
+  // Auto-preview: as soon as the user has 4 picks (or the existing quote
+  // expires), fetch fresh odds without making them tap a button. Debounced
+  // so rapid pick swaps coalesce into a single request.
+  useEffect(() => {
+    if (!canPreview) return;
+    if (pageState !== "READY" && pageState !== "PREVIEW_EXPIRED") return;
+    const id = window.setTimeout(() => {
+      requestPreview();
+    }, 250);
+    return () => window.clearTimeout(id);
+  }, [canPreview, pageState, requestPreview]);
+
   const finalizeAccepted = useCallback(
     (r: Extract<SubmitResult, { result: "ACCEPTED" }>) => {
       const ticket: SubmittedTicket = {
