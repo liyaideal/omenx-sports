@@ -617,6 +617,7 @@ function ComboBuilder({
         ))}
       </div>
       <StakeDisplay />
+      <BuilderShareRow ctrl={ctrl} />
       <BuilderCTA ctrl={ctrl} onCalculate={onCalculate} onConfirm={onConfirm} />
     </div>
   );
