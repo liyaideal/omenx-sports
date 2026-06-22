@@ -585,15 +585,251 @@ export const CARNIVAL_TICKER_LINES = [
 ];
 
 /* ------------------------------------------------------------------ */
+/*  Guess the Legend — country-by-country reveal of signed jerseys     */
+/* ------------------------------------------------------------------ */
+
+/**
+ * 8 confirmed signing countries (one country may appear in the queue
+ * more than once — e.g. Brazil could surface Kaká in one round and
+ * Roberto Carlos in another). Reveal schedule is INTENTIONALLY random
+ * because each player's signing window depends on their availability;
+ * the UI must NEVER display a numeric countdown for the next round.
+ */
+export type LegendCountryCode =
+  | "BRA" | "ESP" | "FRA" | "ARG" | "GER" | "ENG" | "NED" | "POR";
+
+export const LEGEND_COUNTRIES: Record<LegendCountryCode, { name: string; flag: string }> = {
+  BRA: { name: "Brazil", flag: "🇧🇷" },
+  ESP: { name: "Spain", flag: "🇪🇸" },
+  FRA: { name: "France", flag: "🇫🇷" },
+  ARG: { name: "Argentina", flag: "🇦🇷" },
+  GER: { name: "Germany", flag: "🇩🇪" },
+  ENG: { name: "England", flag: "🏴󠁧󠁢󠁥󠁮󠁧󠁿" },
+  NED: { name: "Netherlands", flag: "🇳🇱" },
+  POR: { name: "Portugal", flag: "🇵🇹" },
+};
+
+export interface LegendCandidate {
+  /** Stable id, lowercase-dashed (e.g. "iniesta"). */
+  id: string;
+  name: string;
+  /** Marquee club shown beneath the name. Display only. */
+  club: string;
+  /** Mock community vote share 0..1; the 4 candidates per round MUST sum to ~1. */
+  votePct: number;
+}
+
+export interface LegendClue {
+  /** 1..3. Clue index inside the round. */
+  idx: 1 | 2 | 3;
+  text: string;
+  /**
+   * `revealed` clues are visible. `locked` clues display the unlock condition
+   * (e.g. "Unlocks after 60% community vote"). The unlock condition itself
+   * is mock; this field is the only switch that matters in the UI.
+   */
+  state: "revealed" | "locked";
+  /** Human-readable unlock condition shown on locked clues. */
+  unlockHint?: string;
+}
+
+export type LegendRoundStatus =
+  /** Future round — country not yet announced. Shown as a locked dot. */
+  | "upcoming"
+  /** Currently open for voting. */
+  | "voting"
+  /** User already locked a pick, but reveal hasn't happened. */
+  | "locked-in"
+  /** Reveal done — user picked correctly. */
+  | "revealed-hit"
+  /** Reveal done — user missed (or didn't pick). */
+  | "revealed-miss";
+
+export interface LegendRound {
+  id: string;
+  /** 1-indexed round number, shown as "Round #03". */
+  roundNumber: number;
+  country: LegendCountryCode;
+  /** id of the correct candidate inside `candidates`. Only meaningful once revealed. */
+  correctCandidateId: string;
+  candidates: LegendCandidate[];
+  clues: LegendClue[];
+  status: LegendRoundStatus;
+  /** Candidate id the user locked in (for locked-in / revealed-* states). */
+  userPickId?: string;
+}
+
+/**
+ * Mock timeline:
+ * - Round #01 France/Vieira → user picked correctly (hit)
+ * - Round #02 Argentina/Zanetti → user missed (picked Verón)
+ * - Round #03 Spain/Iniesta → currently voting, 2 of 3 clues live
+ * - Round #04 + future → upcoming placeholders
+ *
+ * Distractor candidates are real retired legends from the same country
+ * (frontend-only fiction — none of them have signed for OmenX).
+ */
+export const LEGEND_ROUNDS: LegendRound[] = [
+  {
+    id: "round-01-fra",
+    roundNumber: 1,
+    country: "FRA",
+    correctCandidateId: "vieira",
+    status: "revealed-hit",
+    userPickId: "vieira",
+    candidates: [
+      { id: "vieira", name: "Patrick Vieira", club: "Arsenal", votePct: 0.38 },
+      { id: "henry", name: "Thierry Henry", club: "Arsenal", votePct: 0.41 },
+      { id: "thuram", name: "Lilian Thuram", club: "Juventus", votePct: 0.12 },
+      { id: "makelele", name: "Claude Makélélé", club: "Chelsea", votePct: 0.09 },
+    ],
+    clues: [
+      { idx: 1, state: "revealed", text: "Won 3 Premier League titles with the Invincibles era." },
+      { idx: 2, state: "revealed", text: "Captained his national team to a European Championship." },
+      { idx: 3, state: "revealed", text: "Currently a head coach in Europe's top five leagues." },
+    ],
+  },
+  {
+    id: "round-02-arg",
+    roundNumber: 2,
+    country: "ARG",
+    correctCandidateId: "zanetti",
+    status: "revealed-miss",
+    userPickId: "veron",
+    candidates: [
+      { id: "zanetti", name: "Javier Zanetti", club: "Inter Milan", votePct: 0.29 },
+      { id: "veron", name: "Juan Sebastián Verón", club: "Lazio", votePct: 0.34 },
+      { id: "crespo", name: "Hernán Crespo", club: "Parma", votePct: 0.21 },
+      { id: "riquelme", name: "Juan Román Riquelme", club: "Boca Juniors", votePct: 0.16 },
+    ],
+    clues: [
+      { idx: 1, state: "revealed", text: "Spent nearly two decades at one Serie A club." },
+      { idx: 2, state: "revealed", text: "Wore the captain's armband for 145+ national-team caps." },
+      { idx: 3, state: "revealed", text: "Holds the appearance record for his club of his prime." },
+    ],
+  },
+  {
+    id: "round-03-esp",
+    roundNumber: 3,
+    country: "ESP",
+    correctCandidateId: "iniesta",
+    status: "voting",
+    candidates: [
+      { id: "iniesta", name: "Andrés Iniesta", club: "Barcelona", votePct: 0.42 },
+      { id: "xavi", name: "Xavi Hernández", club: "Barcelona", votePct: 0.31 },
+      { id: "puyol", name: "Carles Puyol", club: "Barcelona", votePct: 0.14 },
+      { id: "villa", name: "David Villa", club: "Valencia", votePct: 0.13 },
+    ],
+    clues: [
+      { idx: 1, state: "revealed", text: "Midfield maestro with 6 La Liga titles to his name." },
+      { idx: 2, state: "revealed", text: "Scored the winning goal in a World Cup final." },
+      {
+        idx: 3,
+        state: "locked",
+        text: "Played his entire prime at one club's youth-to-first-team pipeline.",
+        unlockHint: "Unlocks after 60% community vote",
+      },
+    ],
+  },
+  {
+    id: "round-04",
+    roundNumber: 4,
+    country: "BRA", // placeholder; UI shows ??? until announced
+    correctCandidateId: "",
+    status: "upcoming",
+    candidates: [],
+    clues: [],
+  },
+  {
+    id: "round-05",
+    roundNumber: 5,
+    country: "BRA",
+    correctCandidateId: "",
+    status: "upcoming",
+    candidates: [],
+    clues: [],
+  },
+  {
+    id: "round-06",
+    roundNumber: 6,
+    country: "BRA",
+    correctCandidateId: "",
+    status: "upcoming",
+    candidates: [],
+    clues: [],
+  },
+  {
+    id: "round-07",
+    roundNumber: 7,
+    country: "BRA",
+    correctCandidateId: "",
+    status: "upcoming",
+    candidates: [],
+    clues: [],
+  },
+  {
+    id: "round-08",
+    roundNumber: 8,
+    country: "BRA",
+    correctCandidateId: "",
+    status: "upcoming",
+    candidates: [],
+    clues: [],
+  },
+];
+
+export interface PrewarmLegend {
+  id: string;
+  name: string;
+  country: string;
+  flag: string;
+  /** True if the legend is part of the 8-country main pool (Vieira). */
+  inMainPool: boolean;
+  caption: string;
+}
+
+/**
+ * Already-signed memorabilia shown above the round to build trust ("this
+ * isn't vapor — we have signatures in hand"). Y.Touré is intentionally
+ * NOT in the 8-country pool — he's a pre-warm bonus, used to seed FOMO
+ * without committing him to a future round.
+ */
+export const PREWARM_LEGENDS: PrewarmLegend[] = [
+  {
+    id: "vieira",
+    name: "Patrick Vieira",
+    country: "France",
+    flag: "🇫🇷",
+    inMainPool: true,
+    caption: "Round #01 reward — already in the vault",
+  },
+  {
+    id: "y-toure",
+    name: "Yaya Touré",
+    country: "Côte d'Ivoire",
+    flag: "🇨🇮",
+    inMainPool: false,
+    caption: "Pre-warm bonus — not part of the 8-country main pool",
+  },
+];
+
+/* ------------------------------------------------------------------ */
 /*  Tabs                                                              */
 /* ------------------------------------------------------------------ */
 
-export type CarnivalTab = "overview" | "newbie" | "combo" | "luckybox" | "rules";
+export type CarnivalTab =
+  | "overview"
+  | "newbie"
+  | "combo"
+  | "luckybox"
+  | "legend"
+  | "rules";
 
 export const CARNIVAL_TABS: { id: CarnivalTab; label: string; sec: string }[] = [
   { id: "overview", label: "Overview", sec: "MAIN" },
   { id: "newbie", label: "Welcome Pack", sec: "SEC-01" },
   { id: "combo", label: "Combo Challenge", sec: "SEC-02" },
   { id: "luckybox", label: "Lucky Box", sec: "SEC-03" },
+  { id: "legend", label: "Guess the Legend", sec: "SEC-04" },
   { id: "rules", label: "Rules", sec: "INFO" },
 ];
