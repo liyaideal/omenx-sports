@@ -114,13 +114,24 @@ export interface WCOutcome {
   disabledReason?: string;
 }
 
+export interface WCMarketLine {
+  /** Numeric line for spread/total, e.g. 2.5. */
+  lineValue: number;
+  /** Always exactly 2 outcomes for spread/total (HOME/AWAY semantics). */
+  outcomes: WCOutcome[];
+}
+
 export interface WCMarket {
+  /** Stable id `${matchId}:ML|SP|TT` for use as combo-leg uniqueness key. */
+  marketId: string;
   marketType: WCMarketType;
   combo_eligible: boolean;
-  displayOnly?: boolean;
-  /** Plain English summary, used for display-only SPREAD/TOTAL chips. */
-  summary?: string;
+  /** MONEYLINE only — direct outcomes (Home / Draw / Away). */
   outcomes?: WCOutcome[];
+  /** SPREAD / TOTAL — multiple selectable lines; UI lets user step through. */
+  lines?: WCMarketLine[];
+  /** Index of the line shown by default (e.g. middle of the array). */
+  defaultLineIndex?: number;
 }
 
 export interface WCMatch {
@@ -144,6 +155,7 @@ function ml(
   away: { code: string; name: string; p: number },
 ): WCMarket {
   return {
+    marketId: "", // filled in by enrichMatch
     marketType: "MONEYLINE",
     combo_eligible: true,
     outcomes: [
@@ -154,21 +166,111 @@ function ml(
   };
 }
 
-function total(line: number, over: number): WCMarket {
+const clamp = (n: number, lo: number, hi: number) => Math.min(hi, Math.max(lo, n));
+
+/** Build a 4-line SPREAD market around the moneyline favorite. */
+function buildSpread(
+  matchId: string,
+  homeCode: string,
+  awayCode: string,
+  homeP: number,
+  awayP: number,
+): WCMarket {
+  const homeIsFav = homeP >= awayP;
+  const favCode = homeIsFav ? homeCode : awayCode;
+  const dogCode = homeIsFav ? awayCode : homeCode;
+  const favSide: OutcomeSide = homeIsFav ? "HOME" : "AWAY";
+  const dogSide: OutcomeSide = homeIsFav ? "AWAY" : "HOME";
+  const favP = Math.max(homeP, awayP);
+  const lineValues = [0.5, 1.0, 1.5, 2.5];
+  const lines: WCMarketLine[] = lineValues.map((line) => {
+    // 0.5 ≈ easier than ML (slight bump), 2.5 ≈ much harder.
+    const adj = (line - 1.0) * 0.12;
+    const favWinProb = clamp(favP - adj, 0.08, 0.92);
+    return {
+      lineValue: line,
+      outcomes: [
+        {
+          outcomeId: `SP_${favCode}_-${line}`,
+          label: `${favCode} -${line}`,
+          side: favSide,
+          probability: favWinProb,
+          selectable: true,
+        },
+        {
+          outcomeId: `SP_${dogCode}_+${line}`,
+          label: `${dogCode} +${line}`,
+          side: dogSide,
+          probability: 1 - favWinProb,
+          selectable: true,
+        },
+      ],
+    };
+  });
   return {
-    marketType: "TOTAL",
-    combo_eligible: false,
-    displayOnly: true,
-    summary: `O/U ${line.toFixed(1)} · Over ${(over * 100).toFixed(0)}%`,
+    marketId: `${matchId}:SP`,
+    marketType: "SPREAD",
+    combo_eligible: true,
+    defaultLineIndex: 1,
+    lines,
   };
 }
 
-function spread(team: string, line: number): WCMarket {
+/** Build a 5-line TOTAL market (Over / Under) around a centered base line. */
+function buildTotal(matchId: string, baseOver = 0.5): WCMarket {
+  const baseLine = 2.5;
+  const lineValues = [0.5, 1.5, 2.5, 3.5, 4.5];
+  const lines: WCMarketLine[] = lineValues.map((line) => {
+    const diff = (line - baseLine) * 0.18; // higher line → lower over prob
+    const overP = clamp(baseOver - diff, 0.05, 0.95);
+    return {
+      lineValue: line,
+      outcomes: [
+        {
+          outcomeId: `TT_O_${line}`,
+          label: `Over ${line}`,
+          side: "HOME",
+          probability: overP,
+          selectable: true,
+        },
+        {
+          outcomeId: `TT_U_${line}`,
+          label: `Under ${line}`,
+          side: "AWAY",
+          probability: 1 - overP,
+          selectable: true,
+        },
+      ],
+    };
+  });
   return {
-    marketType: "SPREAD",
-    combo_eligible: false,
-    displayOnly: true,
-    summary: `${team} ${line > 0 ? "+" : ""}${line.toFixed(1)}`,
+    marketId: `${matchId}:TT`,
+    marketType: "TOTAL",
+    combo_eligible: true,
+    defaultLineIndex: 2,
+    lines,
+  };
+}
+
+/**
+ * Each match is defined with a single MONEYLINE market; this enricher
+ * auto-attaches a Spread and Total market with multi-line options so the
+ * combo card can offer all three Polymarket-style.
+ */
+function enrichMatch(m: WCMatch): WCMatch {
+  const moneyline = m.markets[0];
+  moneyline.marketId = `${m.matchId}:ML`;
+  const homeP = moneyline.outcomes?.find((o) => o.side === "HOME")?.probability ?? 0.4;
+  const awayP = moneyline.outcomes?.find((o) => o.side === "AWAY")?.probability ?? 0.4;
+  // Closer matches → marginally higher total over prob (more game-script variance).
+  const baseOver = clamp(0.5 + (1 - Math.abs(homeP - awayP)) * 0.05, 0.4, 0.62);
+  return {
+    ...m,
+    markets: [
+      moneyline,
+      buildSpread(m.matchId, m.homeCode, m.awayCode, homeP, awayP),
+      buildTotal(m.matchId, baseOver),
+    ],
   };
 }
 
