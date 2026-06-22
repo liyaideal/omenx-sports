@@ -1,17 +1,18 @@
-目标：Combo 下单金额只支持固定 10U，不允许用户输入、拖动或选择其他金额。
+目标：每场比赛在 Combo 内最多只能选 1 条 leg。从 Moneyline / Spread / Total 三个 section 中任选一个；在同场内再点另一个按钮（不管来自哪个 section、哪一档线）会替换已有 leg。
 
-实施计划：
-1. 更新 `ComboChallengeSection.tsx` 的 Stake 区域：
-   - 移除可编辑 number input。
-   - 移除 1U / 5U / 10U 预设按钮。
-   - 展示固定金额 `10U`，视觉上保持当前 scoreboard/carnival 风格，但明确是不可编辑状态。
-2. 更新移动端 sticky bar 中的 stake 展示：
-   - 同样显示固定 `10U`，不出现任何可交互金额控件。
-3. 更新 combo 状态逻辑：
-   - stake 固定为 10U。
-   - stake 校验恒定有效，不再接受其他金额。
-   - quote / ticket / payout 继续使用 10U 作为 stake。
-4. 同步文案：
-   - 把 “valid stake / enter valid stake / 1–10 step 0.1” 等提示移除或改成 “Fixed 10U”。
+实施：
 
-不做：不增加滑块、不增加金额输入、不支持 10U 以外下注金额。
+1. `src/components/sports/promo/combo/useComboState.ts`
+   - `selectOutcome` 的唯一性键从 `market.marketId` 改回 `match.matchId`：同场命中即替换，不同场比赛才新增（仍受 4 腿上限约束）。
+   - `removeLeg(marketId)` 实现不变（按 marketId 过滤）；因每场只一条，等效于按 matchId 删除。
+   - 当替换发生且新 market 与旧 market 不同时，可选地用 `toast.info` 提示"Replaced your pick for {match}"，保持当前 toast 风格简短。
+
+2. `src/components/sports/promo/ComboChallengeSection.tsx`
+   - `MatchCard` 中各 section（Moneyline / Spread / Total）按钮的高亮逻辑保持按 `outcomeId` 匹配 selectedLeg；同场只会有一个按钮高亮。
+   - LineStepper、percentage 显示、卡片整体布局不动。
+   - builder slot / quote / mobile sticky bar 不动。
+
+不做：
+- 不改数据模型，每场仍同时暴露 ML / SP / TT 三类 market 与多档线。
+- 不改 stake（固定 10U）、quote、submit、ticket 渲染、4 腿上限。
+- 不改 style-guide mock 字段。

@@ -203,12 +203,13 @@ export function useComboState() {
         return;
       }
       setSelectedLegs((prev) => {
-        // Uniqueness is per market — same market re-pick replaces; different
-        // markets within the same match stack as separate legs (capped at 4).
-        const sameMarketIdx = prev.findIndex((l) => l.marketId === market.marketId);
-        if (sameMarketIdx >= 0) {
+        // Uniqueness is per match — each match can contribute at most one
+        // leg. Picking any outcome on the same match (Moneyline / Spread /
+        // Total, any line) replaces the previous leg for that match.
+        const sameMatchIdx = prev.findIndex((l) => l.matchId === match.matchId);
+        if (sameMatchIdx >= 0) {
           const next = [...prev];
-          next[sameMarketIdx] = legFromOutcome(match, market, outcome);
+          next[sameMatchIdx] = legFromOutcome(match, market, outcome);
           return next;
         }
         if (prev.length >= COMBO_MAX_PICKS) {
