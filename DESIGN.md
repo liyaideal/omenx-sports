@@ -414,6 +414,19 @@ Section 7 is append-only. Every regression the user catches gets pinned here.
   bonus legends OUTSIDE the 8-country pool (e.g. Yaya Touré) to seed
   trust, but those bonus legends must never enter the round queue or
   appear as candidates.
+- Don't ship the Guess-the-Legend tab as a wall of text. The tab MUST be
+  rendered inside the scoreboard chassis (12px `#1a1a1a` frame, 4 corner
+  bolts, ≤ 8% CRT scanline overlay). Mandatory image elements: (1) an 8-tile
+  LED progress row at the top — green=hit, amber=live (pulse), red=miss,
+  zinc=upcoming; (2) the active round's hero plate uses the country's
+  weathered flag image from `src/assets/legend-reveal/flag-{code}.jpg` with
+  a dark gradient overlay, replaced (right-half) by the matching
+  `signed-{code}.jpg` portrait only AFTER reveal; (3) a bottom Signed
+  Archive strip with portrait cards (R## chip amber, BONUS chip violet).
+  Clues render as 3 split-flap rows with fixed labels `POSITION`, `PEAK
+  CLUB`, `MAJOR TROPHY` — never as free-text sentences. Candidate cards
+  never carry portraits (anti-spoiler + portrait-rights hygiene); only the
+  signed archive does.
 
 ## 8. Responsive Behavior
 
