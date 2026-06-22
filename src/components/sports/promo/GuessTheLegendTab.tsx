@@ -345,18 +345,30 @@ export function ActiveRoundBay({
               height={512}
               className="absolute inset-0 h-full w-full object-cover opacity-90"
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-black/30" />
-            {/* Mystery silhouette overlay until reveal */}
-            {!isRevealed && (
+            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-black/40" />
+            {/* Reveal: replace the flag silhouette with the country's signed portrait */}
+            {isRevealed && (
               <img
-                src={LEGEND_MYSTERY_PORTRAIT}
-                alt=""
-                aria-hidden
+                src={LEGEND_SIGNED_IMAGES[round.country]}
+                alt={`Signed portrait — ${LEGEND_COUNTRIES[round.country].name}`}
                 loading="lazy"
                 width={512}
                 height={768}
-                className="absolute inset-x-0 bottom-0 mx-auto h-[88%] w-auto object-contain opacity-70 mix-blend-screen"
+                className="absolute inset-y-0 right-0 h-full w-1/2 object-cover object-top"
               />
+            )}
+            {!isRevealed && (
+              <div
+                aria-hidden
+                className="pointer-events-none absolute inset-0 grid place-items-center"
+              >
+                <span
+                  className="font-scoreboard text-7xl font-bold text-white/15 mix-blend-overlay"
+                  style={{ textShadow: "0 4px 16px rgba(0,0,0,0.6)" }}
+                >
+                  ?
+                </span>
+              </div>
             )}
             <div className="absolute bottom-1.5 left-1.5 right-1.5 flex items-center justify-between gap-2">
               <span className="bg-black/70 px-1.5 py-0.5 font-scoreboard text-[9px] font-bold tracking-[0.22em] text-white backdrop-blur-sm">
