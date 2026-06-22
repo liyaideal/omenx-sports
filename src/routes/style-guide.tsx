@@ -112,7 +112,15 @@ import { ComboChallengeSection } from "@/components/sports/promo/ComboChallengeS
 import { LuckyBoxSection } from "@/components/sports/promo/LuckyBoxSection";
 import { NewbieRewardsSection, TaskCard } from "@/components/sports/promo/NewbieRewardsSection";
 import type { NewbieTask, LegendRound, LegendRoundStatus } from "@/data/world-cup-carnival";
-import { LEGEND_ROUNDS } from "@/data/world-cup-carnival";
+import {
+  LEGEND_ROUNDS,
+  LEGEND_COUNTRIES,
+  LEGEND_SIGNED_IMAGES,
+  LEGEND_MYSTERY_PORTRAIT,
+  type LegendCountryCode,
+} from "@/data/world-cup-carnival";
+import signedCivAsset from "@/assets/legend-reveal/signed-civ.jpg";
+import * as FlatFlags from "country-flag-icons/react/3x2";
 import {
   ScoreboardChassis,
   RoundProgressHud,
@@ -2153,6 +2161,13 @@ function StyleGuide() {
               <div className="mt-10 space-y-10">
                 <div className="space-y-3">
                   <div className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+                    Assets & Tokens inventory (atoms used by HUD · bay · archive)
+                  </div>
+                  <LegendAssetsInventory />
+                </div>
+
+                <div className="space-y-3">
+                  <div className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
                     Guess the Legend — scoreboard chassis (HUD · bay · board · archive)
                   </div>
                   <LegendScoreboardDemo />
@@ -2792,6 +2807,129 @@ function LegendScoreboardDemo() {
         />
         <SignedArchiveStrip rounds={LEGEND_ROUNDS} />
       </ScoreboardChassis>
+    </div>
+  );
+}
+
+function LegendAssetsInventory() {
+  const codes = Object.keys(LEGEND_COUNTRIES) as LegendCountryCode[];
+  const tokens: { name: string; hex: string; usage: string }[] = [
+    { name: "ACCENT (HIT)", hex: "#4ade80", usage: "Correct guess · HUD LED bar · archive winner border" },
+    { name: "AMBER (LIVE)", hex: "#facc15", usage: "Active round ring · split-flap clue rail · GUES-NN label" },
+    { name: "MISS", hex: "#f87171", usage: "Wrong guess · revealed-miss tile border + LED bar" },
+    { name: "Chassis BG", hex: "#0d0d0d", usage: "ScoreboardChassis surface · HUD panel · candidate board" },
+  ];
+  return (
+    <div className="space-y-8 rounded-lg border border-border bg-card/40 p-5">
+      {/* 1. Weathered hero flags */}
+      <div>
+        <div className="mb-2 font-mono text-[10px] uppercase tracking-widest text-amber-400/80">
+          1 · Country flags — weathered hero (ActiveRoundBay only)
+        </div>
+        <p className="mb-3 max-w-2xl text-xs text-muted-foreground">
+          Reference via <code className="font-mono text-foreground">LEGEND_COUNTRIES[code].flagImage</code>. Source:{" "}
+          <code className="font-mono text-foreground">src/assets/legend-reveal/flag-*.jpg</code>. Never use in the HUD — too noisy at small size.
+        </p>
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+          {codes.map((code) => {
+            const c = LEGEND_COUNTRIES[code];
+            return (
+              <div key={code} className="overflow-hidden rounded-md border border-border bg-[#0a0a0a]">
+                <img src={c.flagImage} alt={`${c.name} weathered flag`} className="h-24 w-full object-cover" />
+                <div className="px-2 py-1.5">
+                  <div className="font-mono text-[10px] font-bold text-foreground">{code}</div>
+                  <div className="font-mono text-[10px] text-muted-foreground">{c.name} · {c.region}</div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* 2. Flat ISO SVG flags */}
+      <div>
+        <div className="mb-2 font-mono text-[10px] uppercase tracking-widest text-amber-400/80">
+          2 · Country flags — flat ISO SVG (RoundProgressHud only)
+        </div>
+        <p className="mb-3 max-w-2xl text-xs text-muted-foreground">
+          Reference via <code className="font-mono text-foreground">country-flag-icons/react/3x2</code> using{" "}
+          <code className="font-mono text-foreground">LEGEND_COUNTRIES[code].iso2</code>. England uses the{" "}
+          <code className="font-mono text-foreground">GB-ENG</code> subdivision (St George's Cross).
+        </p>
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+          {codes.map((code) => {
+            const c = LEGEND_COUNTRIES[code];
+            const Flag = (FlatFlags as Record<string, React.ComponentType<{ className?: string; title?: string }> | undefined>)[c.iso2];
+            return (
+              <div key={code} className="rounded-md border border-border bg-[#0a0a0a] p-2">
+                <div className="overflow-hidden rounded-sm border border-black/70">
+                  {Flag ? <Flag title={c.name} className="block h-12 w-full" /> : <div className="h-12 w-full bg-zinc-800" />}
+                </div>
+                <div className="mt-1.5">
+                  <div className="font-mono text-[10px] font-bold text-foreground">{code} · iso2={c.iso2}</div>
+                  <div className="font-mono text-[10px] text-muted-foreground">{c.name}</div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* 3. Signed portraits */}
+      <div>
+        <div className="mb-2 font-mono text-[10px] uppercase tracking-widest text-amber-400/80">
+          3 · Signed portraits (SignedArchiveStrip + ActiveRoundBay reveal)
+        </div>
+        <p className="mb-3 max-w-2xl text-xs text-muted-foreground">
+          Reference via <code className="font-mono text-foreground">LEGEND_SIGNED_IMAGES[code]</code>. Mystery silhouette via{" "}
+          <code className="font-mono text-foreground">LEGEND_MYSTERY_PORTRAIT</code> is shown on the active hero until reveal day. CIV is a pre-warm bonus —{" "}
+          <b>not</b> part of the 8-round queue.
+        </p>
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-5">
+          {codes.map((code) => (
+            <div key={code} className="rounded-md border border-border bg-[#0a0a0a] p-2">
+              <div className="overflow-hidden rounded-sm ring-1 ring-amber-500/40">
+                <img src={LEGEND_SIGNED_IMAGES[code]} alt={`${LEGEND_COUNTRIES[code].name} signed portrait`} className="aspect-[5/7] w-full object-cover" />
+              </div>
+              <div className="mt-1.5 font-mono text-[10px] font-bold text-foreground">{code}</div>
+              <div className="font-mono text-[10px] text-muted-foreground">LEGEND_SIGNED_IMAGES.{code}</div>
+            </div>
+          ))}
+          <div className="rounded-md border border-dashed border-border bg-[#0a0a0a] p-2">
+            <div className="overflow-hidden rounded-sm ring-1 ring-zinc-700">
+              <img src={LEGEND_MYSTERY_PORTRAIT} alt="Mystery silhouette" className="aspect-[5/7] w-full object-cover" />
+            </div>
+            <div className="mt-1.5 font-mono text-[10px] font-bold text-foreground">MYSTERY</div>
+            <div className="font-mono text-[10px] text-muted-foreground">LEGEND_MYSTERY_PORTRAIT</div>
+          </div>
+          <div className="rounded-md border border-amber-500/30 bg-[#0a0a0a] p-2">
+            <div className="overflow-hidden rounded-sm ring-1 ring-amber-500/40">
+              <img src={signedCivAsset} alt="Côte d'Ivoire pre-warm" className="aspect-[5/7] w-full object-cover" />
+            </div>
+            <div className="mt-1.5 font-mono text-[10px] font-bold text-foreground">CIV (bonus)</div>
+            <div className="font-mono text-[10px] text-muted-foreground">signed-civ.jpg · pre-warm only</div>
+          </div>
+        </div>
+      </div>
+
+      {/* 4. Color tokens */}
+      <div>
+        <div className="mb-2 font-mono text-[10px] uppercase tracking-widest text-amber-400/80">
+          4 · Color tokens (constants in GuessTheLegendTab.tsx)
+        </div>
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+          {tokens.map((t) => (
+            <div key={t.name} className="overflow-hidden rounded-md border border-border bg-[#0a0a0a]">
+              <div className="h-12 w-full" style={{ background: t.hex }} />
+              <div className="px-2 py-1.5">
+                <div className="font-mono text-[10px] font-bold text-foreground">{t.name}</div>
+                <div className="font-mono text-[10px] text-muted-foreground">{t.hex}</div>
+                <div className="mt-0.5 font-mono text-[10px] text-muted-foreground">{t.usage}</div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
     </div>
   );
 }

@@ -1,33 +1,32 @@
 ## 问题
 
-当前 HUD 用的是做旧"博物馆挂旗"纹理图，在 ~80px 宽的小瓦片里被压暗、被周边阴影吃掉，国旗本身几乎看不清，识别率比 emoji 还低。"做旧"风只适合下方 Active Bay 的大图。
+`/style-guide#world-cup-carnival` 里 Guess the Legend 只展示了"组装好"的 scoreboard demo 和 bay 三态，但没有列出原子素材清单——开发者照着这页写新页面时，不知道：
+- 8 个国家用了哪些做旧大旗 (`flagImage`) 和扁平 ISO 旗 (`iso2`)
+- 10 张签名球员图分别长什么样、对应哪个国家
+- mystery 占位、CIV 预热 bonus 各是哪张
+- HUD / Bay / Archive 三处的颜色 token (HIT / LIVE / MISS / AMBER) 分别是什么
 
-## 方案：HUD 改用扁平矢量国旗
+## 方案
 
-HUD 瓦片只需要"一眼识别是哪个国家"，所以把 HUD 那一处（且仅那一处）换成**扁平矢量 ISO 国旗 SVG**，下方 Active Bay 的大幅做旧挂旗保持不变 —— 形成"远看清晰 / 近看有质感"的层次。
+在现有 "scoreboard chassis demo" 之上**新增一段 "Assets & Tokens Inventory"**，纯文档性质，不引入新组件、不改业务代码。
 
-### 实现
+### 修改：`src/routes/style-guide.tsx`
 
-1. 新增依赖：`country-flag-icons`（轻量，按国家 code 暴露纯 SVG React 组件，无需自带 CSS / 字体）。
-2. `src/data/world-cup-carnival.ts`：给 `LegendCountry` 增加 `iso2` 字段（FR / AR / ES / BR / DE / EN→GB-ENG / NL / PT / CI…），保留现有 `flag` emoji 和 `flagImage` 做旧图。
-   - 英格兰用 `country-flag-icons` 的 `GB-ENG` 子区域旗（库里支持）。
-3. `GuessTheLegendTab.tsx` 的 `RoundLedTile`：
-   - 把当前 `<img src={flagImage}>` 块替换成 `<FlagIcon country={iso2} />`（即库提供的 SVG 组件）。
-   - 容器：`h-9 sm:h-11`，`rounded-[3px]`，外加 1px `border-black/70` + 极淡 inset shadow，保持复古面板贴合感。
-   - 状态视觉只动包裹层不动旗本身：
-     - revealed-miss：包裹层加 `grayscale(0.55) opacity(0.7)`
-     - revealed-hit：保留绿底条 + 顶部 1px 极淡绿 inset
-     - voting/locked-in：保留琥珀底条 + 顶部 1px 极淡琥珀 inset
-     - upcoming：继续 "?" 不放旗
-   - 移除之前给旗加的 `contrast/saturate` 滤镜——扁平旗本来就是干净纯色。
-4. Active Bay / Signed Archive / 数据接口、`/style-guide` 演示都**不动**——它们用的是做旧大图，本来就清楚。
+新增一个 `LegendAssetsInventory()` 子组件，插在现有 `LegendScoreboardDemo` 之前（让人先看到清单再看组装效果）。包含 4 块：
 
-### 不动 / 不引入
+1. **Country flags · weathered hero (`flagImage`)** — 8 张 (BRA/ESP/FRA/ARG/GER/ENG/NED/POR) 的 thumbnail（h-24 卡片），下方注 `LEGEND_COUNTRIES.{CODE}.flagImage` 和源路径 `src/assets/legend-reveal/flag-*.jpg`，说明仅用于 ActiveRoundBay。
+2. **Country flags · flat ISO SVG (HUD)** — 同 8 国，渲染 `FlagSvg code={iso2}`（h-12 矩形），下方注 `country-flag-icons/react/3x2` + 对应 `iso2` 字段。说明仅用于 RoundProgressHud。
+3. **Signed portraits (`LEGEND_SIGNED_IMAGES`)** — 10 张 (BRA/ESP/FRA/ARG/GER/ENG/NED/POR/CIV/mystery) 的 thumbnail（h-32，aspect 5/7 框，带烫金边），下方注 `LEGEND_SIGNED_IMAGES.{CODE}` / `LEGEND_MYSTERY_PORTRAIT`，说明 mystery 用于未官宣回合，CIV 是预热 bonus 不参与主回合。
+4. **Color tokens** — 4 个色卡：ACCENT `#4ade80` (HIT)、AMBER `#facc15` (LIVE)、MISS `#f87171`、chassis bg `#0d0d0d`，每个色卡下方写它在哪些组件里出现。
 
-- 不删现有做旧旗资源（Active Bay 还在用）。
-- 不引 CSS spritesheet 方案（flag-icons），SVG 组件更轻、可独立 tree-shake。
-- DESIGN.md §4 加一句小补丁："Scoreboard HUD tiles use flat ISO SVG flags; weathered textures are reserved for Active Bay only." 一行。
+为了让 `FlagSvg` 在 style-guide 里可用，把它从 `GuessTheLegendTab.tsx` export 一下（当前是文件内部 helper），或者在 inventory 里直接 `import * as FlatFlags from 'country-flag-icons/react/3x2'` 自己渲染——选后者，避免污染业务组件的公开 API。
+
+### 不动
+
+- `LegendScoreboardDemo` / `LegendBayPlayground` 保留不动。
+- 没有新增素材生成。
+- 不改 DESIGN.md（这是 playground 完整度补丁，不引入新规则）。
 
 ### 验证
 
-`bun add country-flag-icons` → 改完后 Playwright 截 `/promo/world-cup?tab=legend` 桌面态，确认 8 个 tile 里前 3 个能一眼分辨出 FR/AR/ES。
+跳到 `/style-guide#world-cup-carnival`，确认新增的 "Assets & Tokens Inventory" 块在 demo 上方，所有 8 国双形态旗 + 10 签名图 + 4 token 全部可见且带标签。
