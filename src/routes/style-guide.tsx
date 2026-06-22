@@ -2803,10 +2803,10 @@ function ShareDemo() {
     grossPayoutU: 142,
     wonLegCount: 4,
     legs: [
-      { matchId: "m1", outcomeId: "o1", outcomeSide: "HOME" as const, teamLabel: "Argentina Win", matchLabel: "Argentina vs Mexico", kickoff: "", probability: 0.55, displayProbability: "55%" },
-      { matchId: "m2", outcomeId: "o2", outcomeSide: "HOME" as const, teamLabel: "Brazil Win", matchLabel: "Brazil vs Japan", kickoff: "", probability: 0.6, displayProbability: "60%" },
-      { matchId: "m3", outcomeId: "o3", outcomeSide: "HOME" as const, teamLabel: "Spain Win", matchLabel: "Spain vs USA", kickoff: "", probability: 0.58, displayProbability: "58%" },
-      { matchId: "m4", outcomeId: "o4", outcomeSide: "HOME" as const, teamLabel: "Germany Win", matchLabel: "Germany vs Canada", kickoff: "", probability: 0.62, displayProbability: "62%" },
+      { matchId: "m1", outcomeId: "o1", marketId: "m1:ML", marketType: "MONEYLINE" as const, marketLabel: "Moneyline", outcomeSide: "HOME" as const, teamLabel: "Argentina Win", matchLabel: "Argentina vs Mexico", kickoff: "", probability: 0.55, displayProbability: "55%" },
+      { matchId: "m2", outcomeId: "o2", marketId: "m2:ML", marketType: "MONEYLINE" as const, marketLabel: "Moneyline", outcomeSide: "HOME" as const, teamLabel: "Brazil Win", matchLabel: "Brazil vs Japan", kickoff: "", probability: 0.6, displayProbability: "60%" },
+      { matchId: "m3", outcomeId: "o3", marketId: "m3:ML", marketType: "MONEYLINE" as const, marketLabel: "Moneyline", outcomeSide: "HOME" as const, teamLabel: "Spain Win", matchLabel: "Spain vs USA", kickoff: "", probability: 0.58, displayProbability: "58%" },
+      { matchId: "m4", outcomeId: "o4", marketId: "m4:ML", marketType: "MONEYLINE" as const, marketLabel: "Moneyline", outcomeSide: "HOME" as const, teamLabel: "Germany Win", matchLabel: "Germany vs Canada", kickoff: "", probability: 0.62, displayProbability: "62%" },
     ],
   };
 

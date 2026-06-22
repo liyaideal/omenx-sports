@@ -9,6 +9,8 @@ import {
   COMBO_MAX_COMBOS_PER_USER,
   WC_COMBO_MATCHES,
   type OutcomeSide,
+  type WCMarket,
+  type WCMarketType,
   type WCMatch,
   type WCOutcome,
 } from "@/data/world-cup-carnival";
@@ -30,9 +32,13 @@ export type PageState =
 
 export interface SelectedLeg {
   matchId: string;
+  marketId: string;
+  marketType: WCMarketType;
   outcomeId: string;
   outcomeSide: OutcomeSide;
   teamLabel: string;
+  /** Market subtitle (e.g. "Moneyline", "Spread · BRA -1.5", "Total · Over 2.5"). */
+  marketLabel: string;
   matchLabel: string;
   kickoff: string;
   probability: number;
@@ -51,12 +57,25 @@ export interface SubmittedTicket {
   wonLegCount?: number;
 }
 
-function legFromOutcome(match: WCMatch, outcome: WCOutcome): SelectedLeg {
+function legFromOutcome(
+  match: WCMatch,
+  market: WCMarket,
+  outcome: WCOutcome,
+): SelectedLeg {
+  const marketLabel =
+    market.marketType === "MONEYLINE"
+      ? "Moneyline"
+      : market.marketType === "SPREAD"
+        ? `Spread · ${outcome.label}`
+        : `Total · ${outcome.label}`;
   return {
     matchId: match.matchId,
+    marketId: market.marketId,
+    marketType: market.marketType,
     outcomeId: outcome.outcomeId,
     outcomeSide: outcome.side,
     teamLabel: outcome.label,
+    marketLabel,
     matchLabel: `${match.home} vs ${match.away}`,
     kickoff: match.kickoff,
     probability: outcome.probability,
@@ -77,8 +96,9 @@ function seedTickets(): SubmittedTicket[] {
   const find = (id: string) => WC_COMBO_MATCHES.find((m) => m.matchId === id)!;
   function legOf(matchId: string, side: OutcomeSide): SelectedLeg {
     const m = find(matchId);
-    const o = (m.markets[0].outcomes ?? []).find((x) => x.side === side)!;
-    return legFromOutcome(m, o);
+    const market = m.markets[0];
+    const o = (market.outcomes ?? []).find((x) => x.side === side)!;
+    return legFromOutcome(m, market, o);
   }
   return [
     {
@@ -180,7 +200,7 @@ export function useComboState() {
   const participationCapReached = remainingEntries <= 0;
 
   const selectOutcome = useCallback(
-    (match: WCMatch, outcome: WCOutcome) => {
+    (match: WCMatch, market: WCMarket, outcome: WCOutcome) => {
       if (match.matchComboStatus !== "AVAILABLE") {
         toast.error("This match starts soon and can't be added.");
         return;
@@ -190,25 +210,26 @@ export function useComboState() {
         return;
       }
       setSelectedLegs((prev) => {
-        const sameMatchIdx = prev.findIndex((l) => l.matchId === match.matchId);
-        if (sameMatchIdx >= 0) {
-          // Replace within match — PRD §4.3.3.
+        // Uniqueness is per market — same market re-pick replaces; different
+        // markets within the same match stack as separate legs (capped at 4).
+        const sameMarketIdx = prev.findIndex((l) => l.marketId === market.marketId);
+        if (sameMarketIdx >= 0) {
           const next = [...prev];
-          next[sameMatchIdx] = legFromOutcome(match, outcome);
+          next[sameMarketIdx] = legFromOutcome(match, market, outcome);
           return next;
         }
         if (prev.length >= COMBO_MAX_PICKS) {
           toast.error("You already have 4 picks. Remove one before adding another.");
           return prev;
         }
-        return [...prev, legFromOutcome(match, outcome)];
+        return [...prev, legFromOutcome(match, market, outcome)];
       });
     },
     [],
   );
 
-  const removeLeg = useCallback((matchId: string) => {
-    setSelectedLegs((prev) => prev.filter((l) => l.matchId !== matchId));
+  const removeLeg = useCallback((marketId: string) => {
+    setSelectedLegs((prev) => prev.filter((l) => l.marketId !== marketId));
   }, []);
 
   const resetLegs = useCallback(() => setSelectedLegs([]), []);
