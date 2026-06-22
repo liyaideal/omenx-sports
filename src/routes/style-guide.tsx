@@ -1749,6 +1749,44 @@ function StyleGuide() {
                 </div>
               </div>
 
+              <div>
+                <div className="mb-3 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+                  Mobile behavior — every Carnival component rendered inside a 390w frame
+                </div>
+                <div className="space-y-6">
+                  <MobileFrame label="ScoreboardHero · 390w">
+                    <ScoreboardHero />
+                  </MobileFrame>
+                  <MobileFrame label="CarnivalTabs · horizontal snap row (swipe →)">
+                    <CarnivalTabs current="overview" />
+                  </MobileFrame>
+                  <MobileFrame label="LuckyBoxSection · State B 1,240 U (default)">
+                    <LuckyBoxSection volumeOverride={1240} />
+                  </MobileFrame>
+                  <MobileFrame label="NewbieRewardsSection · invite CTA full-width">
+                    <NewbieRewardsSection />
+                  </MobileFrame>
+                  <MobileFrame label="ComboChallengeSection · stacked filters + sticky bar">
+                    <ComboChallengeSection />
+                  </MobileFrame>
+                </div>
+
+                <ul className="mt-4 space-y-1.5 rounded-2xl border border-dashed border-white/15 bg-white/[0.02] p-5 text-xs text-muted-foreground">
+                  <li className="text-foreground">Mobile rules (mirror of `/promo/world-cup` mobile pass)</li>
+                  <li>• <b>ScoreboardHero</b>: big number drops to <code className="font-mono text-foreground">text-[2.5rem]</code>, countdown collapses to <code className="font-mono text-foreground">HH:MM:SS</code>, header strip wraps. Trophy pill wraps instead of clipping.</li>
+                  <li>• <b>CarnivalTabs</b>: mobile becomes a horizontal snap row (each cell <code className="font-mono text-foreground">min-w-[44%]</code>); from <code className="font-mono text-foreground">md:</code> up reverts to the 5-col grid. Active-cell underline + selected color identical to desktop.</li>
+                  <li>• <b>LuckyBox VolumeLadder</b>: track inset <code className="font-mono text-foreground">px-5</code>, node labels alternate above/below to avoid 100U vs 1,000U collision, last node anchors label flush-right, token hex anchors to right when <code className="font-mono text-foreground">tokenPct &gt; 92</code>. Caption breaks into 3 lines on mobile.</li>
+                  <li>• <b>LuckyBox TierCard</b>: header row wraps; pool label stays <code className="font-mono text-foreground">whitespace-nowrap</code>, title truncates. Reel, spin button, prize list, share — identical to desktop.</li>
+                  <li>• <b>ComboChallengeSection.FilterBar</b>: mobile stacks (stage chips · matchday chips horizontal-scroll · toggle + search 50/50). Search input goes full-width.</li>
+                  <li>• <b>CampaignHero</b>: "ENTRIES LEFT" block flips to <code className="font-mono text-foreground">text-left</code> on mobile.</li>
+                  <li>• <b>MatchCard</b>: matchup title truncates on mobile; locked pill never shrinks. LineStepper button text drops to <code className="font-mono text-foreground">text-[10px]</code>.</li>
+                  <li>• <b>MobileStickyBar</b>: bottom-16 to clear <code className="font-mono text-foreground">MobileBottomNav</code>, single-row layout (no inner StakeDisplay), spacer 28. CTA <code className="font-mono text-foreground">shrink-0 whitespace-nowrap</code>.</li>
+                  <li>• <b>InvitePanel</b>: Copy button is <code className="font-mono text-foreground">w-full sm:w-auto</code>.</li>
+                  <li className="text-foreground">Interactions identical to desktop (do not diverge): spin, share triggers, modal flows (Confirm / Requote / TicketAccepted), prize draw RNG, countdown ticking.</li>
+                  <li className="text-foreground">Rule: every Carnival component MUST have desktop AND mobile (390w) coverage in this style guide. If a mobile rule isn't shown here, it doesn't exist.</li>
+                </ul>
+              </div>
+
               <div className="rounded-2xl border border-dashed border-white/15 bg-white/[0.02] p-5 text-xs">
                 <div className="mb-2 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
                   Rules
