@@ -1187,10 +1187,11 @@ function MobileStickyBar({
   onCalculate: () => void;
   onConfirm: () => void;
 }) {
-  const { filled, quote, pageState, stake } = ctrl;
+  const { filled, quote, pageState, stake, stakeValid } = ctrl;
   let cta = "Select 4 picks";
   let onClick: (() => void) | null = null;
   if (filled < COMBO_MAX_PICKS) cta = `Add ${COMBO_MAX_PICKS - filled} more`;
+  else if (!stakeValid) cta = "Enter valid stake";
   else if (pageState === "READY") {
     cta = "Calculate odds";
     onClick = onCalculate;
@@ -1222,6 +1223,9 @@ function MobileStickyBar({
         >
           {cta}
         </button>
+      </div>
+      <div className="mt-2">
+        <StakeInput value={ctrl.stakeInput} onChange={ctrl.setStakeInput} valid={ctrl.stakeValid} compact />
       </div>
     </div>
   );
