@@ -14,10 +14,25 @@ import {
   type LegendRoundStatus,
 } from "@/data/world-cup-carnival";
 import { cn } from "@/lib/utils";
+import * as FlatFlags from "country-flag-icons/react/3x2";
 
 const ACCENT = "#4ade80";
 const AMBER = "#facc15";
 const MISS = "#f87171";
+
+function FlagSvg({
+  code,
+  title,
+  className,
+}: {
+  code: string;
+  title?: string;
+  className?: string;
+}) {
+  const Cmp = (FlatFlags as Record<string, React.ComponentType<{ title?: string; className?: string }> | undefined>)[code];
+  if (!Cmp) return null;
+  return <Cmp title={title} className={className} />;
+}
 
 /* ----------------------------------------------------------------------- */
 /*  Tab root — Scoreboard chassis                                           */
