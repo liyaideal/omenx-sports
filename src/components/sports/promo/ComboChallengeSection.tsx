@@ -1247,12 +1247,16 @@ function TicketAcceptedModal({
 
 function TicketStatusList({
   tickets,
+  highlightTicketId,
+  ref,
 }: {
   tickets: SubmittedTicket[];
+  highlightTicketId?: string | null;
+  ref?: React.Ref<HTMLDivElement>;
 }) {
   if (tickets.length === 0) return null;
   return (
-    <div className="border-2 border-zinc-800 bg-[#0a0a0a] p-4">
+    <div ref={ref} id="combo-my-tickets" className="scroll-mt-20 border-2 border-zinc-800 bg-[#0a0a0a] p-4">
       <div className="flex items-center gap-2">
         <Ticket className="h-3.5 w-3.5 text-amber-400" />
         <div className="font-scoreboard text-[10px] font-bold tracking-[0.25em] text-amber-400">
@@ -1261,14 +1265,18 @@ function TicketStatusList({
       </div>
       <div className="mt-3 space-y-2">
         {tickets.map((t) => (
-          <TicketRow key={t.ticketId} ticket={t} />
+          <TicketRow
+            key={t.ticketId}
+            ticket={t}
+            highlight={t.ticketId === highlightTicketId}
+          />
         ))}
       </div>
     </div>
   );
 }
 
-function TicketRow({ ticket }: { ticket: SubmittedTicket }) {
+function TicketRow({ ticket, highlight = false }: { ticket: SubmittedTicket; highlight?: boolean }) {
   const statusInfo = {
     ACCEPTED: { label: "Waiting for results", tone: "text-amber-400 border-amber-400/40 bg-amber-400/10" },
     SETTLED_WON: { label: "4/4 Correct — Won!", tone: "text-emerald-400 border-emerald-500/40 bg-emerald-500/10" },
@@ -1279,7 +1287,13 @@ function TicketRow({ ticket }: { ticket: SubmittedTicket }) {
   }[ticket.status];
 
   return (
-    <div className="border border-zinc-800 bg-black p-3">
+    <div
+      className={cn(
+        "border border-zinc-800 bg-black p-3 transition-shadow duration-500",
+        highlight &&
+          "ring-2 ring-amber-400/70 shadow-[0_0_24px_rgba(250,204,21,0.35)] animate-pulse",
+      )}
+    >
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div className="flex items-center gap-2">
           <span className={cn("border px-2 py-0.5 font-pitch text-[10px] font-bold uppercase tracking-widest", statusInfo.tone)}>
