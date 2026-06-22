@@ -1206,7 +1206,7 @@ function MobileStickyBar({
 
   return (
     <div
-      className="fixed inset-x-0 bottom-0 z-[60] border-t-2 border-amber-400/60 bg-[#0a0a0a]/95 p-3 backdrop-blur md:bottom-16 lg:hidden"
+      className="fixed inset-x-0 bottom-16 z-[60] border-t-2 border-amber-400/60 bg-[#0a0a0a]/95 p-3 backdrop-blur md:bottom-0 lg:hidden"
       style={{ paddingBottom: "max(env(safe-area-inset-bottom), 0.75rem)" }}
     >
       <div className="flex items-center gap-3">
