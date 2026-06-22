@@ -94,6 +94,7 @@ export function GuessTheLegendTab() {
   return (
     <div className="mx-auto w-full max-w-3xl">
       <ScoreboardChassis>
+        <MissionBrief />
         <RoundProgressHud
           rounds={rounds}
           activeRoundId={activeRound.id}
@@ -117,6 +118,60 @@ export function GuessTheLegendTab() {
 
         <SignedArchiveStrip rounds={rounds} />
       </ScoreboardChassis>
+    </div>
+  );
+}
+
+/* ----------------------------------------------------------------------- */
+/*  Mission Brief — answers "what am I playing for?" in one strip          */
+/* ----------------------------------------------------------------------- */
+
+export function MissionBrief() {
+  return (
+    <div className="border-b-2 border-[#161616] bg-[#0d0d0d] px-5 py-4 sm:px-7 sm:py-5">
+      <div className="mb-2 flex items-center justify-between font-scoreboard text-[10px] font-bold tracking-[0.3em] text-zinc-600">
+        <span>MISSION</span>
+        <span className="text-zinc-700">HOW IT WORKS</span>
+      </div>
+      <p className="mb-3 font-pitch text-sm leading-snug text-zinc-300 sm:text-[15px]">
+        Crack the signed-jersey vault — one retired legend per round. Read the
+        clues, lock the right name before reveal day, and the vault pays you back.
+      </p>
+      <ul className="space-y-1.5 font-scoreboard text-[10px] font-bold tracking-[0.22em] text-zinc-400 sm:text-[11px]">
+        <li className="flex items-start gap-2">
+          <span
+            className="mt-0.5 inline-block h-2 w-2 shrink-0"
+            style={{ background: AMBER, boxShadow: `0 0 6px ${AMBER}` }}
+          />
+          <span>
+            PICK 1 OF 4 LEGENDS · 3 CLUES UNLOCK BY COMMUNITY VOTE
+          </span>
+        </li>
+        <li className="flex items-start gap-2">
+          <span
+            className="mt-0.5 inline-block h-2 w-2 shrink-0"
+            style={{ background: ACCENT, boxShadow: `0 0 6px ${ACCENT}` }}
+          />
+          <span>
+            HIT ON REVEAL DAY ={" "}
+            <span style={{ color: ACCENT }}>+1 LUCKY BOX TIER-01 SPIN</span>
+          </span>
+        </li>
+        <li className="flex items-start gap-2">
+          <span className="mt-0.5 inline-block h-2 w-2 shrink-0 bg-zinc-600" />
+          <span className="flex flex-wrap items-center gap-1">
+            <span>THE SIGNED JERSEY ITSELF DROPS INTO THE LUCKY BOX POOL</span>
+            <Link
+              to="/promo/world-cup"
+              search={{ tab: "luckybox" }}
+              className="inline-flex items-center gap-1 border border-amber-400/40 px-1.5 py-0.5 text-amber-400 transition-colors hover:bg-amber-400 hover:text-black"
+            >
+              OPEN LUCKY BOX
+              <ChevronRight className="h-3 w-3" />
+            </Link>
+          </span>
+        </li>
+      </ul>
     </div>
   );
 }
