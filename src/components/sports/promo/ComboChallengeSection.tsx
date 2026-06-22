@@ -700,7 +700,7 @@ function BuilderCTA({
   onCalculate: () => void;
   onConfirm: () => void;
 }) {
-  const { filled, pageState, canPreview } = ctrl;
+  const { filled, pageState, quote } = ctrl;
   if (ctrl.participationCapReached) {
     return (
       <div className="mt-3 border border-zinc-800 bg-zinc-950 p-2.5 text-center font-pitch text-[10px] font-bold uppercase tracking-widest text-zinc-500">
@@ -715,25 +715,18 @@ function BuilderCTA({
 
   if (filled < COMBO_MAX_PICKS) {
     label = `Add ${COMBO_MAX_PICKS - filled} more pick${COMBO_MAX_PICKS - filled > 1 ? "s" : ""}`;
-  } else if (pageState === "READY") {
-    label = "Calculate odds";
-    disabled = !canPreview;
-    onClick = onCalculate;
-  } else if (pageState === "PREVIEW_LOADING") {
-    label = "Calculating…";
-  } else if (pageState === "PREVIEW_READY") {
-    label = "Confirm Combo";
+  } else if (pageState === "READY" || pageState === "PREVIEW_LOADING" || pageState === "PREVIEW_EXPIRED") {
+    label = "Locking odds…";
+  } else if (pageState === "PREVIEW_READY" && quote) {
+    label = `Place 10U · ${quote.activityOdds.toFixed(2)}× → ${quote.grossPayoutU.toFixed(0)}U`;
     disabled = false;
     onClick = onConfirm;
-  } else if (pageState === "PREVIEW_EXPIRED") {
-    label = "Refresh odds";
-    disabled = false;
-    onClick = onCalculate;
   } else if (pageState === "SUBMITTING") {
     label = "Submitting…";
   } else if (pageState === "REQUOTE_REQUIRED") {
     label = "Review new odds";
     disabled = false;
+    onClick = onConfirm;
   }
 
   return (
