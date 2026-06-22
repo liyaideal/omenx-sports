@@ -1205,36 +1205,35 @@ function TicketAcceptedModal({
               target={shareCombo({ ticket, poster: <ShareCardPreview ticket={ticket} /> })}
               variant="wide"
               label="Share my combo"
-              className="border-2 border-amber-400 bg-amber-400/10"
             />
           )}
-          <button
-            type="button"
-            onClick={onView}
-            className="group flex w-full items-center justify-center gap-3 rounded-2xl border border-amber-400/40 bg-transparent py-3 transition-all duration-200 hover:border-amber-400 hover:bg-amber-400/10"
-          >
-            <Eye className="h-3.5 w-3.5 text-amber-300" />
-            <span className="font-mono text-[11px] font-bold uppercase tracking-[0.25em] text-amber-300">
-              View my ticket
-            </span>
-          </button>
-          {capReached ? (
-            <p className="text-center font-pitch text-[10px] font-semibold uppercase tracking-widest text-zinc-500">
-              You have used all available combo entries for this matchday.
-            </p>
-          ) : (
+          <div className="grid grid-cols-2 gap-2">
+            <button
+              type="button"
+              onClick={onView}
+              className="flex items-center justify-center gap-2 rounded-2xl border border-zinc-700 bg-zinc-900/60 py-3 transition-all duration-200 hover:border-zinc-500 hover:bg-zinc-900 active:scale-[0.98]"
+            >
+              <Eye className="h-3.5 w-3.5 text-zinc-300" />
+              <span className="font-mono text-[11px] font-bold uppercase tracking-[0.25em] text-zinc-300">
+                View ticket
+              </span>
+            </button>
             <button
               type="button"
               onClick={onAnother}
-              className="group flex w-full items-center justify-center gap-4 rounded-2xl border-2 border-zinc-700 bg-zinc-900/60 py-4 transition-all duration-300 hover:border-zinc-500 hover:bg-zinc-900 active:scale-[0.98]"
+              disabled={capReached}
+              className="flex items-center justify-center gap-2 rounded-2xl border border-zinc-700 bg-zinc-900/60 py-3 transition-all duration-200 hover:border-zinc-500 hover:bg-zinc-900 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:border-zinc-700 disabled:hover:bg-zinc-900/60"
             >
-              <span className="font-mono text-[11px] font-bold uppercase tracking-[0.25em] text-zinc-300 transition-colors group-hover:text-foreground">
-                Build another combo
-              </span>
-              <span className="grid h-6 w-6 place-items-center rounded-lg bg-white/10 transition-colors group-hover:bg-white/20">
-                <RefreshCw className="h-3.5 w-3.5 text-zinc-200" />
+              <RefreshCw className="h-3.5 w-3.5 text-zinc-300" />
+              <span className="font-mono text-[11px] font-bold uppercase tracking-[0.25em] text-zinc-300">
+                Build another
               </span>
             </button>
+          </div>
+          {capReached && (
+            <p className="text-center font-pitch text-[10px] font-semibold uppercase tracking-widest text-zinc-500">
+              You have used all available combo entries for this matchday.
+            </p>
           )}
         </div>
     </ResponsiveModal>
