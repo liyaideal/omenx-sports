@@ -129,6 +129,10 @@ import {
   SignedArchiveStrip,
   MissionBrief,
 } from "@/components/sports/promo/GuessTheLegendTab";
+import {
+  LegendRevealOverlay,
+  type RevealOutcome,
+} from "@/components/sports/promo/LegendRevealOverlay";
 
 export const Route = createFileRoute("/style-guide")({
   head: () => ({
