@@ -3047,7 +3047,9 @@ function LegendBayPlayground() {
     { label: "revealed-miss", description: "Reveal day — user missed" },
   ];
   return (
-    <div className="grid grid-cols-1 gap-6 lg:grid-cols-1">
+    <div className="space-y-8">
+      <LegendRevealSequenceDemo baseRound={baseRound} />
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-1">
       {states.map((s) => {
         const round: LegendRound = {
           ...baseRound,
@@ -3078,6 +3080,7 @@ function LegendBayPlayground() {
           </div>
         );
       })}
+      </div>
     </div>
   );
 }
