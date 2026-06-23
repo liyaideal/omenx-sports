@@ -259,7 +259,7 @@ export function LegendRevealOverlay({
     outcome === "hit"
       ? "YOU HIT IT · TIER-01 SPIN GRANTED"
       : outcome === "miss"
-        ? "MISSED · NEXT ROUND IN 24H"
+        ? "MISSED · NEXT ROUND TBA"
         : "REVEALED · NO PICK THIS ROUND";
   const bannerColor = outcome === "hit" ? ACCENT : outcome === "miss" ? MISS : BLUE;
 
