@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { Check, Lock, X, ChevronRight, Play } from "lucide-react";
 import { toast } from "sonner";
@@ -67,8 +67,17 @@ export function GuessTheLegendTab() {
   const { queue, markSeen } = useLegendRevealQueue(revealedIds);
   const [replayRoundId, setReplayRoundId] = useState<string | null>(null);
 
-  // Auto-play head of queue; replay overrides (manual user trigger).
-  const playingRoundId = replayRoundId ?? queue[0] ?? null;
+  // Only auto-play the MOST RECENT unseen reveal — older unseen rounds are
+  // silently marked seen so users aren't subjected to a long animation
+  // marathon if they skip the tab for several rounds.
+  const latestUnseen = queue.length > 0 ? queue[queue.length - 1] : null;
+  useEffect(() => {
+    if (queue.length > 1) {
+      for (let i = 0; i < queue.length - 1; i++) markSeen(queue[i]);
+    }
+  }, [queue, markSeen]);
+
+  const playingRoundId = replayRoundId ?? latestUnseen ?? null;
   const playingRound = playingRoundId
     ? rounds.find((r) => r.id === playingRoundId)
     : null;
@@ -79,8 +88,7 @@ export function GuessTheLegendTab() {
       setReplayRoundId(null);
       return;
     }
-    const id = queue[0];
-    if (id) markSeen(id);
+    if (latestUnseen) markSeen(latestUnseen);
   }
 
   const activeRound = rounds.find((r) => r.id === activeRoundId) ?? currentRound;
