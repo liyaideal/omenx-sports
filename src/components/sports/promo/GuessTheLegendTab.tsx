@@ -543,6 +543,7 @@ export function ActiveRoundBay({
           {isRevealed && (
             <RevealBanner
               status={effectiveStatus as "revealed-hit" | "revealed-miss"}
+              hasPick={!!round.userPickId}
             />
           )}
         </div>
