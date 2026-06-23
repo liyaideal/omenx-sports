@@ -12,6 +12,7 @@ import {
   Plus,
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
+import { AnimatePresence } from "motion/react";
 import { Button } from "@/components/ui/button";
 import { MatchCard } from "@/components/sports/MatchCard";
 import { SentimentCard } from "@/components/sports/SentimentCard";
