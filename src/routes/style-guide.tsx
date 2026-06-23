@@ -3046,10 +3046,16 @@ function LegendClueScript() {
 function LegendBayPlayground() {
   const baseRound =
     LEGEND_ROUNDS.find((r) => r.status === "voting") ?? LEGEND_ROUNDS[0];
-  const states: { label: LegendRoundStatus; description: string }[] = [
-    { label: "voting", description: "Active round — clues unlock, candidates clickable" },
-    { label: "revealed-hit", description: "Reveal day — user picked correctly" },
-    { label: "revealed-miss", description: "Reveal day — user missed" },
+  const states: {
+    key: string;
+    label: LegendRoundStatus;
+    description: string;
+    variant?: "no-pick";
+  }[] = [
+    { key: "voting", label: "voting", description: "Active round — clues unlock, candidates clickable" },
+    { key: "revealed-hit", label: "revealed-hit", description: "Reveal day — user picked correctly" },
+    { key: "revealed-miss", label: "revealed-miss", description: "Reveal day — user missed" },
+    { key: "revealed-no-pick", label: "revealed-miss", description: "Reveal day — user didn't pick", variant: "no-pick" },
   ];
   return (
     <div className="space-y-8">
@@ -3060,7 +3066,9 @@ function LegendBayPlayground() {
           ...baseRound,
           status: s.label,
           userPickId:
-            s.label === "revealed-miss"
+            s.variant === "no-pick"
+              ? undefined
+              : s.label === "revealed-miss"
               ? baseRound.candidates.find(
                   (c) => c.id !== baseRound.correctCandidateId,
                 )?.id
@@ -3068,7 +3076,7 @@ function LegendBayPlayground() {
         };
         const pickId = s.label === "voting" ? undefined : round.userPickId;
         return (
-          <div key={s.label} className="space-y-2">
+          <div key={s.key} className="space-y-2">
             <div className="font-mono text-[10px] uppercase tracking-widest text-amber-400/80">
               {s.label} · {s.description}
             </div>
