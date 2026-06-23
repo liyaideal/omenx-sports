@@ -33,6 +33,37 @@ const T = {
 const FULL_DURATION_MS = 6800;
 const REDUCED_DURATION_MS = 2200;
 
+/* -------------------------------------------------------------------- */
+/*  Module-level body scroll lock — reference counted so concurrent     */
+/*  overlays, StrictMode double-effects, and fast tab switches never    */
+/*  leak `overflow: hidden` onto <body>.                                 */
+/* -------------------------------------------------------------------- */
+
+let __bodyLockCount = 0;
+let __bodyLockOriginal = "";
+
+function acquireBodyLock() {
+  if (typeof document === "undefined") return;
+  if (__bodyLockCount === 0) {
+    __bodyLockOriginal = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+  }
+  __bodyLockCount += 1;
+}
+
+function releaseBodyLock() {
+  if (typeof document === "undefined") return;
+  if (__bodyLockCount <= 0) {
+    __bodyLockCount = 0;
+    return;
+  }
+  __bodyLockCount -= 1;
+  if (__bodyLockCount === 0) {
+    document.body.style.overflow = __bodyLockOriginal;
+    __bodyLockOriginal = "";
+  }
+}
+
 export type RevealOutcome = "hit" | "miss" | "no-pick";
 
 function outcomeForRound(round: LegendRound): RevealOutcome {
@@ -141,6 +172,7 @@ export function LegendRevealOverlay({
 
   useEffect(() => {
     startedAtRef.current = performance.now();
+    const timers: ReturnType<typeof setTimeout>[] = [];
     const tick = (now: number) => {
       elapsedRef.current = now - startedAtRef.current;
       force();
@@ -148,19 +180,26 @@ export function LegendRevealOverlay({
         if (!closedRef.current) {
           closedRef.current = true;
           // Small grace pause so users see final state
-          setTimeout(onClose, 320);
+          timers.push(setTimeout(onClose, 320));
         }
         return;
       }
       rafRef.current = requestAnimationFrame(tick);
     };
     rafRef.current = requestAnimationFrame(tick);
-    // Lock body scroll while playing
-    const prev = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
+    // Lock body scroll while playing (ref-counted, leak-safe).
+    acquireBodyLock();
+    let released = false;
     return () => {
-      if (rafRef.current) cancelAnimationFrame(rafRef.current);
-      document.body.style.overflow = prev;
+      if (rafRef.current) {
+        cancelAnimationFrame(rafRef.current);
+        rafRef.current = null;
+      }
+      for (const t of timers) clearTimeout(t);
+      if (!released) {
+        released = true;
+        releaseBodyLock();
+      }
     };
     // Recompute only if outcome changes (won't mid-flight)
     // eslint-disable-next-line react-hooks/exhaustive-deps
