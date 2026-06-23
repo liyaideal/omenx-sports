@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { Link } from "@tanstack/react-router";
-import { Check, Lock, X, ChevronRight } from "lucide-react";
+import { Check, Lock, X, ChevronRight, Play } from "lucide-react";
 import { toast } from "sonner";
 import {
   LEGEND_ROUNDS,
@@ -15,6 +15,9 @@ import {
 } from "@/data/world-cup-carnival";
 import { cn } from "@/lib/utils";
 import * as FlatFlags from "country-flag-icons/react/3x2";
+import { LegendRevealOverlay } from "./LegendRevealOverlay";
+import { useLegendRevealQueue } from "@/hooks/useLegendRevealQueue";
+import { AnimatePresence } from "motion/react";
 
 const ACCENT = "#4ade80";
 const AMBER = "#facc15";
@@ -51,6 +54,34 @@ export function GuessTheLegendTab() {
   const [activeRoundId, setActiveRoundId] = useState<string>(currentRound.id);
   const [pickByRound, setPickByRound] = useState<Record<string, string>>({});
   const [lockedRounds, setLockedRounds] = useState<Record<string, boolean>>({});
+
+  const revealedIds = useMemo(
+    () =>
+      rounds
+        .filter(
+          (r) => r.status === "revealed-hit" || r.status === "revealed-miss",
+        )
+        .map((r) => r.id),
+    [rounds],
+  );
+  const { queue, markSeen } = useLegendRevealQueue(revealedIds);
+  const [replayRoundId, setReplayRoundId] = useState<string | null>(null);
+
+  // Auto-play head of queue; replay overrides (manual user trigger).
+  const playingRoundId = replayRoundId ?? queue[0] ?? null;
+  const playingRound = playingRoundId
+    ? rounds.find((r) => r.id === playingRoundId)
+    : null;
+  const isReplay = !!replayRoundId;
+
+  function handleOverlayClose() {
+    if (replayRoundId) {
+      setReplayRoundId(null);
+      return;
+    }
+    const id = queue[0];
+    if (id) markSeen(id);
+  }
 
   const activeRound = rounds.find((r) => r.id === activeRoundId) ?? currentRound;
 
@@ -107,6 +138,12 @@ export function GuessTheLegendTab() {
           <ActiveRoundBay
             round={activeRound}
             effectiveStatus={effectiveStatus}
+            onReplayReveal={
+              activeRound.status === "revealed-hit" ||
+              activeRound.status === "revealed-miss"
+                ? () => setReplayRoundId(activeRound.id)
+                : undefined
+            }
           />
 
           <CandidateBoard
@@ -120,6 +157,16 @@ export function GuessTheLegendTab() {
           <SignedArchiveStrip rounds={rounds} />
         </div>
       </ScoreboardChassis>
+      <AnimatePresence>
+        {playingRound && (
+          <LegendRevealOverlay
+            key={playingRound.id + (isReplay ? "-replay" : "-auto")}
+            round={playingRound}
+            onClose={handleOverlayClose}
+            isReplay={isReplay}
+          />
+        )}
+      </AnimatePresence>
     </div>
   );
 }
@@ -399,9 +446,11 @@ function RoundLedTile({
 export function ActiveRoundBay({
   round,
   effectiveStatus,
+  onReplayReveal,
 }: {
   round: LegendRound;
   effectiveStatus: LegendRoundStatus;
+  onReplayReveal?: () => void;
 }) {
   if (round.status === "upcoming") {
     return <UpcomingBay round={round} />;
@@ -423,6 +472,16 @@ export function ActiveRoundBay({
             <span className="hidden sm:inline" style={{ color: ACCENT }}>
               HIT → +1 SPIN
             </span>
+          )}
+          {isRevealed && onReplayReveal && (
+            <button
+              type="button"
+              onClick={onReplayReveal}
+              className="flex items-center gap-1 border border-zinc-700 px-1.5 py-0.5 text-zinc-400 transition-colors hover:border-amber-400 hover:text-amber-400"
+              aria-label="Replay reveal sequence"
+            >
+              <Play className="h-2.5 w-2.5" /> REPLAY
+            </button>
           )}
           <span>
             {isRevealed ? "REVEALED" : `${revealedCount} / 3 CLUES LIVE`}
