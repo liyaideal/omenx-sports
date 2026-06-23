@@ -576,7 +576,13 @@ function UpcomingBay({ round }: { round: LegendRound }) {
   );
 }
 
-function RevealBanner({ status }: { status: "revealed-hit" | "revealed-miss" }) {
+function RevealBanner({
+  status,
+  hasPick = true,
+}: {
+  status: "revealed-hit" | "revealed-miss";
+  hasPick?: boolean;
+}) {
   const hit = status === "revealed-hit";
   const color = hit ? ACCENT : MISS;
   return (
@@ -593,7 +599,11 @@ function RevealBanner({ status }: { status: "revealed-hit" | "revealed-miss" }) 
         <X className="h-3.5 w-3.5 shrink-0" style={{ color }} />
       )}
       <span className="font-scoreboard text-[10px] font-bold tracking-[0.18em] text-white">
-        {hit ? "YOU HIT IT · TIER-01 SPIN GRANTED" : "BETTER LUCK NEXT ROUND"}
+        {hit
+          ? "YOU HIT IT · TIER-01 SPIN GRANTED"
+          : hasPick
+            ? "BETTER LUCK NEXT ROUND"
+            : "NO PICK · MISSED REVEAL"}
       </span>
     </div>
   );
