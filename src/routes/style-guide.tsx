@@ -3090,6 +3090,73 @@ function LegendBayPlayground() {
 }
 
 function EventOutcomesPanelDemo() {
+  // placeholder anchor — real impl below
+  return _EventOutcomesPanelDemoImpl();
+}
+
+function LegendRevealSequenceDemo({ baseRound }: { baseRound: LegendRound }) {
+  const [outcome, setOutcome] = useState<RevealOutcome | null>(null);
+
+  const round: LegendRound = useMemo(() => {
+    if (!outcome) return baseRound;
+    const wrong = baseRound.candidates.find(
+      (c) => c.id !== baseRound.correctCandidateId,
+    );
+    return {
+      ...baseRound,
+      status: outcome === "hit" ? "revealed-hit" : "revealed-miss",
+      userPickId:
+        outcome === "hit"
+          ? baseRound.correctCandidateId
+          : outcome === "miss"
+            ? wrong?.id
+            : undefined,
+    };
+  }, [baseRound, outcome]);
+
+  const buttons: { id: RevealOutcome; label: string; color: string }[] = [
+    { id: "hit", label: "▶ PLAY HIT", color: "#4ade80" },
+    { id: "miss", label: "▶ PLAY MISS", color: "#f87171" },
+    { id: "no-pick", label: "▶ PLAY NO-PICK", color: "#60a5fa" },
+  ];
+
+  return (
+    <div className="space-y-3">
+      <div className="font-mono text-[10px] uppercase tracking-widest text-amber-400/80">
+        reveal sequence · 6–8s cinematic, auto-plays once per user per round
+      </div>
+      <div className="flex flex-wrap gap-2">
+        {buttons.map((b) => (
+          <button
+            key={b.id}
+            type="button"
+            onClick={() => setOutcome(b.id)}
+            className="border-2 px-4 py-2 font-mono text-xs font-bold tracking-widest transition-colors"
+            style={{ borderColor: b.color, color: b.color }}
+          >
+            {b.label}
+          </button>
+        ))}
+        <span className="self-center font-mono text-[10px] text-muted-foreground">
+          Replays do not write the seen flag — close with SKIP or wait for end.
+        </span>
+      </div>
+      <AnimatePresence>
+        {outcome && (
+          <LegendRevealOverlay
+            key={outcome}
+            round={round}
+            outcomeOverride={outcome}
+            isReplay
+            onClose={() => setOutcome(null)}
+          />
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
+
+function _EventOutcomesPanelDemoImpl() {
   const binary = MATCH_MARKETS.find((m) => m.outcomes.length === 2) ?? FEATURED_MATCH;
   const threeWay = MATCH_MARKETS.find((m) => m.outcomes.length === 3) ?? FEATURED_MATCH;
   const sevenWay = buildSevenWayMarket();
