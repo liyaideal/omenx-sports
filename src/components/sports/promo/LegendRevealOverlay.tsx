@@ -553,15 +553,6 @@ export function LegendRevealOverlay({
             </motion.div>
           )}
         </AnimatePresence>
-        {/* Bottom helper text — inline on mobile so it doesn't overlap banner */}
-        <div className="mt-6 text-center font-scoreboard text-[9px] font-bold tracking-[0.3em] text-zinc-600 sm:hidden">
-          {isReplay ? "REPLAY · NO REWARD CHANGE" : "FIRST WATCH · CINEMATIC AUTO-PLAYS ONCE"} · ESC TO SKIP
-        </div>
-      </div>
-
-      {/* Bottom helper text — desktop only, absolute */}
-      <div className="absolute inset-x-0 bottom-4 hidden text-center font-scoreboard text-[9px] font-bold tracking-[0.3em] text-zinc-600 sm:block">
-        {isReplay ? "REPLAY · NO REWARD CHANGE" : "FIRST WATCH · CINEMATIC AUTO-PLAYS ONCE"} · ESC TO SKIP
       </div>
     </motion.div>
   );
