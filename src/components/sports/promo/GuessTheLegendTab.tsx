@@ -446,9 +446,11 @@ function RoundLedTile({
 export function ActiveRoundBay({
   round,
   effectiveStatus,
+  onReplayReveal,
 }: {
   round: LegendRound;
   effectiveStatus: LegendRoundStatus;
+  onReplayReveal?: () => void;
 }) {
   if (round.status === "upcoming") {
     return <UpcomingBay round={round} />;
@@ -470,6 +472,16 @@ export function ActiveRoundBay({
             <span className="hidden sm:inline" style={{ color: ACCENT }}>
               HIT → +1 SPIN
             </span>
+          )}
+          {isRevealed && onReplayReveal && (
+            <button
+              type="button"
+              onClick={onReplayReveal}
+              className="flex items-center gap-1 border border-zinc-700 px-1.5 py-0.5 text-zinc-400 transition-colors hover:border-amber-400 hover:text-amber-400"
+              aria-label="Replay reveal sequence"
+            >
+              <Play className="h-2.5 w-2.5" /> REPLAY
+            </button>
           )}
           <span>
             {isRevealed ? "REVEALED" : `${revealedCount} / 3 CLUES LIVE`}
