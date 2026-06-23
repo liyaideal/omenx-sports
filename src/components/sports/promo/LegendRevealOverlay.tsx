@@ -272,7 +272,7 @@ export function LegendRevealOverlay({
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       transition={{ duration: 0.25 }}
-      className="fixed inset-0 z-[80] flex items-center justify-center bg-black/95 backdrop-blur-sm"
+      className="fixed inset-0 z-[80] flex items-start justify-center overflow-y-auto bg-black/95 backdrop-blur-sm sm:items-center sm:overflow-hidden"
       style={{
         backgroundImage:
           "radial-gradient(ellipse at center, rgba(250,204,21,0.06), transparent 60%)",
@@ -290,7 +290,7 @@ export function LegendRevealOverlay({
 
       {/* LED frame */}
       <motion.div
-        className="pointer-events-none absolute inset-4 border-2"
+        className="pointer-events-none absolute inset-2 border-2 sm:inset-4"
         initial={{ opacity: 0 }}
         animate={{ opacity: at(T.curtain) ? 1 : 0 }}
         transition={{ duration: 0.4 }}
@@ -301,18 +301,18 @@ export function LegendRevealOverlay({
       />
 
       {/* Top bar */}
-      <div className="absolute inset-x-0 top-0 flex items-center justify-between px-6 py-4">
+      <div className="absolute inset-x-0 top-0 z-10 flex items-center justify-between gap-3 bg-gradient-to-b from-black/80 to-transparent px-4 py-3 sm:px-6 sm:py-4">
         <motion.div
           initial={{ opacity: 0, y: -8 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1, duration: 0.3 }}
-          className="font-scoreboard text-[11px] font-bold tracking-[0.32em]"
+          className="min-w-0 truncate font-scoreboard text-[10px] font-bold tracking-[0.28em] sm:text-[11px] sm:tracking-[0.32em]"
           style={{ color: AMBER }}
         >
           <span className="animate-pulse">●</span>{" "}
           ROUND {String(round.roundNumber).padStart(2, "0")} · REVEALING…
         </motion.div>
-        <div className="flex items-center gap-2">
+        <div className="flex shrink-0 items-center gap-2">
           <button
             type="button"
             onClick={toggleMuted}
@@ -338,7 +338,7 @@ export function LegendRevealOverlay({
       />
 
       {/* Stage */}
-      <div className="relative mx-auto w-full max-w-4xl px-6">
+      <div className="relative mx-auto w-full max-w-4xl px-4 pb-6 pt-14 sm:px-6 sm:pb-0 sm:pt-0">
         {/* Clue stack */}
         <div className="mb-8 space-y-2">
           {round.clues.map((clue, i) => {
@@ -351,7 +351,7 @@ export function LegendRevealOverlay({
                   boxShadow: lit ? `0 0 12px ${AMBER}66` : "none",
                 }}
                 transition={{ duration: 0.2 }}
-                className="relative flex items-center gap-3 border bg-[#0d0d0d]/80 px-4 py-3"
+                className="relative flex items-center gap-3 border bg-[#0d0d0d]/80 px-3 py-2.5 sm:px-4 sm:py-3"
               >
                 <div
                   className="grid h-7 w-7 shrink-0 place-items-center font-scoreboard text-[11px] font-bold transition-colors"
@@ -363,10 +363,10 @@ export function LegendRevealOverlay({
                 >
                   {clue.idx}
                 </div>
-                <div className="font-scoreboard text-[11px] font-bold tracking-[0.24em] text-zinc-500">
+                <div className="shrink-0 font-scoreboard text-[10px] font-bold tracking-[0.22em] text-zinc-500 sm:text-[11px] sm:tracking-[0.24em]">
                   {clue.label}
                 </div>
-                <div className="ml-auto font-pitch text-sm font-bold uppercase tracking-wide">
+                <div className="ml-auto min-w-0 truncate text-right font-pitch text-xs font-bold uppercase tracking-wide sm:text-sm">
                   <AnimatePresence mode="wait">
                     {lit ? (
                       <motion.span
@@ -390,7 +390,7 @@ export function LegendRevealOverlay({
         </div>
 
         {/* Candidate grid */}
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+        <div className="grid grid-cols-4 gap-2 sm:gap-3">
           {round.candidates.map((cand) => {
             const isCorrect = cand.id === round.correctCandidateId;
             const isUserPick = cand.id === round.userPickId;
@@ -410,7 +410,7 @@ export function LegendRevealOverlay({
                 }}
                 transition={{ duration: 0.35, ease: "easeOut" }}
                 className={cn(
-                  "relative border bg-[#0d0d0d] p-3",
+                  "relative border bg-[#0d0d0d] p-2 sm:p-3",
                   isCorrect && focused && "z-10",
                 )}
                 style={{
@@ -472,12 +472,12 @@ export function LegendRevealOverlay({
                     />
                   )}
                 </div>
-                <div className="mt-2 font-pitch text-[12px] font-bold uppercase tracking-wide text-white">
+                <div className="mt-1.5 truncate font-pitch text-[10px] font-bold uppercase tracking-wide text-white sm:mt-2 sm:text-[12px]">
                   {cand.name}
                 </div>
                 {isUserPick && (
                   <div
-                    className="absolute -top-2 right-2 px-1.5 py-0.5 font-scoreboard text-[8px] font-bold tracking-[0.22em]"
+                    className="absolute -top-2 right-1 px-1 py-0.5 font-scoreboard text-[7px] font-bold tracking-[0.2em] sm:right-2 sm:px-1.5 sm:text-[8px] sm:tracking-[0.22em]"
                     style={{ background: AMBER, color: "black" }}
                   >
                     YOUR PICK
@@ -497,33 +497,35 @@ export function LegendRevealOverlay({
               animate={{ y: 0, opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.4, ease: "easeOut" }}
-              className="mt-8 flex items-center justify-center gap-3 border-2 px-5 py-3"
+              className="mt-6 flex flex-col items-center justify-center gap-1.5 border-2 px-4 py-2.5 sm:mt-8 sm:flex-row sm:gap-3 sm:px-5 sm:py-3"
               style={{
                 borderColor: bannerColor,
                 background: `${bannerColor}1A`,
                 boxShadow: `0 0 30px ${bannerColor}66`,
               }}
             >
-              {outcome === "hit" ? (
-                <Check className="h-5 w-5" style={{ color: bannerColor }} />
-              ) : outcome === "miss" ? (
-                <X className="h-5 w-5" style={{ color: bannerColor }} />
-              ) : (
+              <div className="flex items-center gap-2 sm:gap-3">
+                {outcome === "hit" ? (
+                  <Check className="h-4 w-4 shrink-0 sm:h-5 sm:w-5" style={{ color: bannerColor }} />
+                ) : outcome === "miss" ? (
+                  <X className="h-4 w-4 shrink-0 sm:h-5 sm:w-5" style={{ color: bannerColor }} />
+                ) : (
+                  <span
+                    className="grid h-4 w-4 shrink-0 place-items-center text-xs font-bold sm:h-5 sm:w-5"
+                    style={{ color: bannerColor }}
+                  >
+                    ●
+                  </span>
+                )}
                 <span
-                  className="grid h-5 w-5 place-items-center text-xs font-bold"
-                  style={{ color: bannerColor }}
+                  className="text-center font-scoreboard text-[12px] font-bold tracking-[0.2em] sm:text-sm sm:tracking-[0.22em]"
+                  style={{ color: "white" }}
                 >
-                  ●
+                  {bannerCopy}
                 </span>
-              )}
+              </div>
               <span
-                className="font-scoreboard text-sm font-bold tracking-[0.22em]"
-                style={{ color: "white" }}
-              >
-                {bannerCopy}
-              </span>
-              <span
-                className="font-scoreboard text-[11px] font-bold tracking-[0.18em]"
+                className="text-center font-scoreboard text-[10px] font-bold tracking-[0.16em] sm:text-[11px] sm:tracking-[0.18em]"
                 style={{ color: bannerColor }}
               >
                 · {correct?.name ?? country.name}
@@ -551,10 +553,14 @@ export function LegendRevealOverlay({
             </motion.div>
           )}
         </AnimatePresence>
+        {/* Bottom helper text — inline on mobile so it doesn't overlap banner */}
+        <div className="mt-6 text-center font-scoreboard text-[9px] font-bold tracking-[0.3em] text-zinc-600 sm:hidden">
+          {isReplay ? "REPLAY · NO REWARD CHANGE" : "FIRST WATCH · CINEMATIC AUTO-PLAYS ONCE"} · ESC TO SKIP
+        </div>
       </div>
 
-      {/* Bottom helper text */}
-      <div className="absolute inset-x-0 bottom-4 text-center font-scoreboard text-[9px] font-bold tracking-[0.3em] text-zinc-600">
+      {/* Bottom helper text — desktop only, absolute */}
+      <div className="absolute inset-x-0 bottom-4 hidden text-center font-scoreboard text-[9px] font-bold tracking-[0.3em] text-zinc-600 sm:block">
         {isReplay ? "REPLAY · NO REWARD CHANGE" : "FIRST WATCH · CINEMATIC AUTO-PLAYS ONCE"} · ESC TO SKIP
       </div>
     </motion.div>
