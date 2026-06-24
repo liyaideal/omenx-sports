@@ -1,16 +1,14 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState, useCallback } from "react";
-import { ArrowLeft, Info, OctagonAlert, Undo2, Zap } from "lucide-react";
+import { ArrowLeft, X, Zap } from "lucide-react";
 import { toast } from "sonner";
-import { cn } from "@/lib/utils";
+import "@fontsource/press-start-2p/400.css";
 import { MATCH_MARKETS } from "@/data/sports-markets";
 import { useStrikezoneSession } from "@/features/strikezone/hooks/useStrikezoneSession";
 import { useLiveTicker } from "@/features/strikezone/hooks/useLiveTicker";
-import { MarketSidebar, type SidebarItem } from "@/features/strikezone/MarketSidebar";
-import { PriceChart } from "@/features/strikezone/PriceChart";
+import { Sidebar, type OutcomeChoice } from "@/features/strikezone/Sidebar";
 import { Grid } from "@/features/strikezone/Grid";
-import { BetSizeBar } from "@/features/strikezone/BetSizeBar";
-import { PositionsPanel } from "@/features/strikezone/PositionsPanel";
+import "@/features/strikezone/sz-theme.css";
 
 export const Route = createFileRoute("/strikezone")({
   head: () => ({
@@ -19,7 +17,7 @@ export const Route = createFileRoute("/strikezone")({
       {
         name: "description",
         content:
-          "Bettle-style price × time grid betting on live sports markets. Click a cell, win the multiplier when the price crosses it.",
+          "Bettle-style price × time grid betting on live sports markets. Click a cell, win the multiplier when the price hits it.",
       },
       { property: "og:title", content: "Strikezone — OmenX" },
       {
@@ -32,46 +30,67 @@ export const Route = createFileRoute("/strikezone")({
 });
 
 function StrikezonePage() {
-  // Live matches (must be in-play)
   const liveMarkets = useMemo(
     () => MATCH_MARKETS.filter((m) => m.isLiveStream && m.liveScore),
     []
   );
 
-  // Build sidebar items: one row per (market × outcome)
-  const sidebarItems: SidebarItem[] = useMemo(() => {
-    const items: SidebarItem[] = [];
-    for (const m of liveMarkets) {
-      for (const o of m.outcomes) {
-        items.push({ market: m, outcome: o, id: `${m.id}::${o.id}` });
-      }
-    }
-    return items;
+  // Group sidebar items by market
+  const groups = useMemo(() => {
+    return liveMarkets.map((m) => ({
+      market: m,
+      outcomes: m.outcomes.map((o) => ({
+        market: m,
+        outcome: o,
+        id: `${m.id}::${o.id}`,
+      })) as OutcomeChoice[],
+    }));
   }, [liveMarkets]);
 
-  const [activeId, setActiveId] = useState(sidebarItems[0]?.id ?? "");
-  const active = sidebarItems.find((it) => it.id === activeId);
+  const [activeMarketId, setActiveMarketId] = useState(groups[0]?.market.id ?? "");
+  const [activeOutcomeId, setActiveOutcomeId] = useState(
+    groups[0]?.outcomes[0]?.id ?? ""
+  );
 
-  if (sidebarItems.length === 0 || !active) {
-    return <EmptyState />;
-  }
+  // When market changes, pick its first outcome
+  const handlePickMarket = (mid: string) => {
+    setActiveMarketId(mid);
+    const g = groups.find((x) => x.market.id === mid);
+    if (g) setActiveOutcomeId(g.outcomes[0].id);
+  };
 
-  return <StrikezoneInner sidebarItems={sidebarItems} activeId={activeId} setActiveId={setActiveId} />;
+  if (groups.length === 0) return <EmptyState />;
+
+  return (
+    <StrikezoneInner
+      groups={groups}
+      activeMarketId={activeMarketId}
+      activeOutcomeId={activeOutcomeId}
+      onPickMarket={handlePickMarket}
+      onPickOutcome={setActiveOutcomeId}
+    />
+  );
 }
 
 function StrikezoneInner({
-  sidebarItems,
-  activeId,
-  setActiveId,
+  groups,
+  activeMarketId,
+  activeOutcomeId,
+  onPickMarket,
+  onPickOutcome,
 }: {
-  sidebarItems: SidebarItem[];
-  activeId: string;
-  setActiveId: (id: string) => void;
+  groups: ReturnType<typeof useStrikezoneGroups>;
+  activeMarketId: string;
+  activeOutcomeId: string;
+  onPickMarket: (id: string) => void;
+  onPickOutcome: (id: string) => void;
 }) {
-  const active = sidebarItems.find((it) => it.id === activeId)!;
-  const seedPrice = active.outcome.price * 100;
+  const activeGroup = groups.find((g) => g.market.id === activeMarketId) ?? groups[0];
+  const activeChoice =
+    activeGroup.outcomes.find((o) => o.id === activeOutcomeId) ?? activeGroup.outcomes[0];
 
-  const { price, history, tickSec } = useLiveTicker(active.id, seedPrice);
+  const seedPrice = activeChoice.outcome.price * 100;
+  const { price, tickSec } = useLiveTicker(activeChoice.id, seedPrice);
   const {
     state,
     placeBet,
@@ -85,50 +104,41 @@ function StrikezoneInner({
   } = useStrikezoneSession();
 
   const [recentHits, setRecentHits] = useState<{ id: string; at: number }[]>([]);
-  const [now, setNow] = useState(Date.now());
   const [showStop, setShowStop] = useState(false);
+  const [showRules, setShowRules] = useState(false);
 
-  // Per-second now refresh (positions panel countdowns)
-  useEffect(() => {
-    const id = window.setInterval(() => setNow(Date.now()), 500);
-    return () => window.clearInterval(id);
-  }, []);
-
-  // Settlement loop — run after each tick (price changes)
+  // Settlement on tick
   const priceRef = useRef(price);
   priceRef.current = price;
   useEffect(() => {
     const t = Date.now();
-    const settled: { id: string; at: number; won: boolean }[] = [];
+    const settled: { id: string; at: number; won: boolean; payout: number }[] = [];
     for (const p of state.positions) {
       if (p.status !== "open") continue;
       if (p.targetAt <= t) {
         const hit =
           priceRef.current >= p.cellCenter - 0.5 && priceRef.current < p.cellCenter + 0.5;
         settlePosition(p.id, hit ? "won" : "lost", priceRef.current);
-        settled.push({ id: p.id, at: t, won: hit });
+        settled.push({
+          id: p.id,
+          at: t,
+          won: hit,
+          payout: hit ? p.stake * p.mult : 0,
+        });
       }
     }
-    if (settled.length) {
-      const wins = settled.filter((s) => s.won);
-      if (wins.length) {
-        setRecentHits((h) => [...wins.map((w) => ({ id: w.id, at: w.at })), ...h].slice(0, 20));
-        const winningP = state.positions.find((p) => p.id === wins[0].id);
-        if (winningP)
-          toast.success(`HIT! +$${(winningP.stake * winningP.mult - winningP.stake).toFixed(0)}`, {
-            duration: 2000,
-          });
-        setTimeout(() => {
-          setRecentHits((h) =>
-            h.filter((x) => !wins.some((w) => w.id === x.id))
-          );
-        }, 800);
-      }
+    const wins = settled.filter((s) => s.won);
+    if (wins.length) {
+      setRecentHits((h) => [...wins.map((w) => ({ id: w.id, at: w.at })), ...h].slice(0, 20));
+      const big = Math.max(...wins.map((w) => w.payout));
+      toast.success(`HIT! +$${big.toFixed(0)}`, { duration: 2000 });
+      setTimeout(() => {
+        setRecentHits((h) => h.filter((x) => !wins.some((w) => w.id === x.id)));
+      }, 1200);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tickSec]);
 
-  // Place a bet on a grid cell
   const handlePlace = useCallback(
     (cellCenter: number, distanceCents: number, secondsAhead: number, mult: number) => {
       if (state.balance < state.betSize) {
@@ -136,12 +146,12 @@ function StrikezoneInner({
         return;
       }
       placeBet({
-        marketId: active.market.id,
-        outcomeId: active.outcome.id,
-        marketLabel: active.market.fixture
-          ? `${active.market.fixture.home.short} vs ${active.market.fixture.away.short}`
-          : active.market.title,
-        outcomeLabel: active.outcome.label,
+        marketId: activeChoice.market.id,
+        outcomeId: activeChoice.outcome.id,
+        marketLabel: activeChoice.market.fixture
+          ? `${activeChoice.market.fixture.home.short} vs ${activeChoice.market.fixture.away.short}`
+          : activeChoice.market.title,
+        outcomeLabel: activeChoice.outcome.label,
         targetAt: Date.now() + secondsAhead * 1000,
         cellCenter,
         secondsAhead,
@@ -150,25 +160,24 @@ function StrikezoneInner({
         mult,
       });
     },
-    [active, state.balance, state.betSize, placeBet]
+    [activeChoice, state.balance, state.betSize, placeBet]
   );
 
   const handleUndo = useCallback(() => {
     const ok = undoLast();
-    toast[ok ? "success" : "error"](ok ? "Bet undone — refunded" : "Nothing to undo");
+    if (ok) toast.success("Bet refunded");
   }, [undoLast]);
 
-  const handleStop = () => setShowStop(true);
   const confirmStop = () => {
     stopAll();
     setShowStop(false);
-    toast.success("All open bets cancelled & refunded");
+    toast.success("All open bets refunded");
   };
 
   // Hotkeys
   useEffect(() => {
-    const handler = (e: KeyboardEvent) => {
-      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
+    const h = (e: KeyboardEvent) => {
+      if (e.target instanceof HTMLInputElement) return;
       switch (e.key.toLowerCase()) {
         case "a":
         case "arrowleft":
@@ -187,43 +196,14 @@ function StrikezoneInner({
         case "escape":
           e.preventDefault();
           if (showStop) setShowStop(false);
-          else handleStop();
-          break;
-        case "1":
-          setBetSize(10);
-          break;
-        case "2":
-          setBetSize(100);
-          break;
-        case "5":
-          setBetSize(500);
-          break;
-        case "0":
-          setBetSize(1000);
+          else if (showRules) setShowRules(false);
+          else setShowStop(true);
           break;
       }
     };
-    window.addEventListener("keydown", handler);
-    return () => window.removeEventListener("keydown", handler);
-  }, [cycleBetSize, setBetSize, handleUndo, showStop]);
-
-  // Live prices per sidebar item (so other markets show a live-ish number too — for v1 use static)
-  const livePrices = useMemo(() => {
-    const map: Record<string, number> = {};
-    for (const it of sidebarItems) map[it.id] = it.outcome.price * 100;
-    map[active.id] = price;
-    return map;
-  }, [sidebarItems, active.id, price]);
-
-  const openCountPerItem = useMemo(() => {
-    const map: Record<string, number> = {};
-    for (const p of state.positions) {
-      if (p.status !== "open") continue;
-      const k = `${p.marketId}::${p.outcomeId}`;
-      map[k] = (map[k] ?? 0) + 1;
-    }
-    return map;
-  }, [state.positions]);
+    window.addEventListener("keydown", h);
+    return () => window.removeEventListener("keydown", h);
+  }, [cycleBetSize, handleUndo, showStop, showRules]);
 
   // Undo countdown
   const [undoMsLeft, setUndoMsLeft] = useState(0);
@@ -238,266 +218,297 @@ function StrikezoneInner({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const openPositionsForMarket = state.positions.filter(
+  const openPositions = state.positions.filter(
     (p) =>
       p.status === "open" &&
-      p.marketId === active.market.id &&
-      p.outcomeId === active.outcome.id
+      p.marketId === activeChoice.market.id &&
+      p.outcomeId === activeChoice.outcome.id
   );
-
-  const allPositions = state.positions;
-
-  const priceChange = price - active.outcome.price * 100;
+  const openCount = state.positions.filter((p) => p.status === "open").length;
+  const priceChange = price - activeChoice.outcome.price * 100;
 
   return (
-    <div className="flex h-screen w-full flex-col bg-zinc-950 text-zinc-100">
+    <div className="sz-root relative min-h-screen w-full overflow-hidden">
+      <div className="sz-stars" />
+
       {/* Topbar */}
-      <header className="flex h-14 shrink-0 items-center gap-3 border-b border-zinc-800 bg-zinc-950 px-3">
+      <header className="relative z-10 flex h-14 items-center gap-4 px-4">
         <Link
           to="/"
-          className="flex items-center gap-1.5 rounded px-2 py-1 text-xs text-zinc-400 hover:bg-zinc-900 hover:text-zinc-100"
+          className="sz-pixel flex items-center gap-2 rounded px-2 py-1.5 text-[10px] hover:opacity-80"
+          style={{ color: "var(--sz-cyan)" }}
         >
           <ArrowLeft className="size-3.5" />
-          Back
+          BACK
         </Link>
-        <div className="flex items-center gap-2">
-          <Zap className="size-4 text-emerald-400" />
+        <div className="ml-2 flex items-center gap-2">
+          <Zap className="size-5" style={{ color: "var(--sz-green)" }} />
           <span
-            className="font-bold tracking-[0.25em] text-emerald-300"
-            style={{ fontFamily: "'Orbitron', sans-serif" }}
+            className="sz-display sz-glow-green text-xl"
+            style={{ color: "var(--sz-green)" }}
           >
             STRIKEZONE
           </span>
-          <span className="rounded bg-rose-500/20 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider text-rose-300">
+          <span
+            className="sz-pixel rounded px-1.5 py-0.5 text-[8px]"
+            style={{
+              color: "var(--sz-orange)",
+              border: "1px solid var(--sz-orange)",
+            }}
+          >
             BETA
           </span>
         </div>
-        <div className="ml-auto flex items-center gap-4 font-mono text-xs tabular-nums">
-          <div className="text-zinc-400">
-            BAL{" "}
-            <span className="text-zinc-100">${state.balance.toFixed(0).toLocaleString()}</span>
-          </div>
-          <div
-            className={cn(
-              "rounded px-2 py-0.5",
-              state.sessionPL > 0 && "bg-emerald-400/15 text-emerald-300",
-              state.sessionPL < 0 && "bg-rose-500/15 text-rose-300",
-              state.sessionPL === 0 && "text-zinc-500"
-            )}
-          >
-            P/L {state.sessionPL >= 0 ? "+" : ""}${state.sessionPL.toFixed(0)}
-          </div>
+
+        {undoMsLeft > 0 && (
           <button
-            onClick={() =>
-              toast.info(
-                "Click a grid cell to bet $X that the price will be in that cell's range at T+Ns. Win = bet × multiplier."
-              )
-            }
-            className="rounded p-1 text-zinc-500 hover:bg-zinc-900 hover:text-zinc-200"
-            aria-label="How it works"
+            onClick={handleUndo}
+            className="sz-pixel ml-auto rounded px-3 py-1.5 text-[9px]"
+            style={{
+              color: "var(--sz-orange-bright)",
+              border: "1px solid var(--sz-orange)",
+              background: "rgba(255,107,26,0.1)",
+            }}
           >
-            <Info className="size-3.5" />
+            UNDO {(undoMsLeft / 1000).toFixed(1)}S [Z]
           </button>
-        </div>
+        )}
       </header>
 
-      <div className="flex flex-1 overflow-hidden">
-        {/* Sidebar (desktop only) */}
-        <aside className="hidden w-[260px] shrink-0 border-r border-zinc-800 md:flex md:flex-col">
-          <div className="flex-1 overflow-hidden">
-            <MarketSidebar
-              items={sidebarItems}
-              activeId={activeId}
-              onPick={setActiveId}
-              livePrices={livePrices}
-              openCountPerItem={openCountPerItem}
-            />
-          </div>
-          <div className="border-t border-zinc-800 p-3">
-            <div className="mb-2 text-[10px] font-bold uppercase tracking-[0.2em] text-zinc-500">
-              Positions
-            </div>
-            <div className="max-h-[200px]">
-              <PositionsPanel positions={allPositions} now={now} />
-            </div>
-          </div>
-          <div className="border-t border-zinc-800 p-3">
-            <button
-              onClick={handleStop}
-              className="flex w-full items-center justify-center gap-1.5 rounded border border-rose-500/40 bg-rose-500/10 py-2 text-xs font-bold uppercase tracking-wider text-rose-300 hover:bg-rose-500/20"
-            >
-              <OctagonAlert className="size-3.5" />
-              STOP · refund all
-            </button>
-          </div>
-        </aside>
+      <div className="relative z-10 flex gap-2 px-2 pb-4">
+        {/* Sidebar */}
+        <Sidebar
+          balance={state.balance}
+          sessionPL={state.sessionPL}
+          openCount={openCount}
+          groups={groups}
+          activeMarketId={activeMarketId}
+          activeOutcomeId={activeOutcomeId}
+          onPickMarket={onPickMarket}
+          onPickOutcome={onPickOutcome}
+          betSize={state.betSize}
+          onBetSize={setBetSize}
+          onStop={() => setShowStop(true)}
+          onShowRules={() => setShowRules(true)}
+        />
 
         {/* Main */}
-        <main className="flex flex-1 flex-col overflow-hidden">
-          {/* Mobile market picker */}
-          <div className="border-b border-zinc-800 bg-zinc-950 p-2 md:hidden">
-            <select
-              value={activeId}
-              onChange={(e) => setActiveId(e.target.value)}
-              className="w-full rounded border border-zinc-700 bg-zinc-900 px-2 py-1.5 text-xs text-zinc-100"
-            >
-              {sidebarItems.map((it) => (
-                <option key={it.id} value={it.id}>
-                  {it.market.fixture
-                    ? `${it.market.fixture.home.short}–${it.market.fixture.away.short}`
-                    : it.market.title}
-                  {" · "}
-                  {it.outcome.label}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          {/* Market header */}
-          <div className="flex items-center gap-3 border-b border-zinc-800 px-4 py-2.5">
-            <div className="min-w-0">
-              <div className="truncate text-sm font-semibold text-zinc-100">
-                {active.market.fixture
-                  ? `${active.market.fixture.home.name} vs ${active.market.fixture.away.name}`
-                  : active.market.title}
-              </div>
-              <div className="flex items-center gap-2 text-[10px] text-zinc-500">
-                <span className="flex items-center gap-1">
-                  <span className="inline-block size-1.5 animate-pulse rounded-full bg-rose-500" />
-                  LIVE {active.market.liveClock}
-                </span>
-                <span>·</span>
-                <span>
-                  {active.market.liveScore?.home}–{active.market.liveScore?.away}
-                </span>
-                <span>·</span>
-                <span>
-                  Outcome: <span className="text-zinc-300">{active.outcome.label}</span>
-                </span>
-              </div>
+        <main className="flex flex-1 flex-col gap-3 p-2">
+          {/* Match header — small line above grid */}
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <span
+                className="size-2 animate-pulse rounded-full"
+                style={{
+                  background: "var(--sz-red)",
+                  boxShadow: "0 0 8px var(--sz-red)",
+                }}
+              />
+              <span
+                className="sz-pixel text-[10px]"
+                style={{ color: "var(--sz-red)" }}
+              >
+                LIVE {activeChoice.market.liveClock}
+              </span>
+              <span
+                className="sz-display text-sm"
+                style={{ color: "var(--sz-cyan)" }}
+              >
+                {activeChoice.market.fixture
+                  ? `${activeChoice.market.fixture.home.name.toUpperCase()} VS ${activeChoice.market.fixture.away.name.toUpperCase()}`
+                  : activeChoice.market.title.toUpperCase()}
+              </span>
+              <span
+                className="sz-num text-xs tabular-nums"
+                style={{ color: "var(--sz-muted)" }}
+              >
+                {activeChoice.market.liveScore?.home}–
+                {activeChoice.market.liveScore?.away}
+              </span>
             </div>
-            <div className="ml-auto text-right">
-              <div
-                className="font-mono text-2xl tabular-nums text-emerald-300"
-                style={{ fontFamily: "'JetBrains Mono', monospace" }}
+
+            <div className="flex items-center gap-3">
+              <span
+                className="sz-pixel text-[9px]"
+                style={{ color: "var(--sz-muted)" }}
+              >
+                {activeChoice.outcome.label} TO WIN
+              </span>
+              <span
+                className="sz-display sz-glow-orange text-2xl"
+                style={{ color: "var(--sz-orange-bright)" }}
               >
                 {price.toFixed(1)}¢
-              </div>
-              <div
-                className={cn(
-                  "font-mono text-[10px] tabular-nums",
-                  priceChange > 0 ? "text-emerald-400" : priceChange < 0 ? "text-rose-400" : "text-zinc-500"
-                )}
+              </span>
+              <span
+                className="sz-num text-xs tabular-nums"
+                style={{
+                  color:
+                    priceChange >= 0 ? "var(--sz-green)" : "var(--sz-red)",
+                }}
               >
-                {priceChange >= 0 ? "▲" : "▼"} {Math.abs(priceChange).toFixed(2)}¢
-              </div>
+                {priceChange >= 0 ? "▲" : "▼"}
+                {Math.abs(priceChange).toFixed(2)}¢
+              </span>
             </div>
           </div>
 
-          {/* Price chart + grid */}
-          <div className="flex-1 space-y-2 overflow-auto p-3">
-            <PriceChart history={history} current={price} />
-            <Grid
-              currentPrice={price}
-              tickSec={tickSec}
-              positions={openPositionsForMarket}
-              betSize={state.betSize}
-              onPlace={handlePlace}
-              recentHits={recentHits}
-            />
+          {/* Grid */}
+          <Grid
+            currentPrice={price}
+            positions={openPositions}
+            betSize={state.betSize}
+            onPlace={handlePlace}
+            recentHits={recentHits}
+          />
 
-            {/* BET SIZE + actions */}
-            <div className="flex flex-wrap items-center justify-between gap-3 rounded border border-zinc-800 bg-zinc-950 p-3">
-              <BetSizeBar value={state.betSize} onChange={setBetSize} />
-              <div className="flex items-center gap-2">
-                {undoMsLeft > 0 && (
-                  <button
-                    onClick={handleUndo}
-                    className="flex items-center gap-1 rounded border border-amber-400/50 bg-amber-400/15 px-2.5 py-1 text-xs text-amber-200 hover:bg-amber-400/25"
-                  >
-                    <Undo2 className="size-3" />
-                    Undo ({(undoMsLeft / 1000).toFixed(1)}s)
-                  </button>
-                )}
-                <span className="hidden font-mono text-[10px] text-zinc-600 sm:inline">
-                  hotkeys: A/D bet · Z undo · Esc stop
-                </span>
-              </div>
-            </div>
-
-            {/* Mobile positions */}
-            <div className="md:hidden">
-              <div className="mb-1 text-[10px] font-bold uppercase tracking-[0.2em] text-zinc-500">
-                Positions
-              </div>
-              <PositionsPanel positions={allPositions} now={now} />
-              <button
-                onClick={handleStop}
-                className="mt-2 flex w-full items-center justify-center gap-1.5 rounded border border-rose-500/40 bg-rose-500/10 py-2 text-xs font-bold uppercase tracking-wider text-rose-300"
-              >
-                <OctagonAlert className="size-3.5" />
-                STOP · refund all
-              </button>
-            </div>
+          {/* Help line */}
+          <div className="flex items-center justify-between">
+            <span
+              className="sz-pixel text-[8px]"
+              style={{ color: "var(--sz-muted)" }}
+            >
+              CLICK A CELL TO BET · HOTKEYS: A/D BET SIZE · Z UNDO · ESC STOP
+            </span>
+            <span
+              className="sz-pixel text-[8px]"
+              style={{ color: "var(--sz-muted)" }}
+            >
+              MULT CAPPED AT 95.00x
+            </span>
           </div>
         </main>
       </div>
 
       {/* STOP confirm */}
       {showStop && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4">
-          <div className="w-full max-w-sm rounded-lg border border-rose-500/40 bg-zinc-950 p-5">
-            <div className="mb-2 flex items-center gap-2 text-rose-300">
-              <OctagonAlert className="size-5" />
-              <span className="font-bold uppercase tracking-wider">Stop all bets?</span>
+        <ModalShell onClose={() => setShowStop(false)}>
+          <div className="sz-card p-5" style={{ borderColor: "var(--sz-red)" }}>
+            <div className="sz-pixel mb-3 text-xs" style={{ color: "var(--sz-red)" }}>
+              STOP ALL BETS?
             </div>
-            <p className="text-xs text-zinc-400">
+            <p className="text-xs" style={{ color: "#aaa" }}>
               All open positions will be cancelled and stakes refunded immediately.
             </p>
             <div className="mt-4 flex gap-2">
               <button
                 onClick={() => setShowStop(false)}
-                className="flex-1 rounded border border-zinc-700 py-2 text-xs text-zinc-300 hover:bg-zinc-900"
+                className="sz-chip sz-pixel flex-1 py-3 text-[10px]"
+                style={{ color: "var(--sz-cyan)" }}
               >
-                Keep playing
+                KEEP PLAYING
               </button>
               <button
                 onClick={confirmStop}
-                className="flex-1 rounded bg-rose-500 py-2 text-xs font-bold text-white hover:bg-rose-600"
+                className="sz-stop sz-pixel flex-1 py-3 text-[10px]"
+                style={{ color: "#fff" }}
               >
                 STOP
               </button>
             </div>
           </div>
-        </div>
+        </ModalShell>
       )}
+
+      {/* RULES modal */}
+      {showRules && (
+        <ModalShell onClose={() => setShowRules(false)}>
+          <div className="sz-card max-w-md p-5">
+            <div className="mb-3 flex items-center justify-between">
+              <span className="sz-pixel text-xs" style={{ color: "var(--sz-cyan)" }}>
+                HOW TO PLAY
+              </span>
+              <button onClick={() => setShowRules(false)}>
+                <X className="size-4" style={{ color: "var(--sz-muted)" }} />
+              </button>
+            </div>
+            <ol className="space-y-2 text-[11px]" style={{ color: "#bbb" }}>
+              <li>
+                <span className="sz-pixel mr-2 text-[9px]" style={{ color: "var(--sz-orange)" }}>
+                  01
+                </span>
+                Pick an outcome on the left. Its YES price (¢) is your moving target.
+              </li>
+              <li>
+                <span className="sz-pixel mr-2 text-[9px]" style={{ color: "var(--sz-orange)" }}>
+                  02
+                </span>
+                Each grid cell is a bet that the price will land in that 1¢ range exactly N seconds from now.
+              </li>
+              <li>
+                <span className="sz-pixel mr-2 text-[9px]" style={{ color: "var(--sz-orange)" }}>
+                  03
+                </span>
+                Click a cell to bet your BET SIZE. Win = stake × multiplier. Miss = lose stake. Caps at 95.00x.
+              </li>
+              <li>
+                <span className="sz-pixel mr-2 text-[9px]" style={{ color: "var(--sz-orange)" }}>
+                  04
+                </span>
+                A/D switch bet size, Z undoes the last bet within 5s, Esc opens STOP.
+              </li>
+            </ol>
+          </div>
+        </ModalShell>
+      )}
+    </div>
+  );
+}
+
+function ModalShell({
+  children,
+  onClose,
+}: {
+  children: React.ReactNode;
+  onClose: () => void;
+}) {
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4"
+      onClick={onClose}
+    >
+      <div onClick={(e) => e.stopPropagation()} className="w-full max-w-sm">
+        {children}
+      </div>
     </div>
   );
 }
 
 function EmptyState() {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-950 px-4">
-      <div className="max-w-md text-center">
-        <Zap className="mx-auto size-10 text-emerald-400" />
+    <div className="sz-root relative flex min-h-screen items-center justify-center px-4">
+      <div className="sz-stars" />
+      <div className="relative max-w-md text-center">
+        <Zap className="mx-auto size-12" style={{ color: "var(--sz-green)" }} />
         <h1
-          className="mt-4 text-2xl font-bold tracking-[0.25em] text-emerald-300"
-          style={{ fontFamily: "'Orbitron', sans-serif" }}
+          className="sz-display sz-glow-green mt-4 text-3xl"
+          style={{ color: "var(--sz-green)" }}
         >
           STRIKEZONE
         </h1>
-        <p className="mt-3 text-sm text-zinc-400">
-          Grids open only when a match is live. No matches in play right now — check back during a
-          live fixture.
+        <p className="sz-pixel mt-4 text-[10px] leading-loose" style={{ color: "var(--sz-cyan)" }}>
+          GRIDS OPEN ONLY DURING LIVE MATCHES.
+          <br />
+          NOTHING IN PLAY RIGHT NOW.
         </p>
         <Link
           to="/"
-          className="mt-5 inline-flex items-center gap-1.5 rounded border border-zinc-700 px-3 py-1.5 text-xs text-zinc-300 hover:bg-zinc-900"
+          className="sz-pixel mt-6 inline-flex items-center gap-2 rounded px-4 py-2 text-[10px]"
+          style={{ color: "var(--sz-cyan)", border: "1px solid var(--sz-cyan-dim)" }}
         >
-          <ArrowLeft className="size-3.5" />
-          Back to events
+          <ArrowLeft className="size-3" />
+          BACK
         </Link>
       </div>
     </div>
   );
+}
+
+// helper type alias
+type GroupedMarkets = {
+  market: import("@/data/sports-markets").SportsMarket;
+  outcomes: OutcomeChoice[];
+}[];
+function useStrikezoneGroups(): GroupedMarkets {
+  return [] as GroupedMarkets;
 }

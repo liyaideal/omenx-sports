@@ -1,225 +1,190 @@
-import { useMemo, useState, useEffect, useRef } from "react";
-import { multiplier, formatMultiplier, multiplierHeat, multiplierBorder } from "./lib/multiplier";
+import { useMemo, useEffect, useRef, useState } from "react";
+import {
+  multiplier,
+  formatMultiplier,
+  multiplierHeat,
+  multiplierTextColor,
+} from "./lib/multiplier";
 import type { StrikezonePosition } from "./hooks/useStrikezoneSession";
-import { cn } from "@/lib/utils";
+import { PriceCapsule } from "./PriceCapsule";
 
-const COLS = 60; // seconds ahead
-const ROWS = 21; // ±10¢ around center, row 10 = center
+// Visible window
+const COLS = 10; // future seconds +1..+10
+const ROWS = 11; // ±5¢ around center; row 5 = center
+const ROW_H = 64;
+const CELL_GAP = 6;
 
 interface Props {
-  currentPrice: number; // ¢ (0..100)
-  tickSec: number;
-  positions: StrikezonePosition[]; // open only (filtered by parent)
+  currentPrice: number; // ¢
+  positions: StrikezonePosition[]; // open bets on active outcome
   betSize: number;
   onPlace: (cellCenter: number, distanceCents: number, secondsAhead: number, mult: number) => void;
   recentHits: { id: string; at: number }[];
 }
 
-export function Grid({ currentPrice, tickSec, positions, betSize, onPlace, recentHits }: Props) {
-  const center = Math.round(currentPrice); // grid center row tracks integer ¢
-  const [hover, setHover] = useState<{ col: number; row: number } | null>(null);
+export function Grid({ currentPrice, positions, betSize, onPlace, recentHits }: Props) {
+  const center = Math.round(currentPrice);
 
-  // Precompute cell metadata (multipliers don't depend on center — they depend on distance)
+  // Precompute multiplier per (row, col). distance = (5 - row), secondsAhead = col + 1
   const cells = useMemo(() => {
-    const out: { col: number; row: number; dist: number; secs: number; mult: number }[] = [];
+    const out: { row: number; col: number; dist: number; secs: number; mult: number }[] = [];
     for (let r = 0; r < ROWS; r++) {
-      const dist = 10 - r; // top row = +10¢ above center
+      const dist = 5 - r; // +5 at top, -5 at bottom
       for (let c = 0; c < COLS; c++) {
         const secs = c + 1;
-        out.push({ col: c, row: r, dist, secs, mult: multiplier(dist, secs) });
+        out.push({ row: r, col: c, dist, secs, mult: multiplier(dist, secs) });
       }
     }
     return out;
   }, []);
 
-  // Bet marker positions (computed from absolute target time and cellCenter vs current center)
+  // Bet markers
   const now = Date.now();
   const markers = positions
     .map((p) => {
-      const secsLeft = Math.ceil((p.targetAt - now) / 1000);
-      const col = secsLeft - 1; // 0-indexed col
-      const row = 10 - (p.cellCenter - center);
+      const secsLeft = Math.max(1, Math.ceil((p.targetAt - now) / 1000));
+      const col = secsLeft - 1;
+      const row = 5 - (p.cellCenter - center);
       return { p, col, row };
     })
     .filter((m) => m.col >= 0 && m.col < COLS && m.row >= 0 && m.row < ROWS);
 
-  // Aggregate per-cell stake
   const cellBets = new Map<string, { stake: number; count: number }>();
   for (const m of markers) {
-    const k = `${m.col}:${m.row}`;
+    const k = `${m.row}:${m.col}`;
     const cur = cellBets.get(k) ?? { stake: 0, count: 0 };
     cur.stake += m.p.stake;
     cur.count += 1;
     cellBets.set(k, cur);
   }
 
-  // Sub-second smooth scroll offset (visual only) — bets shift left within current second
-  const [subOffset, setSubOffset] = useState(0);
-  const rafRef = useRef<number | null>(null);
+  // Floating "+$X" texts on hit
+  const [floats, setFloats] = useState<{ id: string; row: number; col: number; text: string }[]>(
+    []
+  );
+  const seenHitsRef = useRef<Set<string>>(new Set());
   useEffect(() => {
-    let alive = true;
-    const loop = () => {
-      if (!alive) return;
-      const ms = Date.now() % 1000;
-      setSubOffset(ms / 1000);
-      rafRef.current = requestAnimationFrame(loop);
-    };
-    rafRef.current = requestAnimationFrame(loop);
-    return () => {
-      alive = false;
-      if (rafRef.current) cancelAnimationFrame(rafRef.current);
-    };
-  }, []);
+    for (const h of recentHits) {
+      if (seenHitsRef.current.has(h.id)) continue;
+      seenHitsRef.current.add(h.id);
+      const m = markers.find((mk) => mk.p.id === h.id);
+      if (!m) continue;
+      const text = `+$${(m.p.stake * m.p.mult - m.p.stake).toFixed(0)}`;
+      const id = h.id + ":fx";
+      setFloats((f) => [...f, { id, row: m.row, col: m.col, text }]);
+      setTimeout(() => setFloats((f) => f.filter((x) => x.id !== id)), 1300);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [recentHits.length]);
 
-  // Recent hits set
   const hitIds = new Set(recentHits.map((h) => h.id));
+  const yRange: [number, number] = [center - 5.5, center + 5.5];
+  const gridHeight = ROWS * ROW_H + (ROWS - 1) * CELL_GAP;
 
   return (
-    <div className="relative w-full overflow-hidden rounded-md border border-zinc-800 bg-zinc-950">
-      {/* Y-axis price labels (left) */}
-      <div className="flex">
-        <div className="flex w-10 flex-col border-r border-zinc-800 bg-zinc-950 text-[9px] font-mono text-zinc-500">
-          {Array.from({ length: ROWS }, (_, r) => {
-            const p = center + (10 - r);
-            const isCenter = r === 10;
+    <div
+      className="relative flex"
+      style={{ height: `${gridHeight}px`, gap: "16px" }}
+    >
+      {/* Y-axis labels — between rows, every 2 rows */}
+      <div
+        className="relative shrink-0"
+        style={{ width: "44px", height: `${gridHeight}px` }}
+      >
+        {Array.from({ length: ROWS + 1 }, (_, i) => {
+          const value = center + 5 - i + 0.5;
+          const top = i * (ROW_H + CELL_GAP) - CELL_GAP / 2;
+          // only show every other label to avoid crowding
+          if (i % 2 !== 0) return null;
+          return (
+            <div
+              key={i}
+              className="sz-num absolute right-0 text-xs tabular-nums"
+              style={{
+                top: `${top}px`,
+                transform: "translateY(-50%)",
+                color: "var(--sz-cyan)",
+                opacity: 0.65,
+                textShadow: "0 0 6px rgba(0,240,255,0.35)",
+              }}
+            >
+              {value.toFixed(0)}¢
+            </div>
+          );
+        })}
+        {/* price capsule lives on the axis */}
+        <PriceCapsule price={currentPrice} range={yRange} height={gridHeight} />
+      </div>
+
+      {/* Grid body */}
+      <div className="relative flex-1">
+        <div
+          className="grid h-full w-full"
+          style={{
+            gridTemplateColumns: `repeat(${COLS}, minmax(0, 1fr))`,
+            gridTemplateRows: `repeat(${ROWS}, ${ROW_H}px)`,
+            gap: `${CELL_GAP}px`,
+          }}
+        >
+          {cells.map((cell) => {
+            const k = `${cell.row}:${cell.col}`;
+            const bet = cellBets.get(k);
+            const isHit = markers.some(
+              (m) => m.row === cell.row && m.col === cell.col && hitIds.has(m.p.id)
+            );
             return (
-              <div
-                key={r}
-                className={cn(
-                  "flex flex-1 items-center justify-end pr-1 tabular-nums",
-                  isCenter && "font-bold text-emerald-300"
-                )}
+              <button
+                key={k}
+                onClick={() =>
+                  onPlace(center + cell.dist, Math.abs(cell.dist), cell.secs, cell.mult)
+                }
+                className={`sz-cell ${bet ? "sz-cell-bet" : ""} ${isHit ? "sz-cell-hit" : ""}`}
+                style={{
+                  backgroundColor: multiplierHeat(cell.mult),
+                }}
+                title={`$${betSize} → $${(betSize * cell.mult).toFixed(0)}`}
               >
-                {p}¢
-              </div>
+                <span
+                  className="sz-num absolute inset-0 flex items-center justify-center tabular-nums"
+                  style={{
+                    fontSize: bet ? "13px" : "18px",
+                    color: multiplierTextColor(cell.mult),
+                    transition: "font-size 150ms ease",
+                  }}
+                >
+                  {formatMultiplier(cell.mult)}
+                </span>
+                {bet && (
+                  <span
+                    className="sz-display sz-glow-cyan absolute bottom-1 left-1/2 -translate-x-1/2 text-base"
+                    style={{ color: "var(--sz-cyan)" }}
+                  >
+                    ${bet.stake}
+                  </span>
+                )}
+              </button>
             );
           })}
         </div>
 
-        {/* Grid body */}
-        <div className="relative flex-1">
-          <div
-            className="grid h-full w-full"
-            style={{
-              gridTemplateColumns: `repeat(${COLS}, minmax(0, 1fr))`,
-              gridTemplateRows: `repeat(${ROWS}, 22px)`,
-            }}
-          >
-            {cells.map((cell) => {
-              const isCenter = cell.row === 10;
-              const isHover = hover?.col === cell.col && hover?.row === cell.row;
-              return (
-                <button
-                  key={`${cell.col}:${cell.row}`}
-                  onMouseEnter={() => setHover({ col: cell.col, row: cell.row })}
-                  onMouseLeave={() => setHover(null)}
-                  onClick={() =>
-                    onPlace(center + cell.dist, Math.abs(cell.dist), cell.secs, cell.mult)
-                  }
-                  className={cn(
-                    "relative border-r border-b border-zinc-900/60 transition-colors",
-                    "hover:z-10 hover:ring-1 hover:ring-emerald-400/60",
-                    isCenter && "border-b-emerald-400/30"
-                  )}
-                  style={{
-                    backgroundColor: multiplierHeat(cell.mult),
-                    borderColor: isHover ? multiplierBorder(cell.mult) : undefined,
-                  }}
-                >
-                  <span
-                    className={cn(
-                      "absolute inset-0 flex items-center justify-center font-mono text-[8px] tabular-nums leading-none",
-                      cell.mult < 8 ? "text-zinc-500" : "text-zinc-300"
-                    )}
-                  >
-                    {cell.mult >= 10 ? Math.round(cell.mult) : cell.mult.toFixed(1)}
-                  </span>
-                </button>
-              );
-            })}
-          </div>
-
-          {/* Center price line */}
-          <div
-            className="pointer-events-none absolute left-0 right-0 border-t border-dashed border-emerald-300/40"
-            style={{ top: `${10 * 22 + 11}px` }}
-          />
-
-          {/* Bet markers overlay */}
-          <div
-            className="pointer-events-none absolute inset-0"
-            style={{
-              transform: `translateX(${-subOffset * (100 / COLS)}%)`,
-              willChange: "transform",
-            }}
-          >
-            {Array.from(cellBets.entries()).map(([k, v]) => {
-              const [col, row] = k.split(":").map(Number);
-              const sample = markers.find((m) => m.col === col && m.row === row)!;
-              const hit = hitIds.has(sample.p.id);
-              return (
-                <div
-                  key={k}
-                  className={cn(
-                    "absolute flex items-center justify-center rounded-sm border-2 font-mono text-[9px] font-bold tabular-nums",
-                    hit
-                      ? "border-white bg-emerald-400 text-zinc-950 animate-pulse"
-                      : "border-emerald-300 bg-emerald-500/40 text-emerald-100"
-                  )}
-                  style={{
-                    left: `${(col / COLS) * 100}%`,
-                    top: `${row * 22}px`,
-                    width: `calc(${100 / COLS}% - 1px)`,
-                    height: "22px",
-                    boxShadow: hit
-                      ? "0 0 12px rgba(52,211,153,0.9)"
-                      : "0 0 6px rgba(52,211,153,0.4)",
-                  }}
-                  title={`$${v.stake} × ${formatMultiplier(sample.p.mult)} ${v.count > 1 ? `(${v.count} bets)` : ""}`}
-                >
-                  ${v.stake}
-                </div>
-              );
-            })}
-          </div>
-
-          {/* Hover tooltip */}
-          {hover && (() => {
-            const cell = cells[hover.row * COLS + hover.col];
-            const win = (betSize * cell.mult).toFixed(0);
-            return (
-              <div
-                className="pointer-events-none absolute z-20 -translate-x-1/2 rounded border border-zinc-700 bg-zinc-950/95 px-2 py-1 font-mono text-[10px] text-zinc-200 shadow-lg"
-                style={{
-                  left: `${((hover.col + 0.5) / COLS) * 100}%`,
-                  top: `${hover.row * 22 - 36}px`,
-                }}
-              >
-                <div>
-                  T+{cell.secs}s · {center + cell.dist}¢
-                </div>
-                <div className="text-emerald-300">
-                  ${betSize} → ${win} ({formatMultiplier(cell.mult)})
-                </div>
-              </div>
-            );
-          })()}
-        </div>
-      </div>
-
-      {/* X-axis (bottom) */}
-      <div className="flex border-t border-zinc-800 bg-zinc-950 text-[9px] font-mono text-zinc-500">
-        <div className="w-10 border-r border-zinc-800" />
-        <div
-          className="grid flex-1"
-          style={{ gridTemplateColumns: `repeat(${COLS}, minmax(0, 1fr))` }}
-        >
-          {Array.from({ length: COLS }, (_, c) => (
-            <div key={c} className="flex justify-center py-0.5 tabular-nums">
-              {(c + 1) % 10 === 0 ? `+${c + 1}s` : ""}
+        {/* Float "+$X" overlay */}
+        {floats.map((f) => {
+          const colW = `calc((100% - ${(COLS - 1) * CELL_GAP}px) / ${COLS})`;
+          return (
+            <div
+              key={f.id}
+              className="sz-float sz-display sz-glow-green pointer-events-none absolute z-40 text-2xl"
+              style={{
+                top: `${f.row * (ROW_H + CELL_GAP) + ROW_H / 2}px`,
+                left: `calc(${f.col} * (${colW} + ${CELL_GAP}px) + ${colW} / 2)`,
+                transform: "translate(-50%, -50%)",
+                color: "var(--sz-green)",
+              }}
+            >
+              {f.text}
             </div>
-          ))}
-        </div>
+          );
+        })}
       </div>
     </div>
   );

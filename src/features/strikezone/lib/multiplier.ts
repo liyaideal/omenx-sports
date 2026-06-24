@@ -1,31 +1,41 @@
 /**
  * Bettle-style payout multiplier.
- * Balanced curve: near cell ~1.5×, far cell (10¢ × 60s ahead) ~50×.
  *
- *   mult = 1.5 × (1 + 0.6 × distance¢) × (1 + 0.4 × seconds_ahead / 10)
+ *   raw = 1 + 0.6 * distance² * (1 + secondsAhead / 25)
+ *
+ * Capped at 95.00× to match Bettle's display ceiling. Yields ~1× near the
+ * current price, climbing fast for far-away cells.
  */
+export const MULT_CAP = 95;
+
 export function multiplier(distanceCents: number, secondsAhead: number): number {
   const d = Math.abs(distanceCents);
   const t = Math.max(1, secondsAhead);
-  const raw = 1.5 * (1 + 0.6 * d) * (1 + 0.4 * (t / 10));
-  return Math.round(raw * 10) / 10;
+  const raw = 1 + 0.6 * d * d * (1 + t / 25);
+  return Math.min(MULT_CAP, Math.round(raw * 100) / 100);
 }
 
 export function formatMultiplier(m: number): string {
-  return m >= 10 ? `${Math.round(m)}×` : `${m.toFixed(1)}×`;
+  return `${m.toFixed(2)}x`;
 }
 
-/** Heat color for cell — emerald (safe) → amber → rose (risky). */
+/** Cell background — orange heat. Higher mult → brighter orange. */
 export function multiplierHeat(m: number): string {
-  if (m < 3) return "rgb(52 211 153 / 0.18)";
-  if (m < 8) return "rgb(132 204 22 / 0.20)";
-  if (m < 20) return "rgb(250 204 21 / 0.22)";
-  return "rgb(244 63 94 / 0.24)";
+  // 0..1 intensity
+  const t = Math.min(1, Math.log(m + 1) / Math.log(MULT_CAP + 1));
+  // Interpolate from very dark ember to bright orange
+  // Dark: #2a1208 (very faint, near bg). Bright: #ff6b1a
+  const r = Math.round(42 + t * (255 - 42));
+  const g = Math.round(18 + t * (107 - 18));
+  const b = Math.round(8 + t * (26 - 8));
+  const alpha = 0.55 + t * 0.45;
+  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
 }
 
-export function multiplierBorder(m: number): string {
-  if (m < 3) return "rgb(52 211 153 / 0.35)";
-  if (m < 8) return "rgb(132 204 22 / 0.40)";
-  if (m < 20) return "rgb(250 204 21 / 0.45)";
-  return "rgb(244 63 94 / 0.50)";
+/** Text color for cell — bright on bright cells, muted on dark cells. */
+export function multiplierTextColor(m: number): string {
+  const t = Math.min(1, Math.log(m + 1) / Math.log(MULT_CAP + 1));
+  if (t > 0.6) return "#fff5e8";
+  if (t > 0.3) return "#ffcfa0";
+  return "#8a5a3a";
 }

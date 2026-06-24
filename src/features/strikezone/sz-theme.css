@@ -1,0 +1,201 @@
+/* Strikezone scoped theme — Bettle-inspired neon arcade look.
+ * All variables scoped under .sz-root so they do not leak into the rest of
+ * the app. */
+
+.sz-root {
+  --sz-bg: #0a0a1f;
+  --sz-bg-2: #0d0d28;
+  --sz-card: rgba(13, 13, 40, 0.85);
+  --sz-cyan: #00f0ff;
+  --sz-cyan-dim: rgba(0, 240, 255, 0.35);
+  --sz-green: #00ff9d;
+  --sz-green-dim: rgba(0, 255, 157, 0.4);
+  --sz-orange: #ff6b1a;
+  --sz-orange-bright: #ff8a3d;
+  --sz-red: #ff2d4a;
+  --sz-muted: #5a5a78;
+
+  background-color: var(--sz-bg);
+  background-image:
+    radial-gradient(circle at 12% 18%, rgba(0, 240, 255, 0.06) 0%, transparent 40%),
+    radial-gradient(circle at 88% 82%, rgba(255, 107, 26, 0.05) 0%, transparent 45%);
+  color: #e8e8ff;
+  font-family: "Chakra Petch", "JetBrains Mono", monospace;
+}
+
+/* Starfield — 3 layered tiny dot patterns at different densities */
+.sz-stars {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image:
+    radial-gradient(1px 1px at 23% 12%, rgba(255, 255, 255, 0.45), transparent),
+    radial-gradient(1px 1px at 67% 28%, rgba(255, 255, 255, 0.35), transparent),
+    radial-gradient(1px 1px at 14% 73%, rgba(255, 255, 255, 0.4), transparent),
+    radial-gradient(1px 1px at 82% 64%, rgba(255, 255, 255, 0.3), transparent),
+    radial-gradient(1px 1px at 48% 41%, rgba(255, 255, 255, 0.5), transparent),
+    radial-gradient(1px 1px at 91% 88%, rgba(255, 255, 255, 0.25), transparent),
+    radial-gradient(1px 1px at 35% 89%, rgba(255, 255, 255, 0.35), transparent),
+    radial-gradient(1.5px 1.5px at 56% 12%, rgba(0, 240, 255, 0.4), transparent),
+    radial-gradient(1.5px 1.5px at 8% 38%, rgba(255, 107, 26, 0.3), transparent),
+    radial-gradient(1px 1px at 73% 92%, rgba(255, 255, 255, 0.3), transparent),
+    radial-gradient(1px 1px at 19% 56%, rgba(255, 255, 255, 0.25), transparent),
+    radial-gradient(1px 1px at 95% 18%, rgba(255, 255, 255, 0.35), transparent);
+  background-size: 100% 100%;
+}
+
+/* Card — cyan-edged rounded panel */
+.sz-card {
+  position: relative;
+  border-radius: 14px;
+  background: var(--sz-card);
+  border: 1.5px solid var(--sz-cyan-dim);
+  box-shadow:
+    inset 0 0 24px rgba(0, 240, 255, 0.05),
+    0 0 18px rgba(0, 240, 255, 0.08);
+}
+
+.sz-card-orange {
+  border-color: rgba(255, 107, 26, 0.45);
+  box-shadow:
+    inset 0 0 24px rgba(255, 107, 26, 0.05),
+    0 0 18px rgba(255, 107, 26, 0.1);
+}
+
+/* Pixel & display font helpers */
+.sz-pixel {
+  font-family: "Press Start 2P", "Chakra Petch", monospace;
+  letter-spacing: 0.05em;
+}
+.sz-display {
+  font-family: "Audiowide", "Chakra Petch", sans-serif;
+  letter-spacing: 0.04em;
+}
+.sz-num {
+  font-family: "Chakra Petch", "JetBrains Mono", monospace;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.sz-glow-cyan {
+  text-shadow: 0 0 8px rgba(0, 240, 255, 0.8), 0 0 16px rgba(0, 240, 255, 0.4);
+}
+.sz-glow-green {
+  text-shadow: 0 0 10px rgba(0, 255, 157, 0.9), 0 0 24px rgba(0, 255, 157, 0.5);
+}
+.sz-glow-orange {
+  text-shadow: 0 0 8px rgba(255, 107, 26, 0.8), 0 0 16px rgba(255, 107, 26, 0.4);
+}
+.sz-glow-red {
+  text-shadow: 0 0 8px rgba(255, 45, 74, 0.8), 0 0 16px rgba(255, 45, 74, 0.4);
+}
+
+/* Cell — orange heat */
+.sz-cell {
+  position: relative;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 107, 26, 0.25);
+  transition:
+    transform 120ms ease,
+    border-color 150ms ease,
+    box-shadow 200ms ease;
+  cursor: pointer;
+  overflow: hidden;
+}
+.sz-cell:hover {
+  border-color: var(--sz-cyan);
+  box-shadow: 0 0 14px rgba(0, 240, 255, 0.4);
+  transform: translateY(-1px);
+}
+.sz-cell:active {
+  transform: scale(0.96);
+}
+.sz-cell-bet {
+  border-color: var(--sz-cyan) !important;
+  box-shadow:
+    0 0 16px rgba(0, 240, 255, 0.55),
+    inset 0 0 12px rgba(0, 240, 255, 0.18) !important;
+}
+.sz-cell-hit {
+  animation: sz-hit 0.6s ease-out;
+}
+@keyframes sz-hit {
+  0% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.9);
+    filter: brightness(2.5);
+  }
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 30px rgba(255, 255, 255, 0);
+    filter: brightness(1);
+  }
+}
+
+/* Price capsule */
+.sz-pill {
+  background: linear-gradient(180deg, #0a3a26 0%, #042418 100%);
+  border: 2px solid var(--sz-green);
+  border-radius: 999px;
+  box-shadow:
+    0 0 18px rgba(0, 255, 157, 0.5),
+    inset 0 0 10px rgba(0, 255, 157, 0.25);
+}
+
+/* STOP button */
+.sz-stop {
+  background: linear-gradient(180deg, #ff4661 0%, #c8112d 100%);
+  border: 2px solid rgba(255, 80, 100, 0.9);
+  border-radius: 14px;
+  box-shadow:
+    0 0 22px rgba(255, 45, 74, 0.5),
+    inset 0 -4px 0 rgba(0, 0, 0, 0.25),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  transition: all 150ms ease;
+}
+.sz-stop:hover {
+  box-shadow:
+    0 0 32px rgba(255, 45, 74, 0.8),
+    inset 0 -4px 0 rgba(0, 0, 0, 0.25),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  transform: translateY(-1px);
+}
+
+.sz-chip {
+  border: 1.5px solid rgba(0, 240, 255, 0.2);
+  border-radius: 8px;
+  background: rgba(0, 0, 0, 0.3);
+  transition: all 150ms ease;
+}
+.sz-chip:hover {
+  border-color: var(--sz-cyan-dim);
+  background: rgba(0, 240, 255, 0.05);
+}
+.sz-chip-active {
+  border-color: var(--sz-orange) !important;
+  background: rgba(255, 107, 26, 0.12) !important;
+  box-shadow: 0 0 14px rgba(255, 107, 26, 0.35);
+}
+.sz-chip-cyan-active {
+  border-color: var(--sz-cyan) !important;
+  background: rgba(0, 240, 255, 0.1) !important;
+  box-shadow: 0 0 14px rgba(0, 240, 255, 0.35);
+}
+
+/* Float text — multiplier flying up on hit */
+@keyframes sz-float {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, 0);
+  }
+  20% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -60px);
+  }
+}
+.sz-float {
+  animation: sz-float 1.2s ease-out forwards;
+}
