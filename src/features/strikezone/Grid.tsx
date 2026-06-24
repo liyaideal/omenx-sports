@@ -101,28 +101,57 @@ export function Grid({
     return out;
   }, []);
 
-  // Hit floats — fire at NOW line at the bet's y.
-  const [floats, setFloats] = useState<{ id: string; y: number; text: string }[]>([]);
-  const seenHits = useRef<Set<string>>(new Set());
-  useEffect(() => {
-    for (const h of recentHits) {
-      if (seenHits.current.has(h.id)) continue;
-      seenHits.current.add(h.id);
-      const p = positions.find((x) => x.id === h.id);
-      if (!p) continue;
-      const lev = p.leverage ?? 1;
-      const text = `+$${(p.stake * p.mult * lev - p.stake).toFixed(0)}`;
-      const y = yFor(p.cellCenter);
-      const id = h.id + ":fx";
-      setFloats((f) => [...f, { id, y, text }]);
-      window.setTimeout(() => {
-        setFloats((f) => f.filter((x) => x.id !== id));
-      }, 1300);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [recentHits.length]);
+  const hitIds = useMemo(() => new Set(recentHits.map((h) => h.id)), [recentHits]);
 
-  const hitIds = new Set(recentHits.map((h) => h.id));
+  // ── Settled cache ─────────────────────────────────────────────────────
+  // When a position id disappears from `positions`, snapshot it and keep
+  // rendering it pinned at the NOW line for SETTLE_TTL_MS so the user sees
+  // the win/loss settlement animation.
+  type Settled = {
+    p: StrikezonePosition;
+    settledAt: number;
+    won: boolean;
+  };
+  const settledRef = useRef<Map<string, Settled>>(new Map());
+  const prevIdsRef = useRef<Map<string, StrikezonePosition>>(new Map());
+  const [, forceRerender] = useState(0);
+
+  // Detect transitions: ids that were in prev but not in current.
+  useEffect(() => {
+    const currIds = new Set(positions.map((p) => p.id));
+    const now = Date.now();
+    let added = false;
+    for (const [id, prevP] of prevIdsRef.current) {
+      if (!currIds.has(id) && !settledRef.current.has(id)) {
+        settledRef.current.set(id, {
+          p: prevP,
+          settledAt: now,
+          won: hitIds.has(id),
+        });
+        added = true;
+      }
+    }
+    const next = new Map<string, StrikezonePosition>();
+    for (const p of positions) next.set(p.id, p);
+    prevIdsRef.current = next;
+    if (added) forceRerender((n) => n + 1);
+  }, [positions, hitIds]);
+
+  // Reap expired settled entries on each tick.
+  useEffect(() => {
+    if (tickSec == null) return;
+    const now = Date.now();
+    let changed = false;
+    for (const [id, s] of settledRef.current) {
+      if (now - s.settledAt > SETTLE_TTL_MS) {
+        settledRef.current.delete(id);
+        changed = true;
+      }
+    }
+    if (changed) forceRerender((n) => n + 1);
+  }, [tickSec]);
+
+  const settledArr = Array.from(settledRef.current.values());
 
   return (
     <div className="relative flex w-full" style={{ height: TOTAL_H }}>
