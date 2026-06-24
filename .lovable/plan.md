@@ -1,74 +1,54 @@
-## 调整目标
+## 问题诊断
 
-补两件事：(1) 加入平台特有的**杠杆**机制；(2) 把 event 切换从 sidebar 抽出到**顶部 Event Tabs**，每个 event 仍带 3 个 market。
+现在 Grid 是"价格固定在左轴 + 未来格子静止排在右边"，所以看起来是价格自己在上下抖。Bettle 是反过来：**价格线水平向右一直走、格子持续向左滑**，价格线尖端在屏幕中央的"NOW"分界线上 hit 到哪个格子就算中。
 
----
+## 重做布局
 
-## 1. 顶部 Event Tabs
-
-新增 `EventTabs.tsx`，渲染在 `/strikezone` 页面顶部、sidebar+grid 上方一条 56px 高的水平条：
+主区横向一分为二：
 
 ```
-┌──────────────────────────────────────────────────────────────────┐
-│  ● LIVE  [ 🇺🇸 USA 1 – 0 PAR  · 67' ]  [ 🇲🇽 MEX 2 – 1 RSA · 23' ]│
-└──────────────────────────────────────────────────────────────────┘
+┌──────────────── HISTORY ────────────────┬──── FUTURE GRID ────┐
+│  price line ───────────────────●━━━━━━━━│ [cell][cell][cell]… │
+│  ($50.6¢ tag)                  NOW──────│  ▲ 每秒整列向左滑    │
+└──────────────────────────────────────────┴──────────────────────┘
+        左 ~38%                              右 ~62%（10 列×11 行）
 ```
 
-- 每个 tab 是一颗 chip：左侧两国旗、中间比分、右侧分钟数 + 跳动红点
-- 当前选中 tab：cyan 描边 + 轻微 glow，其它 tab：低对比、hover 提亮
-- 字体 Press Start 2P 用于队名缩写，Audiowide 用于比分
-- 只列 `isLiveStream && liveScore` 的事件，最多 4 个，溢出可横向滚动
-- 切换 tab 时：
-  - 重置 grid 视图（清空 history、重新 seed 价格、保留 balance/session）
-  - 默认选中该 event 的第一个 market（USA / MEX）
-  - 已下未结的注**保留**，UI 给出"切换后未结算注仍在原事件计算"的小提示（chip 上 ●N 角标显示该事件未结注数）
+- **HISTORY 区**：60s 滚动 SVG 折线（涨绿/跌红），尾端贴 `50.6¢` 胶囊。线一直向右画到 NOW 线。
+- **NOW 分界线**：HISTORY 与 GRID 中间一条 1px cyan dashed 竖线 + 顶部 `▲ NOW` 标，这是 hit 判定线。
+- **FUTURE GRID**：10 cols × 11 rows，每 1s 整列 `translateX(-cellW-gap)` 平移一列；最右侧 push 新一列；y 轴中点 = 当前价 round 后取整，超出 ±5¢ 时 y 中心 1s 平滑过渡跟随。
+- **价格"延伸尖端"**：价格线尾端再向 GRID 内画一小段 dashed 投影（1–2 cells），强调"线正朝格子走"。
 
-Sidebar 改造：
-- **删除**原 sidebar 顶部的 "USA-PAR / MEX-RSA" event 切换卡
-- 只保留 3 颗 market chips（YES outcome 三选一 / 二选一），标题改为当前 event 名（如 `USA vs PAR · 67'`）
+## 命中逻辑改写
 
----
+不再"等 N 秒到点查价格"，改成"格子撞到 NOW 线时查价格"：
 
-## 2. 全局杠杆 (1× / 2× / 5× / 10×)
+1. 点击 GRID 某 cell → 记下 `row + 当时距 NOW 的列偏移 = secondsAhead`，stake/mult/leverage 锁定。
+2. 每秒整列左移，cell 的 col 减 1。
+3. cell 抵达 col 0（NOW 线）瞬间：取当前 `price`，落入 `[center-0.5, center+0.5)` 则 won，否则 lost。
+4. cell 越过 NOW 后立即从 GRID 消失。
 
-Sidebar 在 **BET SIZE 卡和 STOP 按钮之间**插入新卡：
+语义等价于现有 `targetAt` 比较，视觉变成"格子撞到价格"，体验完全像 Bettle。
 
-```
-┌─────────── ⚡ LEVERAGE ───────────┐
-│   [ 1× ]  [ 2× ]  [ 5× ]  [10×]   │
-│   payout × lev  ·  loss × lev      │
-└────────────────────────────────────┘
-```
+## 文件改动
 
-- 4 颗 chip，选中态 = 橙色实心（沿用 BET SIZE 选中样式）
-- 默认 1×，hotkey `Q/E` 在档位间切换
-- 卡片右上角小字 `Q/E` 提示
-- 选中 5× / 10× 时，卡片整体描边变 amber 并加 `⚠ HIGH RISK` 字样
+- **重写** `src/features/strikezone/Grid.tsx`
+  - 删 Y 轴和 PriceCapsule
+  - cells 容器 `transform: translateX(- baseCol * (cellW+gap))` + `transition: transform 1000ms linear`，每 `tickSec` 把 baseCol += 1，最右压入新一列 mult
+  - 命中判定改在 `baseCol` 变化时遍历 markers
+- **新增** `src/features/strikezone/HistoryChart.tsx`
+  - SVG 折线，60 个 1s 采样点（来自 `useLiveTicker.history`）
+  - 末端 PriceCapsule 水平贴线尾
+  - 右沿 dashed 投影
+- **改** `src/features/strikezone/PriceCapsule.tsx`：接受 `{ price, x, y }` 绝对定位
+- **改** `src/routes/strikezone.tsx`：主区改为 `flex` 的 `<HistoryChart>` + `<NowDivider>` + `<Grid>`；删 cell-level `targetAt` 比较循环（settle 由 Grid 在 col=0 时 callback）
 
-### 杠杆数学
+## 不动
 
-Bet 创建时记录 `leverage`，结算时：
-- **命中（HIT）**: `payout = stake × multiplier × leverage`
-- **未命中（MISS）**: `loss = stake × leverage`（亏损放大），从 balance 扣 `stake × (leverage − 1)` 作为追加亏损（基础 stake 已在下注时扣过）
+顶部 Event Tabs、Sidebar（balance / markets / bet size / leverage / stop）、杠杆数学、热度配色、字体、倍率公式 —— 全保留。
 
-下注瞬间扣款仍按 `stake`（保证金概念），未命中时再扣 `stake × (leverage−1)`。
+## 边界
 
-Grid 单元格显示的倍率改为 `mult × leverage`，例如最远格 50× 在 10× 杠杆下显示 **500×**（上限 cap 至 `999×` 防溢出）；颜色热度按 raw mult 计算（不被杠杆影响），避免视觉爆炸。
-
-Positions 显示由 `$100 → $250` 升级为 `$100 ×5 → $1,250`（stake × lev → potential payout）。
-
----
-
-## 3. 技术清单
-
-- 新增 `src/features/strikezone/EventTabs.tsx`
-- 改 `src/routes/strikezone.tsx`：顶部插入 EventTabs，state 提升 `currentEventId`，传给 Sidebar/Grid
-- 改 `src/features/strikezone/Sidebar.tsx`：删 event 切换卡、加 LEVERAGE 卡、传 `leverage`/`setLeverage`
-- 改 `src/features/strikezone/hooks/useStrikezoneSession.ts`：bet 模型加 `leverage: number`，结算逻辑按上述公式
-- 改 `src/features/strikezone/Grid.tsx`：cell 倍率显示 `mult × leverage`，marker 浮字按杠杆放大
-- 改 `src/features/strikezone/lib/multiplier.ts`：导出 `applyLeverage(mult, lev, cap=999)` 工具
-- 新增 hotkeys：`Q`=降档，`E`=升档；`Tab`=event tabs 间循环
-
-切换 event 时未结注**不强平**，继续在原 event 的价格流上判定；如需强平再讨论。
-
-杠杆默认 1×，已存在的 localStorage session 兼容：`bet.leverage ?? 1`。
+- 价格在 60s 内漂出 ±5¢ 时，y 轴中心 1s 平滑跟随（避免 row 跳变）
+- 下到 +10s 列的注会经历完整 10s 左移动画
+- HISTORY 区不够数据时（开局前几秒）左侧线段从右往左淡入
