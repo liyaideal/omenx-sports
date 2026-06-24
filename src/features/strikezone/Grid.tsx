@@ -4,6 +4,7 @@ import {
   formatMultiplier,
   multiplierHeat,
   multiplierTextColor,
+  applyLeverage,
 } from "./lib/multiplier";
 import type { StrikezonePosition } from "./hooks/useStrikezoneSession";
 import { PriceCapsule } from "./PriceCapsule";
@@ -18,11 +19,12 @@ interface Props {
   currentPrice: number; // ¢
   positions: StrikezonePosition[]; // open bets on active outcome
   betSize: number;
+  leverage: number;
   onPlace: (cellCenter: number, distanceCents: number, secondsAhead: number, mult: number) => void;
   recentHits: { id: string; at: number }[];
 }
 
-export function Grid({ currentPrice, positions, betSize, onPlace, recentHits }: Props) {
+export function Grid({ currentPrice, positions, betSize, leverage, onPlace, recentHits }: Props) {
   const center = Math.round(currentPrice);
 
   // Precompute multiplier per (row, col). distance = (5 - row), secondsAhead = col + 1
@@ -69,7 +71,8 @@ export function Grid({ currentPrice, positions, betSize, onPlace, recentHits }: 
       seenHitsRef.current.add(h.id);
       const m = markers.find((mk) => mk.p.id === h.id);
       if (!m) continue;
-      const text = `+$${(m.p.stake * m.p.mult - m.p.stake).toFixed(0)}`;
+      const lev = m.p.leverage ?? 1;
+      const text = `+$${(m.p.stake * m.p.mult * lev - m.p.stake).toFixed(0)}`;
       const id = h.id + ":fx";
       setFloats((f) => [...f, { id, row: m.row, col: m.col, text }]);
       setTimeout(() => setFloats((f) => f.filter((x) => x.id !== id)), 1300);
@@ -132,6 +135,7 @@ export function Grid({ currentPrice, positions, betSize, onPlace, recentHits }: 
             const isHit = markers.some(
               (m) => m.row === cell.row && m.col === cell.col && hitIds.has(m.p.id)
             );
+            const displayMult = applyLeverage(cell.mult, leverage);
             return (
               <button
                 key={k}
@@ -142,7 +146,7 @@ export function Grid({ currentPrice, positions, betSize, onPlace, recentHits }: 
                 style={{
                   backgroundColor: multiplierHeat(cell.mult),
                 }}
-                title={`$${betSize} → $${(betSize * cell.mult).toFixed(0)}`}
+                title={`$${betSize} × ${leverage}× → $${(betSize * cell.mult * leverage).toFixed(0)}`}
               >
                 <span
                   className="sz-num absolute inset-0 flex items-center justify-center tabular-nums"
@@ -152,7 +156,7 @@ export function Grid({ currentPrice, positions, betSize, onPlace, recentHits }: 
                     transition: "font-size 150ms ease",
                   }}
                 >
-                  {formatMultiplier(cell.mult)}
+                  {formatMultiplier(displayMult)}
                 </span>
                 {bet && (
                   <span
