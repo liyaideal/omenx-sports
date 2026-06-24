@@ -8,6 +8,7 @@ import { useStrikezoneSession } from "@/features/strikezone/hooks/useStrikezoneS
 import { useLiveTicker } from "@/features/strikezone/hooks/useLiveTicker";
 import { Sidebar, type OutcomeChoice } from "@/features/strikezone/Sidebar";
 import { Grid } from "@/features/strikezone/Grid";
+import { EventTabs } from "@/features/strikezone/EventTabs";
 import "@/features/strikezone/sz-theme.css";
 
 export const Route = createFileRoute("/strikezone")({
@@ -35,7 +36,7 @@ function StrikezonePage() {
     []
   );
 
-  // Group sidebar items by market
+  // Each live market is one EVENT; its outcomes are the markets you trade.
   const groups = useMemo(() => {
     return liveMarkets.map((m) => ({
       market: m,
@@ -47,15 +48,14 @@ function StrikezonePage() {
     }));
   }, [liveMarkets]);
 
-  const [activeMarketId, setActiveMarketId] = useState(groups[0]?.market.id ?? "");
+  const [activeEventId, setActiveEventId] = useState(groups[0]?.market.id ?? "");
   const [activeOutcomeId, setActiveOutcomeId] = useState(
     groups[0]?.outcomes[0]?.id ?? ""
   );
 
-  // When market changes, pick its first outcome
-  const handlePickMarket = (mid: string) => {
-    setActiveMarketId(mid);
-    const g = groups.find((x) => x.market.id === mid);
+  const handlePickEvent = (eid: string) => {
+    setActiveEventId(eid);
+    const g = groups.find((x) => x.market.id === eid);
     if (g) setActiveOutcomeId(g.outcomes[0].id);
   };
 
@@ -64,9 +64,9 @@ function StrikezonePage() {
   return (
     <StrikezoneInner
       groups={groups}
-      activeMarketId={activeMarketId}
+      activeEventId={activeEventId}
       activeOutcomeId={activeOutcomeId}
-      onPickMarket={handlePickMarket}
+      onPickEvent={handlePickEvent}
       onPickOutcome={setActiveOutcomeId}
     />
   );
@@ -74,18 +74,18 @@ function StrikezonePage() {
 
 function StrikezoneInner({
   groups,
-  activeMarketId,
+  activeEventId,
   activeOutcomeId,
-  onPickMarket,
+  onPickEvent,
   onPickOutcome,
 }: {
   groups: ReturnType<typeof useStrikezoneGroups>;
-  activeMarketId: string;
+  activeEventId: string;
   activeOutcomeId: string;
-  onPickMarket: (id: string) => void;
+  onPickEvent: (id: string) => void;
   onPickOutcome: (id: string) => void;
 }) {
-  const activeGroup = groups.find((g) => g.market.id === activeMarketId) ?? groups[0];
+  const activeGroup = groups.find((g) => g.market.id === activeEventId) ?? groups[0];
   const activeChoice =
     activeGroup.outcomes.find((o) => o.id === activeOutcomeId) ?? activeGroup.outcomes[0];
 
@@ -99,6 +99,8 @@ function StrikezoneInner({
     stopAll,
     setBetSize,
     cycleBetSize,
+    setLeverage,
+    cycleLeverage,
     lastBetExpiryRef,
     lastBetIdRef,
   } = useStrikezoneSession();
@@ -119,11 +121,12 @@ function StrikezoneInner({
         const hit =
           priceRef.current >= p.cellCenter - 0.5 && priceRef.current < p.cellCenter + 0.5;
         settlePosition(p.id, hit ? "won" : "lost", priceRef.current);
+        const lev = p.leverage ?? 1;
         settled.push({
           id: p.id,
           at: t,
           won: hit,
-          payout: hit ? p.stake * p.mult : 0,
+          payout: hit ? p.stake * p.mult * lev : 0,
         });
       }
     }
@@ -158,9 +161,10 @@ function StrikezoneInner({
         distanceCents,
         stake: state.betSize,
         mult,
+        leverage: state.leverage,
       });
     },
-    [activeChoice, state.balance, state.betSize, placeBet]
+    [activeChoice, state.balance, state.betSize, state.leverage, placeBet]
   );
 
   const handleUndo = useCallback(() => {
@@ -189,6 +193,14 @@ function StrikezoneInner({
           e.preventDefault();
           cycleBetSize(1);
           break;
+        case "q":
+          e.preventDefault();
+          cycleLeverage(-1);
+          break;
+        case "e":
+          e.preventDefault();
+          cycleLeverage(1);
+          break;
         case "z":
           e.preventDefault();
           handleUndo();
@@ -203,7 +215,7 @@ function StrikezoneInner({
     };
     window.addEventListener("keydown", h);
     return () => window.removeEventListener("keydown", h);
-  }, [cycleBetSize, handleUndo, showStop, showRules]);
+  }, [cycleBetSize, cycleLeverage, handleUndo, showStop, showRules]);
 
   // Undo countdown
   const [undoMsLeft, setUndoMsLeft] = useState(0);
@@ -225,6 +237,14 @@ function StrikezoneInner({
       p.outcomeId === activeChoice.outcome.id
   );
   const openCount = state.positions.filter((p) => p.status === "open").length;
+  const openCountByEvent = useMemo(() => {
+    const out: Record<string, number> = {};
+    for (const p of state.positions) {
+      if (p.status !== "open") continue;
+      out[p.marketId] = (out[p.marketId] ?? 0) + 1;
+    }
+    return out;
+  }, [state.positions]);
   const priceChange = price - activeChoice.outcome.price * 100;
 
   return (
@@ -275,19 +295,28 @@ function StrikezoneInner({
         )}
       </header>
 
+      {/* Event tabs */}
+      <EventTabs
+        events={groups.map((g) => g.market)}
+        activeEventId={activeEventId}
+        onPick={onPickEvent}
+        openCountByEvent={openCountByEvent}
+      />
+
       <div className="relative z-10 flex gap-2 px-2 pb-4">
         {/* Sidebar */}
         <Sidebar
           balance={state.balance}
           sessionPL={state.sessionPL}
           openCount={openCount}
-          groups={groups}
-          activeMarketId={activeMarketId}
+          activeEvent={activeGroup.market}
+          outcomes={activeGroup.outcomes}
           activeOutcomeId={activeOutcomeId}
-          onPickMarket={onPickMarket}
           onPickOutcome={onPickOutcome}
           betSize={state.betSize}
           onBetSize={setBetSize}
+          leverage={state.leverage}
+          onLeverage={setLeverage}
           onStop={() => setShowStop(true)}
           onShowRules={() => setShowRules(true)}
         />
@@ -358,6 +387,7 @@ function StrikezoneInner({
             currentPrice={price}
             positions={openPositions}
             betSize={state.betSize}
+            leverage={state.leverage}
             onPlace={handlePlace}
             recentHits={recentHits}
           />
@@ -368,13 +398,13 @@ function StrikezoneInner({
               className="sz-pixel text-[8px]"
               style={{ color: "var(--sz-muted)" }}
             >
-              CLICK A CELL TO BET · HOTKEYS: A/D BET SIZE · Z UNDO · ESC STOP
+              CLICK A CELL · A/D BET SIZE · Q/E LEVERAGE · Z UNDO · ESC STOP
             </span>
             <span
               className="sz-pixel text-[8px]"
               style={{ color: "var(--sz-muted)" }}
             >
-              MULT CAPPED AT 95.00x
+              MULT × LEV CAPPED AT 999x
             </span>
           </div>
         </main>
