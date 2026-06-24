@@ -41,6 +41,7 @@ type Effect =
       startAt: number;
       p: StrikezonePosition;
       payoutNet: number;
+      _popped?: boolean;
     }
   | {
       kind: "lose";
