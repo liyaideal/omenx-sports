@@ -1,124 +1,151 @@
-# Strikezone — Bettle 风格体育网格博彩
+# Strikezone v2 — 完全重写，1:1 复刻 Bettle 视觉
 
-完全独立的新页面 `/strikezone`，不动任何现有 trading / event 代码。
+把现有 `/strikezone` 的 UI 全部推翻重写。**数据模型/玩法/路由不变**（live 市场、价格游走、点格下单、瞬时穿越判定、localStorage 持仓），只换 **布局 + 字体 + 颜色 + 网格尺寸 + 控件形态**，1:1 对齐 Bettle 截图。
 
-## 1. 核心玩法
-
-每个 market 的 **YES 价格曲线（0–100¢）** 实时滚动；右侧网格代表"未来 60s × 当前价 ±N¢"的预测格子。点击任意格 = 用当前 BET SIZE 押"价格线会在 T 秒时穿过这个 1¢ × 1s 的小格"。命中 → 立刻结算 `押注 × 倍率`；未命中 → 输掉。
-
-- **格子**：纵 1¢ / 横 1s
-- **窗口**：未来 60s（60 列 × 21 行，纵向 ±10¢）
-- **倍率曲线（B 均衡）**：`mult = 1.5 × (1 + 0.6 × distance¢) × (1 + 0.4 × seconds_ahead/10)`，最远格 ~50×。每格倍率印在格子里
-- **判定**：价格线瞬时穿过格子矩形即命中（同一格只算一次）
-- **开放时机**：只在 `live` 比赛中开网格，pre-match / closed 显示"网格仅在比赛进行中开放"的暗色提示卡 + 跳转回事件页按钮
-
-## 2. 布局
-
-桌面（≥md）：
+## 1. 布局重做（参考 Bettle 截图 2）
 
 ```text
-┌─────────────────────────────────────────────────┐
-│ Topbar: ← Back · STRIKEZONE · Balance · P/L · ⓘ │
-├──────────┬──────────────────────────────────────┤
-│ Sidebar  │  Market header (CAN vs BIH · LIVE 23'│
-│ 280px    │   · CAN YES 53¢ ▲)                   │
-│          │                                      │
-│ [Live]   │  ┌────────────────────────────────┐  │
-│ ─────    │  │  Grid 60s × 21 rows            │  │
-│ MARKETS  │  │  ← scrolling left              │  │
-│ • Main   │  │  price line traces through     │  │
-│   Winner │  │  multiplier in each cell       │  │
-│ • O/U2.5 │  └────────────────────────────────┘  │
-│ • BTTS   │                                      │
-│ ─────    │  BET SIZE: [10][25][100][500][1k]   │
-│ Positions│  Hotkeys: A/D ←→ · Z undo · Esc stop│
-│ (open)   │                                      │
-│ [STOP]   │                                      │
-└──────────┴──────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────┐
+│                                                              │
+│  ┌──────────────┐    ┌────────────────────────────────────┐ │
+│  │ ● BALANCE    │    │  Y-axis    Grid (~10 cols × 9 rows)│ │
+│  │  $10,000 ◢   │    │   60¢                              │ │
+│  │              │    │   55¢   [95.00x][95.00x][52.51x]…  │ │
+│  │ ↗ SESSION    │    │   53¢   [19.36x][ 8.28x][ 5.71x]…  │ │
+│  │   +$0        │    │       ╭─ $1,663 ─╮                  │ │
+│  │              │    │   50¢ │  (pill)  │ [1.02x][1.01x]… │ │
+│  └──────────────┘    │       ╰──────────╯                  │ │
+│                      │   48¢   [22.50x][ 4.92x][ 3.37x]…  │ │
+│  ┌──────────────┐    │   45¢   [95.00x][68.14x][18.86x]…  │ │
+│  │ ┌MATCH┐STREAK│    │   40¢                              │ │
+│  │ ┌USA┐DRAW PAR│    │                                    │ │
+│  └──────────────┘    └────────────────────────────────────┘ │
+│                      below grid:                            │
+│  ┌──────────────┐    United States vs Paraguay · LIVE 23'  │
+│  │ BET SIZE  A/D│                                          │
+│  │   ┌─ 100 ─┐  │                                          │
+│  │   $10  $50   │                                          │
+│  │   $100 $500  │                                          │
+│  │   $1k  $5k   │                                          │
+│  └──────────────┘                                          │
+│                                                             │
+│  ┌──────────────┐                                          │
+│  │  ▣ STOP      │  (big red glowing button)                │
+│  └──────────────┘                                          │
+│                                                             │
+│  [♪ ON][📖 RULES][ⓘ]                                       │
+└─────────────────────────────────────────────────────────────┘
+                              ↑ 星空点状底纹（dotted bg）
 ```
 
-移动（<md）：顶部 sticky 条（balance + P/L + market picker），网格全屏，底部 sticky BET SIZE 条 + Positions pill → 底部 sheet。
+左栏 **不再是 market 列表**。左栏改为 Bettle 那种 **控制面板**（Balance / Asset picker / Bet size / STOP / 底部 ON/RULES/info）。市场选择改成左栏中段一个 **二级 tabs**：上一级 `MATCH / STREAK`（先只有 MATCH 可用，STREAK 灰着），下一级 outcome 横排小 chips（USA / DRAW / PAR），跟 Bettle 的 CRYPTO/STOCKS + BTC/ETH/SOL 完全同形。
 
-## 3. 路由 & 文件
+市场名（"United States vs Paraguay · LIVE 23'"）移到 **网格下方** 作为副标题（Bettle 也是把当前资产名放在网格下/上的小字处）。
 
-新建（全部不影响现有代码）：
+移除现有 topbar 的 BAL/PL 显示（已经在左栏卡里）；topbar 只留 ← Back + STRIKEZONE 标志。
+
+## 2. 网格重做
+
+- **尺寸**：可视 ~10 列 × 9 行（不是 60×21）。每格 ~96px × 64px 大方块
+- **每格内容**：单一大字号倍率 `2.33x` / `95.00x`，占满格子
+- **倍率范围**：近格 1.0x–2.5x（浅色），远格 8x–95x（亮橙）。"95.00x" 是显示上限（cap），更远的格也都印 95.00x（跟 Bettle 一致）
+- **颜色**：橙色热力 — 倍率越高越亮橙（`#ff6b1a` → `#7a2a0a`），低倍率近黑色。**完全去掉之前的绿/黄/红梯度**
+- **边框**：每格 1px 亮橙发光边（`box-shadow: 0 0 8px rgba(255,107,26,0.4) inset`）
+- **Y 轴标签**：左侧贴边，每 ~3 格一个 ¢ 标签，cyan/teal 色（如 Bettle 的 `1,659 / 1,660 / 1,661`）
+- **X 轴**：取消文字标签（Bettle 也没有 +10s/+20s 这种）
+- **价格 pill**：当前价位置画一个 **大型发光胶囊**：`$1,663`（在我们语境是 `50¢`），下方一条短发光线指向当前 Y 轴刻度。绿色霓虹 `#00ff88`，外发光 ~16px。位置随当前价上下平滑过渡
+- **下注标记**：押过的格子边框变 **亮 cyan** + 中心叠 `$100` 小字（不替换倍率，倍率在角落缩小）。命中时整格 0.5s 白闪 + 倍率向上飘字
+
+## 3. 字体
+
+- **像素/街机字体**：Bettle 用的是接近 "Press Start 2P" / "VT323" 这种 bitmap 风格
+- 用 `@fontsource/press-start-2p` 装 Press Start 2P 给数字、按钮标签、标志
+- 正文 fallback 继续用 JetBrains Mono
+- 所有数字（倍率、价格、余额、bet size、P/L）一律 Press Start 2P
+- 标志 STRIKEZONE / BALANCE / SESSION / BET SIZE / STOP / RULES 也用 Press Start 2P，全大写 + 字间距
+
+## 4. 颜色 / 底纹
+
+- 背景：深紫黑 `#0a0a1a` + **dotted starfield**（CSS radial gradient 点阵噪点）
+- 主体强调色：neon cyan `#00f0ff`（边框、tab、按钮描边）+ neon green `#00ff88`（balance、价格胶囊、ON 状态）
+- 警示：red `#ff2d2d`（STOP）
+- 热力：橙 `#ff6b1a` 主色
+
+把这些写成 css 变量（scoped 在 `/strikezone` 容器内，避免污染主题）：
+```css
+.sz-root {
+  --sz-bg: #0a0a1a;
+  --sz-cyan: #00f0ff;
+  --sz-green: #00ff88;
+  --sz-orange: #ff6b1a;
+  --sz-red: #ff2d2d;
+  --sz-card: #0f0f24;
+  --sz-card-border: #00f0ff33;
+}
+```
+
+## 5. 左栏控件细节
+
+| 控件 | 样式 |
+|---|---|
+| **BALANCE 卡** | cyan 描边圆角卡，左上角 `● BALANCE` 小字 cyan，下方 `$10,000` 巨大 Press Start 2P + 绿色发光，右下角微 `◢` 装饰角 |
+| **SESSION 卡** | 同卡里下半部分，`↗ SESSION` + `+$0`（涨绿/跌红） |
+| **MARKET 卡** | 上一行：`MATCH` (active cyan边) `/ STREAK` (灰禁用)；下一行 3 个 outcome 方块（如 USA/DRAW/PAR），active 项 cyan 边+icon |
+| **BET SIZE 卡** | 顶 `BET SIZE` + 右上 `A/D or Scroll` 提示；中间巨大显示当前值 `100`（Press Start 2P 橙色发光）；下面 6 个 chip 2×3 网格 `$10 $50 / $100 $500 / $1k $5k` |
+| **STOP** | 大块红色发光按钮，square icon + `STOP` 字 |
+| **底部** | 3 个小圆角方块：`♪ ON`（cyan）、`📖 RULES`（开 modal 显示玩法）、`ⓘ`（开 about） |
+
+## 6. 视觉效果（Bettle 的"灵魂"）
+
+- **星空底纹**：用 SVG 或 CSS `radial-gradient` 点阵铺满 body
+- **格子发光**：所有 active 元素带 `box-shadow` 外发光
+- **价格胶囊跟踪**：current price 变化时胶囊用 `transition: top 1s linear` 平滑滑动
+- **bet 命中**：cell `animate-ping` + 倍率 +N 飘字
+- **STOP 按钮**：hover 时红光更亮 + 轻微 scale
+- **格子点击**：scale 0.95 → 1 弹回 + cyan 边框闪一下
+
+## 7. 不动的部分
+
+- 路由仍是 `/strikezone`
+- `useStrikezoneSession` 持仓/余额逻辑完全不动
+- `useLiveTicker` 1s 价格游走不动
+- 倍率公式不动（只把显示 cap 在 95.00x）
+- 命中判定（瞬时穿越）不动
+- 热键 A/D/Z/Esc 不动
+- 仅 live 比赛开放不动
+- 不加任何入口
+
+## 8. 文件改动
 
 ```
-src/routes/strikezone.tsx                          # 独立路由 + head()
-src/features/strikezone/
-  StrikezoneShell.tsx                              # 桌面/移动布局壳
-  MarketSidebar.tsx                                # 左栏 market 列表
-  GridCanvas.tsx                                   # 网格 + 价格线（canvas 渲染）
-  PriceLineLayer.tsx                               # SVG/canvas 价格线 + trail
-  CellGrid.tsx                                     # 倍率格子 hover/click
-  BetSizeBar.tsx                                   # 底/侧 BET SIZE 芯片
-  PositionsPanel.tsx                               # 进行中 + 已结算
-  HitFlashLayer.tsx                                # 命中爆闪 + 飘字
-  UndoToast.tsx                                    # 5s 撤销
-  MarketStatusGate.tsx                             # 非 live 提示卡
-  hooks/
-    useStrikezoneSession.ts                        # balance/P/L/positions（localStorage）
-    useLiveTicker.ts                               # 1s tick 价格游走（mock，复用 sports-markets.ts 当前价做种子）
-    useGridHitDetection.ts                         # 价格线 vs 格子穿越判定
-    useHotkeys.ts                                  # A/D/Z/Esc/数字
-  lib/
-    multiplier.ts                                  # 倍率公式 + 格式化
-    storage.ts                                     # localStorage 持久化
-  styles.css                                       # 网格 LED 风格变量
-src/routes/style-guide.tsx                         # 新增 Strikezone section（grid demo / 倍率热力图 / hit flash）
+新增：
+  src/features/strikezone/sz-theme.css        # 局部 css 变量 + 星空底纹 + utility
+  src/features/strikezone/Sidebar.tsx         # 重写：Balance/Market/BetSize/Stop/Footer
+  src/features/strikezone/PriceCapsule.tsx    # 发光价格胶囊组件
+
+重写：
+  src/routes/strikezone.tsx                   # 新布局
+  src/features/strikezone/Grid.tsx            # ~10×9 大格 + 橙色热力 + Y轴 + 价格胶囊层
+
+废弃（删除）：
+  src/features/strikezone/MarketSidebar.tsx
+  src/features/strikezone/BetSizeBar.tsx
+  src/features/strikezone/PriceChart.tsx      # Bettle 没有独立 chart，取消
+  src/features/strikezone/PositionsPanel.tsx  # 改成左栏 BALANCE 卡下小一行 "OPEN: 3 · P/L"
+
+字体：
+  bun add @fontsource/press-start-2p
+  在 src/main.tsx import
 ```
 
-不动：`event.$id.tsx`、`TradeDrawer`、`TradeForm`、`sports-markets.ts`（只读）。
+## 9. 验证标准（看图说话）
 
-## 4. 数据 & 状态
+实现后页面必须满足：
+1. 视觉与 Bettle 截图近似 80% 以上：橙色大格、左栏卡片堆叠、Press Start 2P 字体、星空底纹、绿色价格胶囊
+2. 单击格子 → 边框 cyan + 中心 `$100`
+3. 价格胶囊随 tick 平滑上下移动
+4. STOP 按钮巨大显眼，hover 红光增强
+5. 字体全部为像素/街机风
+6. **不**出现现有版本的：60列密集小格、绿色热力、market 列表式 sidebar、独立的折线图
 
-- **Market 列表**：从 `sports-markets.ts` 筛 `status === 'live'` 的事件，展开所有 markets，左栏分组（按 event）
-- **价格 tick**：`useLiveTicker` 每 1000ms 用随机游走 ±0.8¢ 推进当前 market 的 YES 价（NO = 100 - YES），保留近 60s 历史画轨迹
-- **会话状态** `useStrikezoneSession`（localStorage key `omenx.strikezone.v1`）：
-  - `balance`（默认 $10,000）
-  - `betSize`（10/25/100/500/1000/5000）
-  - `positions: { id, marketId, side: 'YES'|'NO', priceCenter, secondsAhead, stake, mult, placedAt, status: 'open'|'won'|'lost' }`
-  - `sessionPL`、`history`
-- **判定**：每 tick 后遍历 open positions，若价格线在当前 second 落入该格的价格区间 → won；若 secondsAhead 倒计时归零未命中 → lost
-- **STOP**：confirm 后清空所有 open positions（按"取消，本金原路退回"处理）
-
-## 5. 视觉
-
-- 暗色 LED 主题，复用项目现有 token；网格底色 `oklch(0.18 0.02 240)`，格线 `oklch(0.28 0.03 240)`
-- YES 色 emerald-400，NO 色 rose-400，价格线 1.5px 发光轨
-- 命中：格子 0.4s 白→YES 色闪烁 + 倍率向上飘字 + 数字音效（可选关）
-- 字体：标题 Orbitron（项目已用），数字 JetBrains Mono
-- 倍率热力：远格颜色更暖（emerald → amber → rose），明示风险
-
-## 6. 交互细节
-
-- 单击格子 = 立即下单（无确认弹窗），账户立刻扣款，格子边框加亮 + 显示已押筹码
-- 同格多次点击 = 加仓（叠加 stake，倍率不变）
-- A/D 或 ←/→ 切 BET SIZE，1/2/5/0 直选 10/25/100/1k，Z 撤销最近 5s 内下单（退款），Esc 触发 STOP
-- 鼠标 hover 格子：显示 `押 $X → 赢 $Y（mult ×N）`
-- 价格线触达屏幕右边缘时画面整体左移（time scroll）
-
-## 7. 边界
-
-- market closed / 比赛结束 → 网格暗化 + "结算中"覆盖层，所有 open positions 按本金退款
-- 进球等价格瞬跳 → 按瞬时穿越判定（穿过的所有格子都触发命中）
-- 切换 market → 当前 positions 不消失，仍在后台 tick 与判定，sidebar 显示数量徽标
-
-## 8. 不做
-
-- 不做真实撮合、不接 Cloud、不做跨设备同步
-- 不做 STOP 之外的提前平仓 / TP / SL
-- 不做排行榜、不做音效开关（先默认开）
-- 不加任何入口（导航/首页卡片）—— 用户手动访问 `/strikezone` 体验
-
-## 9. 验证
-
-1. 直接访问 `/strikezone`，左栏看到至少一场 live 比赛的 markets
-2. 选中 main winner YES，右侧 60s 网格滚动、价格线左移
-3. BET SIZE = $100，点击近格 → 余额 -100、格子高亮、5s 内 Z 可撤
-4. 等价格穿过 → 命中爆闪、余额 += 押注×倍率、Positions 出现 won 记录
-5. A/D 切档、Esc 触发 STOP 确认
-6. 刷新 → balance/positions/history 全部恢复
-7. 切到 `pre-match` 比赛 → 显示"仅 live 开放"提示
-8. 移动视口（375px）→ 顶/底条切换正常，格子可触达
-9. `/style-guide` 新增 Strikezone section 显示 grid demo + 倍率热力 + hit flash 动画
+如果做完看起来还是不像，我会主动用 playwright 截屏 + zoom_image 对比 Bettle 截图，差哪儿改哪儿，不交差。
