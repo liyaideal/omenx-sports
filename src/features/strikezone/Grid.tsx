@@ -80,6 +80,9 @@ export function Grid({
   const baseSec = Math.floor((tickSec ? tickSec * 1000 : Date.now()) / 1000);
   const columnCount = VISIBLE_COLS + 2; // one extra at right for smooth slide-in
 
+  // Top-of-grid clock countdown — seconds until next tick rollover (1..60 loop).
+  const nextTickInSec = 60 - (baseSec % 60);
+
   // Precompute mult per (row, col-offset). Static — independent of tickSec.
   const cellMults = useMemo(() => {
     const out: number[][] = [];
@@ -141,16 +144,10 @@ export function Grid({
           className="absolute inset-0"
           style={{
             background:
-              "repeating-linear-gradient(to bottom, var(--sz-cyan) 0 4px, transparent 4px 8px)",
-            opacity: 0.55,
+              "linear-gradient(to bottom, transparent, rgba(255,107,26,0.45) 12%, rgba(255,107,26,0.45) 88%, transparent)",
+            opacity: 0.7,
           }}
         />
-        <div
-          className="sz-pixel absolute left-1/2 -translate-x-1/2 text-[8px]"
-          style={{ color: "var(--sz-cyan)", top: -14 }}
-        >
-          NOW
-        </div>
       </div>
 
       {/* FUTURE GRID (right) — scrolling */}
@@ -158,6 +155,24 @@ export function Grid({
         className="relative flex-1 overflow-hidden"
         style={{ height: TOTAL_H, marginLeft: 6 }}
       >
+        {/* Clock badge — top center, mimics reference */}
+        <div
+          className="sz-display absolute left-1/2 z-30 -translate-x-1/2 rounded-md px-3 py-1 text-base"
+          style={{
+            top: -10,
+            color: "var(--sz-cyan)",
+            background: "rgba(8,16,28,0.92)",
+            border: "1.5px solid var(--sz-cyan)",
+            boxShadow:
+              "0 0 14px rgba(0,240,255,0.45), inset 0 0 8px rgba(0,240,255,0.15)",
+            letterSpacing: "0.08em",
+          }}
+        >
+          <span className="sz-glow-cyan tabular-nums">
+            {String(Math.floor(nextTickInSec / 60)).padStart(1, "0")}:
+            {String(nextTickInSec % 60).padStart(2, "0")}
+          </span>
+        </div>
         <div
           ref={scrollRef}
           className="absolute left-0 top-0"
@@ -214,6 +229,7 @@ export function Grid({
             if (y < 0 || y > TOTAL_H) return null;
             const isHit = hitIds.has(p.id);
             const lev = p.leverage ?? 1;
+            const payout = p.stake * p.mult * lev - p.stake;
             return (
               <div
                 key={p.id}
@@ -223,19 +239,35 @@ export function Grid({
                   top: y - ROW_H / 2,
                   width: COL_W,
                   height: ROW_H,
-                  border: "2px solid var(--sz-cyan)",
                   borderRadius: 8,
+                  background:
+                    "linear-gradient(180deg, rgba(255,138,61,0.95) 0%, rgba(255,107,26,0.95) 100%)",
+                  border: "1.5px solid #ffd9b8",
                   boxShadow:
-                    "0 0 16px rgba(0,240,255,0.6), inset 0 0 12px rgba(0,240,255,0.2)",
+                    "0 0 18px rgba(255,138,61,0.7), inset 0 0 10px rgba(255,255,255,0.25)",
                 }}
               >
-                <span
-                  className="sz-display sz-glow-cyan absolute inset-0 flex items-center justify-center text-[13px]"
-                  style={{ color: "var(--sz-cyan)" }}
-                >
-                  ${p.stake}
-                  {lev > 1 ? `×${lev}` : ""}
-                </span>
+                <div className="absolute inset-0 flex flex-col items-center justify-center leading-tight">
+                  <span
+                    className="sz-num text-[9px] tabular-nums"
+                    style={{ color: "rgba(255,255,255,0.85)" }}
+                  >
+                    ${p.stake}
+                    {lev > 1 ? `×${lev}` : ""}
+                  </span>
+                  <span
+                    className="sz-display text-[13px] tabular-nums"
+                    style={{ color: "#fff" }}
+                  >
+                    {formatMultiplier(applyLeverage(p.mult, lev))}
+                  </span>
+                  <span
+                    className="sz-num text-[9px] tabular-nums"
+                    style={{ color: "var(--sz-green)" }}
+                  >
+                    +${payout.toFixed(0)}
+                  </span>
+                </div>
               </div>
             );
           })}
@@ -343,17 +375,6 @@ function HistoryChart({
           strokeWidth={2}
           points={pts.join(" ")}
           style={{ filter: `drop-shadow(0 0 4px ${glow})` }}
-        />
-        {/* dashed projection beyond the right edge into NOW */}
-        <line
-          x1={width}
-          y1={tipY}
-          x2={width + 14}
-          y2={tipY}
-          stroke={stroke}
-          strokeDasharray="3 3"
-          strokeWidth={2}
-          opacity={0.7}
         />
         {/* tip dot */}
         <circle
