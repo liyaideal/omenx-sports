@@ -54,11 +54,13 @@ export function Grid({
   };
 
   // 1Hz tick — drives marker repositioning when baseSec advances.
-  const [tickSec, setTickSec] = useState(() => Math.floor(Date.now() / 1000));
+  // Initialized to null to avoid SSR/CSR hydration mismatch.
+  const [tickSec, setTickSec] = useState<number | null>(null);
   useEffect(() => {
+    setTickSec(Math.floor(Date.now() / 1000));
     const id = window.setInterval(() => {
       setTickSec(Math.floor(Date.now() / 1000));
-    }, 250);
+    }, 200);
     return () => window.clearInterval(id);
   }, []);
 
@@ -78,11 +80,11 @@ export function Grid({
     return () => cancelAnimationFrame(raf);
   }, []);
 
-  const baseSec = Math.floor((tickSec ? tickSec * 1000 : Date.now()) / 1000);
+  const baseSec = tickSec ?? 0;
   const columnCount = VISIBLE_COLS + 2; // one extra at right for smooth slide-in
 
   // Top-of-grid clock countdown — seconds until next tick rollover (1..60 loop).
-  const nextTickInSec = 60 - (baseSec % 60);
+  const nextTickInSec = tickSec == null ? null : 60 - (baseSec % 60);
 
   // Precompute mult per (row, col-offset). Static — independent of tickSec.
   const cellMults = useMemo(() => {
