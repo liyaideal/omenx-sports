@@ -9,21 +9,15 @@ import { useEffect, useRef, useState } from "react";
  */
 export function useLiveTicker(marketId: string, seedPrice: number) {
   const [price, setPrice] = useState(seedPrice);
-  const [history, setHistory] = useState<number[]>(() => {
-    // pre-fill 60 ticks of mild noise around seed so the chart isn't empty
-    const out: number[] = [];
-    let p = seedPrice;
-    for (let i = 0; i < 60; i++) {
-      p = clamp(p + (Math.random() - 0.5) * 0.6, 1, 99);
-      out.push(p);
-    }
-    return out;
-  });
-  const [tickSec, setTickSec] = useState(() => Math.floor(Date.now() / 1000));
+  // Start with a flat history (SSR-safe), populate noisy seed on client mount.
+  const [history, setHistory] = useState<number[]>(() =>
+    Array.from({ length: 60 }, () => seedPrice)
+  );
+  const [tickSec, setTickSec] = useState(0);
   const priceRef = useRef(seedPrice);
   priceRef.current = price;
 
-  // Reset on market change
+  // Seed noisy history on client (or when market changes).
   useEffect(() => {
     setPrice(seedPrice);
     const out: number[] = [];
