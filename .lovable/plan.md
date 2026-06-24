@@ -1,55 +1,67 @@
-## Goal
+我理解这次的核心问题：现在实现仍然是 DOM 格子 + CSS 动画，所以天然做不出“空格先没、下注格继续滑、命中爆裂飘钱”的真实交互。接下来要把网格主体重做成 canvas。
 
-Make the Strikezone feel like a real prediction arcade: the **price line is fixed at NOW**, blank grid cells just slide left and quietly vanish at the boundary, but **cells you've bet on keep going past NOW**, then either explode with a clear win animation + floating profit, or fade red on loss. Match the reference video's energy.
+## 目标
 
-## Current problem
+- 网格、价格线、倍数、下注格、结算动画全部在一块 `<canvas>` 上用 `requestAnimationFrame` 每帧重画。
+- 空格和下注格走不同生命周期：
+  - 未下注 cell 到 NOW 线：原地快速淡出并移除。
+  - 已下注 cell 到 NOW 线：继续往左滑入历史/价格区域，500-800ms 慢慢淡出。
+  - 赢的 cell：先播放强烈 HIT 爆闪、缩放弹跳、外扩光圈，并弹出绿色 `+$xxx` 飘字。
+- 点击未来格子下注；再次点击同一个未结算下注格取消并退款。
+- 保留现有左侧下注金额、杠杆、余额、STOP、事件/market 选择逻辑。
 
-- All cells (bet or not) live inside a single `overflow-hidden` scroller, so bet markers get clipped exactly at the NOW line the same way empty cells do.
-- "Hit" effect is just a tiny class + small green text — no flash, no scale, no ripple. Reads as "nothing happened".
-- Loss path has no visual at all.
+## 实施计划
 
-## Plan
+1. **重写 `Grid.tsx` 为 Canvas 渲染器**
+   - 用 `canvasRef + ResizeObserver + requestAnimationFrame` 管理绘制。
+   - DPR 适配：`canvas.width/height = cssSize * devicePixelRatio`，绘制前 scale。
+   - 建立虚拟坐标系：
 
-### 1. Split the marker layer out of the clipped scroller
+```text
+NOW_X = 左侧价格历史区宽度
+timeToX(expiryT) = NOW_X + (expiryT - now) * PX_PER_MS
+priceToY(price) = canvasH / 2 - (price - smoothCenter) * PX_PER_CENT
+```
 
-In `src/features/strikezone/Grid.tsx`:
-- Keep the right-side `overflow-hidden` scroller for empty grid cells only.
-- Render `positions` markers in a sibling layer that overlays both the history panel and the future grid (so a marker can travel from its future column, across the NOW line, into the history area for ~0.6s before resolving).
-- Marker X uses the same per-frame `progress` as the scroller (lift the rAF value to React state or a ref shared with markers) so a bet cell tracks its column exactly until `targetAt`, then continues sliding left at the same speed for a short "settle" window (e.g. 600ms) before being removed.
+2. **实现 cell 数据和独立状态机**
+   - 每帧按当前时间生成/维护未来列 cell，不再把一列 DOM 一起移动。
+   - 每个 cell 用数据描述：`expiryT / bandCenter / multiplier / state / anim / bet`。
+   - 到期时逐格处理：空格进入 `dying`；下注格进入 `resolving_win` 或 `resolving_lose`。
 
-### 2. Settlement visuals
+3. **绘制分层效果**
+   - 背景星点/暗网格。
+   - 左侧价格刻度与发光价格折线。
+   - 右侧未来倍率格子，暖橙色圆角矩形，数字在 canvas 绘制。
+   - NOW 线、顶部倒计时胶囊、当前价格 pill。
+   - 下注格三行信息：`$stake`、`multiplier x`、`+$profit`。
+   - 结算特效层：HIT 爆闪、光圈、绿色收益飘字。
 
-When `targetAt` is reached for a position:
-- **Win** (`recentHits` contains it):
-  - Marker snaps to NOW-line X, scales 1 → 1.35 → 1, white-hot flash (filter brightness 2 + box-shadow burst), 2 expanding orange ring SVGs (`@keyframes sz-ring` 0→2.2 scale, opacity 0.8→0).
-  - Big `+$payout` floats up ~60px and fades over 1.2s in green with cyan glow, using `sz-display` at text-3xl.
-  - Subtle screen-shake on the grid container (translate 2px for 120ms) — optional, keep small.
-- **Loss** (no hit by `targetAt + grace`):
-  - Marker turns red gradient, scale 1 → 0.85, opacity → 0 over 500ms. No popup.
-- Empty (unbet) cells: no change — they continue to silently exit at the NOW boundary as today.
+4. **点击命中检测改为 canvas 坐标**
+   - 监听 canvas click/mousemove。
+   - 用鼠标像素坐标反查未来 cell：`hitTest(x, y) -> cell`。
+   - hover 高亮也在 canvas 内绘制，不再依赖 DOM hover。
 
-### 3. Win/loss detection inside Grid
+5. **补齐取消下注能力**
+   - 在 `useStrikezoneSession` 增加按 position id 取消并退款的函数。
+   - `Grid` 点击已下注 cell 时调用取消；点击空未来 cell 时下注。
 
-Today `recentHits` only contains wins. Add a derived `settledLosses` set in Grid: for each position whose `targetAt < now - 300ms` and id not in `hitIds`, treat as loss. Drive the loss animation locally; no business-logic change, no new state in the hook.
+6. **调整结算数据流**
+   - 保留现有 `settlePosition` 的余额/盈亏逻辑。
+   - `Grid` 内维护短生命周期 settled/effects cache，让已经从 open 列表移除或状态变更的下注格还能继续滑动并播放动画。
+   - 移除或弱化 toast HIT，主要反馈放回 canvas 的爆裂和飘钱上，提升博彩刺激感。
 
-### 4. Float popup upgrade
+7. **清理 CSS 动画依赖**
+   - `sz-theme.css` 只保留页面、侧栏、按钮、字体和少量容器样式。
+   - 删除/停用原先 DOM cell 动画，避免和 canvas 方案混在一起。
 
-Replace the current small green float with:
-- `sz-display` text-3xl, color `var(--sz-green)`, text-shadow cyan+green double glow.
-- Starts at marker Y on the NOW line, animates `translateY(-60px)` + opacity 1→0 over 1200ms via a dedicated `@keyframes sz-profit-pop` (add to `src/styles.css` or local style block).
-- Pre-pended `▲` arrow for extra punch.
+8. **同步 `/style-guide`**
+   - 按项目记忆要求，给新的 StrikeZone canvas 网格增加一个可视化 demo/入口，保证 playground 与真实页面同步。
 
-### 5. Hydration fix (side cleanup)
-
-The current `nextTickInSec` is computed from `Date.now()` at first render, which mismatches SSR and triggers the hydration error shown in runtime logs. Initialize the clock badge value to a stable placeholder (`--`) and only fill it in after mount via `useEffect`. Same pattern for `tickSec`.
-
-### Technical notes
-
-- Files touched: `src/features/strikezone/Grid.tsx` only (plus a few keyframes appended to `src/styles.css` if not already present). No hook/business changes.
-- Animation primitives use CSS keyframes — no new deps.
-- Performance: marker layer is a handful of nodes; rAF already drives the scroller and can publish `progress` via a ref consumed by markers each frame (direct DOM transform, no React rerender per frame).
-- Style guide: update the Strikezone demo in `/style-guide` to mirror the new marker/float visuals so playground stays in sync.
-
-### Out of scope
-
-- No changes to multipliers, leverage, bet sizing, event/outcome switching, sidebar, or hooks.
+9. **验证**
+   - 用浏览器打开 `/strikezone`，确认：
+     - 网格是 canvas 渲染。
+     - 点击下注后格子锁定三行信息。
+     - 到期时空格先消失，下注格继续左滑。
+     - 命中时有明显 HIT、光圈、绿色 `+$xxx` 飘字。
+     - 再点已下注格可取消退款。
+     - 桌面与当前预览宽度下不重叠、不空白。
