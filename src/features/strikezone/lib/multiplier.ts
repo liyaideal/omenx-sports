@@ -15,7 +15,15 @@ export function multiplier(distanceCents: number, secondsAhead: number): number 
   return Math.min(MULT_CAP, Math.round(raw * 100) / 100);
 }
 
+/** Cap for leveraged display so cells never blow up past 4 chars. */
+export const LEVERAGE_DISPLAY_CAP = 999;
+
+export function applyLeverage(mult: number, leverage: number): number {
+  return Math.min(LEVERAGE_DISPLAY_CAP, Math.round(mult * leverage * 100) / 100);
+}
+
 export function formatMultiplier(m: number): string {
+  if (m >= 100) return `${Math.round(m)}x`;
   return `${m.toFixed(2)}x`;
 }
 
