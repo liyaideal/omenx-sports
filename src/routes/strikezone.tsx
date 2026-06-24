@@ -90,7 +90,7 @@ function StrikezoneInner({
     activeGroup.outcomes.find((o) => o.id === activeOutcomeId) ?? activeGroup.outcomes[0];
 
   const seedPrice = activeChoice.outcome.price * 100;
-  const { price, tickSec } = useLiveTicker(activeChoice.id, seedPrice);
+  const { price, history, tickSec } = useLiveTicker(activeChoice.id, seedPrice);
   const {
     state,
     placeBet,
@@ -385,6 +385,7 @@ function StrikezoneInner({
           {/* Grid */}
           <Grid
             currentPrice={price}
+            history={history}
             positions={openPositions}
             betSize={state.betSize}
             leverage={state.leverage}
