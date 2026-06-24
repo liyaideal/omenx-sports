@@ -1,46 +1,55 @@
-## 要修正的核心理解
+## Goal
 
-参考图里的交互不是“价格在格子区域里上下扫”，也不是“整张格子流到左边结算”。正确结构是：
+Make the Strikezone feel like a real prediction arcade: the **price line is fixed at NOW**, blank grid cells just slide left and quietly vanish at the boundary, but **cells you've bet on keep going past NOW**, then either explode with a clear win animation + floating profit, or fade red on loss. Match the reference video's energy.
 
-```text
-左侧历史区                         右侧未来区
-price line  ───────● price tag | 未来赔率格网
-                              ^
-                      价格点/当前边界
-```
+## Current problem
 
-- 价格线只画在左侧历史区，最新价格点固定贴近左右分界线。
-- 右侧是未来时间 × 价格区间的赔率格，格子整体按时间缓慢向左推进。
-- 结算发生在右侧格子的最左列/分界线处：价格点的 Y 命中哪个价格区间，就结算该格。
-- 用户下单后，下注标记应该留在对应格子上，并跟随格子向左移动；不是让价格线进入格子里追逐它。
+- All cells (bet or not) live inside a single `overflow-hidden` scroller, so bet markers get clipped exactly at the NOW line the same way empty cells do.
+- "Hit" effect is just a tiny class + small green text — no flash, no scale, no ripple. Reads as "nothing happened".
+- Loss path has no visual at all.
 
-## 实施计划
+## Plan
 
-1. **重构 `Grid.tsx` 的坐标模型**
-   - 保留左侧 `HistoryChart`，但把最新价格点固定到历史区右边缘附近。
-   - 右侧 grid 的第 0 列紧贴分界线，后续列向右延展。
-   - 使用同一套 Y 轴映射，让价格线、价格标签、格子行区间完全对齐。
+### 1. Split the marker layer out of the clipped scroller
 
-2. **改成“右侧未来格滚动，价格点不进格子”的视觉**
-   - 格子容器只做水平时间推进。
-   - 当前价格标签和价格点停在左侧历史区末端，参考图那样贴在分界线左侧。
-   - 分界线不再强行画成很突出的 NOW 竖线；改成更像参考图的暗边界/细分割，顶部可保留小型计时/Now 提示。
+In `src/features/strikezone/Grid.tsx`:
+- Keep the right-side `overflow-hidden` scroller for empty grid cells only.
+- Render `positions` markers in a sibling layer that overlays both the history panel and the future grid (so a marker can travel from its future column, across the NOW line, into the history area for ~0.6s before resolving).
+- Marker X uses the same per-frame `progress` as the scroller (lift the rAF value to React state or a ref shared with markers) so a bet cell tracks its column exactly until `targetAt`, then continues sliding left at the same speed for a short "settle" window (e.g. 600ms) before being removed.
 
-3. **修正下注标记表现**
-   - 点击右侧某个格子后，该格显示 stake、multiplier、潜在收益。
-   - 标记跟着该格向左移动，到分界线时结算。
-   - 命中时格子变亮橙/黄并显示绿色收益；未命中则淡出。
+### 2. Settlement visuals
 
-4. **修正结算时机与命中判断**
-   - 结算仍以 `targetAt` 为准，但视觉位置与时间推进严格一致。
-   - 命中判断用当前价格所在行区间，不再产生“价格自己跑到格子里”的观感。
+When `targetAt` is reached for a position:
+- **Win** (`recentHits` contains it):
+  - Marker snaps to NOW-line X, scales 1 → 1.35 → 1, white-hot flash (filter brightness 2 + box-shadow burst), 2 expanding orange ring SVGs (`@keyframes sz-ring` 0→2.2 scale, opacity 0.8→0).
+  - Big `+$payout` floats up ~60px and fades over 1.2s in green with cyan glow, using `sz-display` at text-3xl.
+  - Subtle screen-shake on the grid container (translate 2px for 120ms) — optional, keep small.
+- **Loss** (no hit by `targetAt + grace`):
+  - Marker turns red gradient, scale 1 → 0.85, opacity → 0 over 500ms. No popup.
+- Empty (unbet) cells: no change — they continue to silently exit at the NOW boundary as today.
 
-5. **同步 `/style-guide`**
-   - 按项目记忆要求，给 Strikezone 模块加一个 playground/demo 区块或更新现有引用，确保真实页面和样式指南里的组件展示一致。
+### 3. Win/loss detection inside Grid
 
-## 技术细节
+Today `recentHits` only contains wins. Add a derived `settledLosses` set in Grid: for each position whose `targetAt < now - 300ms` and id not in `hitIds`, treat as loss. Drive the loss animation locally; no business-logic change, no new state in the hook.
 
-- 主要修改：`src/features/strikezone/Grid.tsx`、`src/routes/strikezone.tsx`。
-- 可能补充：把 `HistoryChart` 拆成更清晰的内部组件或保持在 `Grid.tsx` 内。
-- 不改现有 Event Tabs、Sidebar、杠杆、bet size、market/outcome 切换逻辑。
-- 不接入新后端，不引入新的业务状态。
+### 4. Float popup upgrade
+
+Replace the current small green float with:
+- `sz-display` text-3xl, color `var(--sz-green)`, text-shadow cyan+green double glow.
+- Starts at marker Y on the NOW line, animates `translateY(-60px)` + opacity 1→0 over 1200ms via a dedicated `@keyframes sz-profit-pop` (add to `src/styles.css` or local style block).
+- Pre-pended `▲` arrow for extra punch.
+
+### 5. Hydration fix (side cleanup)
+
+The current `nextTickInSec` is computed from `Date.now()` at first render, which mismatches SSR and triggers the hydration error shown in runtime logs. Initialize the clock badge value to a stable placeholder (`--`) and only fill it in after mount via `useEffect`. Same pattern for `tickSec`.
+
+### Technical notes
+
+- Files touched: `src/features/strikezone/Grid.tsx` only (plus a few keyframes appended to `src/styles.css` if not already present). No hook/business changes.
+- Animation primitives use CSS keyframes — no new deps.
+- Performance: marker layer is a handful of nodes; rAF already drives the scroller and can publish `progress` via a ref consumed by markers each frame (direct DOM transform, no React rerender per frame).
+- Style guide: update the Strikezone demo in `/style-guide` to mirror the new marker/float visuals so playground stays in sync.
+
+### Out of scope
+
+- No changes to multipliers, leverage, bet sizing, event/outcome switching, sidebar, or hooks.
