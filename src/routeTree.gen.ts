@@ -11,7 +11,6 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as StyleGuideHomepageRouteImport } from './routes/style-guide-homepage'
 import { Route as StyleGuideRouteImport } from './routes/style-guide'
-import { Route as StrikezoneRouteImport } from './routes/strikezone'
 import { Route as FansRouteImport } from './routes/fans'
 import { Route as EventsRouteImport } from './routes/events'
 import { Route as IndexRouteImport } from './routes/index'
@@ -27,11 +26,6 @@ const StyleGuideHomepageRoute = StyleGuideHomepageRouteImport.update({
 const StyleGuideRoute = StyleGuideRouteImport.update({
   id: '/style-guide',
   path: '/style-guide',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const StrikezoneRoute = StrikezoneRouteImport.update({
-  id: '/strikezone',
-  path: '/strikezone',
   getParentRoute: () => rootRouteImport,
 } as any)
 const FansRoute = FansRouteImport.update({
@@ -69,7 +63,6 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/events': typeof EventsRoute
   '/fans': typeof FansRoute
-  '/strikezone': typeof StrikezoneRoute
   '/style-guide': typeof StyleGuideRoute
   '/style-guide-homepage': typeof StyleGuideHomepageRoute
   '/event/$id': typeof EventIdRoute
@@ -80,7 +73,6 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/events': typeof EventsRoute
   '/fans': typeof FansRoute
-  '/strikezone': typeof StrikezoneRoute
   '/style-guide': typeof StyleGuideRoute
   '/style-guide-homepage': typeof StyleGuideHomepageRoute
   '/event/$id': typeof EventIdRoute
@@ -92,7 +84,6 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/events': typeof EventsRoute
   '/fans': typeof FansRoute
-  '/strikezone': typeof StrikezoneRoute
   '/style-guide': typeof StyleGuideRoute
   '/style-guide-homepage': typeof StyleGuideHomepageRoute
   '/event/$id': typeof EventIdRoute
@@ -105,7 +96,6 @@ export interface FileRouteTypes {
     | '/'
     | '/events'
     | '/fans'
-    | '/strikezone'
     | '/style-guide'
     | '/style-guide-homepage'
     | '/event/$id'
@@ -116,7 +106,6 @@ export interface FileRouteTypes {
     | '/'
     | '/events'
     | '/fans'
-    | '/strikezone'
     | '/style-guide'
     | '/style-guide-homepage'
     | '/event/$id'
@@ -127,7 +116,6 @@ export interface FileRouteTypes {
     | '/'
     | '/events'
     | '/fans'
-    | '/strikezone'
     | '/style-guide'
     | '/style-guide-homepage'
     | '/event/$id'
@@ -139,7 +127,6 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   EventsRoute: typeof EventsRoute
   FansRoute: typeof FansRoute
-  StrikezoneRoute: typeof StrikezoneRoute
   StyleGuideRoute: typeof StyleGuideRoute
   StyleGuideHomepageRoute: typeof StyleGuideHomepageRoute
   EventIdRoute: typeof EventIdRoute
@@ -161,13 +148,6 @@ declare module '@tanstack/react-router' {
       path: '/style-guide'
       fullPath: '/style-guide'
       preLoaderRoute: typeof StyleGuideRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/strikezone': {
-      id: '/strikezone'
-      path: '/strikezone'
-      fullPath: '/strikezone'
-      preLoaderRoute: typeof StrikezoneRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/fans': {
@@ -219,7 +199,6 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   EventsRoute: EventsRoute,
   FansRoute: FansRoute,
-  StrikezoneRoute: StrikezoneRoute,
   StyleGuideRoute: StyleGuideRoute,
   StyleGuideHomepageRoute: StyleGuideHomepageRoute,
   EventIdRoute: EventIdRoute,
