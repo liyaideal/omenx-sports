@@ -17,6 +17,8 @@ export interface StrikezonePosition {
   distanceCents: number;
   stake: number;
   mult: number;
+  /** Platform leverage applied at placement (1, 2, 5, 10). */
+  leverage: number;
   placedAt: number;
   status: "open" | "won" | "lost" | "refunded";
   /** Settlement price ¢ (when settled). */
@@ -28,6 +30,7 @@ export interface StrikezonePosition {
 export interface StrikezoneState {
   balance: number;
   betSize: number;
+  leverage: number;
   sessionPL: number;
   positions: StrikezonePosition[];
 }
@@ -35,9 +38,13 @@ export interface StrikezoneState {
 const BET_SIZES = [10, 25, 100, 500, 1000, 5000] as const;
 export const BET_SIZE_OPTIONS = BET_SIZES;
 
+const LEVERAGES = [1, 2, 5, 10] as const;
+export const LEVERAGE_OPTIONS = LEVERAGES;
+
 const DEFAULT_STATE: StrikezoneState = {
   balance: 10000,
   betSize: 100,
+  leverage: 1,
   sessionPL: 0,
   positions: [],
 };
@@ -90,13 +97,28 @@ export function useStrikezoneSession() {
         const idx = s.positions.findIndex((p) => p.id === id);
         if (idx === -1 || s.positions[idx].status !== "open") return s;
         const p = s.positions[idx];
-        const payout = result === "won" ? p.stake * p.mult : result === "refunded" ? p.stake : 0;
+        const lev = p.leverage ?? 1;
+        // Win: stake × mult × leverage paid back.
+        // Loss: keep stake forfeited AND deduct extra stake × (lev-1).
+        // Refund: stake returned untouched.
+        const payout =
+          result === "won"
+            ? p.stake * p.mult * lev
+            : result === "refunded"
+              ? p.stake
+              : 0;
+        const extraLoss = result === "lost" ? p.stake * (lev - 1) : 0;
         const next = [...s.positions];
         next[idx] = { ...p, status: result, settledPrice, payout };
-        const pl = result === "won" ? payout - p.stake : result === "lost" ? -p.stake : 0;
+        const pl =
+          result === "won"
+            ? payout - p.stake
+            : result === "lost"
+              ? -p.stake * lev
+              : 0;
         return {
           ...s,
-          balance: s.balance + payout,
+          balance: s.balance + payout - extraLoss,
           sessionPL: s.sessionPL + pl,
           positions: next,
         };
@@ -148,6 +170,19 @@ export function useStrikezoneSession() {
     });
   }, []);
 
+  const setLeverage = useCallback((lev: number) => {
+    setState((s) => ({ ...s, leverage: lev }));
+  }, []);
+
+  const cycleLeverage = useCallback((dir: 1 | -1) => {
+    setState((s) => {
+      const cur = (s.leverage ?? 1) as (typeof LEVERAGES)[number];
+      const i = LEVERAGES.indexOf(cur);
+      const ni = Math.max(0, Math.min(LEVERAGES.length - 1, (i === -1 ? 0 : i) + dir));
+      return { ...s, leverage: LEVERAGES[ni] };
+    });
+  }, []);
+
   const reset = useCallback(() => setState(DEFAULT_STATE), []);
 
   return {
@@ -159,6 +194,8 @@ export function useStrikezoneSession() {
     stopAll,
     setBetSize,
     cycleBetSize,
+    setLeverage,
+    cycleLeverage,
     reset,
     lastBetExpiryRef,
     lastBetIdRef,
