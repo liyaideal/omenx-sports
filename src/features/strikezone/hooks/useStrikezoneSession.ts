@@ -158,6 +158,22 @@ export function useStrikezoneSession() {
     });
   }, []);
 
+  const cancelPosition = useCallback((id: string) => {
+    let ok = false;
+    setState((s) => {
+      const p = s.positions.find((x) => x.id === id);
+      if (!p || p.status !== "open") return s;
+      ok = true;
+      return {
+        ...s,
+        balance: s.balance + p.stake,
+        positions: s.positions.filter((x) => x.id !== id),
+      };
+    });
+    if (ok && lastBetIdRef.current === id) lastBetIdRef.current = null;
+    return ok;
+  }, []);
+
   const setBetSize = useCallback((size: number) => {
     setState((s) => ({ ...s, betSize: size }));
   }, []);
@@ -192,6 +208,7 @@ export function useStrikezoneSession() {
     settlePosition,
     undoLast,
     stopAll,
+    cancelPosition,
     setBetSize,
     cycleBetSize,
     setLeverage,

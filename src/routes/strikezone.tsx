@@ -97,6 +97,7 @@ function StrikezoneInner({
     settlePosition,
     undoLast,
     stopAll,
+    cancelPosition,
     setBetSize,
     cycleBetSize,
     setLeverage,
@@ -390,6 +391,7 @@ function StrikezoneInner({
             betSize={state.betSize}
             leverage={state.leverage}
             onPlace={handlePlace}
+            onCancel={cancelPosition}
             recentHits={recentHits}
           />
 
