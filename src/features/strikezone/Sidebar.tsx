@@ -1,5 +1,5 @@
-import { Volume2, BookOpen, Info, Square } from "lucide-react";
-import { BET_SIZE_OPTIONS } from "./hooks/useStrikezoneSession";
+import { Volume2, BookOpen, Info, Square, Zap } from "lucide-react";
+import { BET_SIZE_OPTIONS, LEVERAGE_OPTIONS } from "./hooks/useStrikezoneSession";
 import type { SportsMarket, Outcome } from "@/data/sports-markets";
 
 export interface OutcomeChoice {
@@ -12,15 +12,16 @@ interface Props {
   balance: number;
   sessionPL: number;
   openCount: number;
-  // market group (e.g. the live match the user is currently on)
-  groups: { market: SportsMarket; outcomes: OutcomeChoice[] }[];
-  activeMarketId: string;
+  /** Active event (single match). Outcomes are its markets. */
+  activeEvent: SportsMarket;
+  outcomes: OutcomeChoice[];
   activeOutcomeId: string;
-  onPickMarket: (marketId: string) => void;
   onPickOutcome: (id: string) => void;
   // bet
   betSize: number;
   onBetSize: (n: number) => void;
+  leverage: number;
+  onLeverage: (n: number) => void;
   // stop
   onStop: () => void;
   onShowRules: () => void;
@@ -30,18 +31,22 @@ export function Sidebar({
   balance,
   sessionPL,
   openCount,
-  groups,
-  activeMarketId,
+  activeEvent,
+  outcomes,
   activeOutcomeId,
-  onPickMarket,
   onPickOutcome,
   betSize,
   onBetSize,
+  leverage,
+  onLeverage,
   onStop,
   onShowRules,
 }: Props) {
-  const activeGroup = groups.find((g) => g.market.id === activeMarketId) ?? groups[0];
   const plPositive = sessionPL >= 0;
+  const highRisk = leverage >= 5;
+  const eventLabel = activeEvent.fixture
+    ? `${activeEvent.fixture.home.short} VS ${activeEvent.fixture.away.short}`
+    : activeEvent.title.toUpperCase();
 
   return (
     <div className="flex w-[300px] shrink-0 flex-col gap-4 p-4">
@@ -98,40 +103,23 @@ export function Sidebar({
         </div>
       </div>
 
-      {/* MARKET picker */}
+      {/* MARKETS for active event */}
       <div className="sz-card p-3">
-        {/* tier 1: match list as MATCH/STREAK tabs */}
-        <div className="grid grid-cols-2 gap-2">
-          {groups.slice(0, 2).map((g) => (
-            <button
-              key={g.market.id}
-              onClick={() => onPickMarket(g.market.id)}
-              className={`sz-chip sz-pixel py-2 text-[9px] ${
-                g.market.id === activeMarketId ? "sz-chip-cyan-active" : ""
-              }`}
-              style={{
-                color:
-                  g.market.id === activeMarketId ? "var(--sz-cyan)" : "var(--sz-muted)",
-              }}
-            >
-              {g.market.fixture
-                ? `${g.market.fixture.home.short}-${g.market.fixture.away.short}`
-                : g.market.title.slice(0, 8)}
-            </button>
-          ))}
-          {groups.length < 2 && (
-            <div
-              className="sz-chip sz-pixel flex items-center justify-center py-2 text-[9px] opacity-30"
-              style={{ color: "var(--sz-muted)" }}
-            >
-              SOON
-            </div>
+        <div className="mb-2 flex items-center justify-between">
+          <span className="sz-pixel text-[10px]" style={{ color: "var(--sz-cyan)" }}>
+            {eventLabel}
+          </span>
+          {activeEvent.liveClock && (
+            <span className="sz-pixel text-[8px]" style={{ color: "var(--sz-muted)" }}>
+              {activeEvent.liveClock}
+            </span>
           )}
         </div>
-
-        {/* tier 2: outcome chips */}
-        <div className="mt-3 grid grid-cols-3 gap-2">
-          {activeGroup?.outcomes.map((o) => {
+        <div
+          className="grid gap-2"
+          style={{ gridTemplateColumns: `repeat(${outcomes.length}, minmax(0,1fr))` }}
+        >
+          {outcomes.map((o) => {
             const isActive = o.id === activeOutcomeId;
             return (
               <button
@@ -202,6 +190,53 @@ export function Sidebar({
               ${s >= 1000 ? `${s / 1000}K` : s}
             </button>
           ))}
+        </div>
+      </div>
+
+      {/* LEVERAGE card */}
+      <div
+        className="sz-card p-3"
+        style={
+          highRisk
+            ? {
+                borderColor: "rgba(255,180,30,0.7)",
+                boxShadow:
+                  "inset 0 0 24px rgba(255,180,30,0.06), 0 0 18px rgba(255,180,30,0.18)",
+              }
+            : undefined
+        }
+      >
+        <div className="flex items-center justify-between">
+          <span className="sz-pixel flex items-center gap-1 text-[10px]" style={{ color: highRisk ? "#ffcc4d" : "var(--sz-cyan)" }}>
+            <Zap className="size-3" />
+            LEVERAGE
+          </span>
+          <span className="sz-pixel text-[8px]" style={{ color: "var(--sz-muted)" }}>
+            Q/E
+          </span>
+        </div>
+        <div className="mt-2 grid grid-cols-4 gap-1.5">
+          {LEVERAGE_OPTIONS.map((l) => {
+            const active = leverage === l;
+            return (
+              <button
+                key={l}
+                onClick={() => onLeverage(l)}
+                className={`sz-chip sz-pixel py-2 text-[10px] ${active ? "sz-chip-active" : ""}`}
+                style={{
+                  color: active ? "var(--sz-orange-bright)" : "var(--sz-muted)",
+                }}
+              >
+                {l}×
+              </button>
+            );
+          })}
+        </div>
+        <div
+          className="sz-pixel mt-2 text-center text-[8px]"
+          style={{ color: highRisk ? "#ffcc4d" : "var(--sz-muted)" }}
+        >
+          {highRisk ? "⚠ HIGH RISK · LOSS × LEV" : "PAYOUT × LEV · LOSS × LEV"}
         </div>
       </div>
 
