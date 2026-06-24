@@ -19,6 +19,7 @@ const PITCH_Y = ROW_H + ROW_GAP;
 const PITCH_X = COL_W + COL_GAP;
 const TOTAL_H = ROWS * ROW_H + (ROWS - 1) * ROW_GAP;
 const HISTORY_W = 360;
+const SETTLE_TTL_MS = 1300; // how long settled markers linger at NOW line
 
 interface Props {
   currentPrice: number;
