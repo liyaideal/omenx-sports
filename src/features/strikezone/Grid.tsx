@@ -376,17 +376,6 @@ function HistoryChart({
           points={pts.join(" ")}
           style={{ filter: `drop-shadow(0 0 4px ${glow})` }}
         />
-        {/* dashed projection beyond the right edge into NOW */}
-        <line
-          x1={width}
-          y1={tipY}
-          x2={width + 14}
-          y2={tipY}
-          stroke={stroke}
-          strokeDasharray="3 3"
-          strokeWidth={2}
-          opacity={0.7}
-        />
         {/* tip dot */}
         <circle
           cx={width}
