@@ -201,8 +201,11 @@ export function Grid({
           }}
         >
           <span className="sz-glow-cyan tabular-nums">
-            {String(Math.floor(nextTickInSec / 60)).padStart(1, "0")}:
-            {String(nextTickInSec % 60).padStart(2, "0")}
+            {nextTickInSec == null
+              ? "0:--"
+              : `${String(Math.floor(nextTickInSec / 60)).padStart(1, "0")}:${String(
+                  nextTickInSec % 60
+                ).padStart(2, "0")}`}
           </span>
         </div>
         <div
@@ -259,13 +262,12 @@ export function Grid({
             if (colRel < 0 || colRel >= columnCount) return null;
             const y = yFor(p.cellCenter);
             if (y < 0 || y > TOTAL_H) return null;
-            const isHit = hitIds.has(p.id);
             const lev = p.leverage ?? 1;
             const payout = p.stake * p.mult * lev - p.stake;
             return (
               <div
                 key={p.id}
-                className={`pointer-events-none absolute ${isHit ? "sz-cell-hit" : ""}`}
+                className="pointer-events-none absolute"
                 style={{
                   left: colRel * PITCH_X,
                   top: y - ROW_H / 2,
@@ -305,21 +307,69 @@ export function Grid({
           })}
         </div>
 
-        {/* Float "+$X" — fires at NOW line (left edge) */}
-        {floats.map((f) => (
-          <div
-            key={f.id}
-            className="sz-float sz-display sz-glow-green pointer-events-none absolute z-40 text-2xl"
-            style={{
-              left: 8,
-              top: f.y,
-              transform: "translateY(-50%)",
-              color: "var(--sz-green)",
-            }}
-          >
-            {f.text}
-          </div>
-        ))}
+        {/* Settled markers — pinned at NOW line, animated win/loss */}
+        {settledArr.map((s) => {
+          const lev = s.p.leverage ?? 1;
+          const payout = s.p.stake * s.p.mult * lev - s.p.stake;
+          const y = yFor(s.p.cellCenter);
+          return (
+            <div
+              key={s.p.id + ":settled"}
+              className="pointer-events-none absolute z-30"
+              style={{ left: 0, top: y, width: 0, height: 0 }}
+            >
+              {/* Marker burst pinned at NOW line */}
+              <div
+                className={s.won ? "sz-win-burst" : "sz-loss-fade"}
+                style={{
+                  position: "absolute",
+                  left: 0,
+                  top: 0,
+                  width: COL_W,
+                  height: ROW_H,
+                  borderRadius: 8,
+                  background: s.won
+                    ? "linear-gradient(180deg, #fff6c4 0%, #ffb347 55%, #ff6b1a 100%)"
+                    : "linear-gradient(180deg, rgba(255,138,61,0.95) 0%, rgba(255,107,26,0.95) 100%)",
+                  border: s.won ? "2px solid #fff" : "1.5px solid #ffd9b8",
+                }}
+              >
+                <div className="absolute inset-0 flex flex-col items-center justify-center leading-tight">
+                  <span
+                    className="sz-display text-[13px] tabular-nums"
+                    style={{ color: s.won ? "#1a0a00" : "#fff" }}
+                  >
+                    {formatMultiplier(applyLeverage(s.p.mult, lev))}
+                  </span>
+                </div>
+                {s.won && (
+                  <>
+                    <span className="sz-ring" />
+                    <span className="sz-ring sz-ring-2" />
+                  </>
+                )}
+              </div>
+              {/* Big profit pop on win */}
+              {s.won && (
+                <div
+                  className="sz-profit-pop sz-display sz-glow-green pointer-events-none absolute"
+                  style={{
+                    left: COL_W / 2,
+                    top: -8,
+                    fontSize: 30,
+                    fontWeight: 800,
+                    color: "var(--sz-green)",
+                    whiteSpace: "nowrap",
+                    textShadow:
+                      "0 0 14px rgba(0,255,157,0.95), 0 0 28px rgba(0,255,157,0.55), 0 0 6px rgba(255,255,255,0.7)",
+                  }}
+                >
+                  +${payout.toFixed(0)}
+                </div>
+              )}
+            </div>
+          );
+        })}
       </div>
     </div>
   );
