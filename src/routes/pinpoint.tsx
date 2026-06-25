@@ -12,6 +12,7 @@ import { LIQ_TRIGGER_MMR } from "@/features/pinpoint/constants";
 import { useLiveTicker } from "@/features/pinpoint/hooks/useLiveTicker";
 import { Sidebar, type OutcomeChoice } from "@/features/pinpoint/Sidebar";
 import { Grid } from "@/features/pinpoint/Grid";
+import { DepositSheet } from "@/features/pinpoint/DepositSheet";
 import { useGameStats } from "@/features/pinpoint/hooks/useGameStats";
 import {
   isMuted as soundsIsMuted,
@@ -110,7 +111,7 @@ function PinpointInner({
     settlePosition,
     cancelPosition,
     liquidateAll,
-    reset,
+    deposit,
     setBetSize,
     cycleBetSize,
     setLeverage,
@@ -134,7 +135,9 @@ function PinpointInner({
   const [showLiquidated, setShowLiquidated] = useState<{
     liquidatedCount: number;
     lossAmount: number;
+    mmrAtFreeze: number;
   } | null>(null);
+  const [showDeposit, setShowDeposit] = useState(false);
   const liqArmedRef = useRef(false);
 
   // Settlement on tick
@@ -286,7 +289,8 @@ function PinpointInner({
       liqArmedRef.current = true;
       return; // require 2 consecutive ticks
     }
-    const { liquidatedIds } = liquidateAll();
+    const mmrAtFreeze = mmr;
+    const { liquidatedIds } = liquidateAll({ mmr: mmrAtFreeze });
     if (liquidatedIds.length > 0) {
       sndGameOver();
       gameStats.breakStreak();
@@ -298,6 +302,7 @@ function PinpointInner({
       setShowLiquidated({
         liquidatedCount: liquidatedIds.length,
         lossAmount,
+        mmrAtFreeze,
       });
       setTimeout(() => {
         setRecentLiqs((h) => h.filter((x) => !liquidatedIds.includes(x.id)));
