@@ -129,6 +129,9 @@ export function Grid({
   const popsRef = useRef<ProfitPop[]>([]);
   // Mouse hover
   const hoverRef = useRef<{ x: number; y: number } | null>(null);
+  // Timestamp of the most recently rendered RAF frame; used to compensate
+  // for the cells' continuous leftward drift when hit-testing clicks/hover.
+  const lastRenderNowRef = useRef<number>(Date.now());
   // Cell rect cache (built each frame for hit-testing)
   const futureCellsRef = useRef<
     Array<{
@@ -216,6 +219,7 @@ export function Grid({
       ctx.clearRect(0, 0, W, H);
 
       const now = Date.now();
+      lastRenderNowRef.current = now;
       const HISTORY_W = Math.round(W * HISTORY_FRAC);
       const NOW_X = HISTORY_W;
       const yCenter = H / 2;
@@ -369,7 +373,10 @@ export function Grid({
 
       // Build future cells; track for hit-test
       const futureCells: typeof futureCellsRef.current = [];
-      const hover = hoverRef.current;
+      const hoverRaw = hoverRef.current;
+      // No drift compensation needed for hover here — hover is sampled in the
+      // same frame's `now`. (Click uses a later `now` and compensates below.)
+      const hover = hoverRaw;
       for (let k = 0; k < visibleCols; k++) {
         const expirySec = firstSec + k;
         const expiryT = expirySec * 1000;
@@ -586,7 +593,12 @@ export function Grid({
   // ── Mouse handlers ────────────────────────────────────────────────────
   const onMouseMove = useCallback((e: React.MouseEvent<HTMLCanvasElement>) => {
     const r = e.currentTarget.getBoundingClientRect();
-    hoverRef.current = { x: e.clientX - r.left, y: e.clientY - r.top };
+    const rawX = e.clientX - r.left;
+    const y = e.clientY - r.top;
+    // Same drift compensation as onClick: align hover with the cell that will
+    // be hit if the user clicks now.
+    const dx = Math.max(0, (Date.now() - lastRenderNowRef.current) * PX_PER_MS);
+    hoverRef.current = { x: rawX + dx, y };
   }, []);
   const onMouseLeave = useCallback(() => {
     hoverRef.current = null;
@@ -594,8 +606,16 @@ export function Grid({
   const onClick = useCallback(
     (e: React.MouseEvent<HTMLCanvasElement>) => {
       const r = e.currentTarget.getBoundingClientRect();
-      const x = e.clientX - r.left;
+      const rawX = e.clientX - r.left;
       const y = e.clientY - r.top;
+      // Cells drift LEFT at PX_PER_MS between RAF frames. The user aimed at
+      // what they SAW (last painted frame); by the time this click handler
+      // runs, futureCellsRef may already reflect a newer, further-left frame,
+      // so the cursor sits over the cell that was visually to the RIGHT of
+      // the target. Compensate by shifting the click x rightward by the
+      // distance the cells have drifted since the last rendered frame.
+      const dx = Math.max(0, (Date.now() - lastRenderNowRef.current) * PX_PER_MS);
+      const x = rawX + dx;
       const cells = futureCellsRef.current;
       for (const c of cells) {
         if (x >= c.x && x <= c.x + c.w && y >= c.y && y <= c.y + c.h) {
