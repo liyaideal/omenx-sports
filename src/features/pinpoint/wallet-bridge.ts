@@ -14,6 +14,8 @@
  * never collide.
  */
 
+import { useEffect, useState } from "react";
+
 const WALLET_KEY = "omenx.wallet.v1";
 /** Seed balance for first-time users so the demo wallet isn't empty. */
 const SEED_WALLET_BALANCE = 5000;
@@ -79,9 +81,7 @@ export function subscribeWallet(cb: () => void): () => void {
 
 /** Hook-friendly snapshot — components can re-read on each render. */
 export function useWalletBalance(): number {
-  // Lazy import to avoid pulling React when used in non-component contexts.
-  const React = require("react") as typeof import("react");
-  const [bal, setBal] = React.useState<number>(() => getWalletBalance());
-  React.useEffect(() => subscribeWallet(() => setBal(getWalletBalance())), []);
+  const [bal, setBal] = useState<number>(() => getWalletBalance());
+  useEffect(() => subscribeWallet(() => setBal(getWalletBalance())), []);
   return bal;
 }
