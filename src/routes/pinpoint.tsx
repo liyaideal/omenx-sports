@@ -30,6 +30,10 @@ import { StreakPill } from "@/features/pinpoint/StreakPill";
 import { emit, tierFromRatio, tierBumpForStreak } from "@/features/pinpoint/effects/effectsBus";
 import "@/features/pinpoint/pp-theme.css";
 
+// Tier ordering for "highest in a multi-hit batch".
+const TIER_ORDER = { S: 0, M: 1, L: 2, XL: 3 } as const;
+function tierWeight(t: "S" | "M" | "L" | "XL"): number { return TIER_ORDER[t]; }
+
 export const Route = createFileRoute("/pinpoint")({
   head: () => ({
     meta: [
@@ -697,14 +701,6 @@ function ModalShell({
 }
 
 function EmptyState() {
-  return null as never;
-}
-function _unused() {
-  return null;
-}
-// helper: tier ordering for "highest in batch"
-const TIER_ORDER = { S: 0, M: 1, L: 2, XL: 3 } as const;
-function tierWeight(t: "S" | "M" | "L" | "XL"): number { return TIER_ORDER[t]; }
   return (
     <div className="pp-root relative flex min-h-screen items-center justify-center px-4">
       <div className="pp-stars" />
