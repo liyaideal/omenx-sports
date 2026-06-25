@@ -524,4 +524,65 @@ Quick token reference:
 | Body text | `text-foreground` |
 | Meta text | `text-muted-foreground` |
 | Card radius | `rounded-3xl` |
+
+---
+
+## 8. Pinpoint (`/pinpoint`) — scoped sub-theme
+
+`/pinpoint` runs an isolated Y2K Cartridge / Game Boy LCD theme under
+`.pp-root` (see `src/features/pinpoint/pp-theme.css`). It MUST NOT bleed
+into the main app — no `pp-*` token leaks outside the route, and the main
+design system rules above still apply everywhere else.
+
+### 8.1 Economic tokens (v3 spec — source of truth)
+
+Mirrors `src/features/pinpoint/constants.ts`. Never hard-code these in
+components; always import from `constants.ts`.
+
+| Token            | Value         | Meaning                                            |
+|------------------|---------------|----------------------------------------------------|
+| `MM_RATE`        | `0.05` (5%)   | Maintenance margin per $1 of open notional         |
+| `ODDS_CAP`       | `100×`        | Hard cap on quoted odds `1/p`                      |
+| `VIG_PER_CELL`   | `0.015` (1.5%)| House edge baked into each AMM quote               |
+| `TRADING_FEE`    | `0.02` (2%)   | Opening premium charged on notional at bet         |
+| `LEVERAGE_OPTIONS` | `[1, 2, 3]` | Account-level; applies to **new bets only**        |
+| `CANCEL_LOCK_MS` | `1500`        | Pre-judgement window where cancellation is blocked |
+
+### 8.2 Accounting identities (P0 — non-negotiable)
+
+- `Notional N = Margin m × Leverage L`
+- `Quantity q = N / p`   *(p is the AMM-quoted hit probability)*
+- `Win payout (net of margin) = q × (1 − p)`   *— floored at 0*
+- `Equity = Balance + Σ_open (q × (p_t − p_entry))`   *(continuous MTM)*
+- `MMR = (Σ_open N_i × MM_RATE) / Equity`   *— **frozen** when MMR ≥ 100%*
+
+### 8.3 UX rules (P1 — disclosure & guard-rails)
+
+1. Always render the **3-number disclosure** before a bet is placed:
+   `MARGIN $m · NOTIONAL $N · FEE $(N × 2%)`. The per-cell tooltip/label
+   adds the 4th number: `WIN IF HIT = q × (1−p)`.
+2. No "STOP ALL", "Close Now" or active-management buttons. Bets resolve
+   only at judgement or via account-level liquidation.
+3. A single cell is cancelable by clicking your own bet **until**
+   `CANCEL_LOCK_MS` before its judgement tick — then the cell visibly
+   locks (dashed border + 🔒). The trading fee is **not** refunded on
+   cancel; the margin is.
+4. Liquidation is account-wide and synchronous: when `MMR ≥ 100%`, freeze
+   the session, prevent all new bets and cancels, settle every open
+   position as a loss-of-margin, and show the `SESSION FROZEN` panel
+   (never "GAME OVER").
+5. Leverage applies only to **new** bets. Changing leverage never
+   restruts existing positions' `p_entry` or `q`.
+
+### 8.4 Don'ts
+
+- Don't expose distance-based multipliers or any pricing that isn't
+  derived from `quoteCell()` — odds must equal `1/p` (capped at 100×).
+- Don't render a "GAME OVER" stamp; use `SESSION FROZEN`.
+- Don't add a manual close / stop button anywhere in `/pinpoint`.
+- Don't refund the 2% opening fee on cancel.
+- Don't let any `.pp-*` class apply outside `.pp-root`.
+
+The canonical visual reference lives in `src/routes/style-guide.tsx`
+→ *Pinpoint Cartridge* → *Economic Tokens · Pinpoint v3*.
 | Pill radius | `rounded-full` |
