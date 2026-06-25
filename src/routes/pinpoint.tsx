@@ -408,6 +408,10 @@ function PinpointInner({
           maintenance={maintenance}
           lockedStake={lockedStake}
           initialBalance={INITIAL_BALANCE}
+          stats={gameStats.stats}
+          trophies={gameStats.trophies}
+          muted={muted}
+          onToggleMute={toggleMute}
         />
 
         {/* Main */}
