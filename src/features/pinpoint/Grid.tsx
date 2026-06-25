@@ -637,9 +637,6 @@ export function Grid({
         return true;
       });
 
-      // ── 9. Top countdown badge (drawn last over future area) ──────
-      drawCountdownBadge(ctx, NOW_X + 6 + futureW / 2, 4, Math.ceil(60 - (now / 1000) % 60));
-
       raf = requestAnimationFrame(loop);
     };
 
