@@ -132,9 +132,6 @@ export function Grid({
   // Timestamp of the most recently rendered RAF frame; used to compensate
   // for the cells' continuous leftward drift when hit-testing clicks/hover.
   const lastRenderNowRef = useRef<number>(Date.now());
-  // Smoothed vertical offset for the price pill so it can dodge active
-  // hit-flash callouts on the NOW line without snapping.
-  const pillOffsetYRef = useRef<number>(0);
   // Cell rect cache (built each frame for hit-testing)
   const futureCellsRef = useRef<
     Array<{
