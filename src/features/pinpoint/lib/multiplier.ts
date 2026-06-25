@@ -27,23 +27,30 @@ export function formatMultiplier(m: number): string {
   return `${m.toFixed(2)}x`;
 }
 
-/** Cell background — orange heat. Higher mult → brighter orange. */
+/** Cell background — LCD heat. Higher mult → brighter mint/coin gradient. */
 export function multiplierHeat(m: number): string {
-  // 0..1 intensity
   const t = Math.min(1, Math.log(m + 1) / Math.log(MULT_CAP + 1));
-  // Interpolate from very dark ember to bright orange
-  // Dark: #2a1208 (very faint, near bg). Bright: #ff6b1a
-  const r = Math.round(42 + t * (255 - 42));
-  const g = Math.round(18 + t * (107 - 18));
-  const b = Math.round(8 + t * (26 - 8));
-  const alpha = 0.55 + t * 0.45;
+  // Dark LCD wash → mint → coin gold as multiplier climbs.
+  // Dark: #14241a, Mid: #7ed4b2 (mint), Hot: #ffcc00 (coin).
+  let r: number, g: number, b: number;
+  if (t < 0.5) {
+    const k = t / 0.5;
+    r = Math.round(20 + k * (126 - 20));
+    g = Math.round(36 + k * (212 - 36));
+    b = Math.round(26 + k * (178 - 26));
+  } else {
+    const k = (t - 0.5) / 0.5;
+    r = Math.round(126 + k * (255 - 126));
+    g = Math.round(212 + k * (204 - 212));
+    b = Math.round(178 + k * (0 - 178));
+  }
+  const alpha = 0.55 + t * 0.4;
   return `rgba(${r}, ${g}, ${b}, ${alpha})`;
 }
 
-/** Text color for cell — bright on bright cells, muted on dark cells. */
+/** Text color for cell — high contrast vs the new mint/gold heat. */
 export function multiplierTextColor(m: number): string {
   const t = Math.min(1, Math.log(m + 1) / Math.log(MULT_CAP + 1));
-  if (t > 0.6) return "#fff5e8";
-  if (t > 0.3) return "#ffcfa0";
-  return "#8a5a3a";
+  if (t > 0.5) return "#1a1a1a"; // dark over mint/coin
+  return "#f4ecd8";              // cream over LCD wash
 }

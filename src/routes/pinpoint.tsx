@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState, useCallback } from "react";
-import { ArrowLeft, X, Zap } from "lucide-react";
+import { ArrowLeft, X, Zap, Gamepad2 } from "lucide-react";
 import { toast } from "sonner";
 import { MATCH_MARKETS } from "@/data/sports-markets";
 import {
@@ -12,6 +12,16 @@ import { useLiveTicker } from "@/features/pinpoint/hooks/useLiveTicker";
 import { Sidebar, type OutcomeChoice } from "@/features/pinpoint/Sidebar";
 import { Grid } from "@/features/pinpoint/Grid";
 import { EventTabs } from "@/features/pinpoint/EventTabs";
+import { useGameStats } from "@/features/pinpoint/hooks/useGameStats";
+import {
+  isMuted as soundsIsMuted,
+  setMuted as soundsSetMuted,
+  sndCoin,
+  sndWin,
+  sndLose,
+  sndGameOver,
+  sndClick,
+} from "@/features/pinpoint/sounds";
 import "@/features/pinpoint/pp-theme.css";
 
 export const Route = createFileRoute("/pinpoint")({
@@ -111,6 +121,14 @@ function PinpointInner({
     lastBetIdRef,
   } = usePinpointSession();
 
+  // Arcade HUD stats (XP, level, streak, trophies)
+  const gameStats = useGameStats();
+  // Sound mute state
+  const [muted, setMutedState] = useState<boolean>(() => soundsIsMuted());
+  const toggleMute = useCallback(() => {
+    setMutedState((m) => { const next = !m; soundsSetMuted(next); if (!next) sndClick(); return next; });
+  }, []);
+
   const [recentHits, setRecentHits] = useState<{ id: string; at: number }[]>([]);
   const [recentLiqs, setRecentLiqs] = useState<{ id: string; at: number }[]>([]);
   const [showStop, setShowStop] = useState(false);
@@ -134,11 +152,14 @@ function PinpointInner({
           priceRef.current >= p.cellCenter - 0.5 && priceRef.current < p.cellCenter + 0.5;
         settlePosition(p.id, hit ? "won" : "lost", priceRef.current);
         const lev = p.leverage ?? 1;
+        const payout = hit ? p.stake * p.mult * lev : 0;
+        gameStats.recordSettle({ won: hit, stake: p.stake, mult: p.mult * lev, payout });
+        if (hit) sndWin(); else sndLose();
         settled.push({
           id: p.id,
           at: t,
           won: hit,
-          payout: hit ? p.stake * p.mult * lev : 0,
+          payout,
         });
       }
     }
@@ -160,6 +181,7 @@ function PinpointInner({
         toast.error("Insufficient balance");
         return;
       }
+      sndCoin();
       placeBet({
         marketId: activeChoice.market.id,
         outcomeId: activeChoice.outcome.id,
@@ -286,6 +308,8 @@ function PinpointInner({
     // Trigger account-wide liquidation.
     const { liquidatedIds } = liquidateAll(priceByOutcome);
     if (liquidatedIds.length > 0) {
+      sndGameOver();
+      gameStats.breakStreak();
       const at = Date.now();
       setRecentLiqs((h) => [...liquidatedIds.map((id) => ({ id, at })), ...h].slice(0, 40));
       const lossAmount = state.positions
@@ -384,6 +408,10 @@ function PinpointInner({
           maintenance={maintenance}
           lockedStake={lockedStake}
           initialBalance={INITIAL_BALANCE}
+          stats={gameStats.stats}
+          trophies={gameStats.trophies}
+          muted={muted}
+          onToggleMute={toggleMute}
         />
 
         {/* Main */}
@@ -478,6 +506,21 @@ function PinpointInner({
         </main>
       </div>
 
+      {/* LEVEL UP flash banner */}
+      {gameStats.levelUpFlash != null && (
+        <div className="pointer-events-none fixed inset-x-0 top-24 z-50 flex justify-center">
+          <div
+            className="pp-card pp-card-cream pp-level-up px-8 py-4 text-center"
+            style={{ boxShadow: "var(--pp-shadow-coin)" }}
+          >
+            <div className="pp-marker text-[10px]" style={{ color: "#1a1a1a" }}>LEVEL UP!</div>
+            <div className="pp-headline mt-1 text-3xl" style={{ color: "var(--pp-red)" }}>
+              LV {String(gameStats.levelUpFlash).padStart(2, "0")}
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* STOP confirm */}
       {showStop && (
         <ModalShell onClose={() => setShowStop(false)}>
@@ -512,54 +555,58 @@ function PinpointInner({
       {showLiquidated && (
         <ModalShell onClose={() => setShowLiquidated(null)}>
           <div
-            className="pp-card overflow-hidden p-0 text-center"
+            className="pp-card pp-lcd overflow-hidden p-0 text-center"
             style={{
               borderColor: "var(--pp-red)",
               boxShadow: "var(--pp-sticker-shadow-red)",
             }}
           >
             <div className="pp-hazard-stripes-red" />
-            <div className="p-6">
-            <div
-              className="pp-headline text-3xl"
-              style={{
-                color: "var(--pp-red)",
-                textShadow: "3px 3px 0 #000",
-              }}
-            >
-              LIQUIDATED
-            </div>
-            <p className="pp-marker mt-2 text-sm" style={{ color: "var(--pp-yellow)" }}>
-              ACCOUNT EQUITY FELL BELOW MAINTENANCE
-            </p>
-            <p className="mt-4 text-xs" style={{ color: "var(--pp-ink)" }}>
-              {showLiquidated.liquidatedCount} OPEN POSITION
-              {showLiquidated.liquidatedCount === 1 ? "" : "S"} FORCE-CLOSED.
-              <br />
-              MARGIN LOST:{" "}
-              <span style={{ color: "var(--pp-red)" }}>
-                −${showLiquidated.lossAmount.toFixed(0)}
-              </span>
-            </p>
-            <div className="mt-5 flex gap-2">
-              <button
-                onClick={() => setShowLiquidated(null)}
-                className="pp-chip pp-stencil flex-1 py-3 text-[10px]"
+            <div className="px-6 py-8">
+              <div
+                className="pp-headline pp-flicker text-4xl"
+                style={{
+                  color: "var(--pp-red)",
+                  textShadow: "3px 3px 0 #000, 0 0 12px rgba(255,59,59,0.6)",
+                }}
+              >
+                GAME<br />OVER
+              </div>
+              <p className="pp-marker mt-4 text-[10px]" style={{ color: "var(--pp-yellow)" }}>
+                MARGIN CALL · ACCOUNT WIPED
+              </p>
+              <div className="pp-lcd mx-auto mt-5 inline-block px-4 py-2 text-left">
+                <p className="pp-num text-base" style={{ color: "var(--pp-green-2)" }}>
+                  POSITIONS .... {String(showLiquidated.liquidatedCount).padStart(2, "0")}
+                </p>
+                <p className="pp-num text-base" style={{ color: "var(--pp-red)" }}>
+                  MARGIN LOST . −${showLiquidated.lossAmount.toFixed(0)}
+                </p>
+                <p className="pp-num text-base" style={{ color: "var(--pp-yellow)" }}>
+                  CREDITS ..... ${state.balance.toFixed(0)}
+                </p>
+              </div>
+              <p
+                className="pp-stencil pp-blink mt-5 text-[9px]"
                 style={{ color: "var(--pp-yellow)" }}
               >
-                CONTINUE (${state.balance.toFixed(0)})
-              </button>
-              <button
-                onClick={() => {
-                  reset();
-                  setShowLiquidated(null);
-                }}
-                className="pp-stop pp-stencil flex-1 py-3 text-[10px]"
-                style={{ color: "#fff" }}
-              >
-                RESET ACCOUNT
-              </button>
-            </div>
+                ▶ INSERT COIN TO CONTINUE
+              </p>
+              <div className="mt-5 flex gap-2">
+                <button
+                  onClick={() => { sndClick(); setShowLiquidated(null); }}
+                  className="pp-btn pp-btn-mint flex-1 py-3 text-[10px]"
+                >
+                  CONTINUE
+                </button>
+                <button
+                  onClick={() => { sndClick(); reset(); setShowLiquidated(null); }}
+                  className="pp-stop pp-stencil flex-1 py-3 text-[10px]"
+                  style={{ color: "#fff" }}
+                >
+                  RESET
+                </button>
+              </div>
             </div>
             <div className="pp-hazard-stripes-red" />
           </div>
