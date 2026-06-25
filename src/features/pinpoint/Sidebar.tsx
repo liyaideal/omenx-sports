@@ -40,6 +40,8 @@ interface Props {
   // v3 session controls
   frozen: boolean;
   mmr: number;
+  /** MMR at the moment liquidation triggered (0..1). */
+  mmrAtFreeze?: number;
   // sub-account funding
   onDeposit: () => void;
 }
@@ -67,6 +69,7 @@ export function Sidebar({
   onLeverage,
   frozen,
   mmr,
+  mmrAtFreeze,
   onDeposit,
 }: Props) {
   const highRisk = leverage >= 3;
@@ -93,6 +96,8 @@ export function Sidebar({
         lockedStake={lockedStake}
         initialBalance={initialBalance}
         onDeposit={onDeposit}
+        frozen={frozen}
+        mmrAtFreeze={mmrAtFreeze}
       />
 
       {/* ── PER-BET stack: Event → Market → Size → Leverage → Stop */}
