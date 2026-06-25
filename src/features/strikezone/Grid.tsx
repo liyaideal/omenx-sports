@@ -34,6 +34,7 @@ interface Props {
   leverage: number;
   onPlace: (cellCenter: number, distanceCents: number, secondsAhead: number, mult: number) => void;
   onCancel?: (positionId: string) => void;
+  onLiquidate?: (positionId: string, atPrice: number) => void;
   recentHits: { id: string; at: number }[];
 }
 
@@ -49,6 +50,12 @@ type Effect =
       kind: "lose";
       startAt: number;
       p: StrikezonePosition;
+    }
+  | {
+      kind: "liquidate";
+      startAt: number;
+      p: StrikezonePosition;
+      _popped?: boolean;
     };
 
 type DyingCell = {
@@ -92,6 +99,7 @@ export function Grid({
   leverage,
   onPlace,
   onCancel,
+  onLiquidate,
   recentHits,
 }: Props) {
   const wrapRef = useRef<HTMLDivElement | null>(null);
@@ -118,6 +126,9 @@ export function Grid({
   const hitFlashRef = useRef<HitFlashCell[]>([]);
   const starsRef = useRef<StarParticle[]>([]);
   const popsRef = useRef<ProfitPop[]>([]);
+  // Track which positions we've already liquidated locally (avoid double-fire
+  // before parent state propagates).
+  const liquidatedLocalRef = useRef<Set<string>>(new Set());
   // Mouse hover
   const hoverRef = useRef<{ x: number; y: number } | null>(null);
   // Cell rect cache (built each frame for hit-testing)
@@ -164,6 +175,12 @@ export function Grid({
     const next = new Map<string, StrikezonePosition>();
     for (const p of positions) next.set(p.id, p);
     prevPositionsRef.current = next;
+    // Clean liquidatedLocal set of ids that are no longer tracked anywhere.
+    for (const id of liquidatedLocalRef.current) {
+      if (!currIds.has(id) && !effectsRef.current.has(id)) {
+        liquidatedLocalRef.current.delete(id);
+      }
+    }
   }, [positions, recentHits]);
 
   // ── Resize observer ───────────────────────────────────────────────────
