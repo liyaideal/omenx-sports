@@ -1,23 +1,22 @@
 ## Goal
-Remove all `/pinpoint` content from the project so the route and feature no longer exist.
+Attach the "GUESS WHO'S NEXT →" entry to the **Signed Jersey** prize row so it visually belongs to that prize, while keeping all percentages right-aligned in a single column like the other rows.
 
-## Changes
+## Change (scoped to `src/components/sports/promo/LuckyBoxSection.tsx`)
 
-1. **Delete the route**
-   - `rm src/routes/pinpoint.tsx` (TanStack Router will regenerate `routeTree.gen.ts` automatically — do not hand-edit it).
+In the prize list (lines 427–442), the Signed Jersey row becomes:
 
-2. **Delete the entire feature directory**
-   - `rm -rf src/features/pinpoint/` (covers `Grid.tsx`, `Sidebar.tsx`, `AccountBlock.tsx`, `DepositSheet.tsx`, `EventSelector.tsx`, `PriceCapsule.tsx`, `StreakPill.tsx`, `amm.ts`, `constants.ts`, `sounds.ts`, `wallet-bridge.ts`, `pp-theme.css`, `effects/`, `hooks/`, `lib/`).
+```
+🏆 Signed Jersey  [ GUESS WHO'S NEXT → ]            2.0%
+```
 
-3. **Clean `src/routes/style-guide.tsx`**
-   - Remove the `import "@/features/pinpoint/pp-theme.css";` line (3).
-   - Remove the `["pinpoint-cartridge", "Pinpoint Cartridge"]` entry from the section index (184).
-   - Remove the entire `<Section id="pinpoint-cartridge">…</Section>` block (lines 3504–3723).
+- Left cluster: trophy icon + "Signed Jersey" label + a small inline amber dashed chip "GUESS WHO'S NEXT →" rendered as `<Link to="/promo/world-cup" search={{ tab: "legend" }}>`. The chip sits immediately after the label so the association is unambiguous.
+- Right side: the `2.0%` chance stays in the same right-aligned percentage column shared by all other prize rows — no change to that element's position, font, or styling.
+- Non-hero prize rows render unchanged.
+- The chip reuses the existing amber/dashed treatment, shrunk to fit inline (smaller padding, no full-width stretch, no chevron icon — the `→` in the label is enough).
 
-4. **Clean `DESIGN.md`**
-   - Remove the "## 8. Pinpoint (`/pinpoint`) — scoped sub-theme" section and any pinpoint references that follow it (around lines 530–587 and any other mentions).
+Then **remove** the standalone full-width CTA block at lines 444–453 so the card loses the extra row and the hierarchy reads cleanly.
 
-## Verification
-- Run a build/typecheck — expect no broken imports.
-- Confirm `rg -i pinpoint .` returns nothing (besides node_modules).
-- Confirm `/pinpoint` route 404s.
+## Why this works
+- Percentages remain visually aligned in one right-hand column, preserving scan-ability of odds.
+- The CTA is anchored to the Signed Jersey label, eliminating the "is this the next tier?" ambiguity.
+- No logic, data, or copy changes — pure layout.
