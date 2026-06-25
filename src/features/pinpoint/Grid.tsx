@@ -7,6 +7,7 @@ import {
   applyLeverage,
 } from "./lib/multiplier";
 import type { PinpointPosition } from "./hooks/usePinpointSession";
+import { emit, tierFromRatio, type WinTier } from "./effects/effectsBus";
 
 // ── Layout constants (in CSS pixels) ──────────────────────────────────────
 const ROWS = 11; // ±5¢ around center
@@ -591,13 +592,25 @@ export function Grid({
           // Spawn profit pop + star burst once
           if (!eff._popped) {
             eff._popped = true;
+            // Tier from net ratio (already includes leverage via payoutNet).
+            const lev = p.leverage ?? 1;
+            const ratio = eff.payoutNet / Math.max(1, p.stake);
+            const tier = tierFromRatio(ratio, lev);
+            // Coin source in viewport coords for the overlay layer.
+            const rect = canvas.getBoundingClientRect();
+            emit("win", {
+              x: rect.left + cx,
+              y: rect.top + cy,
+              tier,
+              amount: eff.payoutNet,
+            });
             popsRef.current.push({
               startAt: now,
               amount: eff.payoutNet,
               baseX: cx,
               baseY: cy - ROW_H / 2,
             });
-            spawnStars(starsRef.current, cx, cy, now);
+            spawnStars(starsRef.current, cx, cy, now, tier);
           }
         } else if (eff.kind === "liquidate") {
           drawLiquidateBurst(ctx, x, y, COL_W, ROW_H, t01, p);
@@ -1135,27 +1148,30 @@ function spawnStars(
   store: StarParticle[],
   cx: number,
   cy: number,
-  now: number
+  now: number,
+  tier: WinTier = "M"
 ) {
-  // Main bright stars
-  const big = 7;
+  // Tier-amplified counts (capped — pool stays bounded).
+  const bigByTier: Record<WinTier, number> = { S: 5, M: 9, L: 16, XL: 24 };
+  const smallByTier: Record<WinTier, number> = { S: 10, M: 18, L: 30, XL: 42 };
+  const big = bigByTier[tier];
   for (let i = 0; i < big; i++) {
     const a = (Math.PI * 2 * i) / big + Math.random() * 0.7;
-    const speed = 0.18 + Math.random() * 0.14; // px/ms
+    const speed = 0.20 + Math.random() * (tier === "XL" ? 0.22 : 0.14); // px/ms
     store.push({
       startAt: now,
       x: cx + Math.cos(a) * 4,
       y: cy + Math.sin(a) * 4,
       vx: Math.cos(a) * speed,
       vy: Math.sin(a) * speed - 0.05,
-      size: 5 + Math.random() * 3,
-      hue: Math.random() < 0.55 ? "gold" : "green",
+      size: (tier === "XL" ? 6 : 5) + Math.random() * 3,
+      hue: Math.random() < (tier === "L" || tier === "XL" ? 0.7 : 0.55) ? "gold" : "green",
       rot: Math.random() * Math.PI,
       vrot: (Math.random() - 0.5) * 0.012,
     });
   }
   // Smaller sparkles
-  const small = 14;
+  const small = smallByTier[tier];
   for (let i = 0; i < small; i++) {
     const a = Math.random() * Math.PI * 2;
     const speed = 0.08 + Math.random() * 0.22;
