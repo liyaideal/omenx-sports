@@ -318,7 +318,7 @@ export function Grid({
         ctx.shadowBlur = 0;
 
         // Price pill (anchored to tip, drifts left of NOW_X)
-        const pillW = 64;
+        const pillW = 70;
         const pillH = 24;
         const pillX = HISTORY_W - pillW - 12;
         const pillY = tipY - pillH / 2;
@@ -332,16 +332,13 @@ export function Grid({
         ctx.fill();
         ctx.shadowBlur = 0;
         ctx.lineWidth = 2;
-        ctx.strokeStyle = stroke;
+        ctx.strokeStyle = "rgba(14,24,18,0.85)";
         ctx.stroke();
-        ctx.fillStyle = stroke;
-        ctx.font = '700 13px "Bungee","Anton",sans-serif';
+        ctx.fillStyle = "#0e1812";
+        ctx.font = '800 13px "Silkscreen","VT323",monospace';
         ctx.textAlign = "center";
         ctx.textBaseline = "middle";
-        ctx.shadowColor = glow;
-        ctx.shadowBlur = 6;
         ctx.fillText(`${priceRef.current.toFixed(1)}¢`, pillX + pillW / 2, pillY + pillH / 2);
-        ctx.shadowBlur = 0;
         ctx.textAlign = "start";
         ctx.textBaseline = "alphabetic";
       }
