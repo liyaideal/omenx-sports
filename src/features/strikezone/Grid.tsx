@@ -913,15 +913,80 @@ function drawProfitPop(
   ctx.globalAlpha = Math.max(0, alpha);
   ctx.translate(cx, cy);
   ctx.scale(scale, scale);
-  ctx.fillStyle = "#00ff9d";
-  ctx.shadowColor = "rgba(0,255,157,0.95)";
+  const negative = pop.amount < 0;
+  ctx.fillStyle = negative ? "#ff3a5a" : "#00ff9d";
+  ctx.shadowColor = negative ? "rgba(255,58,90,0.95)" : "rgba(0,255,157,0.95)";
   ctx.shadowBlur = 22;
   ctx.font = '800 30px "Audiowide","Chakra Petch",sans-serif';
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
-  ctx.fillText(`+$${pop.amount.toFixed(0)}`, 0, 0);
+  const sign = negative ? "−" : "+";
+  const mag = Math.abs(pop.amount).toFixed(0);
+  ctx.fillText(`${sign}$${mag}${negative ? "  LIQ" : ""}`, 0, 0);
   ctx.shadowBlur = 0;
   ctx.restore();
+}
+
+function drawLiquidateBurst(
+  ctx: CanvasRenderingContext2D,
+  x: number,
+  y: number,
+  w: number,
+  h: number,
+  t: number,
+  _p: StrikezonePosition
+) {
+  // Sharp red impact: scale punch 0..0.18, then fade quickly.
+  const scale =
+    t < 0.18 ? 0.95 + (t / 0.18) * 0.28 : t < 0.5 ? 1.23 - ((t - 0.18) / 0.32) * 0.18 : 1.05;
+  const alpha = t < 0.6 ? 1 : 1 - (t - 0.6) / 0.4;
+  const cx = x + w / 2;
+  const cy = y + h / 2;
+
+  ctx.save();
+  ctx.globalAlpha = Math.max(0, alpha);
+  ctx.translate(cx, cy);
+  ctx.scale(scale, scale);
+  ctx.translate(-cx, -cy);
+
+  roundRect(ctx, x, y, w, h, 8);
+  const g = ctx.createLinearGradient(0, y, 0, y + h);
+  const flash = Math.min(1, t / 0.18);
+  g.addColorStop(0, flash < 1 ? "#ffffff" : "#ff7a8a");
+  g.addColorStop(1, flash < 1 ? "#ffaab2" : "#8a0a18");
+  ctx.fillStyle = g;
+  ctx.shadowColor = "rgba(255,60,90,0.95)";
+  ctx.shadowBlur = 28 * (1 - t * 0.5);
+  ctx.fill();
+  ctx.shadowBlur = 0;
+  ctx.lineWidth = 2;
+  ctx.strokeStyle = "#ff3a5a";
+  ctx.stroke();
+
+  ctx.fillStyle = "#fff";
+  ctx.font = '800 11px "Audiowide","Chakra Petch",sans-serif';
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  ctx.fillText("LIQ", cx, cy);
+  ctx.textAlign = "start";
+  ctx.textBaseline = "alphabetic";
+  ctx.restore();
+
+  // Expanding red ring
+  const ringT = Math.min(1, t / 0.55);
+  if (ringT > 0 && ringT < 1) {
+    ctx.save();
+    ctx.globalAlpha = 0.85 * (1 - ringT);
+    const rScale = 0.6 + ringT * 1.8;
+    ctx.translate(cx, cy);
+    ctx.scale(rScale, rScale);
+    ctx.translate(-cx, -cy);
+    roundRect(ctx, x, y, w, h, 10);
+    ctx.lineWidth = 2;
+    ctx.strokeStyle = "#ff3a5a";
+    ctx.stroke();
+    ctx.restore();
+  }
 }
 
 function drawCountdownBadge(
