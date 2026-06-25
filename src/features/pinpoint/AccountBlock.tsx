@@ -20,6 +20,8 @@ interface Props {
   maintenance: number;
   lockedStake: number;
   initialBalance: number;
+  /** Opens the deposit sheet (main wallet → Pinpoint transfer). */
+  onDeposit?: () => void;
 }
 
 /**
@@ -39,6 +41,7 @@ export function AccountBlock({
   maintenance,
   lockedStake,
   initialBalance,
+  onDeposit,
 }: Props) {
   const ts = trophies ?? TROPHIES.map((t) => ({ ...t, unlocked: t.got(stats) }));
   const need = xpForNext(stats.level);
@@ -150,11 +153,29 @@ export function AccountBlock({
       {/* ── Balance zone ─────────────────────────────────────────── */}
       <div className="flex items-baseline justify-between">
         <span className="pp-stencil text-[11px]" style={{ color: "var(--pp-yellow)" }}>
-          BALANCE
+          PINPOINT BAL
         </span>
-        <span className="pp-stencil text-[9px]" style={{ color: "var(--pp-mute)" }}>
-          {openCount} OPEN
-        </span>
+        <div className="flex items-center gap-2">
+          <span className="pp-stencil text-[9px]" style={{ color: "var(--pp-mute)" }}>
+            {openCount} OPEN
+          </span>
+          {onDeposit ? (
+            <button
+              onClick={onDeposit}
+              className="pp-stencil px-1.5 py-0.5 text-[9px] leading-none"
+              style={{
+                color: "#000",
+                background: "var(--pp-yellow)",
+                border: "1.5px solid #000",
+                borderRadius: 3,
+                boxShadow: "1.5px 1.5px 0 #000",
+              }}
+              title="Transfer from OmenX main wallet"
+            >
+              + FUND
+            </button>
+          ) : null}
+        </div>
       </div>
       <div
         className="pp-headline pp-stamp-green mt-0.5 truncate text-2xl leading-none tabular-nums"
