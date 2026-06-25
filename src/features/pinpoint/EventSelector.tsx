@@ -45,50 +45,59 @@ export function EventSelector({ events, activeEventId, onPick, openCountByEvent 
     <div ref={wrapRef} className="relative">
       <button
         onClick={() => setOpen((v) => !v)}
-        className="pp-card flex w-full items-center gap-2 p-2.5 text-left"
+        className="pp-card flex w-full flex-col gap-1.5 p-3 text-left"
         title="Switch event"
       >
-        <span
-          className="size-1.5 shrink-0 animate-pulse rounded-full"
-          style={{ background: "var(--pp-red)", boxShadow: "1px 1px 0 #000" }}
-        />
-        <span className="pp-stencil text-[9px]" style={{ color: "var(--pp-red)" }}>
-          LIVE
-        </span>
-        <span
-          className="pp-stencil truncate text-[10px]"
-          style={{ color: "var(--pp-yellow)" }}
-        >
-          {home?.short ?? "—"}
+        {/* Row 1 — LIVE marker + clock + chevron */}
+        <div className="flex w-full items-center gap-2">
+          <span
+            className="size-1.5 shrink-0 animate-pulse rounded-full"
+            style={{ background: "var(--pp-red)", boxShadow: "1px 1px 0 #000" }}
+          />
+          <span className="pp-stencil text-[10px]" style={{ color: "var(--pp-red)" }}>
+            LIVE
+          </span>
+          <span
+            className="pp-stencil ml-auto text-[10px] tabular-nums"
+            style={{ color: "var(--pp-mute)" }}
+          >
+            {active.liveClock ?? ""}
+          </span>
+          {activeOpen > 0 && (
+            <span
+              className="pp-stencil flex h-4 min-w-4 items-center justify-center rounded-full px-1 text-[9px]"
+              style={{ color: "#fff", background: "var(--pp-red)", boxShadow: "1px 1px 0 #000" }}
+            >
+              {activeOpen}
+            </span>
+          )}
+          <ChevronDown
+            className="size-3.5 shrink-0"
+            style={{
+              color: "var(--pp-mute)",
+              transform: open ? "rotate(180deg)" : "none",
+              transition: "transform 160ms",
+            }}
+          />
+        </div>
+        {/* Row 2 — matchup + score */}
+        <div className="flex w-full items-baseline gap-2">
+          <span
+            className="pp-stencil truncate text-[12px]"
+            style={{ color: "var(--pp-yellow)" }}
+          >
+            {home?.short ?? "—"} <span style={{ color: "var(--pp-mute)" }}>vs</span>{" "}
+            {away?.short ?? "—"}
+          </span>
           {score && (
-            <span className="pp-num mx-1 tabular-nums" style={{ color: "#fff" }}>
+            <span
+              className="pp-num ml-auto text-[12px] tabular-nums"
+              style={{ color: "#fff" }}
+            >
               {score.home}–{score.away}
             </span>
           )}
-          {away?.short ?? "—"}
-        </span>
-        <span
-          className="pp-stencil ml-auto text-[8px] tabular-nums"
-          style={{ color: "var(--pp-mute)" }}
-        >
-          {active.liveClock ?? ""}
-        </span>
-        {activeOpen > 0 && (
-          <span
-            className="pp-stencil flex h-3.5 min-w-3.5 items-center justify-center rounded-full px-1 text-[8px]"
-            style={{ color: "#fff", background: "var(--pp-red)", boxShadow: "1px 1px 0 #000" }}
-          >
-            {activeOpen}
-          </span>
-        )}
-        <ChevronDown
-          className="size-3 shrink-0"
-          style={{
-            color: "var(--pp-mute)",
-            transform: open ? "rotate(180deg)" : "none",
-            transition: "transform 160ms",
-          }}
-        />
+        </div>
       </button>
 
       {open && (

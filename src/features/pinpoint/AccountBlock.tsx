@@ -49,20 +49,20 @@ export function AccountBlock({
 
   return (
     <div
-      className="pp-card p-2.5"
+      className="pp-card p-3.5"
       title={`Equity $${equity.toFixed(0)} · Maintenance $${maintenance.toFixed(0)}`}
     >
       {/* ── Identity zone ─────────────────────────────────────────── */}
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-2.5">
         {/* Avatar */}
         <div
-          className="flex size-9 shrink-0 items-center justify-center"
+          className="flex size-10 shrink-0 items-center justify-center"
           style={{
             background: "var(--pp-yellow)",
             color: "#1a1a1a",
             border: "2px solid #000",
             fontFamily: '"Press Start 2P", monospace',
-            fontSize: 11,
+            fontSize: 12,
             boxShadow:
               "inset 0 -3px 0 rgba(0,0,0,0.18), inset 0 2px 0 rgba(255,255,255,0.35)",
           }}
@@ -73,18 +73,18 @@ export function AccountBlock({
         {/* LV + XP */}
         <div className="min-w-0 flex-1">
           <div className="flex items-baseline justify-between gap-2">
-            <span className="pp-stencil text-[9px]" style={{ color: "var(--pp-yellow-2)" }}>
+            <span className="pp-stencil text-[11px]" style={{ color: "var(--pp-yellow-2)" }}>
               LV{" "}
               <span style={{ color: "var(--pp-yellow)" }}>
                 {String(stats.level).padStart(2, "0")}
               </span>
             </span>
-            <span className="pp-marker text-[7px]" style={{ color: "rgba(244,236,216,0.55)" }}>
+            <span className="pp-marker text-[9px]" style={{ color: "rgba(244,236,216,0.55)" }}>
               XP {stats.xp}/{need}
             </span>
           </div>
           <div
-            className="mt-1 h-[5px] w-full overflow-hidden"
+            className="mt-1.5 h-[6px] w-full overflow-hidden"
             style={{ background: "#000", border: "1px solid rgba(255,204,0,0.4)" }}
           >
             <div
@@ -98,8 +98,8 @@ export function AccountBlock({
             />
           </div>
           <div
-            className="mt-1 flex items-baseline gap-2.5"
-            style={{ fontFamily: '"Silkscreen", monospace', fontSize: 8, letterSpacing: "0.06em" }}
+            className="mt-1.5 flex items-baseline gap-3"
+            style={{ fontFamily: '"Silkscreen", monospace', fontSize: 10, letterSpacing: "0.06em" }}
           >
             <span>
               <span style={{ color: "rgba(244,236,216,0.5)" }}>W </span>
@@ -118,12 +118,12 @@ export function AccountBlock({
       </div>
 
       {/* Trophy row */}
-      <div className="mt-1.5 flex items-center gap-1" aria-label="Trophies">
+      <div className="mt-2.5 flex items-center gap-1.5" aria-label="Trophies">
         {ts.map((t) => (
           <span
             key={t.id}
             title={`${t.label}${t.unlocked ? " ✓" : " — locked"}`}
-            className="inline-flex size-4 items-center justify-center text-[10px] leading-none"
+            className="inline-flex size-5 items-center justify-center text-[12px] leading-none"
             style={{
               filter: t.unlocked ? "none" : "grayscale(1) opacity(0.35)",
               transition: "filter 200ms ease",
@@ -136,28 +136,28 @@ export function AccountBlock({
 
       {/* ── Divider ──────────────────────────────────────────────── */}
       <div
-        className="my-2 h-px w-full"
+        className="my-3 h-px w-full"
         style={{ background: "var(--pp-card-border)", opacity: 0.5 }}
       />
 
       {/* ── Balance zone ─────────────────────────────────────────── */}
       <div className="flex items-baseline justify-between">
-        <span className="pp-stencil text-[9px]" style={{ color: "var(--pp-yellow)" }}>
+        <span className="pp-stencil text-[11px]" style={{ color: "var(--pp-yellow)" }}>
           BALANCE
         </span>
-        <span className="pp-stencil text-[8px]" style={{ color: "var(--pp-mute)" }}>
+        <span className="pp-stencil text-[9px]" style={{ color: "var(--pp-mute)" }}>
           {openCount} OPEN
         </span>
       </div>
       <div className="flex items-baseline justify-between gap-2">
         <span
-          className="pp-headline pp-stamp-green text-2xl"
+          className="pp-headline pp-stamp-green text-3xl"
           style={{ color: "var(--pp-green)" }}
         >
           ${balance.toLocaleString(undefined, { maximumFractionDigits: 0 })}
         </span>
         <span
-          className="pp-headline text-sm"
+          className="pp-headline text-base"
           style={{
             color: plPositive ? "var(--pp-green)" : "var(--pp-red)",
             textShadow: "1px 1px 0 #000",
@@ -166,25 +166,25 @@ export function AccountBlock({
           {plPositive ? "+" : "−"}${Math.abs(sessionPL).toFixed(0)}
         </span>
       </div>
-      <div className="mt-0.5 flex items-baseline justify-between">
-        <span className="pp-stencil text-[8px]" style={{ color: "var(--pp-mute)" }}>
+      <div className="mt-1 flex items-baseline justify-between">
+        <span className="pp-stencil text-[9px]" style={{ color: "var(--pp-mute)" }}>
           SESSION P/L
         </span>
       </div>
 
-      <div className="mt-2 flex items-center justify-between">
-        <span className="pp-stencil text-[9px]" style={{ color: "var(--pp-yellow)" }}>
+      <div className="mt-3 flex items-center justify-between">
+        <span className="pp-stencil text-[11px]" style={{ color: "var(--pp-yellow)" }}>
           MARGIN
         </span>
         <span
-          className="pp-stencil text-[8px]"
+          className="pp-stencil text-[9px]"
           style={{ color: healthColor, textShadow: "1px 1px 0 #000" }}
         >
           {healthLabel}
         </span>
       </div>
       <div
-        className="mt-1 h-1.5 w-full overflow-hidden rounded-full"
+        className="mt-1.5 h-2 w-full overflow-hidden rounded-full"
         style={{ background: "rgba(0,0,0,0.5)", border: "1px solid var(--pp-card-border)" }}
       >
         <div
