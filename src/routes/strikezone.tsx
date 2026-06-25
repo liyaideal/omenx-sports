@@ -6,7 +6,8 @@ import "@fontsource/press-start-2p/400.css";
 import { MATCH_MARKETS } from "@/data/sports-markets";
 import {
   useStrikezoneSession,
-  liqDistanceFor,
+  computeEquity,
+  INITIAL_BALANCE,
 } from "@/features/strikezone/hooks/useStrikezoneSession";
 import { useLiveTicker } from "@/features/strikezone/hooks/useLiveTicker";
 import { Sidebar, type OutcomeChoice } from "@/features/strikezone/Sidebar";
@@ -101,6 +102,8 @@ function StrikezoneInner({
     undoLast,
     stopAll,
     cancelPosition,
+    liquidateAll,
+    reset,
     setBetSize,
     cycleBetSize,
     setLeverage,
@@ -110,8 +113,14 @@ function StrikezoneInner({
   } = useStrikezoneSession();
 
   const [recentHits, setRecentHits] = useState<{ id: string; at: number }[]>([]);
+  const [recentLiqs, setRecentLiqs] = useState<{ id: string; at: number }[]>([]);
   const [showStop, setShowStop] = useState(false);
   const [showRules, setShowRules] = useState(false);
+  const [showLiquidated, setShowLiquidated] = useState<{
+    liquidatedCount: number;
+    lossAmount: number;
+  } | null>(null);
+  const liqArmedRef = useRef(false);
 
   // Settlement on tick
   const priceRef = useRef(price);
@@ -166,8 +175,6 @@ function StrikezoneInner({
         stake: state.betSize,
         mult,
         leverage: state.leverage,
-        notional: state.betSize * state.leverage,
-        liqDistance: liqDistanceFor(state.leverage),
       });
     },
     [activeChoice, state.balance, state.betSize, state.leverage, placeBet]
@@ -252,6 +259,50 @@ function StrikezoneInner({
     return out;
   }, [state.positions]);
   const priceChange = price - activeChoice.outcome.price * 100;
+
+  // ── Cross-margin equity & maintenance ─────────────────────────────────
+  // Simplification: mark every open position against the active outcome's
+  // live price (multi-event mark-to-market is a follow-up).
+  const priceByOutcome = useMemo(
+    () => ({ [activeChoice.outcome.id]: price }),
+    [activeChoice.outcome.id, price]
+  );
+  const { equity, lockedStake, maintenance } = computeEquity(state, priceByOutcome);
+
+  // Cross-margin liquidation trigger (debounced 2 frames via ref).
+  useEffect(() => {
+    if (lockedStake <= 0) {
+      liqArmedRef.current = false;
+      return;
+    }
+    const breach = equity <= maintenance;
+    if (!breach) {
+      liqArmedRef.current = false;
+      return;
+    }
+    if (!liqArmedRef.current) {
+      liqArmedRef.current = true;
+      return; // require 2 consecutive ticks
+    }
+    // Trigger account-wide liquidation.
+    const { liquidatedIds } = liquidateAll(priceByOutcome);
+    if (liquidatedIds.length > 0) {
+      const at = Date.now();
+      setRecentLiqs((h) => [...liquidatedIds.map((id) => ({ id, at })), ...h].slice(0, 40));
+      const lossAmount = state.positions
+        .filter((p) => p.status === "open" && liquidatedIds.includes(p.id))
+        .reduce((s, p) => s + p.stake, 0);
+      setShowLiquidated({
+        liquidatedCount: liquidatedIds.length,
+        lossAmount,
+      });
+      setTimeout(() => {
+        setRecentLiqs((h) => h.filter((x) => !liquidatedIds.includes(x.id)));
+      }, 1400);
+    }
+    liqArmedRef.current = false;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [tickSec]);
 
   return (
     <div className="sz-root relative min-h-screen w-full overflow-hidden">
@@ -397,8 +448,8 @@ function StrikezoneInner({
             leverage={state.leverage}
             onPlace={handlePlace}
             onCancel={cancelPosition}
-            onLiquidate={(id, atPrice) => settlePosition(id, "liquidated", atPrice)}
             recentHits={recentHits}
+            recentLiquidations={recentLiqs}
           />
 
           {/* Help line */}
