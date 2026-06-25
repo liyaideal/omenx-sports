@@ -335,15 +335,17 @@ export function usePinpointSession() {
   const liquidateAll = useCallback(
     (
       ctx?: { mmr?: number }
-    ): { liquidatedIds: string[] } => {
+    ): { liquidatedIds: string[]; marginLost: number; balanceWiped: number } => {
       const liquidatedIds: string[] = [];
       const now = Date.now();
+      let marginLostOut = 0;
+      let balanceWipedOut = 0;
       setState((s) => {
         if (s.sessionStatus === "frozen") return s;
-        let plDelta = 0;
+        let marginLost = 0;
         const next = s.positions.map((p) => {
           if (p.status !== "open") return p;
-          plDelta -= p.stake;
+          marginLost += p.stake;
           liquidatedIds.push(p.id);
           return {
             ...p,
@@ -353,16 +355,26 @@ export function usePinpointSession() {
             liquidatedAt: now,
           };
         });
+        // Cross-margin wipe: the entire Pinpoint sub-account is the risk pool.
+        // Liquidation forfeits both open margin AND remaining free balance.
+        const balanceWiped = s.balance;
+        marginLostOut = marginLost;
+        balanceWipedOut = balanceWiped;
         return {
           ...s,
-          sessionPL: s.sessionPL + plDelta,
+          balance: 0,
+          sessionPL: s.sessionPL - marginLost - balanceWiped,
           positions: next,
           sessionStatus: "frozen" as const,
           frozenMmr: ctx?.mmr,
           frozenAt: now,
         };
       });
-      return { liquidatedIds };
+      return {
+        liquidatedIds,
+        marginLost: marginLostOut,
+        balanceWiped: balanceWipedOut,
+      };
     },
     []
   );
