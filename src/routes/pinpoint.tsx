@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState, useCallback } from "react";
-import { ArrowLeft, X, Zap, Gamepad2 } from "lucide-react";
+import { ArrowLeft, X, Zap } from "lucide-react";
 import { toast } from "sonner";
 import { MATCH_MARKETS } from "@/data/sports-markets";
 import {
@@ -12,6 +12,7 @@ import { useLiveTicker } from "@/features/pinpoint/hooks/useLiveTicker";
 import { Sidebar, type OutcomeChoice } from "@/features/pinpoint/Sidebar";
 import { Grid } from "@/features/pinpoint/Grid";
 import { EventTabs } from "@/features/pinpoint/EventTabs";
+import { PlayerCard } from "@/features/pinpoint/PlayerCard";
 import { useGameStats } from "@/features/pinpoint/hooks/useGameStats";
 import {
   isMuted as soundsIsMuted,
@@ -363,21 +364,24 @@ function PinpointInner({
           </span>
         </div>
 
-        {undoMsLeft > 0 && (
-          <button
-            onClick={handleUndo}
-            className="pp-stencil ml-auto px-3 py-1.5 text-[10px]"
-            style={{
-              color: "#000",
-              background: "var(--pp-yellow)",
-              border: "2px solid #000",
-              borderRadius: "4px",
-              boxShadow: "2px 2px 0 #000",
-            }}
-          >
-            UNDO {(undoMsLeft / 1000).toFixed(1)}S [Z]
-          </button>
-        )}
+        <div className="ml-auto flex items-center gap-3">
+          {undoMsLeft > 0 && (
+            <button
+              onClick={handleUndo}
+              className="pp-stencil px-3 py-1.5 text-[10px]"
+              style={{
+                color: "#000",
+                background: "var(--pp-yellow)",
+                border: "2px solid #000",
+                borderRadius: "4px",
+                boxShadow: "2px 2px 0 #000",
+              }}
+            >
+              UNDO {(undoMsLeft / 1000).toFixed(1)}S [Z]
+            </button>
+          )}
+          <PlayerCard stats={gameStats.stats} trophies={gameStats.trophies} />
+        </div>
       </header>
 
       {/* Event tabs */}
@@ -408,8 +412,6 @@ function PinpointInner({
           maintenance={maintenance}
           lockedStake={lockedStake}
           initialBalance={INITIAL_BALANCE}
-          stats={gameStats.stats}
-          trophies={gameStats.trophies}
           muted={muted}
           onToggleMute={toggleMute}
         />

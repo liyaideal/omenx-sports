@@ -1,35 +1,68 @@
-## 问题
+## 顶部右侧"玩家证"牌匾 + 左栏压一屏
 
-价格胶囊（"51.7¢"）和命中闪烁格（"1.00x" hit-flash）都锚定在 NOW 线附近的同一行：
+把生涯数据从左栏整体搬到顶栏右侧，做成一块**街机玩家证牌匾**（不是卡片不是 UI 框，是身份徽章）。左栏只留本局数据，自然就一屏放得下。
 
-- 价格胶囊位于 `tipY = yFor(currentPrice)` —— 始终对齐当前价格行
-- Hit-flash 位于 `yFor(round(currentPrice))` —— K 线刚穿过的那行，几乎总是和价格行重合
+### 顶栏新布局
 
-每次格子到期时（每秒一次），它们就撞在一起，俩都看不清。
+```text
+┌──────────────────────────────────────────────────────────────────────────┐
+│  ← BACK   PINPOINT BETA       USA 1-0 PAR  00:38     │ ┌────────────┐    │
+│                               MEX 2-0 RSA  01:04     │ │ PLAYER CARD│   │
+│                                                      │ └────────────┘    │
+└──────────────────────────────────────────────────────────────────────────┘
+```
 
-## 修复方案（仅 `src/features/pinpoint/Grid.tsx`）
+**玩家证牌匾**（顶栏最右、贴边、约 320×64px）：
+- 不用 `.pp-card` 黑底硬阴影那一套，改成**双层冲压金属感**：外层 1px 金边描边、内层暗背景、左上角小三角缺口（像证件孔）
+- 内容横向 3 段：
+  - **左段**：8×8 像素头像方块 + LV 05（大号 stencil）
+  - **中段**：XP 进度条 横置 80×6px + "64 / 340" 小字 + WIN 22%
+  - **右段**：W32 / L114 / BEST 11.4× 三行迷你数字 + 下方 6 个 16px 奖杯横排
+- 整块带 1px 高光线条（像证件层压塑料反光），与左侧 LCD 卡片视觉拉开
+- hover 整块亮 8%，**不可点击**——纯炫耀位（生涯页以后再做）
 
-**动态避让**：当有 hit-flash 活跃时，把价格胶囊从 tipY 临时上移/下移一个行距（`PITCH_Y`），并画一条 1px 引线从 tip 圆点连到胶囊，保持两者的视觉关联。
+视觉关键词：街机时代会员卡、机房积分卡、押金牌、不是 dashboard widget。
 
-### 具体改动
+### 左栏（剩 5 块，自然一屏）
 
-1. **检测冲突**：在画价格胶囊之前，遍历 `hitFlashRef.current`，看是否存在 `Math.round(currentPrice)` 行的活跃 hit-flash（`age < HIT_FLASH_MS`）。
+按从上到下顺序：
+1. Balance 卡
+2. Session P/L + Open 卡（合并）
+3. Margin Health 卡（瘦身、保留 bar）
+4. Market chips（USA/DRAW/PAR + 比分一行）
+5. Bet Size chips（紧凑 2×3，去掉大号 100 数字）
+6. Leverage chips（1×/2×/3× 横排矮版）
+7. STOP 按钮
+8. Sound / Rules / Info 文字行
 
-2. **垂直避让**：若冲突，pill 的 `pillY` 从 `tipY - pillH/2` 改为：
-   - 优先向上 `tipY - PITCH_Y - pillH/2`
-   - 若上移后会超出画布顶部（`< 2px`），改为向下 `tipY + PITCH_Y - pillH/2`
-   - 同时把 pill 水平再往左推 6px，让它彻底脱离 NOW 线那一列的 hit-flash 高亮范围
+合计高度 < 700px，1024×780 视口零滚动。左栏宽度从 ~300px 收到 **260px**，留更多空间给牌匾和顶栏赛程 chip。
 
-3. **加引线**：从 `(HISTORY_W, tipY)` 画一段虚线（2px on / 3px off）到 pill 右边缘中点，颜色用 `stroke`（涨跌色），让用户一眼看出 pill 仍代表当前价。
+### 顶栏赛程区
 
-4. **平滑过渡（可选，简单实现）**：用 `currentPillOffsetRef` 记录上一帧的 y 偏移，每帧朝目标偏移 lerp 30%，避免 hit-flash 出现/消失瞬间 pill 弹跳。
+现在 LIVE 标 + USA/MEX 两个赛程 chip 不动，只把它们的水平位置整体左移，给最右的玩家证让位。
 
-### 不会改动
+### 改动文件
 
-- Hit-flash 自身（保留它在 NOW 线的卡带高亮，毕竟这是"K 线刚刚到达"的关键反馈）
-- 业务逻辑、下注、倍数颜色
-- pill 的样式（前一轮已经修好了可读性）
+- **新建** `src/features/pinpoint/PlayerCard.tsx` —— 顶右玩家证牌匾组件（金属冲压描边 + 头像 + LV + XP bar + W/L/Best + 奖杯横排）
+- **新建** `src/features/pinpoint/pp-player-card.css` —— 牌匾专属样式（金边、压塑高光、证件孔缺口、悬停发光）
+- `src/features/pinpoint/PlayerHUD.tsx` —— 整文件**删除**（或保留为内部空壳，由 PlayerCard 取代）
+- `src/features/pinpoint/Sidebar.tsx` —— 删掉 PlayerHUD 渲染；合并 Balance/Session/Margin 为更紧凑版；BetSize 去掉大号 100；所有 chip 用矮版（28px）
+- `src/routes/pinpoint.tsx` —— 顶栏 flex 末尾插入 `<PlayerCard>`；左栏宽度 300→260px
+- `src/routes/style-guide.tsx` —— Cartridge 段把 PlayerHUD 示例换成 PlayerCard 牌匾示例
+- `DESIGN.md` —— §4 新增 "PlayerCard 玩家证牌匾"（金属冲压视觉、不是 dashboard 卡片）；§5 写明"生涯数据归顶部牌匾，本局数据归左栏"；§7 Do's & Don'ts 加"不要把跨局生涯数据和本局资金数据放进同一个卡片维度"
+
+### 不动
+
+- 右侧网格（位置/宽度/Canvas/逻辑/快捷键全部不动）
+- 数据来源：复用现有 `useGameStats` hook，PlayerCard 只是消费者
+- LCD 卡带主视觉、字体、颜色 token
+- 顶栏 BACK、PINPOINT 标题、LIVE 标、赛程 chip
 
 ### 验证
 
-Playwright 截 `/pinpoint`，等到 hit-flash 出现的那 650ms 内截图，确认 pill 已经避让到上/下一行且引线清晰可见，hit-flash 的 "1.00x" 完全可读。
+- Playwright 三视口截图 1440×900 / 1280×800 / **1024×780**：
+  - 顶栏一行装得下 BACK + 标题 + 赛程 chip + PlayerCard 牌匾，无换行
+  - 左栏从顶到底无滚动（断言 `sidebar.scrollHeight <= clientHeight`）
+  - 右侧网格位置/尺寸与改动前一致
+- 截 PlayerCard 元素特写（`element.screenshot`），确认金属冲压+证件孔+奖杯横排的视觉与左栏 LCD 卡明显不同
+- `/style-guide` Cartridge 段单独展示 PlayerCard，正常渲染
