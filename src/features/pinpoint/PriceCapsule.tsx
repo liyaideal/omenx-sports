@@ -40,14 +40,14 @@ export function PriceCapsule({ price, range, height }: Props) {
           width: "18px",
           background:
             "linear-gradient(90deg, var(--pp-green) 0%, rgba(0,255,157,0.2) 100%)",
-          boxShadow: "0 0 8px rgba(0,255,157,0.6)",
+          boxShadow: "2px 2px 0 #000",
         }}
       />
       <div
         className="size-2.5 rounded-full"
         style={{
           background: "var(--pp-green)",
-          boxShadow: "0 0 12px rgba(0,255,157,0.9)",
+          boxShadow: "2px 2px 0 #000",
         }}
       />
     </div>

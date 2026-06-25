@@ -390,7 +390,7 @@ function PinpointInner({
                 className="size-2 animate-pulse rounded-full"
                 style={{
                   background: "var(--pp-red)",
-                  boxShadow: "0 0 8px var(--pp-red)",
+                  boxShadow: "2px 2px 0 #000",
                 }}
               />
               <span
@@ -510,14 +510,14 @@ function PinpointInner({
             className="pp-card p-6 text-center"
             style={{
               borderColor: "var(--pp-red)",
-              boxShadow: "0 0 40px rgba(255,45,74,0.45), inset 0 0 24px rgba(255,45,74,0.12)",
+              boxShadow: "var(--pp-sticker-shadow-red)",
             }}
           >
             <div
               className="pp-headline text-3xl"
               style={{
                 color: "var(--pp-red)",
-                textShadow: "0 0 16px rgba(255,45,74,0.9)",
+                textShadow: "3px 3px 0 #000",
               }}
             >
               LIQUIDATED

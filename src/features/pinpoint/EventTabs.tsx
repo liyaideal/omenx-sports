@@ -14,7 +14,7 @@ export function EventTabs({ events, activeEventId, onPick, openCountByEvent }: P
       <div className="flex shrink-0 items-center gap-2">
         <span
           className="size-2 animate-pulse rounded-full"
-          style={{ background: "var(--pp-red)", boxShadow: "0 0 8px var(--pp-red)" }}
+          style={{ background: "var(--pp-red)", boxShadow: "2px 2px 0 #000" }}
         />
         <span
           className="pp-stencil text-[10px]"
@@ -72,7 +72,7 @@ export function EventTabs({ events, activeEventId, onPick, openCountByEvent }: P
                   style={{
                     color: "#fff",
                     background: "var(--pp-red)",
-                    boxShadow: "0 0 8px rgba(255,107,26,0.6)",
+                    boxShadow: "2px 2px 0 #000",
                   }}
                 >
                   {openCount}

@@ -81,7 +81,7 @@ export function Sidebar({
             className="size-2 rounded-full"
             style={{
               background: "var(--pp-yellow)",
-              boxShadow: "0 0 8px var(--pp-yellow)",
+              boxShadow: "2px 2px 0 #000",
             }}
           />
           <span
@@ -117,9 +117,7 @@ export function Sidebar({
             className="pp-headline mt-1 text-2xl"
             style={{
               color: plPositive ? "var(--pp-green)" : "var(--pp-red)",
-              textShadow: plPositive
-                ? "0 0 8px rgba(0,255,157,0.6)"
-                : "0 0 8px rgba(255,45,74,0.6)",
+              textShadow: "2px 2px 0 #000",
             }}
           >
             {plPositive ? "+" : "−"}${Math.abs(sessionPL).toFixed(0)}
@@ -133,7 +131,7 @@ export function Sidebar({
             </span>
             <span
               className="pp-stencil text-[9px]"
-              style={{ color: healthColor, textShadow: `0 0 6px ${healthColor}` }}
+              style={{ color: healthColor, textShadow: "1px 1px 0 #000" }}
             >
               {healthLabel}
             </span>
@@ -148,7 +146,7 @@ export function Sidebar({
                 width: `${health * 100}%`,
                 height: "100%",
                 background: healthColor,
-                boxShadow: `0 0 8px ${healthColor}`,
+                boxShadow: "inset 0 -2px 0 rgba(0,0,0,0.35)",
                 transition: "width 200ms linear",
               }}
             />
