@@ -540,54 +540,58 @@ function PinpointInner({
       {showLiquidated && (
         <ModalShell onClose={() => setShowLiquidated(null)}>
           <div
-            className="pp-card overflow-hidden p-0 text-center"
+            className="pp-card pp-lcd overflow-hidden p-0 text-center"
             style={{
               borderColor: "var(--pp-red)",
               boxShadow: "var(--pp-sticker-shadow-red)",
             }}
           >
             <div className="pp-hazard-stripes-red" />
-            <div className="p-6">
-            <div
-              className="pp-headline text-3xl"
-              style={{
-                color: "var(--pp-red)",
-                textShadow: "3px 3px 0 #000",
-              }}
-            >
-              LIQUIDATED
-            </div>
-            <p className="pp-marker mt-2 text-sm" style={{ color: "var(--pp-yellow)" }}>
-              ACCOUNT EQUITY FELL BELOW MAINTENANCE
-            </p>
-            <p className="mt-4 text-xs" style={{ color: "var(--pp-ink)" }}>
-              {showLiquidated.liquidatedCount} OPEN POSITION
-              {showLiquidated.liquidatedCount === 1 ? "" : "S"} FORCE-CLOSED.
-              <br />
-              MARGIN LOST:{" "}
-              <span style={{ color: "var(--pp-red)" }}>
-                −${showLiquidated.lossAmount.toFixed(0)}
-              </span>
-            </p>
-            <div className="mt-5 flex gap-2">
-              <button
-                onClick={() => setShowLiquidated(null)}
-                className="pp-chip pp-stencil flex-1 py-3 text-[10px]"
+            <div className="px-6 py-8">
+              <div
+                className="pp-headline pp-flicker text-4xl"
+                style={{
+                  color: "var(--pp-red)",
+                  textShadow: "3px 3px 0 #000, 0 0 12px rgba(255,59,59,0.6)",
+                }}
+              >
+                GAME<br />OVER
+              </div>
+              <p className="pp-marker mt-4 text-[10px]" style={{ color: "var(--pp-yellow)" }}>
+                MARGIN CALL · ACCOUNT WIPED
+              </p>
+              <div className="pp-lcd mx-auto mt-5 inline-block px-4 py-2 text-left">
+                <p className="pp-num text-base" style={{ color: "var(--pp-green-2)" }}>
+                  POSITIONS .... {String(showLiquidated.liquidatedCount).padStart(2, "0")}
+                </p>
+                <p className="pp-num text-base" style={{ color: "var(--pp-red)" }}>
+                  MARGIN LOST . −${showLiquidated.lossAmount.toFixed(0)}
+                </p>
+                <p className="pp-num text-base" style={{ color: "var(--pp-yellow)" }}>
+                  CREDITS ..... ${state.balance.toFixed(0)}
+                </p>
+              </div>
+              <p
+                className="pp-stencil pp-blink mt-5 text-[9px]"
                 style={{ color: "var(--pp-yellow)" }}
               >
-                CONTINUE (${state.balance.toFixed(0)})
-              </button>
-              <button
-                onClick={() => {
-                  reset();
-                  setShowLiquidated(null);
-                }}
-                className="pp-stop pp-stencil flex-1 py-3 text-[10px]"
-                style={{ color: "#fff" }}
-              >
-                RESET ACCOUNT
-              </button>
-            </div>
+                ▶ INSERT COIN TO CONTINUE
+              </p>
+              <div className="mt-5 flex gap-2">
+                <button
+                  onClick={() => { sndClick(); setShowLiquidated(null); }}
+                  className="pp-btn pp-btn-mint flex-1 py-3 text-[10px]"
+                >
+                  CONTINUE
+                </button>
+                <button
+                  onClick={() => { sndClick(); reset(); setShowLiquidated(null); }}
+                  className="pp-stop pp-stencil flex-1 py-3 text-[10px]"
+                  style={{ color: "#fff" }}
+                >
+                  RESET
+                </button>
+              </div>
             </div>
             <div className="pp-hazard-stripes-red" />
           </div>
