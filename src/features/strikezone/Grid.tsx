@@ -19,10 +19,12 @@ const PITCH_Y = ROW_H + ROW_GAP;
 const TOTAL_H = ROWS * ROW_H + (ROWS - 1) * ROW_GAP;
 const HISTORY_FRAC = 0.34; // left chart takes ~34% of width
 const PX_PER_MS = PITCH_X / 1000; // one column per second
-const DYING_MS = 220;
+const DYING_MS = 150; // non-hit cells in an expired column vanish quickly
+const HIT_FLASH_MS = 650; // hit cell lingers and pulses
 const SETTLE_MS = 750;
 const POP_MS = 1400;
 const WIN_BURST_MS = 1100;
+const STAR_LIFE_MS = 950;
 
 interface Props {
   currentPrice: number;
@@ -54,6 +56,25 @@ type DyingCell = {
   expirySec: number;
   row: number;
   mult: number;
+};
+
+type HitFlashCell = {
+  startAt: number;
+  expirySec: number;
+  row: number;
+  mult: number;
+};
+
+type StarParticle = {
+  startAt: number;
+  x: number;
+  y: number;
+  vx: number; // px/ms
+  vy: number; // px/ms
+  size: number;
+  hue: "gold" | "green";
+  rot: number;
+  vrot: number;
 };
 
 type ProfitPop = {
@@ -94,9 +115,9 @@ export function Grid({
   // Effects/animations
   const effectsRef = useRef<Map<string, Effect>>(new Map());
   const dyingRef = useRef<DyingCell[]>([]);
+  const hitFlashRef = useRef<HitFlashCell[]>([]);
+  const starsRef = useRef<StarParticle[]>([]);
   const popsRef = useRef<ProfitPop[]>([]);
-  // Per-column expirySec we've already settled in-canvas (to avoid duplicate dying spawn).
-  const settledColumnsRef = useRef<Set<number>>(new Set());
   // Mouse hover
   const hoverRef = useRef<{ x: number; y: number } | null>(null);
   // Cell rect cache (built each frame for hit-testing)
@@ -138,9 +159,6 @@ export function Grid({
         } else {
           effectsRef.current.set(id, { kind: "lose", startAt: now, p: prevP });
         }
-        // Also mark this column as settled so dying cells aren't spawned for the row that was bet.
-        const expirySec = Math.round(prevP.targetAt / 1000);
-        settledColumnsRef.current.add(expirySec);
       }
     }
     const next = new Map<string, StrikezonePosition>();
@@ -385,17 +403,37 @@ export function Grid({
       futureCellsRef.current = futureCells;
 
       // ── 5. Spawn dying cells for columns whose expirySec just crossed NOW ──
-      // For any expirySec where firstSec > expirySec and not in settledColumnsRef
-      // (rare path: column expires without any bet). We track "lastFirstSec" by
-      // reading prevFirstSec.
       const prevFirst = prevFirstSecRef.current;
       if (prevFirst != null && prevFirst < firstSec) {
         for (let s = prevFirst; s < firstSec; s++) {
-          if (settledColumnsRef.current.has(s)) continue;
-          // Spawn dying for every row (no bet → all empty)
+          // Determine the row the K-line tip hit at expiry: row whose
+          // cellCenter == round(currentPrice).
+          const hitCenter = Math.round(priceRef.current);
+          const hitDist = hitCenter - center;
+          const hitRow = 5 - hitDist; // may be outside [0,10] if price drifted far
+          // Find any bet (now settled into effectsRef) at this column.
+          const betCentersThisCol = new Set<number>();
+          effectsRef.current.forEach((eff) => {
+            if (Math.round(eff.p.targetAt / 1000) === s) {
+              betCentersThisCol.add(Math.round(eff.p.cellCenter));
+            }
+          });
           for (let r = 0; r < ROWS; r++) {
             const dist = 5 - r;
+            const cellCenter = center + dist;
             const mlt = multiplier(Math.abs(dist), 1);
+            // Skip rows that are settled bet cells — their win/lose effect draws them.
+            if (betCentersThisCol.has(Math.round(cellCenter))) continue;
+            // Hit row that is NOT a bet → flash it brightly instead of dying.
+            if (r === hitRow) {
+              hitFlashRef.current.push({
+                startAt: now,
+                expirySec: s,
+                row: r,
+                mult: mlt,
+              });
+              continue;
+            }
             dyingRef.current.push({
               startAt: now,
               expirySec: s,
@@ -413,7 +451,7 @@ export function Grid({
         if (age > DYING_MS) return false;
         const p = age / DYING_MS;
         const alpha = 1 - p;
-        const scale = 1 - p * 0.2;
+        const scale = 1 - p * 0.35;
         const dist = 5 - d.row;
         const cy = yFor(center + dist);
         const x = NOW_X - COL_W / 2;
@@ -430,6 +468,19 @@ export function Grid({
         return true;
       });
 
+      // ── 6b. Hit-flash cells (non-bet hit row, gold pulse) ─────────
+      hitFlashRef.current = hitFlashRef.current.filter((hf) => {
+        const age = now - hf.startAt;
+        if (age > HIT_FLASH_MS) return false;
+        const t = age / HIT_FLASH_MS;
+        const dist = 5 - hf.row;
+        const cy = yFor(center + dist);
+        const x = NOW_X - COL_W / 2;
+        const y = cy - ROW_H / 2;
+        drawHitFlash(ctx, x, y, COL_W, ROW_H, t, hf.mult);
+        return true;
+      });
+
       // ── 7. Render settlement effects (bet cells: win/lose) ─────────
       const toDelete: string[] = [];
       effectsRef.current.forEach((eff, id) => {
@@ -441,16 +492,16 @@ export function Grid({
         }
         const t01 = Math.min(1, age / totalMs);
         const p = eff.p;
-        // x slides left from NOW_X (settled at expiry) as time passes
-        const slideMs = age; // continue at PX_PER_MS rate
-        const cx = NOW_X - slideMs * PX_PER_MS * 0.6; // slow-mo for drama
+        // Keep bet cell pinned at the NOW line so the player can see the
+        // exact strike position before the burst.
+        const cx = NOW_X;
         const cy = yFor(p.cellCenter);
         const x = cx - COL_W / 2;
         const y = cy - ROW_H / 2;
 
         if (eff.kind === "win") {
           drawWinBurst(ctx, x, y, COL_W, ROW_H, t01, p, eff.payoutNet);
-          // Spawn profit pop once
+          // Spawn profit pop + star burst once
           if (!eff._popped) {
             eff._popped = true;
             popsRef.current.push({
@@ -459,12 +510,26 @@ export function Grid({
               baseX: cx,
               baseY: cy - ROW_H / 2,
             });
+            spawnStars(starsRef.current, cx, cy, now);
           }
         } else {
           drawLoseFade(ctx, x, y, COL_W, ROW_H, t01, p);
         }
       });
       for (const id of toDelete) effectsRef.current.delete(id);
+
+      // ── 8b. Star particles ───────────────────────────────────────
+      starsRef.current = starsRef.current.filter((s) => {
+        const age = now - s.startAt;
+        if (age > STAR_LIFE_MS) return false;
+        // physics
+        s.x += s.vx * dt;
+        s.y += s.vy * dt;
+        s.vy += 0.0009 * dt; // gentle gravity
+        s.rot += s.vrot * dt;
+        drawStar(ctx, s, age / STAR_LIFE_MS);
+        return true;
+      });
 
       // ── 8. Profit pops (floating +$xxx) ────────────────────────────
       popsRef.current = popsRef.current.filter((pop) => {
@@ -800,4 +865,153 @@ function drawCountdownBadge(
   ctx.shadowBlur = 0;
   ctx.textAlign = "start";
   ctx.textBaseline = "alphabetic";
+}
+
+// ── Hit flash (non-bet K-line strike) ──────────────────────────────────
+function drawHitFlash(
+  ctx: CanvasRenderingContext2D,
+  x: number,
+  y: number,
+  w: number,
+  h: number,
+  t: number,
+  mult: number
+) {
+  // Phase 1 (0..0.18): scale punch + white→gold
+  // Phase 2 (0.18..0.7): hold + pulsing ring
+  // Phase 3 (0.7..1): fade out
+  const scale =
+    t < 0.18 ? 0.95 + (t / 0.18) * 0.23 : t < 0.55 ? 1.18 - ((t - 0.18) / 0.37) * 0.13 : 1.05;
+  const alpha = t < 0.7 ? 1 : 1 - (t - 0.7) / 0.3;
+  const cx = x + w / 2;
+  const cy = y + h / 2;
+
+  ctx.save();
+  ctx.globalAlpha = Math.max(0, alpha);
+  ctx.translate(cx, cy);
+  ctx.scale(scale, scale);
+  ctx.translate(-cx, -cy);
+
+  roundRect(ctx, x, y, w, h, 8);
+  const g = ctx.createLinearGradient(0, y, 0, y + h);
+  // White-hot at start, settle to gold
+  const fadeToGold = Math.min(1, t / 0.25);
+  g.addColorStop(0, fadeToGold < 1 ? "#ffffff" : "#fff6c4");
+  g.addColorStop(1, fadeToGold < 1 ? "#ffe9a0" : "#ffb347");
+  ctx.fillStyle = g;
+  ctx.shadowColor = "rgba(255,220,120,0.95)";
+  ctx.shadowBlur = 24 * (1 - t * 0.5);
+  ctx.fill();
+  ctx.shadowBlur = 0;
+  ctx.lineWidth = 2;
+  ctx.strokeStyle = "#ffd84a";
+  ctx.stroke();
+
+  ctx.fillStyle = "#3b1a00";
+  ctx.font = '700 13px "Chakra Petch","JetBrains Mono",monospace';
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  ctx.fillText(formatMultiplier(mult), cx, cy);
+  ctx.textAlign = "start";
+  ctx.textBaseline = "alphabetic";
+  ctx.restore();
+
+  // Expanding gold ring
+  const ringT = Math.min(1, t / 0.6);
+  if (ringT > 0 && ringT < 1) {
+    ctx.save();
+    ctx.globalAlpha = 0.85 * (1 - ringT);
+    const rScale = 0.6 + ringT * 1.6;
+    ctx.translate(cx, cy);
+    ctx.scale(rScale, rScale);
+    ctx.translate(-cx, -cy);
+    roundRect(ctx, x, y, w, h, 10);
+    ctx.lineWidth = 2;
+    ctx.strokeStyle = "#ffd84a";
+    ctx.stroke();
+    ctx.restore();
+  }
+}
+
+// ── Star particles ─────────────────────────────────────────────────────
+function spawnStars(
+  store: StarParticle[],
+  cx: number,
+  cy: number,
+  now: number
+) {
+  // Main bright stars
+  const big = 7;
+  for (let i = 0; i < big; i++) {
+    const a = (Math.PI * 2 * i) / big + Math.random() * 0.7;
+    const speed = 0.18 + Math.random() * 0.14; // px/ms
+    store.push({
+      startAt: now,
+      x: cx + Math.cos(a) * 4,
+      y: cy + Math.sin(a) * 4,
+      vx: Math.cos(a) * speed,
+      vy: Math.sin(a) * speed - 0.05,
+      size: 5 + Math.random() * 3,
+      hue: Math.random() < 0.55 ? "gold" : "green",
+      rot: Math.random() * Math.PI,
+      vrot: (Math.random() - 0.5) * 0.012,
+    });
+  }
+  // Smaller sparkles
+  const small = 14;
+  for (let i = 0; i < small; i++) {
+    const a = Math.random() * Math.PI * 2;
+    const speed = 0.08 + Math.random() * 0.22;
+    store.push({
+      startAt: now,
+      x: cx,
+      y: cy,
+      vx: Math.cos(a) * speed,
+      vy: Math.sin(a) * speed - 0.04,
+      size: 2 + Math.random() * 2,
+      hue: Math.random() < 0.5 ? "gold" : "green",
+      rot: Math.random() * Math.PI,
+      vrot: (Math.random() - 0.5) * 0.02,
+    });
+  }
+}
+
+function drawStar(
+  ctx: CanvasRenderingContext2D,
+  s: StarParticle,
+  t: number
+) {
+  const alpha = t < 0.15 ? t / 0.15 : 1 - (t - 0.15) / 0.85;
+  const color = s.hue === "gold" ? "#ffd84a" : "#7cffb2";
+  const glow = s.hue === "gold" ? "rgba(255,216,74,0.95)" : "rgba(124,255,178,0.9)";
+  ctx.save();
+  ctx.globalAlpha = Math.max(0, Math.min(1, alpha));
+  ctx.translate(s.x, s.y);
+  ctx.rotate(s.rot);
+  ctx.fillStyle = color;
+  ctx.shadowColor = glow;
+  ctx.shadowBlur = 10;
+  // 4-point star = two crossed thin diamonds
+  const r = s.size;
+  ctx.beginPath();
+  ctx.moveTo(0, -r);
+  ctx.lineTo(r * 0.35, 0);
+  ctx.lineTo(0, r);
+  ctx.lineTo(-r * 0.35, 0);
+  ctx.closePath();
+  ctx.fill();
+  ctx.beginPath();
+  ctx.moveTo(-r, 0);
+  ctx.lineTo(0, r * 0.35);
+  ctx.lineTo(r, 0);
+  ctx.lineTo(0, -r * 0.35);
+  ctx.closePath();
+  ctx.fill();
+  // Bright core
+  ctx.shadowBlur = 0;
+  ctx.fillStyle = "#ffffff";
+  ctx.beginPath();
+  ctx.arc(0, 0, r * 0.25, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.restore();
 }
