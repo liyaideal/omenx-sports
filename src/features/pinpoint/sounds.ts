@@ -83,3 +83,30 @@ export const sndLevelUp  = () => play([
 ]);
 /** Streak tick — small bell at every consecutive win past 2. */
 export const sndStreak   = () => play([{ freq: 1568, dur: 0.05 }, { freq: 2093, dur: 0.08 }]);
+
+/** Tiered win — same shape, brighter / higher with tier. */
+export const sndWinTier = (tier: "S" | "M" | "L" | "XL") => {
+  const base = tier === "S" ? 1 : tier === "M" ? 1.12 : tier === "L" ? 1.25 : 1.4;
+  play([
+    { freq: 784 * base, dur: 0.06 },
+    { freq: 988 * base, dur: 0.06 },
+    { freq: 1319 * base, dur: 0.07 },
+    { freq: 1568 * base, dur: tier === "XL" ? 0.24 : 0.16, gain: tier === "S" ? 0.07 : 0.09 },
+  ]);
+};
+/** Coin arrival "tink" — short, bright. */
+export const sndCoinArrive = () => play([{ freq: 2349, dur: 0.04, gain: 0.05 }]);
+/** Combo chord — count drives pitch. */
+export const sndCombo = (count: number) => {
+  const lift = Math.min(1.45, 1 + (count - 2) * 0.07);
+  play([
+    { freq: 1047 * lift, dur: 0.06 },
+    { freq: 1319 * lift, dur: 0.06 },
+    { freq: 1568 * lift, dur: 0.18, gain: 0.1 },
+  ]);
+};
+/** Streak lost — short minor drop. */
+export const sndStreakLost = () => play([
+  { freq: 392, dur: 0.08, type: "triangle" },
+  { freq: 294, dur: 0.16, type: "triangle", gain: 0.05 },
+]);
