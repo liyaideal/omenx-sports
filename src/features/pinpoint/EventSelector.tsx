@@ -133,7 +133,8 @@ export function EventSelector({ events, activeEventId, onPick, openCountByEvent 
             top: rect.top,
             width: rect.width,
             zIndex: 60,
-            boxShadow: "3px 3px 0 #000",
+            background: "#0e1a13",
+            boxShadow: "3px 3px 0 #000, 0 0 0 1px #000, 0 6px 24px rgba(0,0,0,0.6)",
           }}
         >
           {events.map((m) => {
