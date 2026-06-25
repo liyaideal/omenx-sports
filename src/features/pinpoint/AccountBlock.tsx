@@ -16,6 +16,10 @@ interface Props {
   initialBalance: number;
   /** Opens the deposit sheet (main wallet → Pinpoint transfer). */
   onDeposit?: () => void;
+  /** Session has been liquidated → freeze the margin readout. */
+  frozen?: boolean;
+  /** MMR snapshot at liquidation moment (0..1). */
+  mmrAtFreeze?: number;
 }
 
 /**
@@ -36,6 +40,8 @@ export function AccountBlock({
   lockedStake,
   initialBalance,
   onDeposit,
+  frozen = false,
+  mmrAtFreeze,
 }: Props) {
   const ts = trophies ?? TROPHIES.map((t) => ({ ...t, unlocked: t.got(stats) }));
   const need = xpForNext(stats.level);
@@ -54,7 +60,13 @@ export function AccountBlock({
   return (
     <div
       className="pp-card p-3.5"
-      title={`Equity $${equity.toFixed(0)} · Maintenance $${maintenance.toFixed(0)}`}
+      title={
+        frozen
+          ? `LIQUIDATED · Equity $${equity.toFixed(0)} · MMR ${
+              mmrAtFreeze != null ? Math.round(mmrAtFreeze * 100) : 0
+            }%`
+          : `Equity $${equity.toFixed(0)} · Maintenance $${maintenance.toFixed(0)}`
+      }
     >
       {/* ── Identity zone ─────────────────────────────────────────── */}
       <div className="flex items-center gap-2.5">
@@ -208,9 +220,16 @@ export function AccountBlock({
         </span>
         <span
           className="pp-stencil text-[9px]"
-          style={{ color: healthColor, textShadow: "1px 1px 0 #000" }}
+          style={{
+            color: frozen ? "var(--pp-red)" : healthColor,
+            textShadow: "1px 1px 0 #000",
+          }}
         >
-          {healthLabel}
+          {frozen
+            ? `LIQUIDATED · MMR ${
+                mmrAtFreeze != null ? Math.round(mmrAtFreeze * 100) : 0
+              }%`
+            : healthLabel}
         </span>
       </div>
       <div
@@ -218,16 +237,28 @@ export function AccountBlock({
         style={{ background: "rgba(0,0,0,0.5)", border: "1px solid var(--pp-card-border)" }}
       >
         <div
-          className={health <= 0.3 ? "animate-pulse" : ""}
+          className={frozen || health <= 0.3 ? "animate-pulse" : ""}
           style={{
-            width: `${health * 100}%`,
+            width: frozen ? "100%" : `${health * 100}%`,
             height: "100%",
-            background: healthColor,
+            background: frozen
+              ? "repeating-linear-gradient(45deg, var(--pp-red) 0 6px, #7a1212 6px 12px)"
+              : healthColor,
             boxShadow: "inset 0 -2px 0 rgba(0,0,0,0.35)",
             transition: "width 200ms linear",
           }}
         />
       </div>
+      {frozen && (
+        <button
+          type="button"
+          onClick={onDeposit}
+          className="pp-stencil mt-1.5 w-full text-left text-[9px] underline-offset-2 hover:underline"
+          style={{ color: "var(--pp-yellow)" }}
+        >
+          TAP + FUND TO RESUME →
+        </button>
+      )}
     </div>
   );
 }
