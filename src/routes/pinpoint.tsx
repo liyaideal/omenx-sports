@@ -600,6 +600,9 @@ function PinpointInner({
 
       {/* RULES modal */}
       {showRules && (
+        <></>
+      )}
+      {showRules && (
         <ModalShell onClose={() => setShowRules(false)}>
           <div className="pp-card max-w-md p-5">
             <div className="mb-3 flex items-center justify-between">
