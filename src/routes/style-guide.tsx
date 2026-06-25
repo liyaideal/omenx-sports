@@ -3569,6 +3569,42 @@ function ShareDemo() {
               </div>
             </div>
 
+            {/* Balance row — must fit a 256px-wide sidebar card without
+                clipping. Big balance stacks on its own row; SESSION P/L
+                pairs label + value on the row below. */}
+            <div className="pp-card p-4">
+              <div className="pp-marker mb-3 text-[10px]" style={{ color: "var(--pp-yellow)" }}>
+                ACCOUNT · BALANCE ROW
+              </div>
+              <div className="mx-auto" style={{ maxWidth: 256 }}>
+                <div className="flex items-baseline justify-between">
+                  <span className="pp-stencil text-[11px]" style={{ color: "var(--pp-yellow)" }}>
+                    BALANCE
+                  </span>
+                  <span className="pp-stencil text-[9px]" style={{ color: "var(--pp-mute)" }}>
+                    1 OPEN
+                  </span>
+                </div>
+                <div
+                  className="pp-headline pp-stamp-green mt-0.5 truncate text-2xl leading-none tabular-nums"
+                  style={{ color: "var(--pp-green)" }}
+                >
+                  $11,843
+                </div>
+                <div className="mt-2 flex items-baseline justify-between gap-2">
+                  <span className="pp-stencil text-[9px]" style={{ color: "var(--pp-mute)" }}>
+                    SESSION P/L
+                  </span>
+                  <span
+                    className="pp-headline text-sm tabular-nums"
+                    style={{ color: "var(--pp-green)", textShadow: "1px 1px 0 #000" }}
+                  >
+                    +$19
+                  </span>
+                </div>
+              </div>
+            </div>
+
             {/* Typography */}
             <div className="pp-card p-4 col-span-2">
               <div className="pp-marker mb-3 text-[10px]" style={{ color: "var(--pp-yellow)" }}>TYPOGRAPHY</div>

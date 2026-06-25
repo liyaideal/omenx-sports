@@ -1,6 +1,13 @@
 import type { GameStats, Trophy } from "./hooks/useGameStats";
 import { TROPHIES, xpForNext } from "./hooks/useGameStats";
 
+/** Compact balance formatter — keeps the row inside ~240px even at 7+ digits. */
+function formatBalance(n: number): string {
+  const abs = Math.abs(n);
+  if (abs >= 1_000_000) return `$${(n / 1_000_000).toFixed(abs >= 10_000_000 ? 0 : 1)}M`;
+  return `$${Math.round(n).toLocaleString()}`;
+}
+
 interface Props {
   // identity / lifetime
   stats: GameStats;
@@ -149,26 +156,25 @@ export function AccountBlock({
           {openCount} OPEN
         </span>
       </div>
-      <div className="flex items-baseline justify-between gap-2">
-        <span
-          className="pp-headline pp-stamp-green text-3xl"
-          style={{ color: "var(--pp-green)" }}
-        >
-          ${balance.toLocaleString(undefined, { maximumFractionDigits: 0 })}
+      <div
+        className="pp-headline pp-stamp-green mt-0.5 truncate text-2xl leading-none tabular-nums"
+        style={{ color: "var(--pp-green)" }}
+        title={`$${balance.toLocaleString(undefined, { maximumFractionDigits: 0 })}`}
+      >
+        {formatBalance(balance)}
+      </div>
+      <div className="mt-2 flex items-baseline justify-between gap-2">
+        <span className="pp-stencil text-[9px]" style={{ color: "var(--pp-mute)" }}>
+          SESSION P/L
         </span>
         <span
-          className="pp-headline text-base"
+          className="pp-headline text-sm tabular-nums"
           style={{
             color: plPositive ? "var(--pp-green)" : "var(--pp-red)",
             textShadow: "1px 1px 0 #000",
           }}
         >
           {plPositive ? "+" : "−"}${Math.abs(sessionPL).toFixed(0)}
-        </span>
-      </div>
-      <div className="mt-1 flex items-baseline justify-between">
-        <span className="pp-stencil text-[9px]" style={{ color: "var(--pp-mute)" }}>
-          SESSION P/L
         </span>
       </div>
 
