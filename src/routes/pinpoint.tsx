@@ -6,7 +6,6 @@ import { MATCH_MARKETS } from "@/data/sports-markets";
 import {
   usePinpointSession,
   computeEquity,
-  INITIAL_BALANCE,
   MARGIN_HEALTH_ANCHOR,
 } from "@/features/pinpoint/hooks/usePinpointSession";
 import { LIQ_TRIGGER_MMR } from "@/features/pinpoint/constants";
