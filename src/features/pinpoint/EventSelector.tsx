@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { ChevronDown } from "lucide-react";
 import type { SportsMarket } from "@/data/sports-markets";
 
@@ -17,12 +18,33 @@ interface Props {
 export function EventSelector({ events, activeEventId, onPick, openCountByEvent }: Props) {
   const [open, setOpen] = useState(false);
   const wrapRef = useRef<HTMLDivElement>(null);
+  const btnRef = useRef<HTMLButtonElement>(null);
+  const popRef = useRef<HTMLDivElement>(null);
+  const [rect, setRect] = useState<{ left: number; top: number; width: number } | null>(null);
   const active = events.find((m) => m.id === activeEventId) ?? events[0];
 
   useEffect(() => {
     if (!open) return;
+    const measure = () => {
+      const r = btnRef.current?.getBoundingClientRect();
+      if (r) setRect({ left: r.left, top: r.bottom + 4, width: r.width });
+    };
+    measure();
+    window.addEventListener("resize", measure);
+    window.addEventListener("scroll", measure, true);
+    return () => {
+      window.removeEventListener("resize", measure);
+      window.removeEventListener("scroll", measure, true);
+    };
+  }, [open]);
+
+  useEffect(() => {
+    if (!open) return;
     const onDoc = (e: MouseEvent) => {
-      if (!wrapRef.current?.contains(e.target as Node)) setOpen(false);
+      const t = e.target as Node;
+      if (wrapRef.current?.contains(t)) return;
+      if (popRef.current?.contains(t)) return;
+      setOpen(false);
     };
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") setOpen(false);
@@ -44,6 +66,7 @@ export function EventSelector({ events, activeEventId, onPick, openCountByEvent 
   return (
     <div ref={wrapRef} className="relative">
       <button
+        ref={btnRef}
         onClick={() => setOpen((v) => !v)}
         className="pp-card flex w-full flex-col gap-1.5 p-3 text-left"
         title="Switch event"
@@ -100,10 +123,18 @@ export function EventSelector({ events, activeEventId, onPick, openCountByEvent 
         </div>
       </button>
 
-      {open && (
+      {open && rect && typeof document !== "undefined" && createPortal(
         <div
-          className="pp-card absolute left-0 right-0 top-full z-30 mt-1 flex flex-col gap-1 p-1.5"
-          style={{ boxShadow: "3px 3px 0 #000" }}
+          ref={popRef}
+          className="pp-card flex max-h-[60vh] flex-col gap-1 overflow-y-auto p-1.5"
+          style={{
+            position: "fixed",
+            left: rect.left,
+            top: rect.top,
+            width: rect.width,
+            zIndex: 60,
+            boxShadow: "3px 3px 0 #000",
+          }}
         >
           {events.map((m) => {
             const isActive = m.id === activeEventId;
@@ -163,7 +194,8 @@ export function EventSelector({ events, activeEventId, onPick, openCountByEvent 
               </button>
             );
           })}
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );
