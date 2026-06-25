@@ -506,6 +506,21 @@ function PinpointInner({
         </main>
       </div>
 
+      {/* LEVEL UP flash banner */}
+      {gameStats.levelUpFlash != null && (
+        <div className="pointer-events-none fixed inset-x-0 top-24 z-50 flex justify-center">
+          <div
+            className="pp-card pp-card-cream pp-level-up px-8 py-4 text-center"
+            style={{ boxShadow: "var(--pp-shadow-coin)" }}
+          >
+            <div className="pp-marker text-[10px]" style={{ color: "#1a1a1a" }}>LEVEL UP!</div>
+            <div className="pp-headline mt-1 text-3xl" style={{ color: "var(--pp-red)" }}>
+              LV {String(gameStats.levelUpFlash).padStart(2, "0")}
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* STOP confirm */}
       {showStop && (
         <ModalShell onClose={() => setShowStop(false)}>
