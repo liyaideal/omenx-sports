@@ -60,7 +60,13 @@ export function AccountBlock({
   return (
     <div
       className="pp-card p-3.5"
-      title={`Equity $${equity.toFixed(0)} · Maintenance $${maintenance.toFixed(0)}`}
+      title={
+        frozen
+          ? `LIQUIDATED · Equity $${equity.toFixed(0)} · MMR ${
+              mmrAtFreeze != null ? Math.round(mmrAtFreeze * 100) : 0
+            }%`
+          : `Equity $${equity.toFixed(0)} · Maintenance $${maintenance.toFixed(0)}`
+      }
     >
       {/* ── Identity zone ─────────────────────────────────────────── */}
       <div className="flex items-center gap-2.5">
