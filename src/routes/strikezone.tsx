@@ -504,6 +504,60 @@ function StrikezoneInner({
         </ModalShell>
       )}
 
+      {/* LIQUIDATED — cross-margin wipe */}
+      {showLiquidated && (
+        <ModalShell onClose={() => setShowLiquidated(null)}>
+          <div
+            className="sz-card p-6 text-center"
+            style={{
+              borderColor: "var(--sz-red)",
+              boxShadow: "0 0 40px rgba(255,45,74,0.45), inset 0 0 24px rgba(255,45,74,0.12)",
+            }}
+          >
+            <div
+              className="sz-display text-3xl"
+              style={{
+                color: "var(--sz-red)",
+                textShadow: "0 0 16px rgba(255,45,74,0.9)",
+              }}
+            >
+              LIQUIDATED
+            </div>
+            <p className="sz-pixel mt-2 text-[10px]" style={{ color: "#ffcc4d" }}>
+              ACCOUNT EQUITY FELL BELOW MAINTENANCE
+            </p>
+            <p className="mt-4 text-xs" style={{ color: "#bbb" }}>
+              {showLiquidated.liquidatedCount} OPEN POSITION
+              {showLiquidated.liquidatedCount === 1 ? "" : "S"} FORCE-CLOSED.
+              <br />
+              MARGIN LOST:{" "}
+              <span style={{ color: "var(--sz-red)" }}>
+                −${showLiquidated.lossAmount.toFixed(0)}
+              </span>
+            </p>
+            <div className="mt-5 flex gap-2">
+              <button
+                onClick={() => setShowLiquidated(null)}
+                className="sz-chip sz-pixel flex-1 py-3 text-[10px]"
+                style={{ color: "var(--sz-cyan)" }}
+              >
+                CONTINUE (${state.balance.toFixed(0)})
+              </button>
+              <button
+                onClick={() => {
+                  reset();
+                  setShowLiquidated(null);
+                }}
+                className="sz-stop sz-pixel flex-1 py-3 text-[10px]"
+                style={{ color: "#fff" }}
+              >
+                RESET ACCOUNT
+              </button>
+            </div>
+          </div>
+        </ModalShell>
+      )}
+
       {/* RULES modal */}
       {showRules && (
         <ModalShell onClose={() => setShowRules(false)}>
