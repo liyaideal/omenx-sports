@@ -647,7 +647,7 @@ export function Grid({
     const y = e.clientY - r.top;
     // Same drift compensation as onClick: align hover with the cell that will
     // be hit if the user clicks now.
-    const dx = Math.max(0, (Date.now() - lastRenderNowRef.current) * PX_PER_MS);
+    const dx = Math.max(0, (Date.now() - lastRenderNowRef.current) * layoutRef.current.pxPerMs);
     hoverRef.current = { x: rawX + dx, y };
   }, []);
   const onMouseLeave = useCallback(() => {
@@ -664,7 +664,7 @@ export function Grid({
       // so the cursor sits over the cell that was visually to the RIGHT of
       // the target. Compensate by shifting the click x rightward by the
       // distance the cells have drifted since the last rendered frame.
-      const dx = Math.max(0, (Date.now() - lastRenderNowRef.current) * PX_PER_MS);
+      const dx = Math.max(0, (Date.now() - lastRenderNowRef.current) * layoutRef.current.pxPerMs);
       const x = rawX + dx;
       const cells = futureCellsRef.current;
       for (const c of cells) {
@@ -690,8 +690,7 @@ export function Grid({
   return (
     <div
       ref={wrapRef}
-      className="relative w-full"
-      style={{ height: TOTAL_H }}
+      className="relative h-full w-full"
     >
       <canvas
         ref={canvasRef}
@@ -700,7 +699,7 @@ export function Grid({
         onClick={onClick}
         style={{
           width: "100%",
-          height: TOTAL_H,
+          height: "100%",
           display: "block",
           cursor: "crosshair",
         }}
