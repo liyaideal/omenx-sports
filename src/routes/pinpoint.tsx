@@ -364,21 +364,24 @@ function PinpointInner({
           </span>
         </div>
 
-        {undoMsLeft > 0 && (
-          <button
-            onClick={handleUndo}
-            className="pp-stencil ml-auto px-3 py-1.5 text-[10px]"
-            style={{
-              color: "#000",
-              background: "var(--pp-yellow)",
-              border: "2px solid #000",
-              borderRadius: "4px",
-              boxShadow: "2px 2px 0 #000",
-            }}
-          >
-            UNDO {(undoMsLeft / 1000).toFixed(1)}S [Z]
-          </button>
-        )}
+        <div className="ml-auto flex items-center gap-3">
+          {undoMsLeft > 0 && (
+            <button
+              onClick={handleUndo}
+              className="pp-stencil px-3 py-1.5 text-[10px]"
+              style={{
+                color: "#000",
+                background: "var(--pp-yellow)",
+                border: "2px solid #000",
+                borderRadius: "4px",
+                boxShadow: "2px 2px 0 #000",
+              }}
+            >
+              UNDO {(undoMsLeft / 1000).toFixed(1)}S [Z]
+            </button>
+          )}
+          <PlayerCard stats={gameStats.stats} trophies={gameStats.trophies} />
+        </div>
       </header>
 
       {/* Event tabs */}
