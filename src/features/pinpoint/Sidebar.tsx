@@ -77,7 +77,7 @@ export function Sidebar({
         : "3× · HIGH RISK CROSS";
 
   return (
-    <div className="flex w-[288px] shrink-0 flex-col gap-3 p-4">
+    <div className="pp-sidebar-scroll flex min-h-0 w-[288px] shrink-0 flex-col gap-3 overflow-y-auto p-4">
       {/* ── ACCOUNT block (lifetime + this session) ─────────────── */}
       <AccountBlock
         stats={stats}
