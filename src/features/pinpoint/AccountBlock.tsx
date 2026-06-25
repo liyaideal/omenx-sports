@@ -169,13 +169,17 @@ export function AccountBlock({
         </div>
       </div>
       <div className="mt-0.5 flex items-baseline justify-between gap-2">
-        <RollingBalance
-          value={balance}
+        <span
           data-pp-balance-anchor
-          className="pp-headline pp-stamp-green truncate text-2xl leading-none tabular-nums"
-          style={{ color: "var(--pp-green)", display: "inline-block", transformOrigin: "left center" }}
-          title={`$${balance.toLocaleString(undefined, { maximumFractionDigits: 0 })}`}
-        />
+          style={{ display: "inline-block", transformOrigin: "left center" }}
+        >
+          <RollingBalance
+            value={balance}
+            className="pp-headline pp-stamp-green truncate text-2xl leading-none tabular-nums"
+            style={{ color: "var(--pp-green)" }}
+            title={`$${balance.toLocaleString(undefined, { maximumFractionDigits: 0 })}`}
+          />
+        </span>
         <span
           className="pp-stencil shrink-0 text-[9px]"
           style={{ color: "var(--pp-mute)" }}
