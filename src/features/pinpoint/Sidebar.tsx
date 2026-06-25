@@ -1,5 +1,6 @@
-import { Square, Zap } from "lucide-react";
+import { Lock, Zap } from "lucide-react";
 import { BET_SIZE_OPTIONS, LEVERAGE_OPTIONS } from "./hooks/usePinpointSession";
+import { TRADING_FEE_RATE } from "./constants";
 import type { SportsMarket, Outcome } from "@/data/sports-markets";
 import { AccountBlock } from "./AccountBlock";
 import { EventSelector } from "./EventSelector";
@@ -36,8 +37,9 @@ interface Props {
   onBetSize: (n: number) => void;
   leverage: number;
   onLeverage: (n: number) => void;
-  // stop
-  onStop: () => void;
+  // v3 session controls
+  frozen: boolean;
+  mmr: number;
 }
 
 export function Sidebar({
@@ -61,12 +63,18 @@ export function Sidebar({
   onBetSize,
   leverage,
   onLeverage,
-  onStop,
+  frozen,
+  mmr,
 }: Props) {
   const highRisk = leverage >= 3;
   const notional = betSize * leverage;
+  const fee = Math.round(notional * TRADING_FEE_RATE * 100) / 100;
   const riskLabel =
-    leverage === 1 ? "SAFE · 1× PAYOUT" : leverage === 2 ? "CROSS · 2× PAYOUT" : "HIGH RISK · CROSS · 3× PAYOUT";
+    leverage === 1
+      ? "1× · CONSERVATIVE"
+      : leverage === 2
+        ? "2× · CROSS MARGIN"
+        : "3× · HIGH RISK CROSS";
 
   return (
     <div className="flex w-[288px] shrink-0 flex-col gap-3 p-4">
@@ -134,7 +142,7 @@ export function Sidebar({
       </div>
 
       {/* BET SIZE card */}
-      <div className="pp-card pp-card-orange p-3.5">
+      <div className={`pp-card pp-card-orange p-3.5 ${frozen ? "opacity-50 pointer-events-none" : ""}`}>
         <div className="flex items-center justify-between">
           <span className="pp-stencil text-[11px]" style={{ color: "var(--pp-red)" }}>
             BET SIZE
@@ -150,6 +158,7 @@ export function Sidebar({
             <button
               key={s}
               onClick={() => onBetSize(s)}
+              disabled={frozen}
               className={`pp-chip pp-stencil py-2.5 text-[11px] ${
                 betSize === s ? "pp-chip-active" : ""
               }`}
@@ -163,9 +172,9 @@ export function Sidebar({
         </div>
       </div>
 
-      {/* LEVERAGE card — 4 clean rows so labels never overlap */}
+      {/* LEVERAGE card — 1–3× account-level, applies to new bets only. */}
       <div
-        className="pp-card p-3.5"
+        className={`pp-card p-3.5 ${frozen ? "opacity-50 pointer-events-none" : ""}`}
         style={
           highRisk
             ? {
@@ -201,6 +210,7 @@ export function Sidebar({
               <button
                 key={l}
                 onClick={() => onLeverage(l)}
+                disabled={frozen}
                 className={`pp-chip pp-stencil py-2.5 text-[11px] ${active ? "pp-chip-active" : ""}`}
                 style={{ color: active ? "var(--pp-yellow)" : "var(--pp-mute)" }}
               >
@@ -210,7 +220,7 @@ export function Sidebar({
           })}
         </div>
 
-        {/* Row 3 — margin / notional readout */}
+        {/* Row 3 — three-number disclosure: margin / notional / fee */}
         <div
           className="pp-stencil mt-2.5 flex items-baseline justify-between text-[10px]"
           style={{ color: "var(--pp-mute)" }}
@@ -221,27 +231,51 @@ export function Sidebar({
           <span>
             NOTIONAL <span style={{ color: "var(--pp-yellow)" }}>${notional}</span>
           </span>
+          <span>
+            FEE <span style={{ color: "var(--pp-yellow)" }}>${fee.toFixed(fee < 10 ? 2 : 0)}</span>
+          </span>
         </div>
 
-        {/* Row 4 — caption */}
+        {/* Row 4 — caption + "win amount depends on cell odds" hint */}
         <div
           className="pp-stencil mt-2 flex items-baseline justify-between text-[10px]"
           style={{ color: highRisk ? "#ffcc4d" : "var(--pp-mute)" }}
         >
           <span>{riskLabel}</span>
-          <span style={{ color: "var(--pp-mute)" }}>Q/E</span>
+          <span style={{ color: "var(--pp-mute)" }}>NEW BETS ONLY</span>
+        </div>
+        <div
+          className="pp-stencil mt-1 text-[9px]"
+          style={{ color: "var(--pp-mute)" }}
+        >
+          WIN IF HIT = q × (1−p) · SHOWN PER CELL
         </div>
       </div>
 
-      {/* STOP */}
-      <button
-        onClick={onStop}
-        className="pp-stop pp-stencil flex items-center justify-center gap-2 py-3 text-sm"
-        style={{ color: "#fff" }}
-      >
-        <Square className="size-4 fill-current" />
-        STOP
-      </button>
+      {/* v3: no STOP / active close. Frozen-session indicator instead. */}
+      {frozen ? (
+        <div
+          className="pp-stencil flex items-center justify-center gap-2 py-3 text-sm"
+          style={{
+            color: "#fff",
+            background: "var(--pp-red)",
+            border: "2px solid #000",
+            borderRadius: 4,
+            boxShadow: "3px 3px 0 #000",
+          }}
+        >
+          <Lock className="size-4" />
+          SESSION FROZEN · MMR {(mmr * 100).toFixed(0)}%
+        </div>
+      ) : (
+        <div
+          className="pp-stencil flex items-center justify-center py-2 text-[9px]"
+          style={{ color: "var(--pp-mute)" }}
+          title="Bets resolve at judgement or via liquidation — no manual close."
+        >
+          NO MANUAL CLOSE · BETS RESOLVE AT JUDGEMENT
+        </div>
+      )}
     </div>
   );
 }

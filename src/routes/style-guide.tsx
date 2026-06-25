@@ -3587,16 +3587,102 @@ function ShareDemo() {
                 <button className="pp-btn px-4 py-2 text-[10px]">START</button>
                 <button className="pp-btn pp-btn-pink px-4 py-2 text-[10px]">BET</button>
                 <button className="pp-btn pp-btn-mint px-4 py-2 text-[10px]">CONTINUE</button>
-                <button className="pp-stop pp-stencil px-4 py-2 text-[10px]">STOP</button>
+              </div>
+              <p className="pp-marker mt-3 text-[9px]" style={{ color: "#1a1a1a", background: "var(--pp-yellow)", padding: "2px 6px", display: "inline-block", border: "2px solid #000" }}>
+                NO MANUAL CLOSE BUTTON · BETS RESOLVE AT JUDGEMENT OR LIQUIDATION
+              </p>
+            </div>
+
+            {/* Session-Frozen panel (replaces the old GAME OVER stamp). */}
+            <div className="pp-card p-4 col-span-2">
+              <div className="pp-marker mb-3 text-[10px]" style={{ color: "var(--pp-yellow)" }}>SESSION FROZEN PANEL</div>
+              <div className="pp-lcd p-4 text-center">
+                <div className="pp-headline pp-flicker text-3xl" style={{ color: "var(--pp-red)", textShadow: "3px 3px 0 #000" }}>SESSION<br />FROZEN</div>
+                <div className="pp-stencil mt-3 text-[10px]" style={{ color: "var(--pp-yellow)" }}>MMR ≥ 100% · LIQUIDATION IN PROGRESS</div>
+                <div className="pp-stencil pp-blink mt-1 text-[9px]" style={{ color: "var(--pp-mute)" }}>▶ FUND TRANSFER COMING SOON</div>
               </div>
             </div>
 
-            {/* Hazard stripes */}
-            <div className="pp-card p-4 col-span-2">
-              <div className="pp-marker mb-3 text-[10px]" style={{ color: "var(--pp-yellow)" }}>GAME OVER PANEL</div>
-              <div className="pp-lcd p-4 text-center">
-                <div className="pp-headline pp-flicker text-3xl" style={{ color: "var(--pp-red)", textShadow: "3px 3px 0 #000" }}>GAME<br />OVER</div>
-                <div className="pp-stencil pp-blink mt-3 text-[10px]" style={{ color: "var(--pp-yellow)" }}>▶ INSERT COIN</div>
+            {/* Pinpoint Economic Tokens — v3 spec (P0 + P1 disclosure). */}
+            <div className="pp-card p-4 col-span-3">
+              <div className="pp-marker mb-3 text-[10px]" style={{ color: "var(--pp-yellow)" }}>
+                ECONOMIC TOKENS · PINPOINT V3
+              </div>
+              <div className="grid grid-cols-2 gap-3 md:grid-cols-3">
+                {[
+                  ["MM_RATE", "5%", "Maintenance margin per $ notional"],
+                  ["ODDS_CAP", "100×", "Max payout multiple (1/p)"],
+                  ["VIG_PER_CELL", "1.5%", "House edge baked into AMM quote"],
+                  ["TRADING_FEE", "2%", "Opening premium on notional"],
+                  ["LEVERAGE", "1× · 2× · 3×", "Account-level, new bets only"],
+                  ["CANCEL_LOCK", "1500ms", "Pre-judgement cancel freeze"],
+                ].map(([k, v, hint]) => (
+                  <div key={k} className="pp-card pp-card-cream p-3">
+                    <div className="pp-stencil text-[9px]" style={{ color: "#1a1a1a" }}>{k}</div>
+                    <div className="pp-headline text-xl" style={{ color: "var(--pp-red)" }}>{v}</div>
+                    <div className="pp-stencil mt-1 text-[8px]" style={{ color: "#555" }}>{hint}</div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Three-number disclosure bar — exactly what Sidebar renders. */}
+              <div className="mt-4">
+                <div className="pp-marker mb-2 text-[9px]" style={{ color: "var(--pp-yellow)" }}>
+                  3-NUMBER DISCLOSURE (SIDEBAR)
+                </div>
+                <div
+                  className="pp-stencil flex items-baseline justify-between rounded-md px-3 py-2 text-[10px]"
+                  style={{ background: "var(--pp-cream)", border: "2px solid #000", color: "#555" }}
+                >
+                  <span>MARGIN <span style={{ color: "#1a1a1a" }}>$100</span></span>
+                  <span>NOTIONAL <span style={{ color: "#1a1a1a" }}>$300</span></span>
+                  <span>FEE <span style={{ color: "#1a1a1a" }}>$6</span></span>
+                </div>
+                <div className="pp-stencil mt-1 text-[8px]" style={{ color: "var(--pp-mute)" }}>
+                  WIN IF HIT = q × (1−p) · SHOWN PER CELL · q = NOTIONAL ÷ p
+                </div>
+              </div>
+
+              {/* Cancel-lock indicator — what Grid renders on a betted cell. */}
+              <div className="mt-4 grid grid-cols-2 gap-3">
+                <div>
+                  <div className="pp-marker mb-2 text-[9px]" style={{ color: "var(--pp-yellow)" }}>
+                    CELL · CANCELABLE
+                  </div>
+                  <div
+                    className="flex h-16 items-center justify-center rounded-sm"
+                    style={{
+                      background: "var(--pp-yellow)",
+                      border: "2px solid #000",
+                      boxShadow: "3px 3px 0 #000",
+                      color: "#000",
+                    }}
+                  >
+                    <div className="text-center">
+                      <div className="pp-num text-base">12.4×</div>
+                      <div className="pp-stencil text-[8px]">p 8.1% · CLICK TO CANCEL</div>
+                    </div>
+                  </div>
+                </div>
+                <div>
+                  <div className="pp-marker mb-2 text-[9px]" style={{ color: "var(--pp-yellow)" }}>
+                    CELL · LOCKED (≤ 1.5s)
+                  </div>
+                  <div
+                    className="flex h-16 items-center justify-center rounded-sm opacity-80"
+                    style={{
+                      background: "var(--pp-yellow)",
+                      border: "2px dashed #000",
+                      boxShadow: "3px 3px 0 #000",
+                      color: "#000",
+                    }}
+                  >
+                    <div className="text-center">
+                      <div className="pp-num text-base">12.4×</div>
+                      <div className="pp-stencil text-[8px]">🔒 LOCKED · 0.8s</div>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
