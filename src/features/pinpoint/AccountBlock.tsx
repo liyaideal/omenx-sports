@@ -156,9 +156,6 @@ export function AccountBlock({
           PINPOINT BAL
         </span>
         <div className="flex items-center gap-2">
-          <span className="pp-stencil text-[9px]" style={{ color: "var(--pp-mute)" }}>
-            {openCount} OPEN
-          </span>
           {onDeposit ? (
             <button
               onClick={onDeposit}
@@ -177,12 +174,20 @@ export function AccountBlock({
           ) : null}
         </div>
       </div>
-      <div
-        className="pp-headline pp-stamp-green mt-0.5 truncate text-2xl leading-none tabular-nums"
-        style={{ color: "var(--pp-green)" }}
-        title={`$${balance.toLocaleString(undefined, { maximumFractionDigits: 0 })}`}
-      >
-        {formatBalance(balance)}
+      <div className="mt-0.5 flex items-baseline justify-between gap-2">
+        <div
+          className="pp-headline pp-stamp-green truncate text-2xl leading-none tabular-nums"
+          style={{ color: "var(--pp-green)" }}
+          title={`$${balance.toLocaleString(undefined, { maximumFractionDigits: 0 })}`}
+        >
+          {formatBalance(balance)}
+        </div>
+        <span
+          className="pp-stencil shrink-0 text-[9px]"
+          style={{ color: "var(--pp-mute)" }}
+        >
+          {openCount} OPEN
+        </span>
       </div>
       <div className="mt-2 flex items-baseline justify-between gap-2">
         <span className="pp-stencil text-[9px]" style={{ color: "var(--pp-mute)" }}>
