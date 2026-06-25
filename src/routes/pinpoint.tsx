@@ -13,7 +13,7 @@ import { useLiveTicker } from "@/features/pinpoint/hooks/useLiveTicker";
 import { Sidebar, type OutcomeChoice } from "@/features/pinpoint/Sidebar";
 import { Grid } from "@/features/pinpoint/Grid";
 import { EventTabs } from "@/features/pinpoint/EventTabs";
-import "@/features/pinpoint/sz-theme.css";
+import "@/features/pinpoint/pp-theme.css";
 
 export const Route = createFileRoute("/pinpoint")({
   head: () => ({
