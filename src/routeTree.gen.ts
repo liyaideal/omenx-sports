@@ -11,7 +11,6 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as StyleGuideHomepageRouteImport } from './routes/style-guide-homepage'
 import { Route as StyleGuideRouteImport } from './routes/style-guide'
-import { Route as PinpointRouteImport } from './routes/pinpoint'
 import { Route as FansRouteImport } from './routes/fans'
 import { Route as EventsRouteImport } from './routes/events'
 import { Route as IndexRouteImport } from './routes/index'
@@ -27,11 +26,6 @@ const StyleGuideHomepageRoute = StyleGuideHomepageRouteImport.update({
 const StyleGuideRoute = StyleGuideRouteImport.update({
   id: '/style-guide',
   path: '/style-guide',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const PinpointRoute = PinpointRouteImport.update({
-  id: '/pinpoint',
-  path: '/pinpoint',
   getParentRoute: () => rootRouteImport,
 } as any)
 const FansRoute = FansRouteImport.update({
@@ -69,7 +63,6 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/events': typeof EventsRoute
   '/fans': typeof FansRoute
-  '/pinpoint': typeof PinpointRoute
   '/style-guide': typeof StyleGuideRoute
   '/style-guide-homepage': typeof StyleGuideHomepageRoute
   '/event/$id': typeof EventIdRoute
@@ -80,7 +73,6 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/events': typeof EventsRoute
   '/fans': typeof FansRoute
-  '/pinpoint': typeof PinpointRoute
   '/style-guide': typeof StyleGuideRoute
   '/style-guide-homepage': typeof StyleGuideHomepageRoute
   '/event/$id': typeof EventIdRoute
@@ -92,7 +84,6 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/events': typeof EventsRoute
   '/fans': typeof FansRoute
-  '/pinpoint': typeof PinpointRoute
   '/style-guide': typeof StyleGuideRoute
   '/style-guide-homepage': typeof StyleGuideHomepageRoute
   '/event/$id': typeof EventIdRoute
@@ -105,7 +96,6 @@ export interface FileRouteTypes {
     | '/'
     | '/events'
     | '/fans'
-    | '/pinpoint'
     | '/style-guide'
     | '/style-guide-homepage'
     | '/event/$id'
@@ -116,7 +106,6 @@ export interface FileRouteTypes {
     | '/'
     | '/events'
     | '/fans'
-    | '/pinpoint'
     | '/style-guide'
     | '/style-guide-homepage'
     | '/event/$id'
@@ -127,7 +116,6 @@ export interface FileRouteTypes {
     | '/'
     | '/events'
     | '/fans'
-    | '/pinpoint'
     | '/style-guide'
     | '/style-guide-homepage'
     | '/event/$id'
@@ -139,7 +127,6 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   EventsRoute: typeof EventsRoute
   FansRoute: typeof FansRoute
-  PinpointRoute: typeof PinpointRoute
   StyleGuideRoute: typeof StyleGuideRoute
   StyleGuideHomepageRoute: typeof StyleGuideHomepageRoute
   EventIdRoute: typeof EventIdRoute
@@ -161,13 +148,6 @@ declare module '@tanstack/react-router' {
       path: '/style-guide'
       fullPath: '/style-guide'
       preLoaderRoute: typeof StyleGuideRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/pinpoint': {
-      id: '/pinpoint'
-      path: '/pinpoint'
-      fullPath: '/pinpoint'
-      preLoaderRoute: typeof PinpointRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/fans': {
@@ -219,7 +199,6 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   EventsRoute: EventsRoute,
   FansRoute: FansRoute,
-  PinpointRoute: PinpointRoute,
   StyleGuideRoute: StyleGuideRoute,
   StyleGuideHomepageRoute: StyleGuideHomepageRoute,
   EventIdRoute: EventIdRoute,
@@ -229,13 +208,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
