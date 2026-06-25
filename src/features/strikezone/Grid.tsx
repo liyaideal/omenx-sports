@@ -868,3 +868,152 @@ function drawCountdownBadge(
   ctx.textAlign = "start";
   ctx.textBaseline = "alphabetic";
 }
+
+// ── Hit flash (non-bet K-line strike) ──────────────────────────────────
+function drawHitFlash(
+  ctx: CanvasRenderingContext2D,
+  x: number,
+  y: number,
+  w: number,
+  h: number,
+  t: number,
+  mult: number
+) {
+  // Phase 1 (0..0.18): scale punch + white→gold
+  // Phase 2 (0.18..0.7): hold + pulsing ring
+  // Phase 3 (0.7..1): fade out
+  const scale =
+    t < 0.18 ? 0.95 + (t / 0.18) * 0.23 : t < 0.55 ? 1.18 - ((t - 0.18) / 0.37) * 0.13 : 1.05;
+  const alpha = t < 0.7 ? 1 : 1 - (t - 0.7) / 0.3;
+  const cx = x + w / 2;
+  const cy = y + h / 2;
+
+  ctx.save();
+  ctx.globalAlpha = Math.max(0, alpha);
+  ctx.translate(cx, cy);
+  ctx.scale(scale, scale);
+  ctx.translate(-cx, -cy);
+
+  roundRect(ctx, x, y, w, h, 8);
+  const g = ctx.createLinearGradient(0, y, 0, y + h);
+  // White-hot at start, settle to gold
+  const fadeToGold = Math.min(1, t / 0.25);
+  g.addColorStop(0, fadeToGold < 1 ? "#ffffff" : "#fff6c4");
+  g.addColorStop(1, fadeToGold < 1 ? "#ffe9a0" : "#ffb347");
+  ctx.fillStyle = g;
+  ctx.shadowColor = "rgba(255,220,120,0.95)";
+  ctx.shadowBlur = 24 * (1 - t * 0.5);
+  ctx.fill();
+  ctx.shadowBlur = 0;
+  ctx.lineWidth = 2;
+  ctx.strokeStyle = "#ffd84a";
+  ctx.stroke();
+
+  ctx.fillStyle = "#3b1a00";
+  ctx.font = '700 13px "Chakra Petch","JetBrains Mono",monospace';
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  ctx.fillText(formatMultiplier(mult), cx, cy);
+  ctx.textAlign = "start";
+  ctx.textBaseline = "alphabetic";
+  ctx.restore();
+
+  // Expanding gold ring
+  const ringT = Math.min(1, t / 0.6);
+  if (ringT > 0 && ringT < 1) {
+    ctx.save();
+    ctx.globalAlpha = 0.85 * (1 - ringT);
+    const rScale = 0.6 + ringT * 1.6;
+    ctx.translate(cx, cy);
+    ctx.scale(rScale, rScale);
+    ctx.translate(-cx, -cy);
+    roundRect(ctx, x, y, w, h, 10);
+    ctx.lineWidth = 2;
+    ctx.strokeStyle = "#ffd84a";
+    ctx.stroke();
+    ctx.restore();
+  }
+}
+
+// ── Star particles ─────────────────────────────────────────────────────
+function spawnStars(
+  store: StarParticle[],
+  cx: number,
+  cy: number,
+  now: number
+) {
+  // Main bright stars
+  const big = 7;
+  for (let i = 0; i < big; i++) {
+    const a = (Math.PI * 2 * i) / big + Math.random() * 0.7;
+    const speed = 0.18 + Math.random() * 0.14; // px/ms
+    store.push({
+      startAt: now,
+      x: cx + Math.cos(a) * 4,
+      y: cy + Math.sin(a) * 4,
+      vx: Math.cos(a) * speed,
+      vy: Math.sin(a) * speed - 0.05,
+      size: 5 + Math.random() * 3,
+      hue: Math.random() < 0.55 ? "gold" : "green",
+      rot: Math.random() * Math.PI,
+      vrot: (Math.random() - 0.5) * 0.012,
+    });
+  }
+  // Smaller sparkles
+  const small = 14;
+  for (let i = 0; i < small; i++) {
+    const a = Math.random() * Math.PI * 2;
+    const speed = 0.08 + Math.random() * 0.22;
+    store.push({
+      startAt: now,
+      x: cx,
+      y: cy,
+      vx: Math.cos(a) * speed,
+      vy: Math.sin(a) * speed - 0.04,
+      size: 2 + Math.random() * 2,
+      hue: Math.random() < 0.5 ? "gold" : "green",
+      rot: Math.random() * Math.PI,
+      vrot: (Math.random() - 0.5) * 0.02,
+    });
+  }
+}
+
+function drawStar(
+  ctx: CanvasRenderingContext2D,
+  s: StarParticle,
+  t: number
+) {
+  const alpha = t < 0.15 ? t / 0.15 : 1 - (t - 0.15) / 0.85;
+  const color = s.hue === "gold" ? "#ffd84a" : "#7cffb2";
+  const glow = s.hue === "gold" ? "rgba(255,216,74,0.95)" : "rgba(124,255,178,0.9)";
+  ctx.save();
+  ctx.globalAlpha = Math.max(0, Math.min(1, alpha));
+  ctx.translate(s.x, s.y);
+  ctx.rotate(s.rot);
+  ctx.fillStyle = color;
+  ctx.shadowColor = glow;
+  ctx.shadowBlur = 10;
+  // 4-point star = two crossed thin diamonds
+  const r = s.size;
+  ctx.beginPath();
+  ctx.moveTo(0, -r);
+  ctx.lineTo(r * 0.35, 0);
+  ctx.lineTo(0, r);
+  ctx.lineTo(-r * 0.35, 0);
+  ctx.closePath();
+  ctx.fill();
+  ctx.beginPath();
+  ctx.moveTo(-r, 0);
+  ctx.lineTo(0, r * 0.35);
+  ctx.lineTo(r, 0);
+  ctx.lineTo(0, -r * 0.35);
+  ctx.closePath();
+  ctx.fill();
+  // Bright core
+  ctx.shadowBlur = 0;
+  ctx.fillStyle = "#ffffff";
+  ctx.beginPath();
+  ctx.arc(0, 0, r * 0.25, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.restore();
+}
