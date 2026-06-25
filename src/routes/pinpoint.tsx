@@ -312,7 +312,7 @@ function PinpointInner({
         <Link
           to="/"
           className="pp-stencil flex items-center gap-2 rounded px-2 py-1.5 text-[10px] hover:opacity-80"
-          style={{ color: "var(--pp-cyan)" }}
+          style={{ color: "var(--pp-yellow)" }}
         >
           <ArrowLeft className="size-3.5" />
           BACK
@@ -328,8 +328,8 @@ function PinpointInner({
           <span
             className="pp-stencil rounded px-1.5 py-0.5 text-[8px]"
             style={{
-              color: "var(--pp-orange)",
-              border: "1px solid var(--pp-orange)",
+              color: "var(--pp-red)",
+              border: "1px solid var(--pp-red)",
             }}
           >
             BETA
@@ -341,8 +341,8 @@ function PinpointInner({
             onClick={handleUndo}
             className="pp-stencil ml-auto rounded px-3 py-1.5 text-[9px]"
             style={{
-              color: "var(--pp-orange-bright)",
-              border: "1px solid var(--pp-orange)",
+              color: "var(--pp-yellow)",
+              border: "1px solid var(--pp-red)",
               background: "rgba(255,107,26,0.1)",
             }}
           >
@@ -401,7 +401,7 @@ function PinpointInner({
               </span>
               <span
                 className="pp-headline text-sm"
-                style={{ color: "var(--pp-cyan)" }}
+                style={{ color: "var(--pp-yellow)" }}
               >
                 {activeChoice.market.fixture
                   ? `${activeChoice.market.fixture.home.name.toUpperCase()} VS ${activeChoice.market.fixture.away.name.toUpperCase()}`
@@ -409,7 +409,7 @@ function PinpointInner({
               </span>
               <span
                 className="pp-num text-xs tabular-nums"
-                style={{ color: "var(--pp-muted)" }}
+                style={{ color: "var(--pp-mute)" }}
               >
                 {activeChoice.market.liveScore?.home}–
                 {activeChoice.market.liveScore?.away}
@@ -419,13 +419,13 @@ function PinpointInner({
             <div className="flex items-center gap-3">
               <span
                 className="pp-stencil text-[9px]"
-                style={{ color: "var(--pp-muted)" }}
+                style={{ color: "var(--pp-mute)" }}
               >
                 {activeChoice.outcome.label} TO WIN
               </span>
               <span
                 className="pp-headline pp-stamp-red text-2xl"
-                style={{ color: "var(--pp-orange-bright)" }}
+                style={{ color: "var(--pp-yellow)" }}
               >
                 {price.toFixed(1)}¢
               </span>
@@ -459,13 +459,13 @@ function PinpointInner({
           <div className="flex items-center justify-between">
             <span
               className="pp-stencil text-[8px]"
-              style={{ color: "var(--pp-muted)" }}
+              style={{ color: "var(--pp-mute)" }}
             >
               CLICK A CELL · A/D BET SIZE · Q/E LEVERAGE · Z UNDO · ESC STOP
             </span>
             <span
               className="pp-stencil text-[8px]"
-              style={{ color: "var(--pp-muted)" }}
+              style={{ color: "var(--pp-mute)" }}
             >
               MULT × LEV CAPPED AT 999x
             </span>
@@ -487,7 +487,7 @@ function PinpointInner({
               <button
                 onClick={() => setShowStop(false)}
                 className="pp-chip pp-stencil flex-1 py-3 text-[10px]"
-                style={{ color: "var(--pp-cyan)" }}
+                style={{ color: "var(--pp-yellow)" }}
               >
                 KEEP PLAYING
               </button>
@@ -538,7 +538,7 @@ function PinpointInner({
               <button
                 onClick={() => setShowLiquidated(null)}
                 className="pp-chip pp-stencil flex-1 py-3 text-[10px]"
-                style={{ color: "var(--pp-cyan)" }}
+                style={{ color: "var(--pp-yellow)" }}
               >
                 CONTINUE (${state.balance.toFixed(0)})
               </button>
@@ -562,34 +562,34 @@ function PinpointInner({
         <ModalShell onClose={() => setShowRules(false)}>
           <div className="pp-card max-w-md p-5">
             <div className="mb-3 flex items-center justify-between">
-              <span className="pp-stencil text-xs" style={{ color: "var(--pp-cyan)" }}>
+              <span className="pp-stencil text-xs" style={{ color: "var(--pp-yellow)" }}>
                 HOW TO PLAY
               </span>
               <button onClick={() => setShowRules(false)}>
-                <X className="size-4" style={{ color: "var(--pp-muted)" }} />
+                <X className="size-4" style={{ color: "var(--pp-mute)" }} />
               </button>
             </div>
             <ol className="space-y-2 text-[11px]" style={{ color: "#bbb" }}>
               <li>
-                <span className="pp-stencil mr-2 text-[9px]" style={{ color: "var(--pp-orange)" }}>
+                <span className="pp-stencil mr-2 text-[9px]" style={{ color: "var(--pp-red)" }}>
                   01
                 </span>
                 Pick an outcome on the left. Its YES price (¢) is your moving target.
               </li>
               <li>
-                <span className="pp-stencil mr-2 text-[9px]" style={{ color: "var(--pp-orange)" }}>
+                <span className="pp-stencil mr-2 text-[9px]" style={{ color: "var(--pp-red)" }}>
                   02
                 </span>
                 Each grid cell is a bet that the price will land in that 1¢ range exactly N seconds from now.
               </li>
               <li>
-                <span className="pp-stencil mr-2 text-[9px]" style={{ color: "var(--pp-orange)" }}>
+                <span className="pp-stencil mr-2 text-[9px]" style={{ color: "var(--pp-red)" }}>
                   03
                 </span>
                 Click a cell to bet your BET SIZE. Win = stake × multiplier. Miss = lose stake. Caps at 95.00x.
               </li>
               <li>
-                <span className="pp-stencil mr-2 text-[9px]" style={{ color: "var(--pp-orange)" }}>
+                <span className="pp-stencil mr-2 text-[9px]" style={{ color: "var(--pp-red)" }}>
                   04
                 </span>
                 A/D switch bet size, Z undoes the last bet within 5s, Esc opens STOP.
@@ -633,7 +633,7 @@ function EmptyState() {
         >
           PINPOINT
         </h1>
-        <p className="pp-stencil mt-4 text-[10px] leading-loose" style={{ color: "var(--pp-cyan)" }}>
+        <p className="pp-stencil mt-4 text-[10px] leading-loose" style={{ color: "var(--pp-yellow)" }}>
           GRIDS OPEN ONLY DURING LIVE MATCHES.
           <br />
           NOTHING IN PLAY RIGHT NOW.
@@ -641,7 +641,7 @@ function EmptyState() {
         <Link
           to="/"
           className="pp-stencil mt-6 inline-flex items-center gap-2 rounded px-4 py-2 text-[10px]"
-          style={{ color: "var(--pp-cyan)", border: "1px solid var(--pp-cyan-dim)" }}
+          style={{ color: "var(--pp-yellow)", border: "1px solid var(--pp-card-border)" }}
         >
           <ArrowLeft className="size-3" />
           BACK

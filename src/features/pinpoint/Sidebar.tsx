@@ -80,13 +80,13 @@ export function Sidebar({
           <span
             className="size-2 rounded-full"
             style={{
-              background: "var(--pp-cyan)",
-              boxShadow: "0 0 8px var(--pp-cyan)",
+              background: "var(--pp-yellow)",
+              boxShadow: "0 0 8px var(--pp-yellow)",
             }}
           />
           <span
             className="pp-stencil text-[10px]"
-            style={{ color: "var(--pp-cyan)" }}
+            style={{ color: "var(--pp-yellow)" }}
           >
             BALANCE
           </span>
@@ -98,17 +98,17 @@ export function Sidebar({
           ${balance.toLocaleString(undefined, { maximumFractionDigits: 0 })}
         </div>
 
-        <div className="mt-4 border-t pt-3" style={{ borderColor: "var(--pp-cyan-dim)" }}>
+        <div className="mt-4 border-t pt-3" style={{ borderColor: "var(--pp-card-border)" }}>
           <div className="flex items-center justify-between">
             <span
               className="pp-stencil text-[10px]"
-              style={{ color: "var(--pp-cyan)" }}
+              style={{ color: "var(--pp-yellow)" }}
             >
               SESSION
             </span>
             <span
               className="pp-stencil text-[9px]"
-              style={{ color: "var(--pp-muted)" }}
+              style={{ color: "var(--pp-mute)" }}
             >
               {openCount} OPEN
             </span>
@@ -126,9 +126,9 @@ export function Sidebar({
           </div>
 
         {/* MARGIN HEALTH (cross-margin) */}
-        <div className="mt-3 border-t pt-3" style={{ borderColor: "var(--pp-cyan-dim)" }}>
+        <div className="mt-3 border-t pt-3" style={{ borderColor: "var(--pp-card-border)" }}>
           <div className="flex items-center justify-between">
-            <span className="pp-stencil text-[10px]" style={{ color: "var(--pp-cyan)" }}>
+            <span className="pp-stencil text-[10px]" style={{ color: "var(--pp-yellow)" }}>
               MARGIN
             </span>
             <span
@@ -140,7 +140,7 @@ export function Sidebar({
           </div>
           <div
             className="mt-1.5 h-2 w-full overflow-hidden rounded-full"
-            style={{ background: "rgba(0,0,0,0.5)", border: "1px solid var(--pp-cyan-dim)" }}
+            style={{ background: "rgba(0,0,0,0.5)", border: "1px solid var(--pp-card-border)" }}
           >
             <div
               className={health <= 0.3 ? "animate-pulse" : ""}
@@ -153,7 +153,7 @@ export function Sidebar({
               }}
             />
           </div>
-          <div className="mt-1 flex items-center justify-between pp-stencil text-[8px]" style={{ color: "var(--pp-muted)" }}>
+          <div className="mt-1 flex items-center justify-between pp-stencil text-[8px]" style={{ color: "var(--pp-mute)" }}>
             <span>EQ ${equity.toFixed(0)}</span>
             <span>MAINT ${maintenance.toFixed(0)}</span>
           </div>
@@ -164,11 +164,11 @@ export function Sidebar({
       {/* MARKETS for active event */}
       <div className="pp-card p-3">
         <div className="mb-2 flex items-center justify-between">
-          <span className="pp-stencil text-[10px]" style={{ color: "var(--pp-cyan)" }}>
+          <span className="pp-stencil text-[10px]" style={{ color: "var(--pp-yellow)" }}>
             {eventLabel}
           </span>
           {activeEvent.liveClock && (
-            <span className="pp-stencil text-[8px]" style={{ color: "var(--pp-muted)" }}>
+            <span className="pp-stencil text-[8px]" style={{ color: "var(--pp-mute)" }}>
               {activeEvent.liveClock}
             </span>
           )}
@@ -189,13 +189,13 @@ export function Sidebar({
               >
                 <span
                   className="pp-stencil text-[9px]"
-                  style={{ color: isActive ? "var(--pp-cyan)" : "var(--pp-muted)" }}
+                  style={{ color: isActive ? "var(--pp-yellow)" : "var(--pp-mute)" }}
                 >
                   {o.outcome.label}
                 </span>
                 <span
                   className="pp-num text-[11px] tabular-nums"
-                  style={{ color: isActive ? "#fff" : "var(--pp-muted)" }}
+                  style={{ color: isActive ? "#fff" : "var(--pp-mute)" }}
                 >
                   {(o.outcome.price * 100).toFixed(0)}¢
                 </span>
@@ -210,13 +210,13 @@ export function Sidebar({
         <div className="flex items-center justify-between">
           <span
             className="pp-stencil text-[10px]"
-            style={{ color: "var(--pp-orange)" }}
+            style={{ color: "var(--pp-red)" }}
           >
             BET SIZE
           </span>
           <span
             className="pp-stencil text-[8px]"
-            style={{ color: "var(--pp-muted)" }}
+            style={{ color: "var(--pp-mute)" }}
           >
             A/D
           </span>
@@ -225,7 +225,7 @@ export function Sidebar({
         <div
           className="pp-headline pp-stamp-red mt-2 rounded-md py-3 text-center text-3xl"
           style={{
-            color: "var(--pp-orange-bright)",
+            color: "var(--pp-yellow)",
             background: "rgba(0,0,0,0.4)",
             border: "1.5px solid rgba(255,107,26,0.4)",
           }}
@@ -242,7 +242,7 @@ export function Sidebar({
                 betSize === s ? "pp-chip-active" : ""
               }`}
               style={{
-                color: betSize === s ? "var(--pp-orange-bright)" : "var(--pp-muted)",
+                color: betSize === s ? "var(--pp-yellow)" : "var(--pp-mute)",
               }}
             >
               ${s >= 1000 ? `${s / 1000}K` : s}
@@ -265,11 +265,11 @@ export function Sidebar({
         }
       >
         <div className="flex items-center justify-between">
-          <span className="pp-stencil flex items-center gap-1 text-[10px]" style={{ color: highRisk ? "#ffcc4d" : "var(--pp-cyan)" }}>
+          <span className="pp-stencil flex items-center gap-1 text-[10px]" style={{ color: highRisk ? "#ffcc4d" : "var(--pp-yellow)" }}>
             <Zap className="size-3" />
             LEVERAGE
           </span>
-          <span className="pp-stencil text-[8px]" style={{ color: "var(--pp-muted)" }}>
+          <span className="pp-stencil text-[8px]" style={{ color: "var(--pp-mute)" }}>
             Q/E
           </span>
         </div>
@@ -282,7 +282,7 @@ export function Sidebar({
                 onClick={() => onLeverage(l)}
                 className={`pp-chip pp-stencil py-2 text-[10px] ${active ? "pp-chip-active" : ""}`}
                 style={{
-                  color: active ? "var(--pp-orange-bright)" : "var(--pp-muted)",
+                  color: active ? "var(--pp-yellow)" : "var(--pp-mute)",
                 }}
               >
                 {l}×
@@ -292,13 +292,13 @@ export function Sidebar({
         </div>
         <div
           className="pp-stencil mt-2 text-center text-[8px]"
-          style={{ color: highRisk ? "#ffcc4d" : "var(--pp-muted)" }}
+          style={{ color: highRisk ? "#ffcc4d" : "var(--pp-mute)" }}
         >
           {levCopy}
         </div>
         <div
           className="pp-stencil mt-1 text-center text-[8px]"
-          style={{ color: "var(--pp-muted)" }}
+          style={{ color: "var(--pp-mute)" }}
         >
           MARGIN ${betSize} · NOTIONAL ${notional}
         </div>
@@ -318,7 +318,7 @@ export function Sidebar({
       <div className="mt-auto grid grid-cols-3 gap-2">
         <button
           className="pp-chip pp-chip-active-yellow pp-stencil flex items-center justify-center gap-1 py-2 text-[9px]"
-          style={{ color: "var(--pp-cyan)" }}
+          style={{ color: "var(--pp-yellow)" }}
         >
           <Volume2 className="size-3" />
           ON
@@ -326,14 +326,14 @@ export function Sidebar({
         <button
           onClick={onShowRules}
           className="pp-chip pp-stencil flex items-center justify-center gap-1 py-2 text-[9px]"
-          style={{ color: "var(--pp-muted)" }}
+          style={{ color: "var(--pp-mute)" }}
         >
           <BookOpen className="size-3" />
           RULES
         </button>
         <button
           className="pp-chip pp-stencil flex items-center justify-center py-2"
-          style={{ color: "var(--pp-muted)" }}
+          style={{ color: "var(--pp-mute)" }}
         >
           <Info className="size-3.5" />
         </button>

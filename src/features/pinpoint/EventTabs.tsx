@@ -40,7 +40,7 @@ export function EventTabs({ events, activeEventId, onPick, openCountByEvent }: P
             >
               <span
                 className="pp-stencil text-[10px]"
-                style={{ color: isActive ? "var(--pp-cyan)" : "var(--pp-muted)" }}
+                style={{ color: isActive ? "var(--pp-yellow)" : "var(--pp-mute)" }}
               >
                 {home?.short ?? "—"}
               </span>
@@ -54,14 +54,14 @@ export function EventTabs({ events, activeEventId, onPick, openCountByEvent }: P
               )}
               <span
                 className="pp-stencil text-[10px]"
-                style={{ color: isActive ? "var(--pp-cyan)" : "var(--pp-muted)" }}
+                style={{ color: isActive ? "var(--pp-yellow)" : "var(--pp-mute)" }}
               >
                 {away?.short ?? "—"}
               </span>
               {m.liveClock && (
                 <span
                   className="pp-stencil text-[8px]"
-                  style={{ color: "var(--pp-muted)" }}
+                  style={{ color: "var(--pp-mute)" }}
                 >
                   · {m.liveClock}
                 </span>
@@ -71,7 +71,7 @@ export function EventTabs({ events, activeEventId, onPick, openCountByEvent }: P
                   className="pp-stencil absolute -right-1.5 -top-1.5 flex h-4 min-w-4 items-center justify-center rounded-full px-1 text-[8px]"
                   style={{
                     color: "#fff",
-                    background: "var(--pp-orange)",
+                    background: "var(--pp-red)",
                     boxShadow: "0 0 8px rgba(255,107,26,0.6)",
                   }}
                 >
