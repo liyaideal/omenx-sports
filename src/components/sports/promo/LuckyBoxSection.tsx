@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { motion } from "motion/react";
-import { Trophy, Sparkles, Gift, Check, Lock, ChevronRight } from "lucide-react";
+import { Trophy, Sparkles, Gift, Check, Lock } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 import { toast } from "sonner";
 import {
