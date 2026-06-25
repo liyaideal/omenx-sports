@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState, useCallback } from "react";
-import { ArrowLeft, X, Zap } from "lucide-react";
+import { ArrowLeft, X, Zap, Gamepad2 } from "lucide-react";
 import { toast } from "sonner";
 import { MATCH_MARKETS } from "@/data/sports-markets";
 import {
@@ -12,6 +12,16 @@ import { useLiveTicker } from "@/features/pinpoint/hooks/useLiveTicker";
 import { Sidebar, type OutcomeChoice } from "@/features/pinpoint/Sidebar";
 import { Grid } from "@/features/pinpoint/Grid";
 import { EventTabs } from "@/features/pinpoint/EventTabs";
+import { useGameStats } from "@/features/pinpoint/hooks/useGameStats";
+import {
+  isMuted as soundsIsMuted,
+  setMuted as soundsSetMuted,
+  sndCoin,
+  sndWin,
+  sndLose,
+  sndGameOver,
+  sndClick,
+} from "@/features/pinpoint/sounds";
 import "@/features/pinpoint/pp-theme.css";
 
 export const Route = createFileRoute("/pinpoint")({
@@ -111,6 +121,14 @@ function PinpointInner({
     lastBetIdRef,
   } = usePinpointSession();
 
+  // Arcade HUD stats (XP, level, streak, trophies)
+  const gameStats = useGameStats();
+  // Sound mute state
+  const [muted, setMutedState] = useState<boolean>(() => soundsIsMuted());
+  const toggleMute = useCallback(() => {
+    setMutedState((m) => { const next = !m; soundsSetMuted(next); if (!next) sndClick(); return next; });
+  }, []);
+
   const [recentHits, setRecentHits] = useState<{ id: string; at: number }[]>([]);
   const [recentLiqs, setRecentLiqs] = useState<{ id: string; at: number }[]>([]);
   const [showStop, setShowStop] = useState(false);
@@ -134,11 +152,14 @@ function PinpointInner({
           priceRef.current >= p.cellCenter - 0.5 && priceRef.current < p.cellCenter + 0.5;
         settlePosition(p.id, hit ? "won" : "lost", priceRef.current);
         const lev = p.leverage ?? 1;
+        const payout = hit ? p.stake * p.mult * lev : 0;
+        gameStats.recordSettle({ won: hit, stake: p.stake, mult: p.mult * lev, payout });
+        if (hit) sndWin(); else sndLose();
         settled.push({
           id: p.id,
           at: t,
           won: hit,
-          payout: hit ? p.stake * p.mult * lev : 0,
+          payout,
         });
       }
     }
@@ -160,6 +181,7 @@ function PinpointInner({
         toast.error("Insufficient balance");
         return;
       }
+      sndCoin();
       placeBet({
         marketId: activeChoice.market.id,
         outcomeId: activeChoice.outcome.id,
@@ -286,6 +308,8 @@ function PinpointInner({
     // Trigger account-wide liquidation.
     const { liquidatedIds } = liquidateAll(priceByOutcome);
     if (liquidatedIds.length > 0) {
+      sndGameOver();
+      gameStats.breakStreak();
       const at = Date.now();
       setRecentLiqs((h) => [...liquidatedIds.map((id) => ({ id, at })), ...h].slice(0, 40));
       const lossAmount = state.positions
