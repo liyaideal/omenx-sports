@@ -593,7 +593,12 @@ export function Grid({
   // ── Mouse handlers ────────────────────────────────────────────────────
   const onMouseMove = useCallback((e: React.MouseEvent<HTMLCanvasElement>) => {
     const r = e.currentTarget.getBoundingClientRect();
-    hoverRef.current = { x: e.clientX - r.left, y: e.clientY - r.top };
+    const rawX = e.clientX - r.left;
+    const y = e.clientY - r.top;
+    // Same drift compensation as onClick: align hover with the cell that will
+    // be hit if the user clicks now.
+    const dx = Math.max(0, (Date.now() - lastRenderNowRef.current) * PX_PER_MS);
+    hoverRef.current = { x: rawX + dx, y };
   }, []);
   const onMouseLeave = useCallback(() => {
     hoverRef.current = null;
