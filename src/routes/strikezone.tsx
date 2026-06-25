@@ -376,6 +376,10 @@ function StrikezoneInner({
           onLeverage={setLeverage}
           onStop={() => setShowStop(true)}
           onShowRules={() => setShowRules(true)}
+          equity={equity}
+          maintenance={maintenance}
+          lockedStake={lockedStake}
+          initialBalance={INITIAL_BALANCE}
         />
 
         {/* Main */}
