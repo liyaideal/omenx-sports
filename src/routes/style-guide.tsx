@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { Link } from "@tanstack/react-router";
+import "@/features/pinpoint/pp-theme.css";
 import {
   Bell,
   Search,
