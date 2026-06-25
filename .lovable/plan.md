@@ -1,17 +1,35 @@
 ## 问题
 
-`Grid.tsx` 的价格胶囊（pill）当前用价格涨跌色 `stroke`（绿 `#2dd76a` 或红 `#ff3b1f`）同时作为**背景渐变**和**文字颜色** —— 红 pill + 红文字 = 完全看不清（截图里的 "49.x¢" 几乎和背景融成一团）。
+价格胶囊（"51.7¢"）和命中闪烁格（"1.00x" hit-flash）都锚定在 NOW 线附近的同一行：
 
-## 修复（仅 `src/features/pinpoint/Grid.tsx`，约 320–342 行）
+- 价格胶囊位于 `tipY = yFor(currentPrice)` —— 始终对齐当前价格行
+- Hit-flash 位于 `yFor(round(currentPrice))` —— K 线刚穿过的那行，几乎总是和价格行重合
 
-1. **文字色改为高对比常量**：用 LCD 深色 `#0e1812`（暗 LCD 底色）作为字色，配上原有的黄/红渐变背景，黑字压在亮色 pill 上始终可读，与卡带主题一致。
-2. **去掉文字 shadowBlur**（当前 6px glow 让小字进一步糊掉），保留 pill 自身的外发光。
-3. **字号 +1 + 字重**：从 `700 13px` 升到 `800 14px`，并切到等宽 `"VT323","Silkscreen"` 系列里更扎实的 `"Press Start 2P"` 备选 → 用 `'800 13px "Silkscreen","VT323",monospace'`（保持卡带 LCD 感、不破坏视觉系统，比 Bungee 在小尺寸更清晰）。
-4. **pill 描边变深**：把 `strokeStyle` 从 `stroke`（同色）改为 `rgba(14,24,18,0.85)`，让胶囊轮廓与文字一致，进一步分离前景/背景。
-5. **pill 宽度从 64 → 70**，给两位小数 + ¢ 留更多呼吸空间，避免文字贴边。
+每次格子到期时（每秒一次），它们就撞在一起，俩都看不清。
 
-不动业务逻辑、不动其他视觉元素（K 线、tip dot、外发光颜色仍跟随涨跌）。
+## 修复方案（仅 `src/features/pinpoint/Grid.tsx`）
 
-## 验证
+**动态避让**：当有 hit-flash 活跃时，把价格胶囊从 tipY 临时上移/下移一个行距（`PITCH_Y`），并画一条 1px 引线从 tip 圆点连到胶囊，保持两者的视觉关联。
 
-- Playwright 截 `/pinpoint` 在跌势（红 pill）和涨势（黄 pill）两种状态下的局部截图，肉眼确认价格数字清晰可读。
+### 具体改动
+
+1. **检测冲突**：在画价格胶囊之前，遍历 `hitFlashRef.current`，看是否存在 `Math.round(currentPrice)` 行的活跃 hit-flash（`age < HIT_FLASH_MS`）。
+
+2. **垂直避让**：若冲突，pill 的 `pillY` 从 `tipY - pillH/2` 改为：
+   - 优先向上 `tipY - PITCH_Y - pillH/2`
+   - 若上移后会超出画布顶部（`< 2px`），改为向下 `tipY + PITCH_Y - pillH/2`
+   - 同时把 pill 水平再往左推 6px，让它彻底脱离 NOW 线那一列的 hit-flash 高亮范围
+
+3. **加引线**：从 `(HISTORY_W, tipY)` 画一段虚线（2px on / 3px off）到 pill 右边缘中点，颜色用 `stroke`（涨跌色），让用户一眼看出 pill 仍代表当前价。
+
+4. **平滑过渡（可选，简单实现）**：用 `currentPillOffsetRef` 记录上一帧的 y 偏移，每帧朝目标偏移 lerp 30%，避免 hit-flash 出现/消失瞬间 pill 弹跳。
+
+### 不会改动
+
+- Hit-flash 自身（保留它在 NOW 线的卡带高亮，毕竟这是"K 线刚刚到达"的关键反馈）
+- 业务逻辑、下注、倍数颜色
+- pill 的样式（前一轮已经修好了可读性）
+
+### 验证
+
+Playwright 截 `/pinpoint`，等到 hit-flash 出现的那 650ms 内截图，确认 pill 已经避让到上/下一行且引线清晰可见，hit-flash 的 "1.00x" 完全可读。
