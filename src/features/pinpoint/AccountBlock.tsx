@@ -225,11 +225,7 @@ export function AccountBlock({
             textShadow: "1px 1px 0 #000",
           }}
         >
-          {frozen
-            ? `LIQUIDATED · MMR ${
-                mmrAtFreeze != null ? Math.round(mmrAtFreeze * 100) : 0
-              }%`
-            : healthLabel}
+          {frozen ? "LIQUIDATED" : healthLabel}
         </span>
       </div>
       <div
