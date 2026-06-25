@@ -2,7 +2,6 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState, useCallback } from "react";
 import { ArrowLeft, X, Zap } from "lucide-react";
 import { toast } from "sonner";
-import "@fontsource/press-start-2p/400.css";
 import { MATCH_MARKETS } from "@/data/sports-markets";
 import {
   usePinpointSession,
