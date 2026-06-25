@@ -697,6 +697,14 @@ function ModalShell({
 }
 
 function EmptyState() {
+  return null as never;
+}
+function _unused() {
+  return null;
+}
+// helper: tier ordering for "highest in batch"
+const TIER_ORDER = { S: 0, M: 1, L: 2, XL: 3 } as const;
+function tierWeight(t: "S" | "M" | "L" | "XL"): number { return TIER_ORDER[t]; }
   return (
     <div className="pp-root relative flex min-h-screen items-center justify-center px-4">
       <div className="pp-stars" />
