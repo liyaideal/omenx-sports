@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState, useCallback } from "react";
-import { ArrowLeft, X, Zap, Gamepad2 } from "lucide-react";
+import { ArrowLeft, X, Zap } from "lucide-react";
 import { toast } from "sonner";
 import { MATCH_MARKETS } from "@/data/sports-markets";
 import {
