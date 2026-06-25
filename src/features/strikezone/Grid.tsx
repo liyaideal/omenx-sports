@@ -19,10 +19,12 @@ const PITCH_Y = ROW_H + ROW_GAP;
 const TOTAL_H = ROWS * ROW_H + (ROWS - 1) * ROW_GAP;
 const HISTORY_FRAC = 0.34; // left chart takes ~34% of width
 const PX_PER_MS = PITCH_X / 1000; // one column per second
-const DYING_MS = 220;
+const DYING_MS = 150; // non-hit cells in an expired column vanish quickly
+const HIT_FLASH_MS = 650; // hit cell lingers and pulses
 const SETTLE_MS = 750;
 const POP_MS = 1400;
 const WIN_BURST_MS = 1100;
+const STAR_LIFE_MS = 950;
 
 interface Props {
   currentPrice: number;
@@ -54,6 +56,25 @@ type DyingCell = {
   expirySec: number;
   row: number;
   mult: number;
+};
+
+type HitFlashCell = {
+  startAt: number;
+  expirySec: number;
+  row: number;
+  mult: number;
+};
+
+type StarParticle = {
+  startAt: number;
+  x: number;
+  y: number;
+  vx: number; // px/ms
+  vy: number; // px/ms
+  size: number;
+  hue: "gold" | "green";
+  rot: number;
+  vrot: number;
 };
 
 type ProfitPop = {
@@ -94,6 +115,8 @@ export function Grid({
   // Effects/animations
   const effectsRef = useRef<Map<string, Effect>>(new Map());
   const dyingRef = useRef<DyingCell[]>([]);
+  const hitFlashRef = useRef<HitFlashCell[]>([]);
+  const starsRef = useRef<StarParticle[]>([]);
   const popsRef = useRef<ProfitPop[]>([]);
   // Per-column expirySec we've already settled in-canvas (to avoid duplicate dying spawn).
   const settledColumnsRef = useRef<Set<number>>(new Set());
@@ -138,9 +161,6 @@ export function Grid({
         } else {
           effectsRef.current.set(id, { kind: "lose", startAt: now, p: prevP });
         }
-        // Also mark this column as settled so dying cells aren't spawned for the row that was bet.
-        const expirySec = Math.round(prevP.targetAt / 1000);
-        settledColumnsRef.current.add(expirySec);
       }
     }
     const next = new Map<string, StrikezonePosition>();
@@ -385,17 +405,37 @@ export function Grid({
       futureCellsRef.current = futureCells;
 
       // ── 5. Spawn dying cells for columns whose expirySec just crossed NOW ──
-      // For any expirySec where firstSec > expirySec and not in settledColumnsRef
-      // (rare path: column expires without any bet). We track "lastFirstSec" by
-      // reading prevFirstSec.
       const prevFirst = prevFirstSecRef.current;
       if (prevFirst != null && prevFirst < firstSec) {
         for (let s = prevFirst; s < firstSec; s++) {
-          if (settledColumnsRef.current.has(s)) continue;
-          // Spawn dying for every row (no bet → all empty)
+          // Determine the row the K-line tip hit at expiry: row whose
+          // cellCenter == round(currentPrice).
+          const hitCenter = Math.round(priceRef.current);
+          const hitDist = hitCenter - center;
+          const hitRow = 5 - hitDist; // may be outside [0,10] if price drifted far
+          // Find any bet (now settled into effectsRef) at this column.
+          const betCentersThisCol = new Set<number>();
+          effectsRef.current.forEach((eff) => {
+            if (Math.round(eff.p.targetAt / 1000) === s) {
+              betCentersThisCol.add(Math.round(eff.p.cellCenter));
+            }
+          });
           for (let r = 0; r < ROWS; r++) {
             const dist = 5 - r;
+            const cellCenter = center + dist;
             const mlt = multiplier(Math.abs(dist), 1);
+            // Skip rows that are settled bet cells — their win/lose effect draws them.
+            if (betCentersThisCol.has(Math.round(cellCenter))) continue;
+            // Hit row that is NOT a bet → flash it brightly instead of dying.
+            if (r === hitRow) {
+              hitFlashRef.current.push({
+                startAt: now,
+                expirySec: s,
+                row: r,
+                mult: mlt,
+              });
+              continue;
+            }
             dyingRef.current.push({
               startAt: now,
               expirySec: s,
@@ -413,7 +453,7 @@ export function Grid({
         if (age > DYING_MS) return false;
         const p = age / DYING_MS;
         const alpha = 1 - p;
-        const scale = 1 - p * 0.2;
+        const scale = 1 - p * 0.35;
         const dist = 5 - d.row;
         const cy = yFor(center + dist);
         const x = NOW_X - COL_W / 2;
@@ -430,6 +470,19 @@ export function Grid({
         return true;
       });
 
+      // ── 6b. Hit-flash cells (non-bet hit row, gold pulse) ─────────
+      hitFlashRef.current = hitFlashRef.current.filter((hf) => {
+        const age = now - hf.startAt;
+        if (age > HIT_FLASH_MS) return false;
+        const t = age / HIT_FLASH_MS;
+        const dist = 5 - hf.row;
+        const cy = yFor(center + dist);
+        const x = NOW_X - COL_W / 2;
+        const y = cy - ROW_H / 2;
+        drawHitFlash(ctx, x, y, COL_W, ROW_H, t, hf.mult);
+        return true;
+      });
+
       // ── 7. Render settlement effects (bet cells: win/lose) ─────────
       const toDelete: string[] = [];
       effectsRef.current.forEach((eff, id) => {
@@ -441,16 +494,16 @@ export function Grid({
         }
         const t01 = Math.min(1, age / totalMs);
         const p = eff.p;
-        // x slides left from NOW_X (settled at expiry) as time passes
-        const slideMs = age; // continue at PX_PER_MS rate
-        const cx = NOW_X - slideMs * PX_PER_MS * 0.6; // slow-mo for drama
+        // Keep bet cell pinned at the NOW line so the player can see the
+        // exact strike position before the burst.
+        const cx = NOW_X;
         const cy = yFor(p.cellCenter);
         const x = cx - COL_W / 2;
         const y = cy - ROW_H / 2;
 
         if (eff.kind === "win") {
           drawWinBurst(ctx, x, y, COL_W, ROW_H, t01, p, eff.payoutNet);
-          // Spawn profit pop once
+          // Spawn profit pop + star burst once
           if (!eff._popped) {
             eff._popped = true;
             popsRef.current.push({
@@ -459,12 +512,26 @@ export function Grid({
               baseX: cx,
               baseY: cy - ROW_H / 2,
             });
+            spawnStars(starsRef.current, cx, cy, now);
           }
         } else {
           drawLoseFade(ctx, x, y, COL_W, ROW_H, t01, p);
         }
       });
       for (const id of toDelete) effectsRef.current.delete(id);
+
+      // ── 8b. Star particles ───────────────────────────────────────
+      starsRef.current = starsRef.current.filter((s) => {
+        const age = now - s.startAt;
+        if (age > STAR_LIFE_MS) return false;
+        // physics
+        s.x += s.vx * dt;
+        s.y += s.vy * dt;
+        s.vy += 0.0009 * dt; // gentle gravity
+        s.rot += s.vrot * dt;
+        drawStar(ctx, s, age / STAR_LIFE_MS);
+        return true;
+      });
 
       // ── 8. Profit pops (floating +$xxx) ────────────────────────────
       popsRef.current = popsRef.current.filter((pop) => {
