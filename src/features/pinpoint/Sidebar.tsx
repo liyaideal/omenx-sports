@@ -1,6 +1,8 @@
-import { Volume2, BookOpen, Info, Square, Zap } from "lucide-react";
+import { Volume2, VolumeX, BookOpen, Info, Square, Zap } from "lucide-react";
 import { BET_SIZE_OPTIONS, LEVERAGE_OPTIONS } from "./hooks/usePinpointSession";
 import type { SportsMarket, Outcome } from "@/data/sports-markets";
+import { PlayerHUD } from "./PlayerHUD";
+import type { GameStats, Trophy } from "./hooks/useGameStats";
 
 export interface OutcomeChoice {
   market: SportsMarket;
@@ -30,6 +32,11 @@ interface Props {
   maintenance: number;
   lockedStake: number;
   initialBalance: number;
+  // arcade HUD
+  stats: GameStats;
+  trophies: (Trophy & { unlocked: boolean })[];
+  muted: boolean;
+  onToggleMute: () => void;
 }
 
 export function Sidebar({
@@ -50,6 +57,10 @@ export function Sidebar({
   maintenance,
   lockedStake,
   initialBalance,
+  stats,
+  trophies,
+  muted,
+  onToggleMute,
 }: Props) {
   const plPositive = sessionPL >= 0;
   const highRisk = leverage >= 3;
@@ -74,6 +85,9 @@ export function Sidebar({
 
   return (
     <div className="flex w-[300px] shrink-0 flex-col gap-4 p-4">
+      {/* PLAYER HUD — Lv / XP / Streak / Trophies */}
+      <PlayerHUD stats={stats} trophies={trophies} />
+
       {/* BALANCE / SESSION card */}
       <div className="pp-card p-4">
         <div className="flex items-center gap-2">
@@ -315,11 +329,15 @@ export function Sidebar({
       {/* footer trio */}
       <div className="mt-auto grid grid-cols-3 gap-2">
         <button
-          className="pp-chip pp-chip-active-yellow pp-stencil flex items-center justify-center gap-1 py-2 text-[9px]"
-          style={{ color: "var(--pp-yellow)" }}
+          onClick={onToggleMute}
+          className={`pp-chip pp-stencil flex items-center justify-center gap-1 py-2 text-[9px] ${
+            muted ? "" : "pp-chip-active-yellow"
+          }`}
+          style={{ color: muted ? "var(--pp-mute)" : "var(--pp-yellow)" }}
+          title={muted ? "Sound off — click to enable 8-bit FX" : "Sound on"}
         >
-          <Volume2 className="size-3" />
-          ON
+          {muted ? <VolumeX className="size-3" /> : <Volume2 className="size-3" />}
+          {muted ? "OFF" : "ON"}
         </button>
         <button
           onClick={onShowRules}
