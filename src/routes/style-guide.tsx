@@ -3624,9 +3624,6 @@ function ShareDemo() {
                 <button className="pp-btn pp-btn-pink px-4 py-2 text-[10px]">BET</button>
                 <button className="pp-btn pp-btn-mint px-4 py-2 text-[10px]">CONTINUE</button>
               </div>
-              <p className="pp-marker mt-3 text-[9px]" style={{ color: "#1a1a1a", background: "var(--pp-yellow)", padding: "2px 6px", display: "inline-block", border: "2px solid #000" }}>
-                NO MANUAL CLOSE BUTTON · BETS RESOLVE AT JUDGEMENT OR LIQUIDATION
-              </p>
             </div>
 
             {/* Session-Frozen panel (replaces the old GAME OVER stamp). */}
