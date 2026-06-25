@@ -6,7 +6,7 @@ import {
   multiplierTextColor,
   applyLeverage,
 } from "./lib/multiplier";
-import type { StrikezonePosition } from "./hooks/useStrikezoneSession";
+import type { PinpointPosition } from "./hooks/usePinpointSession";
 
 // ── Layout constants (in CSS pixels) ──────────────────────────────────────
 const ROWS = 11; // ±5¢ around center
@@ -29,7 +29,7 @@ const STAR_LIFE_MS = 950;
 interface Props {
   currentPrice: number;
   history: number[];
-  positions: StrikezonePosition[];
+  positions: PinpointPosition[];
   betSize: number;
   leverage: number;
   onPlace: (cellCenter: number, distanceCents: number, secondsAhead: number, mult: number) => void;
@@ -43,19 +43,19 @@ type Effect =
   | {
       kind: "win";
       startAt: number;
-      p: StrikezonePosition;
+      p: PinpointPosition;
       payoutNet: number;
       _popped?: boolean;
     }
   | {
       kind: "lose";
       startAt: number;
-      p: StrikezonePosition;
+      p: PinpointPosition;
     }
   | {
       kind: "liquidate";
       startAt: number;
-      p: StrikezonePosition;
+      p: PinpointPosition;
       _popped?: boolean;
     };
 
@@ -146,7 +146,7 @@ export function Grid({
   >([]);
 
   // ── Detect parent settlements: positions that vanish → push Effect ─────
-  const prevPositionsRef = useRef<Map<string, StrikezonePosition>>(new Map());
+  const prevPositionsRef = useRef<Map<string, PinpointPosition>>(new Map());
   const hitIdsRef = useRef<Set<string>>(new Set());
   hitIdsRef.current = new Set(recentHits.map((h) => h.id));
   const liqIdsRef = useRef<Set<string>>(new Set());
@@ -175,7 +175,7 @@ export function Grid({
         }
       }
     }
-    const next = new Map<string, StrikezonePosition>();
+    const next = new Map<string, PinpointPosition>();
     for (const p of positions) next.set(p.id, p);
     prevPositionsRef.current = next;
   }, [positions, recentHits, recentLiquidations]);
@@ -361,7 +361,7 @@ export function Grid({
       const futureW = W - NOW_X;
       const visibleCols = Math.ceil(futureW / PITCH_X) + 2;
 
-      const positionByKey = new Map<string, StrikezonePosition>();
+      const positionByKey = new Map<string, PinpointPosition>();
       for (const p of positionsRef.current) {
         const k = `${Math.round(p.targetAt / 1000)}:${Math.round(p.cellCenter)}`;
         positionByKey.set(k, p);
@@ -697,7 +697,7 @@ function drawBetCell(
   y: number,
   w: number,
   h: number,
-  p: StrikezonePosition,
+  p: PinpointPosition,
   hover: boolean
 ) {
   // Solid bright orange bet cell with 3-line text
@@ -741,7 +741,7 @@ function drawWinBurst(
   w: number,
   h: number,
   t: number, // 0..1 over WIN_BURST_MS
-  _p: StrikezonePosition,
+  _p: PinpointPosition,
   _payoutNet: number
 ) {
   // Scale: 0.9 → 1.45 → 1
@@ -803,7 +803,7 @@ function drawLoseFade(
   w: number,
   h: number,
   t: number,
-  _p: StrikezonePosition
+  _p: PinpointPosition
 ) {
   const alpha = 1 - t;
   const scale = 1 - t * 0.22;
@@ -875,7 +875,7 @@ function drawLiquidateBurst(
   w: number,
   h: number,
   t: number,
-  _p: StrikezonePosition
+  _p: PinpointPosition
 ) {
   // Sharp red impact: scale punch 0..0.18, then fade quickly.
   const scale =

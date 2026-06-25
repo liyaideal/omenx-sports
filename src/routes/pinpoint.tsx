@@ -5,36 +5,36 @@ import { toast } from "sonner";
 import "@fontsource/press-start-2p/400.css";
 import { MATCH_MARKETS } from "@/data/sports-markets";
 import {
-  useStrikezoneSession,
+  usePinpointSession,
   computeEquity,
   INITIAL_BALANCE,
-} from "@/features/strikezone/hooks/useStrikezoneSession";
-import { useLiveTicker } from "@/features/strikezone/hooks/useLiveTicker";
-import { Sidebar, type OutcomeChoice } from "@/features/strikezone/Sidebar";
-import { Grid } from "@/features/strikezone/Grid";
-import { EventTabs } from "@/features/strikezone/EventTabs";
-import "@/features/strikezone/sz-theme.css";
+} from "@/features/pinpoint/hooks/usePinpointSession";
+import { useLiveTicker } from "@/features/pinpoint/hooks/useLiveTicker";
+import { Sidebar, type OutcomeChoice } from "@/features/pinpoint/Sidebar";
+import { Grid } from "@/features/pinpoint/Grid";
+import { EventTabs } from "@/features/pinpoint/EventTabs";
+import "@/features/pinpoint/sz-theme.css";
 
-export const Route = createFileRoute("/strikezone")({
+export const Route = createFileRoute("/pinpoint")({
   head: () => ({
     meta: [
-      { title: "Strikezone — OmenX" },
+      { title: "Pinpoint — OmenX" },
       {
         name: "description",
         content:
           "Bettle-style price × time grid betting on live sports markets. Click a cell, win the multiplier when the price hits it.",
       },
-      { property: "og:title", content: "Strikezone — OmenX" },
+      { property: "og:title", content: "Pinpoint — OmenX" },
       {
         property: "og:description",
         content: "Price × time grid betting on live sports markets.",
       },
     ],
   }),
-  component: StrikezonePage,
+  component: PinpointPage,
 });
 
-function StrikezonePage() {
+function PinpointPage() {
   const liveMarkets = useMemo(
     () => MATCH_MARKETS.filter((m) => m.isLiveStream && m.liveScore),
     []
@@ -66,7 +66,7 @@ function StrikezonePage() {
   if (groups.length === 0) return <EmptyState />;
 
   return (
-    <StrikezoneInner
+    <PinpointInner
       groups={groups}
       activeEventId={activeEventId}
       activeOutcomeId={activeOutcomeId}
@@ -76,14 +76,14 @@ function StrikezonePage() {
   );
 }
 
-function StrikezoneInner({
+function PinpointInner({
   groups,
   activeEventId,
   activeOutcomeId,
   onPickEvent,
   onPickOutcome,
 }: {
-  groups: ReturnType<typeof useStrikezoneGroups>;
+  groups: ReturnType<typeof usePinpointGroups>;
   activeEventId: string;
   activeOutcomeId: string;
   onPickEvent: (id: string) => void;
@@ -110,7 +110,7 @@ function StrikezoneInner({
     cycleLeverage,
     lastBetExpiryRef,
     lastBetIdRef,
-  } = useStrikezoneSession();
+  } = usePinpointSession();
 
   const [recentHits, setRecentHits] = useState<{ id: string; at: number }[]>([]);
   const [recentLiqs, setRecentLiqs] = useState<{ id: string; at: number }[]>([]);
@@ -305,32 +305,32 @@ function StrikezoneInner({
   }, [tickSec]);
 
   return (
-    <div className="sz-root relative min-h-screen w-full overflow-hidden">
-      <div className="sz-stars" />
+    <div className="pp-root relative min-h-screen w-full overflow-hidden">
+      <div className="pp-stars" />
 
       {/* Topbar */}
       <header className="relative z-10 flex h-14 items-center gap-4 px-4">
         <Link
           to="/"
-          className="sz-pixel flex items-center gap-2 rounded px-2 py-1.5 text-[10px] hover:opacity-80"
-          style={{ color: "var(--sz-cyan)" }}
+          className="pp-stencil flex items-center gap-2 rounded px-2 py-1.5 text-[10px] hover:opacity-80"
+          style={{ color: "var(--pp-cyan)" }}
         >
           <ArrowLeft className="size-3.5" />
           BACK
         </Link>
         <div className="ml-2 flex items-center gap-2">
-          <Zap className="size-5" style={{ color: "var(--sz-green)" }} />
+          <Zap className="size-5" style={{ color: "var(--pp-green)" }} />
           <span
-            className="sz-display sz-glow-green text-xl"
-            style={{ color: "var(--sz-green)" }}
+            className="pp-headline pp-stamp-green text-xl"
+            style={{ color: "var(--pp-green)" }}
           >
-            STRIKEZONE
+            PINPOINT
           </span>
           <span
-            className="sz-pixel rounded px-1.5 py-0.5 text-[8px]"
+            className="pp-stencil rounded px-1.5 py-0.5 text-[8px]"
             style={{
-              color: "var(--sz-orange)",
-              border: "1px solid var(--sz-orange)",
+              color: "var(--pp-orange)",
+              border: "1px solid var(--pp-orange)",
             }}
           >
             BETA
@@ -340,10 +340,10 @@ function StrikezoneInner({
         {undoMsLeft > 0 && (
           <button
             onClick={handleUndo}
-            className="sz-pixel ml-auto rounded px-3 py-1.5 text-[9px]"
+            className="pp-stencil ml-auto rounded px-3 py-1.5 text-[9px]"
             style={{
-              color: "var(--sz-orange-bright)",
-              border: "1px solid var(--sz-orange)",
+              color: "var(--pp-orange-bright)",
+              border: "1px solid var(--pp-orange)",
               background: "rgba(255,107,26,0.1)",
             }}
           >
@@ -390,27 +390,27 @@ function StrikezoneInner({
               <span
                 className="size-2 animate-pulse rounded-full"
                 style={{
-                  background: "var(--sz-red)",
-                  boxShadow: "0 0 8px var(--sz-red)",
+                  background: "var(--pp-red)",
+                  boxShadow: "0 0 8px var(--pp-red)",
                 }}
               />
               <span
-                className="sz-pixel text-[10px]"
-                style={{ color: "var(--sz-red)" }}
+                className="pp-stencil text-[10px]"
+                style={{ color: "var(--pp-red)" }}
               >
                 LIVE {activeChoice.market.liveClock}
               </span>
               <span
-                className="sz-display text-sm"
-                style={{ color: "var(--sz-cyan)" }}
+                className="pp-headline text-sm"
+                style={{ color: "var(--pp-cyan)" }}
               >
                 {activeChoice.market.fixture
                   ? `${activeChoice.market.fixture.home.name.toUpperCase()} VS ${activeChoice.market.fixture.away.name.toUpperCase()}`
                   : activeChoice.market.title.toUpperCase()}
               </span>
               <span
-                className="sz-num text-xs tabular-nums"
-                style={{ color: "var(--sz-muted)" }}
+                className="pp-num text-xs tabular-nums"
+                style={{ color: "var(--pp-muted)" }}
               >
                 {activeChoice.market.liveScore?.home}–
                 {activeChoice.market.liveScore?.away}
@@ -419,22 +419,22 @@ function StrikezoneInner({
 
             <div className="flex items-center gap-3">
               <span
-                className="sz-pixel text-[9px]"
-                style={{ color: "var(--sz-muted)" }}
+                className="pp-stencil text-[9px]"
+                style={{ color: "var(--pp-muted)" }}
               >
                 {activeChoice.outcome.label} TO WIN
               </span>
               <span
-                className="sz-display sz-glow-orange text-2xl"
-                style={{ color: "var(--sz-orange-bright)" }}
+                className="pp-headline pp-stamp-red text-2xl"
+                style={{ color: "var(--pp-orange-bright)" }}
               >
                 {price.toFixed(1)}¢
               </span>
               <span
-                className="sz-num text-xs tabular-nums"
+                className="pp-num text-xs tabular-nums"
                 style={{
                   color:
-                    priceChange >= 0 ? "var(--sz-green)" : "var(--sz-red)",
+                    priceChange >= 0 ? "var(--pp-green)" : "var(--pp-red)",
                 }}
               >
                 {priceChange >= 0 ? "▲" : "▼"}
@@ -459,14 +459,14 @@ function StrikezoneInner({
           {/* Help line */}
           <div className="flex items-center justify-between">
             <span
-              className="sz-pixel text-[8px]"
-              style={{ color: "var(--sz-muted)" }}
+              className="pp-stencil text-[8px]"
+              style={{ color: "var(--pp-muted)" }}
             >
               CLICK A CELL · A/D BET SIZE · Q/E LEVERAGE · Z UNDO · ESC STOP
             </span>
             <span
-              className="sz-pixel text-[8px]"
-              style={{ color: "var(--sz-muted)" }}
+              className="pp-stencil text-[8px]"
+              style={{ color: "var(--pp-muted)" }}
             >
               MULT × LEV CAPPED AT 999x
             </span>
@@ -477,8 +477,8 @@ function StrikezoneInner({
       {/* STOP confirm */}
       {showStop && (
         <ModalShell onClose={() => setShowStop(false)}>
-          <div className="sz-card p-5" style={{ borderColor: "var(--sz-red)" }}>
-            <div className="sz-pixel mb-3 text-xs" style={{ color: "var(--sz-red)" }}>
+          <div className="pp-card p-5" style={{ borderColor: "var(--pp-red)" }}>
+            <div className="pp-stencil mb-3 text-xs" style={{ color: "var(--pp-red)" }}>
               STOP ALL BETS?
             </div>
             <p className="text-xs" style={{ color: "#aaa" }}>
@@ -487,14 +487,14 @@ function StrikezoneInner({
             <div className="mt-4 flex gap-2">
               <button
                 onClick={() => setShowStop(false)}
-                className="sz-chip sz-pixel flex-1 py-3 text-[10px]"
-                style={{ color: "var(--sz-cyan)" }}
+                className="pp-chip pp-stencil flex-1 py-3 text-[10px]"
+                style={{ color: "var(--pp-cyan)" }}
               >
                 KEEP PLAYING
               </button>
               <button
                 onClick={confirmStop}
-                className="sz-stop sz-pixel flex-1 py-3 text-[10px]"
+                className="pp-stop pp-stencil flex-1 py-3 text-[10px]"
                 style={{ color: "#fff" }}
               >
                 STOP
@@ -508,22 +508,22 @@ function StrikezoneInner({
       {showLiquidated && (
         <ModalShell onClose={() => setShowLiquidated(null)}>
           <div
-            className="sz-card p-6 text-center"
+            className="pp-card p-6 text-center"
             style={{
-              borderColor: "var(--sz-red)",
+              borderColor: "var(--pp-red)",
               boxShadow: "0 0 40px rgba(255,45,74,0.45), inset 0 0 24px rgba(255,45,74,0.12)",
             }}
           >
             <div
-              className="sz-display text-3xl"
+              className="pp-headline text-3xl"
               style={{
-                color: "var(--sz-red)",
+                color: "var(--pp-red)",
                 textShadow: "0 0 16px rgba(255,45,74,0.9)",
               }}
             >
               LIQUIDATED
             </div>
-            <p className="sz-pixel mt-2 text-[10px]" style={{ color: "#ffcc4d" }}>
+            <p className="pp-stencil mt-2 text-[10px]" style={{ color: "#ffcc4d" }}>
               ACCOUNT EQUITY FELL BELOW MAINTENANCE
             </p>
             <p className="mt-4 text-xs" style={{ color: "#bbb" }}>
@@ -531,15 +531,15 @@ function StrikezoneInner({
               {showLiquidated.liquidatedCount === 1 ? "" : "S"} FORCE-CLOSED.
               <br />
               MARGIN LOST:{" "}
-              <span style={{ color: "var(--sz-red)" }}>
+              <span style={{ color: "var(--pp-red)" }}>
                 −${showLiquidated.lossAmount.toFixed(0)}
               </span>
             </p>
             <div className="mt-5 flex gap-2">
               <button
                 onClick={() => setShowLiquidated(null)}
-                className="sz-chip sz-pixel flex-1 py-3 text-[10px]"
-                style={{ color: "var(--sz-cyan)" }}
+                className="pp-chip pp-stencil flex-1 py-3 text-[10px]"
+                style={{ color: "var(--pp-cyan)" }}
               >
                 CONTINUE (${state.balance.toFixed(0)})
               </button>
@@ -548,7 +548,7 @@ function StrikezoneInner({
                   reset();
                   setShowLiquidated(null);
                 }}
-                className="sz-stop sz-pixel flex-1 py-3 text-[10px]"
+                className="pp-stop pp-stencil flex-1 py-3 text-[10px]"
                 style={{ color: "#fff" }}
               >
                 RESET ACCOUNT
@@ -561,36 +561,36 @@ function StrikezoneInner({
       {/* RULES modal */}
       {showRules && (
         <ModalShell onClose={() => setShowRules(false)}>
-          <div className="sz-card max-w-md p-5">
+          <div className="pp-card max-w-md p-5">
             <div className="mb-3 flex items-center justify-between">
-              <span className="sz-pixel text-xs" style={{ color: "var(--sz-cyan)" }}>
+              <span className="pp-stencil text-xs" style={{ color: "var(--pp-cyan)" }}>
                 HOW TO PLAY
               </span>
               <button onClick={() => setShowRules(false)}>
-                <X className="size-4" style={{ color: "var(--sz-muted)" }} />
+                <X className="size-4" style={{ color: "var(--pp-muted)" }} />
               </button>
             </div>
             <ol className="space-y-2 text-[11px]" style={{ color: "#bbb" }}>
               <li>
-                <span className="sz-pixel mr-2 text-[9px]" style={{ color: "var(--sz-orange)" }}>
+                <span className="pp-stencil mr-2 text-[9px]" style={{ color: "var(--pp-orange)" }}>
                   01
                 </span>
                 Pick an outcome on the left. Its YES price (¢) is your moving target.
               </li>
               <li>
-                <span className="sz-pixel mr-2 text-[9px]" style={{ color: "var(--sz-orange)" }}>
+                <span className="pp-stencil mr-2 text-[9px]" style={{ color: "var(--pp-orange)" }}>
                   02
                 </span>
                 Each grid cell is a bet that the price will land in that 1¢ range exactly N seconds from now.
               </li>
               <li>
-                <span className="sz-pixel mr-2 text-[9px]" style={{ color: "var(--sz-orange)" }}>
+                <span className="pp-stencil mr-2 text-[9px]" style={{ color: "var(--pp-orange)" }}>
                   03
                 </span>
                 Click a cell to bet your BET SIZE. Win = stake × multiplier. Miss = lose stake. Caps at 95.00x.
               </li>
               <li>
-                <span className="sz-pixel mr-2 text-[9px]" style={{ color: "var(--sz-orange)" }}>
+                <span className="pp-stencil mr-2 text-[9px]" style={{ color: "var(--pp-orange)" }}>
                   04
                 </span>
                 A/D switch bet size, Z undoes the last bet within 5s, Esc opens STOP.
@@ -624,25 +624,25 @@ function ModalShell({
 
 function EmptyState() {
   return (
-    <div className="sz-root relative flex min-h-screen items-center justify-center px-4">
-      <div className="sz-stars" />
+    <div className="pp-root relative flex min-h-screen items-center justify-center px-4">
+      <div className="pp-stars" />
       <div className="relative max-w-md text-center">
-        <Zap className="mx-auto size-12" style={{ color: "var(--sz-green)" }} />
+        <Zap className="mx-auto size-12" style={{ color: "var(--pp-green)" }} />
         <h1
-          className="sz-display sz-glow-green mt-4 text-3xl"
-          style={{ color: "var(--sz-green)" }}
+          className="pp-headline pp-stamp-green mt-4 text-3xl"
+          style={{ color: "var(--pp-green)" }}
         >
-          STRIKEZONE
+          PINPOINT
         </h1>
-        <p className="sz-pixel mt-4 text-[10px] leading-loose" style={{ color: "var(--sz-cyan)" }}>
+        <p className="pp-stencil mt-4 text-[10px] leading-loose" style={{ color: "var(--pp-cyan)" }}>
           GRIDS OPEN ONLY DURING LIVE MATCHES.
           <br />
           NOTHING IN PLAY RIGHT NOW.
         </p>
         <Link
           to="/"
-          className="sz-pixel mt-6 inline-flex items-center gap-2 rounded px-4 py-2 text-[10px]"
-          style={{ color: "var(--sz-cyan)", border: "1px solid var(--sz-cyan-dim)" }}
+          className="pp-stencil mt-6 inline-flex items-center gap-2 rounded px-4 py-2 text-[10px]"
+          style={{ color: "var(--pp-cyan)", border: "1px solid var(--pp-cyan-dim)" }}
         >
           <ArrowLeft className="size-3" />
           BACK
@@ -657,6 +657,6 @@ type GroupedMarkets = {
   market: import("@/data/sports-markets").SportsMarket;
   outcomes: OutcomeChoice[];
 }[];
-function useStrikezoneGroups(): GroupedMarkets {
+function usePinpointGroups(): GroupedMarkets {
   return [] as GroupedMarkets;
 }

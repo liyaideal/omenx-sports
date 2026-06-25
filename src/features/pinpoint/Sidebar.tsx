@@ -1,5 +1,5 @@
 import { Volume2, BookOpen, Info, Square, Zap } from "lucide-react";
-import { BET_SIZE_OPTIONS, LEVERAGE_OPTIONS } from "./hooks/useStrikezoneSession";
+import { BET_SIZE_OPTIONS, LEVERAGE_OPTIONS } from "./hooks/usePinpointSession";
 import type { SportsMarket, Outcome } from "@/data/sports-markets";
 
 export interface OutcomeChoice {
@@ -69,54 +69,54 @@ export function Sidebar({
   const health = lockedStake > 0
     ? Math.max(0, Math.min(1, (equity - maintenance) / Math.max(1, denom - maintenance)))
     : 1;
-  const healthColor = health > 0.6 ? "var(--sz-green)" : health > 0.3 ? "#ffcc4d" : "var(--sz-red)";
+  const healthColor = health > 0.6 ? "var(--pp-green)" : health > 0.3 ? "#ffcc4d" : "var(--pp-red)";
   const healthLabel = health > 0.6 ? "HEALTHY" : health > 0.3 ? "WARN" : "DANGER";
 
   return (
     <div className="flex w-[300px] shrink-0 flex-col gap-4 p-4">
       {/* BALANCE / SESSION card */}
-      <div className="sz-card p-4">
+      <div className="pp-card p-4">
         <div className="flex items-center gap-2">
           <span
             className="size-2 rounded-full"
             style={{
-              background: "var(--sz-cyan)",
-              boxShadow: "0 0 8px var(--sz-cyan)",
+              background: "var(--pp-cyan)",
+              boxShadow: "0 0 8px var(--pp-cyan)",
             }}
           />
           <span
-            className="sz-pixel text-[10px]"
-            style={{ color: "var(--sz-cyan)" }}
+            className="pp-stencil text-[10px]"
+            style={{ color: "var(--pp-cyan)" }}
           >
             BALANCE
           </span>
         </div>
         <div
-          className="sz-display sz-glow-green mt-2 text-4xl"
-          style={{ color: "var(--sz-green)" }}
+          className="pp-headline pp-stamp-green mt-2 text-4xl"
+          style={{ color: "var(--pp-green)" }}
         >
           ${balance.toLocaleString(undefined, { maximumFractionDigits: 0 })}
         </div>
 
-        <div className="mt-4 border-t pt-3" style={{ borderColor: "var(--sz-cyan-dim)" }}>
+        <div className="mt-4 border-t pt-3" style={{ borderColor: "var(--pp-cyan-dim)" }}>
           <div className="flex items-center justify-between">
             <span
-              className="sz-pixel text-[10px]"
-              style={{ color: "var(--sz-cyan)" }}
+              className="pp-stencil text-[10px]"
+              style={{ color: "var(--pp-cyan)" }}
             >
               SESSION
             </span>
             <span
-              className="sz-pixel text-[9px]"
-              style={{ color: "var(--sz-muted)" }}
+              className="pp-stencil text-[9px]"
+              style={{ color: "var(--pp-muted)" }}
             >
               {openCount} OPEN
             </span>
           </div>
           <div
-            className="sz-display mt-1 text-2xl"
+            className="pp-headline mt-1 text-2xl"
             style={{
-              color: plPositive ? "var(--sz-green)" : "var(--sz-red)",
+              color: plPositive ? "var(--pp-green)" : "var(--pp-red)",
               textShadow: plPositive
                 ? "0 0 8px rgba(0,255,157,0.6)"
                 : "0 0 8px rgba(255,45,74,0.6)",
@@ -126,13 +126,13 @@ export function Sidebar({
           </div>
 
         {/* MARGIN HEALTH (cross-margin) */}
-        <div className="mt-3 border-t pt-3" style={{ borderColor: "var(--sz-cyan-dim)" }}>
+        <div className="mt-3 border-t pt-3" style={{ borderColor: "var(--pp-cyan-dim)" }}>
           <div className="flex items-center justify-between">
-            <span className="sz-pixel text-[10px]" style={{ color: "var(--sz-cyan)" }}>
+            <span className="pp-stencil text-[10px]" style={{ color: "var(--pp-cyan)" }}>
               MARGIN
             </span>
             <span
-              className="sz-pixel text-[9px]"
+              className="pp-stencil text-[9px]"
               style={{ color: healthColor, textShadow: `0 0 6px ${healthColor}` }}
             >
               {healthLabel}
@@ -140,7 +140,7 @@ export function Sidebar({
           </div>
           <div
             className="mt-1.5 h-2 w-full overflow-hidden rounded-full"
-            style={{ background: "rgba(0,0,0,0.5)", border: "1px solid var(--sz-cyan-dim)" }}
+            style={{ background: "rgba(0,0,0,0.5)", border: "1px solid var(--pp-cyan-dim)" }}
           >
             <div
               className={health <= 0.3 ? "animate-pulse" : ""}
@@ -153,7 +153,7 @@ export function Sidebar({
               }}
             />
           </div>
-          <div className="mt-1 flex items-center justify-between sz-pixel text-[8px]" style={{ color: "var(--sz-muted)" }}>
+          <div className="mt-1 flex items-center justify-between pp-stencil text-[8px]" style={{ color: "var(--pp-muted)" }}>
             <span>EQ ${equity.toFixed(0)}</span>
             <span>MAINT ${maintenance.toFixed(0)}</span>
           </div>
@@ -162,13 +162,13 @@ export function Sidebar({
       </div>
 
       {/* MARKETS for active event */}
-      <div className="sz-card p-3">
+      <div className="pp-card p-3">
         <div className="mb-2 flex items-center justify-between">
-          <span className="sz-pixel text-[10px]" style={{ color: "var(--sz-cyan)" }}>
+          <span className="pp-stencil text-[10px]" style={{ color: "var(--pp-cyan)" }}>
             {eventLabel}
           </span>
           {activeEvent.liveClock && (
-            <span className="sz-pixel text-[8px]" style={{ color: "var(--sz-muted)" }}>
+            <span className="pp-stencil text-[8px]" style={{ color: "var(--pp-muted)" }}>
               {activeEvent.liveClock}
             </span>
           )}
@@ -183,19 +183,19 @@ export function Sidebar({
               <button
                 key={o.id}
                 onClick={() => onPickOutcome(o.id)}
-                className={`sz-chip flex flex-col items-center justify-center gap-1 py-2.5 ${
-                  isActive ? "sz-chip-cyan-active" : ""
+                className={`pp-chip flex flex-col items-center justify-center gap-1 py-2.5 ${
+                  isActive ? "pp-chip-active-yellow" : ""
                 }`}
               >
                 <span
-                  className="sz-pixel text-[9px]"
-                  style={{ color: isActive ? "var(--sz-cyan)" : "var(--sz-muted)" }}
+                  className="pp-stencil text-[9px]"
+                  style={{ color: isActive ? "var(--pp-cyan)" : "var(--pp-muted)" }}
                 >
                   {o.outcome.label}
                 </span>
                 <span
-                  className="sz-num text-[11px] tabular-nums"
-                  style={{ color: isActive ? "#fff" : "var(--sz-muted)" }}
+                  className="pp-num text-[11px] tabular-nums"
+                  style={{ color: isActive ? "#fff" : "var(--pp-muted)" }}
                 >
                   {(o.outcome.price * 100).toFixed(0)}¢
                 </span>
@@ -206,26 +206,26 @@ export function Sidebar({
       </div>
 
       {/* BET SIZE card */}
-      <div className="sz-card sz-card-orange p-3">
+      <div className="pp-card pp-card-orange p-3">
         <div className="flex items-center justify-between">
           <span
-            className="sz-pixel text-[10px]"
-            style={{ color: "var(--sz-orange)" }}
+            className="pp-stencil text-[10px]"
+            style={{ color: "var(--pp-orange)" }}
           >
             BET SIZE
           </span>
           <span
-            className="sz-pixel text-[8px]"
-            style={{ color: "var(--sz-muted)" }}
+            className="pp-stencil text-[8px]"
+            style={{ color: "var(--pp-muted)" }}
           >
             A/D
           </span>
         </div>
 
         <div
-          className="sz-display sz-glow-orange mt-2 rounded-md py-3 text-center text-3xl"
+          className="pp-headline pp-stamp-red mt-2 rounded-md py-3 text-center text-3xl"
           style={{
-            color: "var(--sz-orange-bright)",
+            color: "var(--pp-orange-bright)",
             background: "rgba(0,0,0,0.4)",
             border: "1.5px solid rgba(255,107,26,0.4)",
           }}
@@ -238,11 +238,11 @@ export function Sidebar({
             <button
               key={s}
               onClick={() => onBetSize(s)}
-              className={`sz-chip sz-pixel py-2 text-[9px] ${
-                betSize === s ? "sz-chip-active" : ""
+              className={`pp-chip pp-stencil py-2 text-[9px] ${
+                betSize === s ? "pp-chip-active" : ""
               }`}
               style={{
-                color: betSize === s ? "var(--sz-orange-bright)" : "var(--sz-muted)",
+                color: betSize === s ? "var(--pp-orange-bright)" : "var(--pp-muted)",
               }}
             >
               ${s >= 1000 ? `${s / 1000}K` : s}
@@ -253,7 +253,7 @@ export function Sidebar({
 
       {/* LEVERAGE card */}
       <div
-        className="sz-card p-3"
+        className="pp-card p-3"
         style={
           highRisk
             ? {
@@ -265,11 +265,11 @@ export function Sidebar({
         }
       >
         <div className="flex items-center justify-between">
-          <span className="sz-pixel flex items-center gap-1 text-[10px]" style={{ color: highRisk ? "#ffcc4d" : "var(--sz-cyan)" }}>
+          <span className="pp-stencil flex items-center gap-1 text-[10px]" style={{ color: highRisk ? "#ffcc4d" : "var(--pp-cyan)" }}>
             <Zap className="size-3" />
             LEVERAGE
           </span>
-          <span className="sz-pixel text-[8px]" style={{ color: "var(--sz-muted)" }}>
+          <span className="pp-stencil text-[8px]" style={{ color: "var(--pp-muted)" }}>
             Q/E
           </span>
         </div>
@@ -280,9 +280,9 @@ export function Sidebar({
               <button
                 key={l}
                 onClick={() => onLeverage(l)}
-                className={`sz-chip sz-pixel py-2 text-[10px] ${active ? "sz-chip-active" : ""}`}
+                className={`pp-chip pp-stencil py-2 text-[10px] ${active ? "pp-chip-active" : ""}`}
                 style={{
-                  color: active ? "var(--sz-orange-bright)" : "var(--sz-muted)",
+                  color: active ? "var(--pp-orange-bright)" : "var(--pp-muted)",
                 }}
               >
                 {l}×
@@ -291,14 +291,14 @@ export function Sidebar({
           })}
         </div>
         <div
-          className="sz-pixel mt-2 text-center text-[8px]"
-          style={{ color: highRisk ? "#ffcc4d" : "var(--sz-muted)" }}
+          className="pp-stencil mt-2 text-center text-[8px]"
+          style={{ color: highRisk ? "#ffcc4d" : "var(--pp-muted)" }}
         >
           {levCopy}
         </div>
         <div
-          className="sz-pixel mt-1 text-center text-[8px]"
-          style={{ color: "var(--sz-muted)" }}
+          className="pp-stencil mt-1 text-center text-[8px]"
+          style={{ color: "var(--pp-muted)" }}
         >
           MARGIN ${betSize} · NOTIONAL ${notional}
         </div>
@@ -307,7 +307,7 @@ export function Sidebar({
       {/* STOP */}
       <button
         onClick={onStop}
-        className="sz-stop sz-pixel flex items-center justify-center gap-2 py-4 text-sm"
+        className="pp-stop pp-stencil flex items-center justify-center gap-2 py-4 text-sm"
         style={{ color: "#fff" }}
       >
         <Square className="size-4 fill-current" />
@@ -317,23 +317,23 @@ export function Sidebar({
       {/* footer trio */}
       <div className="mt-auto grid grid-cols-3 gap-2">
         <button
-          className="sz-chip sz-chip-cyan-active sz-pixel flex items-center justify-center gap-1 py-2 text-[9px]"
-          style={{ color: "var(--sz-cyan)" }}
+          className="pp-chip pp-chip-active-yellow pp-stencil flex items-center justify-center gap-1 py-2 text-[9px]"
+          style={{ color: "var(--pp-cyan)" }}
         >
           <Volume2 className="size-3" />
           ON
         </button>
         <button
           onClick={onShowRules}
-          className="sz-chip sz-pixel flex items-center justify-center gap-1 py-2 text-[9px]"
-          style={{ color: "var(--sz-muted)" }}
+          className="pp-chip pp-stencil flex items-center justify-center gap-1 py-2 text-[9px]"
+          style={{ color: "var(--pp-muted)" }}
         >
           <BookOpen className="size-3" />
           RULES
         </button>
         <button
-          className="sz-chip sz-pixel flex items-center justify-center py-2"
-          style={{ color: "var(--sz-muted)" }}
+          className="pp-chip pp-stencil flex items-center justify-center py-2"
+          style={{ color: "var(--pp-muted)" }}
         >
           <Info className="size-3.5" />
         </button>

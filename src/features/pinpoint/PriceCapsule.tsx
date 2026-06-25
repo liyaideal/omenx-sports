@@ -28,10 +28,10 @@ export function PriceCapsule({ price, range, height }: Props) {
       }}
     >
       <div
-        className="sz-pill sz-display flex items-center px-3 py-1.5 text-xl"
-        style={{ color: "var(--sz-green)" }}
+        className="pp-pill pp-headline flex items-center px-3 py-1.5 text-xl"
+        style={{ color: "var(--pp-green)" }}
       >
-        <span className="sz-glow-green">{price.toFixed(1)}¢</span>
+        <span className="pp-stamp-green">{price.toFixed(1)}¢</span>
       </div>
       {/* stem */}
       <div
@@ -39,14 +39,14 @@ export function PriceCapsule({ price, range, height }: Props) {
         style={{
           width: "18px",
           background:
-            "linear-gradient(90deg, var(--sz-green) 0%, rgba(0,255,157,0.2) 100%)",
+            "linear-gradient(90deg, var(--pp-green) 0%, rgba(0,255,157,0.2) 100%)",
           boxShadow: "0 0 8px rgba(0,255,157,0.6)",
         }}
       />
       <div
         className="size-2.5 rounded-full"
         style={{
-          background: "var(--sz-green)",
+          background: "var(--pp-green)",
           boxShadow: "0 0 12px rgba(0,255,157,0.9)",
         }}
       />

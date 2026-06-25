@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { loadState, saveState } from "../lib/storage";
 
-export interface StrikezonePosition {
+export interface PinpointPosition {
   id: string;
   marketId: string;
   outcomeId: string;
@@ -29,12 +29,12 @@ export interface StrikezonePosition {
   payout?: number;
 }
 
-export interface StrikezoneState {
+export interface PinpointState {
   balance: number;
   betSize: number;
   leverage: number;
   sessionPL: number;
-  positions: StrikezonePosition[];
+  positions: PinpointPosition[];
 }
 
 const BET_SIZES = [10, 25, 100, 500, 1000, 5000] as const;
@@ -59,7 +59,7 @@ function inCell(price: number, cellCenter: number): boolean {
  * (treated as currently out-of-the-money — conservative).
  */
 export function computeEquity(
-  state: StrikezoneState,
+  state: PinpointState,
   priceByOutcome: Record<string, number>
 ): { equity: number; lockedStake: number; maintenance: number } {
   let unrealized = 0;
@@ -80,7 +80,7 @@ export function computeEquity(
   };
 }
 
-const DEFAULT_STATE: StrikezoneState = {
+const DEFAULT_STATE: PinpointState = {
   balance: INITIAL_BALANCE,
   betSize: 100,
   leverage: 1,
@@ -88,15 +88,15 @@ const DEFAULT_STATE: StrikezoneState = {
   positions: [],
 };
 
-export function useStrikezoneSession() {
-  const [state, setState] = useState<StrikezoneState>(DEFAULT_STATE);
+export function usePinpointSession() {
+  const [state, setState] = useState<PinpointState>(DEFAULT_STATE);
   const [hydrated, setHydrated] = useState(false);
 
   useEffect(() => {
     const loaded = loadState();
     if (loaded) {
       setState((s) => {
-        const merged = { ...s, ...loaded } as StrikezoneState;
+        const merged = { ...s, ...loaded } as PinpointState;
         // Migration: legacy open positions used old leverage rules → refund them.
         let refund = 0;
         const migrated = (merged.positions || []).map((p) => {
@@ -120,12 +120,12 @@ export function useStrikezoneSession() {
   const lastBetExpiryRef = useRef<number>(0);
 
   const placeBet = useCallback(
-    (params: Omit<StrikezonePosition, "id" | "placedAt" | "status">) => {
+    (params: Omit<PinpointPosition, "id" | "placedAt" | "status">) => {
       const id = `bet_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
       const now = Date.now();
       setState((s) => {
         if (s.balance < params.stake) return s;
-        const position: StrikezonePosition = {
+        const position: PinpointPosition = {
           ...params,
           id,
           placedAt: now,
