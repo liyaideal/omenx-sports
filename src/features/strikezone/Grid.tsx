@@ -118,8 +118,6 @@ export function Grid({
   const hitFlashRef = useRef<HitFlashCell[]>([]);
   const starsRef = useRef<StarParticle[]>([]);
   const popsRef = useRef<ProfitPop[]>([]);
-  // Per-column expirySec we've already settled in-canvas (to avoid duplicate dying spawn).
-  const settledColumnsRef = useRef<Set<number>>(new Set());
   // Mouse hover
   const hoverRef = useRef<{ x: number; y: number } | null>(null);
   // Cell rect cache (built each frame for hit-testing)
