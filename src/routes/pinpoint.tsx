@@ -12,6 +12,7 @@ import { useLiveTicker } from "@/features/pinpoint/hooks/useLiveTicker";
 import { Sidebar, type OutcomeChoice } from "@/features/pinpoint/Sidebar";
 import { Grid } from "@/features/pinpoint/Grid";
 import { EventTabs } from "@/features/pinpoint/EventTabs";
+import { PlayerCard } from "@/features/pinpoint/PlayerCard";
 import { useGameStats } from "@/features/pinpoint/hooks/useGameStats";
 import {
   isMuted as soundsIsMuted,
@@ -408,8 +409,6 @@ function PinpointInner({
           maintenance={maintenance}
           lockedStake={lockedStake}
           initialBalance={INITIAL_BALANCE}
-          stats={gameStats.stats}
-          trophies={gameStats.trophies}
           muted={muted}
           onToggleMute={toggleMute}
         />
