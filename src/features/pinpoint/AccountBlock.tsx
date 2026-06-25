@@ -1,6 +1,13 @@
 import type { GameStats, Trophy } from "./hooks/useGameStats";
 import { TROPHIES, xpForNext } from "./hooks/useGameStats";
 
+/** Compact balance formatter — keeps the row inside ~240px even at 7+ digits. */
+function formatBalance(n: number): string {
+  const abs = Math.abs(n);
+  if (abs >= 1_000_000) return `$${(n / 1_000_000).toFixed(abs >= 10_000_000 ? 0 : 1)}M`;
+  return `$${Math.round(n).toLocaleString()}`;
+}
+
 interface Props {
   // identity / lifetime
   stats: GameStats;
