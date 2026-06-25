@@ -3499,6 +3499,90 @@ function ShareDemo() {
           </p>
         </div>
       </div>
+
+      <Section id="pinpoint-stickers" title="Pinpoint Stickers" kicker="∞ — Street Skate Sticker System">
+        <p className="mb-6 max-w-2xl text-sm text-muted-foreground">
+          Visual language for <code>/pinpoint</code>. Collaged sticker cards, hand-drawn marker, hazard stripes, screen-print grain. Scoped under <code>.pp-root</code> — never bleeds into the main app.
+        </p>
+        <div className="pp-root rounded-2xl p-6">
+          <div className="grid grid-cols-2 gap-6 lg:grid-cols-3">
+            {/* Palette */}
+            <div className="pp-card p-4">
+              <div className="pp-marker mb-3 text-sm" style={{ color: "var(--pp-yellow)" }}>palette</div>
+              <div className="grid grid-cols-3 gap-2 text-[10px]">
+                {[
+                  ["paper", "var(--pp-paper)", "#efe7d3"],
+                  ["ink", "var(--pp-ink)", "#000"],
+                  ["red", "var(--pp-red)", "#fff"],
+                  ["yellow", "var(--pp-yellow)", "#000"],
+                  ["green", "var(--pp-green-2)", "#000"],
+                  ["mute", "var(--pp-mute)", "#fff"],
+                ].map(([name, bg, fg]) => (
+                  <div key={name} className="pp-stencil rounded-sm p-2 text-center" style={{ background: bg, color: fg, border: "2px solid #000" }}>
+                    {name}
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Sticker logo */}
+            <div className="pp-card p-4">
+              <div className="pp-marker mb-3 text-sm" style={{ color: "var(--pp-yellow)" }}>logo sticker</div>
+              <div className="flex items-center gap-2">
+                <span
+                  className="pp-stencil pp-tilt-l px-3 py-1 text-2xl"
+                  style={{ background: "var(--pp-yellow)", color: "#000", border: "2px solid #000", boxShadow: "3px 3px 0 #000", borderRadius: "4px" }}
+                >
+                  PINPOINT
+                </span>
+                <span className="pp-marker pp-tilt-r text-sm" style={{ color: "var(--pp-red)" }}>beta</span>
+              </div>
+            </div>
+
+            {/* Hazard stripes */}
+            <div className="pp-card p-4">
+              <div className="pp-marker mb-3 text-sm" style={{ color: "var(--pp-yellow)" }}>hazard stripes</div>
+              <div className="pp-hazard-stripes mb-2" />
+              <div className="pp-hazard-stripes-red" />
+              <p className="mt-2 text-[10px]" style={{ color: "var(--pp-mute)" }}>
+                Use above/below liquidation, stop-all, and high-leverage surfaces.
+              </p>
+            </div>
+
+            {/* Typography */}
+            <div className="pp-card p-4 col-span-2">
+              <div className="pp-marker mb-3 text-sm" style={{ color: "var(--pp-yellow)" }}>typography</div>
+              <div className="space-y-2">
+                <div className="pp-headline text-3xl" style={{ color: "var(--pp-ink)" }}>ANTON · HEADLINE</div>
+                <div className="pp-stencil text-xl" style={{ color: "var(--pp-yellow)" }}>BUNGEE · STENCIL</div>
+                <div className="pp-marker text-lg" style={{ color: "var(--pp-red)" }}>permanent marker · caption</div>
+                <div className="pp-num text-base" style={{ color: "var(--pp-ink)" }}>0123456789 · JetBrains Mono</div>
+              </div>
+            </div>
+
+            {/* Stamps */}
+            <div className="pp-card p-4">
+              <div className="pp-marker mb-3 text-sm" style={{ color: "var(--pp-yellow)" }}>stamps</div>
+              <div className="flex flex-wrap items-center gap-3">
+                <span className="pp-stamp" style={{ color: "var(--pp-green-2)" }}>WON</span>
+                <span className="pp-stamp" style={{ color: "var(--pp-red)" }}>LOST</span>
+                <span className="pp-stamp pp-stamp-circle" style={{ color: "var(--pp-yellow)" }}>LIVE</span>
+              </div>
+            </div>
+
+            {/* Buttons & chips */}
+            <div className="pp-card p-4 col-span-2">
+              <div className="pp-marker mb-3 text-sm" style={{ color: "var(--pp-yellow)" }}>buttons & chips</div>
+              <div className="flex flex-wrap gap-3">
+                <button className="pp-stop pp-stencil px-5 py-3 text-sm">STOP ALL</button>
+                <button className="pp-chip pp-stencil px-4 py-2 text-xs" style={{ color: "var(--pp-ink)" }}>IDLE CHIP</button>
+                <button className="pp-chip pp-chip-active pp-stencil px-4 py-2 text-xs" style={{ color: "var(--pp-red)" }}>ACTIVE</button>
+                <button className="pp-chip pp-chip-active-yellow pp-stencil px-4 py-2 text-xs" style={{ color: "var(--pp-yellow)" }}>SELECTED</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </Section>
     </div>
   );
 }
