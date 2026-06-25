@@ -411,6 +411,7 @@ function PinpointInner({
           onLeverage={setLeverage}
           frozen={state.sessionStatus === "frozen"}
           mmr={mmr}
+          onDeposit={() => setShowDeposit(true)}
         />
 
         {/* Main */}
