@@ -1,6 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { Link } from "@tanstack/react-router";
-import "@/features/pinpoint/pp-theme.css";
 import {
   Bell,
   Search,
@@ -181,7 +180,6 @@ const SECTIONS = [
   ["event-extras", "Event Detail Extras"],
   ["share", "Share Dialog"],
   ["production-inventory", "Production Inventory"],
-  ["pinpoint-cartridge", "Pinpoint Cartridge"],
 ] as const;
 
 function Section({ id, title, kicker, children }: { id: string; title: string; kicker?: string; children: React.ReactNode }) {
