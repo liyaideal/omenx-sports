@@ -317,11 +317,18 @@ export function Grid({
         ctx.fill();
         ctx.shadowBlur = 0;
 
-        // Price pill (anchored to tip, drifts left of NOW_X)
+        // Price pill: always anchored a full row ABOVE the K-line tip so it
+        // can never collide with the hit-flash callout that lives on the
+        // price row. A short leader line keeps the link to the tip clear.
         const pillW = 70;
         const pillH = 24;
-        const pillX = HISTORY_W - pillW - 12;
-        const pillY = tipY - pillH / 2;
+        let pillCenterY = tipY - PITCH_Y;
+        if (pillCenterY - pillH / 2 < 2) {
+          // Near the top of the canvas — flip below the tip instead.
+          pillCenterY = tipY + PITCH_Y;
+        }
+        const pillX = HISTORY_W - pillW - 14;
+        const pillY = pillCenterY - pillH / 2;
         roundRect(ctx, pillX, pillY, pillW, pillH, 12);
         const pg = ctx.createLinearGradient(0, pillY, 0, pillY + pillH);
         pg.addColorStop(0, up ? "#ffd400" : "#ff3b1f");
@@ -341,6 +348,19 @@ export function Grid({
         ctx.fillText(`${priceRef.current.toFixed(1)}¢`, pillX + pillW / 2, pillY + pillH / 2);
         ctx.textAlign = "start";
         ctx.textBaseline = "alphabetic";
+
+        // Leader line from the tip dot to the displaced pill.
+        ctx.save();
+        ctx.strokeStyle = stroke;
+        ctx.globalAlpha = 0.7;
+        ctx.lineWidth = 1;
+        ctx.setLineDash([2, 3]);
+        ctx.beginPath();
+        ctx.moveTo(HISTORY_W, tipY);
+        ctx.lineTo(pillX + pillW, pillY + pillH / 2);
+        ctx.stroke();
+        ctx.setLineDash([]);
+        ctx.restore();
       }
 
       // ── 3. NOW divider ─────────────────────────────────────────────
