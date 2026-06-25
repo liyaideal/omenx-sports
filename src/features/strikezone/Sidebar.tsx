@@ -25,6 +25,11 @@ interface Props {
   // stop
   onStop: () => void;
   onShowRules: () => void;
+  // cross-margin live metrics
+  equity: number;
+  maintenance: number;
+  lockedStake: number;
+  initialBalance: number;
 }
 
 export function Sidebar({
@@ -41,6 +46,10 @@ export function Sidebar({
   onLeverage,
   onStop,
   onShowRules,
+  equity,
+  maintenance,
+  lockedStake,
+  initialBalance,
 }: Props) {
   const plPositive = sessionPL >= 0;
   const highRisk = leverage >= 3;
@@ -48,13 +57,20 @@ export function Sidebar({
     ? `${activeEvent.fixture.home.short} VS ${activeEvent.fixture.away.short}`
     : activeEvent.title.toUpperCase();
   const notional = betSize * leverage;
-  const liqDist = (4.5 / Math.max(1, leverage)).toFixed(2);
   const levCopy =
     leverage === 1
       ? "NO LEVERAGE · SAFE"
       : leverage === 2
-        ? `2× PAYOUT · LIQ ±${liqDist}¢`
-        : `⚠ 3× PAYOUT · LIQ ±${liqDist}¢`;
+        ? "2× PAYOUT · CROSS RISK"
+        : "⚠ 3× PAYOUT · HIGH CROSS RISK";
+
+  // Margin-health bar: 1 when equity == initialBalance (or above), 0 at maintenance.
+  const denom = Math.max(1, initialBalance - 0);
+  const health = lockedStake > 0
+    ? Math.max(0, Math.min(1, (equity - maintenance) / Math.max(1, denom - maintenance)))
+    : 1;
+  const healthColor = health > 0.6 ? "var(--sz-green)" : health > 0.3 ? "#ffcc4d" : "var(--sz-red)";
+  const healthLabel = health > 0.6 ? "HEALTHY" : health > 0.3 ? "WARN" : "DANGER";
 
   return (
     <div className="flex w-[300px] shrink-0 flex-col gap-4 p-4">
@@ -108,6 +124,40 @@ export function Sidebar({
           >
             {plPositive ? "+" : "−"}${Math.abs(sessionPL).toFixed(0)}
           </div>
+
+        {/* MARGIN HEALTH (cross-margin) */}
+        <div className="mt-3 border-t pt-3" style={{ borderColor: "var(--sz-cyan-dim)" }}>
+          <div className="flex items-center justify-between">
+            <span className="sz-pixel text-[10px]" style={{ color: "var(--sz-cyan)" }}>
+              MARGIN
+            </span>
+            <span
+              className="sz-pixel text-[9px]"
+              style={{ color: healthColor, textShadow: `0 0 6px ${healthColor}` }}
+            >
+              {healthLabel}
+            </span>
+          </div>
+          <div
+            className="mt-1.5 h-2 w-full overflow-hidden rounded-full"
+            style={{ background: "rgba(0,0,0,0.5)", border: "1px solid var(--sz-cyan-dim)" }}
+          >
+            <div
+              className={health <= 0.3 ? "animate-pulse" : ""}
+              style={{
+                width: `${health * 100}%`,
+                height: "100%",
+                background: healthColor,
+                boxShadow: `0 0 8px ${healthColor}`,
+                transition: "width 200ms linear",
+              }}
+            />
+          </div>
+          <div className="mt-1 flex items-center justify-between sz-pixel text-[8px]" style={{ color: "var(--sz-muted)" }}>
+            <span>EQ ${equity.toFixed(0)}</span>
+            <span>MAINT ${maintenance.toFixed(0)}</span>
+          </div>
+        </div>
         </div>
       </div>
 

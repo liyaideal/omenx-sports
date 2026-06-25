@@ -19,11 +19,7 @@ export interface StrikezonePosition {
   mult: number;
   /** Platform leverage applied at placement (1, 2, 3). */
   leverage: number;
-  /** Notional exposure = stake × leverage. */
-  notional: number;
-  /** Liquidation distance (¢) from cellCenter. Reached → forced close, full margin loss. */
-  liqDistance: number;
-  /** Set when forcibly liquidated before targetAt. */
+  /** Set when account was force-liquidated (cross-margin wipe). */
   liquidatedAt?: number;
   placedAt: number;
   status: "open" | "won" | "lost" | "refunded" | "liquidated";
@@ -46,14 +42,46 @@ export const BET_SIZE_OPTIONS = BET_SIZES;
 
 const LEVERAGES = [1, 2, 3] as const;
 export const LEVERAGE_OPTIONS = LEVERAGES;
-/** Base liquidation distance in cents. Per-position = LIQ_BASE / leverage. */
-export const LIQ_BASE = 4.5;
-export function liqDistanceFor(leverage: number): number {
-  return LIQ_BASE / Math.max(1, leverage);
+/** Cross-margin maintenance ratio. Account liquidates when equity ≤ this × Σ stake(open). */
+export const MAINTENANCE_RATIO = 0.15;
+/** Default starting balance — used by margin-health UI as the "full" anchor. */
+export const INITIAL_BALANCE = 10000;
+
+/** Is the current price in the cell? */
+function inCell(price: number, cellCenter: number): boolean {
+  return price >= cellCenter - 0.5 && price < cellCenter + 0.5;
+}
+
+/**
+ * Compute live equity given current prices keyed by outcomeId.
+ * Equity = balance + Σ (open: in-cell ? stake × mult × lev : 0).
+ * Positions whose outcomeId is missing from priceByOutcome contribute 0
+ * (treated as currently out-of-the-money — conservative).
+ */
+export function computeEquity(
+  state: StrikezoneState,
+  priceByOutcome: Record<string, number>
+): { equity: number; lockedStake: number; maintenance: number } {
+  let unrealized = 0;
+  let lockedStake = 0;
+  for (const p of state.positions) {
+    if (p.status !== "open") continue;
+    lockedStake += p.stake;
+    const price = priceByOutcome[p.outcomeId];
+    if (price == null) continue;
+    if (inCell(price, p.cellCenter)) {
+      unrealized += p.stake * p.mult * (p.leverage ?? 1);
+    }
+  }
+  return {
+    equity: state.balance + unrealized,
+    lockedStake,
+    maintenance: MAINTENANCE_RATIO * lockedStake,
+  };
 }
 
 const DEFAULT_STATE: StrikezoneState = {
-  balance: 10000,
+  balance: INITIAL_BALANCE,
   betSize: 100,
   leverage: 1,
   sessionPL: 0,
@@ -206,6 +234,54 @@ export function useStrikezoneSession() {
     return ok;
   }, []);
 
+  /**
+   * Cross-margin liquidation: force-close every open position at the given
+   * per-outcome price. In-cell positions still get their `won` payout
+   * (lifeline), out-of-cell are marked `liquidated` (stake forfeited).
+   * Returns the list of liquidated position ids (for visual fx).
+   */
+  const liquidateAll = useCallback(
+    (priceByOutcome: Record<string, number>): { liquidatedIds: string[]; wonIds: string[] } => {
+      const liquidatedIds: string[] = [];
+      const wonIds: string[] = [];
+      const now = Date.now();
+      setState((s) => {
+        let balanceDelta = 0;
+        let plDelta = 0;
+        const next = s.positions.map((p) => {
+          if (p.status !== "open") return p;
+          const price = priceByOutcome[p.outcomeId];
+          const hasPrice = price != null;
+          const hit = hasPrice && inCell(price, p.cellCenter);
+          if (hit) {
+            const payout = p.stake * p.mult * (p.leverage ?? 1);
+            balanceDelta += payout;
+            plDelta += payout - p.stake;
+            wonIds.push(p.id);
+            return { ...p, status: "won" as const, settledPrice: price, payout };
+          }
+          plDelta += -p.stake;
+          liquidatedIds.push(p.id);
+          return {
+            ...p,
+            status: "liquidated" as const,
+            settledPrice: hasPrice ? price : p.cellCenter,
+            payout: 0,
+            liquidatedAt: now,
+          };
+        });
+        return {
+          ...s,
+          balance: s.balance + balanceDelta,
+          sessionPL: s.sessionPL + plDelta,
+          positions: next,
+        };
+      });
+      return { liquidatedIds, wonIds };
+    },
+    []
+  );
+
   const setBetSize = useCallback((size: number) => {
     setState((s) => ({ ...s, betSize: size }));
   }, []);
@@ -241,6 +317,7 @@ export function useStrikezoneSession() {
     undoLast,
     stopAll,
     cancelPosition,
+    liquidateAll,
     setBetSize,
     cycleBetSize,
     setLeverage,
