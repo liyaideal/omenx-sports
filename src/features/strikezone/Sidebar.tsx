@@ -57,16 +57,12 @@ export function Sidebar({
     ? `${activeEvent.fixture.home.short} VS ${activeEvent.fixture.away.short}`
     : activeEvent.title.toUpperCase();
   const notional = betSize * leverage;
-  const liqDist = (4.5 / Math.max(1, leverage)).toFixed(2);
   const levCopy =
     leverage === 1
       ? "NO LEVERAGE · SAFE"
       : leverage === 2
         ? "2× PAYOUT · CROSS RISK"
         : "⚠ 3× PAYOUT · HIGH CROSS RISK";
-  // unused now that cross-margin replaced per-position liq lines
-  void liqDist;
-  void notional;
 
   // Margin-health bar: 1 when equity == initialBalance (or above), 0 at maintenance.
   const denom = Math.max(1, initialBalance - 0);
