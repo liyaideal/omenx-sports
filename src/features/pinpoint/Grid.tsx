@@ -56,6 +56,10 @@ interface Props {
   recentHits: { id: string; at: number }[];
   /** Position ids the parent has just account-liquidated → spawn red burst. */
   recentLiquidations?: { id: string; at: number }[];
+  /** Session frozen by liquidation — blocks new bets. */
+  frozen?: boolean;
+  /** 0–1 (or higher); used for the frozen overlay readout. */
+  mmr?: number;
 }
 
 type Effect =
@@ -121,7 +125,12 @@ export function Grid({
   onCancel,
   recentHits,
   recentLiquidations,
+  frozen = false,
+  mmr = 0,
 }: Props) {
+  // Keep frozen flag readable from event handlers without re-binding.
+  const frozenRef = useRef(frozen);
+  frozenRef.current = frozen;
   const wrapRef = useRef<HTMLDivElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const [cssSize, setCssSize] = useState({ w: 0, h: DEFAULT_TOTAL_H });
@@ -655,6 +664,9 @@ export function Grid({
   }, []);
   const onClick = useCallback(
     (e: React.MouseEvent<HTMLCanvasElement>) => {
+      // Frozen session: block new bets. Cancellation also blocked because
+      // cancel events still affect the liquidation queue.
+      if (frozenRef.current) return;
       const r = e.currentTarget.getBoundingClientRect();
       const rawX = e.clientX - r.left;
       const y = e.clientY - r.top;
@@ -701,9 +713,31 @@ export function Grid({
           width: "100%",
           height: "100%",
           display: "block",
-          cursor: "crosshair",
+          cursor: frozen ? "not-allowed" : "crosshair",
         }}
       />
+      {frozen && (
+        <div
+          className="pointer-events-none absolute inset-0 flex items-center justify-center"
+          style={{ background: "rgba(0,0,0,0.55)" }}
+        >
+          <div
+            className="pp-stencil px-5 py-3 text-center"
+            style={{
+              color: "#fff",
+              background: "var(--pp-red)",
+              border: "2px solid #000",
+              boxShadow: "4px 4px 0 #000",
+              borderRadius: 6,
+            }}
+          >
+            <div className="text-xs">SESSION FROZEN</div>
+            <div className="pp-num mt-1 text-[10px]" style={{ color: "#fff" }}>
+              MMR {(mmr * 100).toFixed(0)}% · NO NEW BETS
+            </div>
+          </div>
+        </div>
+      )}
       {/* Hidden helpers used at type level */}
       <span hidden>{formatMultiplier(applyLeverage(1, leverage))}</span>
       <span hidden style={{ color: multiplierTextColor(1), background: multiplierHeat(1) }} />

@@ -8,6 +8,7 @@ import {
   computeEquity,
   INITIAL_BALANCE,
 } from "@/features/pinpoint/hooks/usePinpointSession";
+import { LIQ_TRIGGER_MMR } from "@/features/pinpoint/constants";
 import { useLiveTicker } from "@/features/pinpoint/hooks/useLiveTicker";
 import { Sidebar, type OutcomeChoice } from "@/features/pinpoint/Sidebar";
 import { Grid } from "@/features/pinpoint/Grid";
@@ -107,8 +108,6 @@ function PinpointInner({
     state,
     placeBet,
     settlePosition,
-    undoLast,
-    stopAll,
     cancelPosition,
     liquidateAll,
     reset,
@@ -116,8 +115,6 @@ function PinpointInner({
     cycleBetSize,
     setLeverage,
     cycleLeverage,
-    lastBetExpiryRef,
-    lastBetIdRef,
   } = usePinpointSession();
 
   // Arcade HUD stats (XP, level, streak, trophies)
@@ -130,7 +127,6 @@ function PinpointInner({
 
   const [recentHits, setRecentHits] = useState<{ id: string; at: number }[]>([]);
   const [recentLiqs, setRecentLiqs] = useState<{ id: string; at: number }[]>([]);
-  const [showStop, setShowStop] = useState(false);
   const [showRules, setShowRules] = useState(false);
   const [showLiquidated, setShowLiquidated] = useState<{
     liquidatedCount: number;
@@ -150,9 +146,9 @@ function PinpointInner({
         const hit =
           priceRef.current >= p.cellCenter - 0.5 && priceRef.current < p.cellCenter + 0.5;
         settlePosition(p.id, hit ? "won" : "lost", priceRef.current);
-        const lev = p.leverage ?? 1;
-        const payout = hit ? p.stake * p.mult * lev : 0;
-        gameStats.recordSettle({ won: hit, stake: p.stake, mult: p.mult * lev, payout });
+        const netWin = p.q * (1 - p.pEntry);
+        const payout = hit ? p.stake + netWin : 0;
+        gameStats.recordSettle({ won: hit, stake: p.stake, mult: p.odds, payout });
         if (hit) sndWin(); else sndLose();
         settled.push({
           id: p.id,
@@ -175,13 +171,12 @@ function PinpointInner({
   }, [tickSec]);
 
   const handlePlace = useCallback(
-    (cellCenter: number, distanceCents: number, secondsAhead: number, mult: number) => {
-      if (state.balance < state.betSize) {
-        toast.error("Insufficient balance");
+    (cellCenter: number, distanceCents: number, secondsAhead: number, _mult: number) => {
+      if (state.sessionStatus === "frozen") {
+        toast.error("Session frozen — liquidation in progress");
         return;
       }
-      sndCoin();
-      placeBet({
+      const result = placeBet({
         marketId: activeChoice.market.id,
         outcomeId: activeChoice.outcome.id,
         marketLabel: activeChoice.market.fixture
@@ -193,23 +188,26 @@ function PinpointInner({
         secondsAhead,
         distanceCents,
         stake: state.betSize,
-        mult,
-        leverage: state.leverage,
+        currentPrice: priceRef.current,
       });
+      if (result.id) sndCoin();
+      else if (result.reason === "balance") toast.error("Insufficient balance (margin + fee)");
+      else if (result.reason === "frozen") toast.error("Session frozen");
+      // duplicate → silent (one bet per cell, marker already visible)
     },
-    [activeChoice, state.balance, state.betSize, state.leverage, placeBet]
+    [activeChoice, state.betSize, state.sessionStatus, placeBet]
   );
 
-  const handleUndo = useCallback(() => {
-    const ok = undoLast();
-    if (ok) toast.success("Bet refunded");
-  }, [undoLast]);
-
-  const confirmStop = () => {
-    stopAll();
-    setShowStop(false);
-    toast.success("All open bets refunded");
-  };
+  const handleCancel = useCallback(
+    (id: string) => {
+      const r = cancelPosition(id);
+      if (!r.ok) {
+        if (r.reason === "locked") toast.error("Locked — too close to judgement");
+        else if (r.reason === "frozen") toast.error("Session frozen");
+      }
+    },
+    [cancelPosition]
+  );
 
   // Hotkeys
   useEffect(() => {
@@ -234,34 +232,15 @@ function PinpointInner({
           e.preventDefault();
           cycleLeverage(1);
           break;
-        case "z":
-          e.preventDefault();
-          handleUndo();
-          break;
         case "escape":
           e.preventDefault();
-          if (showStop) setShowStop(false);
-          else if (showRules) setShowRules(false);
-          else setShowStop(true);
+          if (showRules) setShowRules(false);
           break;
       }
     };
     window.addEventListener("keydown", h);
     return () => window.removeEventListener("keydown", h);
-  }, [cycleBetSize, cycleLeverage, handleUndo, showStop, showRules]);
-
-  // Undo countdown
-  const [undoMsLeft, setUndoMsLeft] = useState(0);
-  useEffect(() => {
-    const id = window.setInterval(() => {
-      if (!lastBetIdRef.current) return setUndoMsLeft(0);
-      const ms = lastBetExpiryRef.current - Date.now();
-      setUndoMsLeft(Math.max(0, ms));
-      if (ms <= 0) lastBetIdRef.current = null;
-    }, 100);
-    return () => window.clearInterval(id);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [cycleBetSize, cycleLeverage, showRules]);
 
   const openPositions = state.positions.filter(
     (p) =>
@@ -287,15 +266,15 @@ function PinpointInner({
     () => ({ [activeChoice.outcome.id]: price }),
     [activeChoice.outcome.id, price]
   );
-  const { equity, lockedStake, maintenance } = computeEquity(state, priceByOutcome);
+  const { equity, lockedStake, maintenance, mmr } = computeEquity(state, priceByOutcome);
 
   // Cross-margin liquidation trigger (debounced 2 frames via ref).
   useEffect(() => {
-    if (lockedStake <= 0) {
+    if (lockedStake <= 0 || state.sessionStatus === "frozen") {
       liqArmedRef.current = false;
       return;
     }
-    const breach = equity <= maintenance;
+    const breach = mmr >= LIQ_TRIGGER_MMR;
     if (!breach) {
       liqArmedRef.current = false;
       return;
@@ -304,8 +283,7 @@ function PinpointInner({
       liqArmedRef.current = true;
       return; // require 2 consecutive ticks
     }
-    // Trigger account-wide liquidation.
-    const { liquidatedIds } = liquidateAll(priceByOutcome);
+    const { liquidatedIds } = liquidateAll();
     if (liquidatedIds.length > 0) {
       sndGameOver();
       gameStats.breakStreak();
@@ -363,20 +341,19 @@ function PinpointInner({
         </div>
 
         <div className="ml-auto flex items-center gap-3">
-          {undoMsLeft > 0 && (
-            <button
-              onClick={handleUndo}
+          {state.sessionStatus === "frozen" && (
+            <span
               className="pp-stencil px-3 py-1.5 text-[10px]"
               style={{
-                color: "#000",
-                background: "var(--pp-yellow)",
+                color: "#fff",
+                background: "var(--pp-red)",
                 border: "2px solid #000",
                 borderRadius: "4px",
                 boxShadow: "2px 2px 0 #000",
               }}
             >
-              UNDO {(undoMsLeft / 1000).toFixed(1)}S [Z]
-            </button>
+              SESSION FROZEN
+            </span>
           )}
           <button
             onClick={toggleMute}
@@ -424,7 +401,8 @@ function PinpointInner({
           onBetSize={setBetSize}
           leverage={state.leverage}
           onLeverage={setLeverage}
-          onStop={() => setShowStop(true)}
+          frozen={state.sessionStatus === "frozen"}
+          mmr={mmr}
         />
 
         {/* Main */}
@@ -497,9 +475,11 @@ function PinpointInner({
             betSize={state.betSize}
             leverage={state.leverage}
             onPlace={handlePlace}
-            onCancel={cancelPosition}
+            onCancel={handleCancel}
             recentHits={recentHits}
             recentLiquidations={recentLiqs}
+            frozen={state.sessionStatus === "frozen"}
+            mmr={mmr}
             />
           </div>
 
@@ -509,13 +489,13 @@ function PinpointInner({
               className="pp-stencil text-[8px]"
               style={{ color: "var(--pp-mute)" }}
             >
-              CLICK A CELL · A/D BET SIZE · Q/E LEVERAGE · Z UNDO · ESC STOP
+              CLICK CELL = BET · CLICK YOUR BET = CANCEL (LOCKS 1.5s BEFORE JUDGEMENT) · A/D SIZE · Q/E LEVERAGE
             </span>
             <span
               className="pp-stencil text-[8px]"
               style={{ color: "var(--pp-mute)" }}
             >
-              MULT × LEV CAPPED AT 999x
+              ODDS CAPPED AT 100×
             </span>
           </div>
         </main>
@@ -536,35 +516,7 @@ function PinpointInner({
         </div>
       )}
 
-      {/* STOP confirm */}
-      {showStop && (
-        <ModalShell onClose={() => setShowStop(false)}>
-          <div className="pp-card p-5" style={{ borderColor: "var(--pp-red)" }}>
-            <div className="pp-stencil mb-3 text-xs" style={{ color: "var(--pp-red)" }}>
-              STOP ALL BETS?
-            </div>
-            <p className="text-xs" style={{ color: "#aaa" }}>
-              All open positions will be cancelled and stakes refunded immediately.
-            </p>
-            <div className="mt-4 flex gap-2">
-              <button
-                onClick={() => setShowStop(false)}
-                className="pp-chip pp-stencil flex-1 py-3 text-[10px]"
-                style={{ color: "var(--pp-yellow)" }}
-              >
-                KEEP PLAYING
-              </button>
-              <button
-                onClick={confirmStop}
-                className="pp-stop pp-stencil flex-1 py-3 text-[10px]"
-                style={{ color: "#fff" }}
-              >
-                STOP
-              </button>
-            </div>
-          </div>
-        </ModalShell>
-      )}
+      {/* STOP-ALL removed (v3 spec: no active closing — bets resolve at judgement or are liquidated). */}
 
       {/* LIQUIDATED — cross-margin wipe */}
       {showLiquidated && (
@@ -585,10 +537,10 @@ function PinpointInner({
                   textShadow: "3px 3px 0 #000, 0 0 12px rgba(255,59,59,0.6)",
                 }}
               >
-                GAME<br />OVER
+                SESSION<br />FROZEN
               </div>
               <p className="pp-marker mt-4 text-[10px]" style={{ color: "var(--pp-yellow)" }}>
-                MARGIN CALL · ACCOUNT WIPED
+                MMR ≥ 100% · LIQUIDATION IN PROGRESS
               </p>
               <div className="pp-lcd mx-auto mt-5 inline-block px-4 py-2 text-left">
                 <p className="pp-num text-base" style={{ color: "var(--pp-green-2)" }}>
@@ -605,14 +557,16 @@ function PinpointInner({
                 className="pp-stencil pp-blink mt-5 text-[9px]"
                 style={{ color: "var(--pp-yellow)" }}
               >
-                ▶ INSERT COIN TO CONTINUE
+                ▶ FUND TRANSFER COMING SOON
               </p>
               <div className="mt-5 flex gap-2">
                 <button
-                  onClick={() => { sndClick(); setShowLiquidated(null); }}
+                  disabled
                   className="pp-btn pp-btn-mint flex-1 py-3 text-[10px]"
+                  style={{ opacity: 0.4, cursor: "not-allowed" }}
+                  title="Deposit to sub-account — coming next iteration"
                 >
-                  CONTINUE
+                  ADD FUNDS
                 </button>
                 <button
                   onClick={() => { sndClick(); reset(); setShowLiquidated(null); }}
@@ -645,25 +599,25 @@ function PinpointInner({
                 <span className="pp-stencil mr-2 text-[9px]" style={{ color: "var(--pp-red)" }}>
                   01
                 </span>
-                Pick an outcome on the left. Its YES price (¢) is your moving target.
+                Pick an outcome on the left. The YES price (¢) is the line you're chasing.
               </li>
               <li>
                 <span className="pp-stencil mr-2 text-[9px]" style={{ color: "var(--pp-red)" }}>
                   02
                 </span>
-                Each grid cell is a bet that the price will land in that 1¢ range exactly N seconds from now.
+                Each cell is a digital option: "YES, price lands in this 1¢ band N seconds from now". The AMM quotes a probability p and locks odds = 1/p the moment you click.
               </li>
               <li>
                 <span className="pp-stencil mr-2 text-[9px]" style={{ color: "var(--pp-red)" }}>
                   03
                 </span>
-                Click a cell to bet your BET SIZE. Win = stake × multiplier. Miss = lose stake. Caps at 95.00x.
+                Margin = stake × leverage (notional). Win = q × (1−p) on top of your margin. Miss = lose stake. Odds cap 100×, leverage 1–3×.
               </li>
               <li>
                 <span className="pp-stencil mr-2 text-[9px]" style={{ color: "var(--pp-red)" }}>
                   04
                 </span>
-                A/D switch bet size, Z undoes the last bet within 5s, Esc opens STOP.
+                Click your own bet to cancel & refund the margin (locks 1.5s before judgement; fee is not refunded). No active close — bets resolve at judgement or get liquidated if account MMR ≥ 100%.
               </li>
             </ol>
           </div>
