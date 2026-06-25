@@ -512,12 +512,14 @@ function PinpointInner({
       {showLiquidated && (
         <ModalShell onClose={() => setShowLiquidated(null)}>
           <div
-            className="pp-card p-6 text-center"
+            className="pp-card overflow-hidden p-0 text-center"
             style={{
               borderColor: "var(--pp-red)",
               boxShadow: "var(--pp-sticker-shadow-red)",
             }}
           >
+            <div className="pp-hazard-stripes-red" />
+            <div className="p-6">
             <div
               className="pp-headline text-3xl"
               style={{
@@ -527,10 +529,10 @@ function PinpointInner({
             >
               LIQUIDATED
             </div>
-            <p className="pp-stencil mt-2 text-[10px]" style={{ color: "#ffcc4d" }}>
+            <p className="pp-marker mt-2 text-sm" style={{ color: "var(--pp-yellow)" }}>
               ACCOUNT EQUITY FELL BELOW MAINTENANCE
             </p>
-            <p className="mt-4 text-xs" style={{ color: "#bbb" }}>
+            <p className="mt-4 text-xs" style={{ color: "var(--pp-ink)" }}>
               {showLiquidated.liquidatedCount} OPEN POSITION
               {showLiquidated.liquidatedCount === 1 ? "" : "S"} FORCE-CLOSED.
               <br />
@@ -558,6 +560,8 @@ function PinpointInner({
                 RESET ACCOUNT
               </button>
             </div>
+            </div>
+            <div className="pp-hazard-stripes-red" />
           </div>
         </ModalShell>
       )}
