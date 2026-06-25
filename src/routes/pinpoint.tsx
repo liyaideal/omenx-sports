@@ -7,6 +7,7 @@ import {
   usePinpointSession,
   computeEquity,
   INITIAL_BALANCE,
+  MARGIN_HEALTH_ANCHOR,
 } from "@/features/pinpoint/hooks/usePinpointSession";
 import { LIQ_TRIGGER_MMR } from "@/features/pinpoint/constants";
 import { useLiveTicker } from "@/features/pinpoint/hooks/useLiveTicker";
@@ -397,7 +398,7 @@ function PinpointInner({
           equity={equity}
           maintenance={maintenance}
           lockedStake={lockedStake}
-          initialBalance={INITIAL_BALANCE}
+          initialBalance={Math.max(state.balance + lockedStake, MARGIN_HEALTH_ANCHOR)}
           events={groups.map((g) => g.market)}
           activeEventId={activeEventId}
           onPickEvent={onPickEvent}
