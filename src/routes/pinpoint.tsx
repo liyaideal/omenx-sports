@@ -401,7 +401,7 @@ function PinpointInner({
         </div>
       </header>
 
-      <div className="relative z-10 flex gap-2 px-2 pb-4">
+      <div className="relative z-10 flex gap-3 px-3 pb-4">
         {/* Sidebar */}
         <Sidebar
           stats={gameStats.stats}
