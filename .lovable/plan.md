@@ -1,67 +1,52 @@
-我理解这次的核心问题：现在实现仍然是 DOM 格子 + CSS 动画，所以天然做不出“空格先没、下注格继续滑、命中爆裂飘钱”的真实交互。接下来要把网格主体重做成 canvas。
 
 ## 目标
 
-- 网格、价格线、倍数、下注格、结算动画全部在一块 `<canvas>` 上用 `requestAnimationFrame` 每帧重画。
-- 空格和下注格走不同生命周期：
-  - 未下注 cell 到 NOW 线：原地快速淡出并移除。
-  - 已下注 cell 到 NOW 线：继续往左滑入历史/价格区域，500-800ms 慢慢淡出。
-  - 赢的 cell：先播放强烈 HIT 爆闪、缩放弹跳、外扩光圈，并弹出绿色 `+$xxx` 飘字。
-- 点击未来格子下注；再次点击同一个未结算下注格取消并退款。
-- 保留现有左侧下注金额、杠杆、余额、STOP、事件/market 选择逻辑。
+参考截图修两件事，让"K 线撞到哪个格子"一目了然，命中下注格子时有强烈的赌博命中爽感。
 
-## 实施计划
+1. **撞击瞬间，同列其他格子立刻消失，只留下被撞的那一格短暂停留并发光**——目前是整列一起淡出，看不出哪个被撞。
+2. **如果被撞的格子是用户下注的格子，爆出一圈金/绿色星星粒子**（叠加在现有的金光环 + `+$xxx` 飘字之上）。
 
-1. **重写 `Grid.tsx` 为 Canvas 渲染器**
-   - 用 `canvasRef + ResizeObserver + requestAnimationFrame` 管理绘制。
-   - DPR 适配：`canvas.width/height = cssSize * devicePixelRatio`，绘制前 scale。
-   - 建立虚拟坐标系：
+## 修改范围
 
-```text
-NOW_X = 左侧价格历史区宽度
-timeToX(expiryT) = NOW_X + (expiryT - now) * PX_PER_MS
-priceToY(price) = canvasH / 2 - (price - smoothCenter) * PX_PER_CENT
-```
+只动 `src/features/strikezone/Grid.tsx`（Canvas 渲染层）。不动业务逻辑、session、结算逻辑。
 
-2. **实现 cell 数据和独立状态机**
-   - 每帧按当前时间生成/维护未来列 cell，不再把一列 DOM 一起移动。
-   - 每个 cell 用数据描述：`expiryT / bandCenter / multiplier / state / anim / bet`。
-   - 到期时逐格处理：空格进入 `dying`；下注格进入 `resolving_win` 或 `resolving_lose`。
+## 实现要点
 
-3. **绘制分层效果**
-   - 背景星点/暗网格。
-   - 左侧价格刻度与发光价格折线。
-   - 右侧未来倍率格子，暖橙色圆角矩形，数字在 canvas 绘制。
-   - NOW 线、顶部倒计时胶囊、当前价格 pill。
-   - 下注格三行信息：`$stake`、`multiplier x`、`+$profit`。
-   - 结算特效层：HIT 爆闪、光圈、绿色收益飘字。
+### A. 列结算时区分 "hit row" vs 其他 row
 
-4. **点击命中检测改为 canvas 坐标**
-   - 监听 canvas click/mousemove。
-   - 用鼠标像素坐标反查未来 cell：`hitTest(x, y) -> cell`。
-   - hover 高亮也在 canvas 内绘制，不再依赖 DOM hover。
+`Grid.tsx` 现在 RAF 循环里检测到 `prevFirstSec < firstSec`（一列刚跨过 NOW 线）时，给该列 11 行全部 push 同样速度的 `DyingCell`。改为：
 
-5. **补齐取消下注能力**
-   - 在 `useStrikezoneSession` 增加按 position id 取消并退款的函数。
-   - `Grid` 点击已下注 cell 时调用取消；点击空未来 cell 时下注。
+- 在跨过 NOW 的那一帧，取 `hitRow = round(priceRef.current) → 对应的 row index`（用 `centerRef.current` 反推），作为这列被 K 线撞到的格子。
+- **非 hit row**：以更快的速度淡出（`DYING_MS` 从 220ms 调到约 140ms），同时轻微向内塌缩 + 透明度直降，让"周围立刻清空"的感觉成立。
+- **hit row**：新增一个 `HitFlashCell` 状态（约 650ms）：
+  - 0–120ms：白→金色亮度 punch，scale 1 → 1.18 → 1，边框由橙变金（`#ffd84a`）。
+  - 120–450ms：保持高亮 + 脉冲发光环。
+  - 450–650ms：渐隐到 0。
+  - 该格在期间始终绘制，覆盖在淡出列之上。
+- 已是 user bet 的列（`settledColumnsRef` 已加），现在的逻辑跳过 dying，改为：**仍然对非 bet 行 spawn 快速淡出 DyingCell**（让用户清楚看到"K 线就撞到我下注那行"），bet 行交给已有 win/lose effect 处理。
 
-6. **调整结算数据流**
-   - 保留现有 `settlePosition` 的余额/盈亏逻辑。
-   - `Grid` 内维护短生命周期 settled/effects cache，让已经从 open 列表移除或状态变更的下注格还能继续滑动并播放动画。
-   - 移除或弱化 toast HIT，主要反馈放回 canvas 的爆裂和飘钱上，提升博彩刺激感。
+### B. 命中下注格的星星粒子
 
-7. **清理 CSS 动画依赖**
-   - `sz-theme.css` 只保留页面、侧栏、按钮、字体和少量容器样式。
-   - 删除/停用原先 DOM cell 动画，避免和 canvas 方案混在一起。
+新增 `StarParticle` 数组 + `drawStars()`，在 win effect 创建时一并 spawn ~14–18 个：
 
-8. **同步 `/style-guide`**
-   - 按项目记忆要求，给新的 StrikeZone canvas 网格增加一个可视化 demo/入口，保证 playground 与真实页面同步。
+- 粒子属性：`x, y, vx, vy, life, maxLife, size, hue (gold/green 二选一)`。
+- 初速度径向向外 + 微随机角度，重力 `gy ≈ 0.0008 px/ms²` 让它略下坠。
+- 渲染：四角星形（两个旋转 45° 的矩形 + 中心高光圆点），亮度随 `1 - life/max` 衰减；附带 8px 金色 shadowBlur。
+- 寿命 ~900ms，与 `WIN_BURST_MS` 接近。
+- 同步生成 ~6 颗较大的"主爆星"+ 12 颗"碎星"，营造截图里"满天黄绿小星"的密度。
 
-9. **验证**
-   - 用浏览器打开 `/strikezone`，确认：
-     - 网格是 canvas 渲染。
-     - 点击下注后格子锁定三行信息。
-     - 到期时空格先消失，下注格继续左滑。
-     - 命中时有明显 HIT、光圈、绿色 `+$xxx` 飘字。
-     - 再点已下注格可取消退款。
-     - 桌面与当前预览宽度下不重叠、不空白。
+Lose 不加星星（保持只有红色塌缩）。
+
+### C. 细节
+
+- `drawIdleCell` 在非 hit row 的 dying 阶段加 0.6 倍 fade 曲线（先快后慢），避免一下消失太突兀。
+- `prevFirstSecRef` 的设置时机不变。
+- 不改 props、不改外部 API。
+- `/style-guide` 不需要更新（Grid 不是独立 showcased 组件，且只是视觉调整）。
+
+## 验收
+
+- 一根 K 线撞到某列时，眼睛能在 ~150ms 内只看到那一格亮起，其他格已消失。
+- 撞到自己下注的格子时，金/绿色星星向外散开 + 原有 `+$xxx` 飘字 + 环。
+- 撞到空格子时，只有金色 hit-flash，没有星星。
+- 输的格子继续走红色塌缩，无星星。
