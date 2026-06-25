@@ -181,7 +181,7 @@ const SECTIONS = [
   ["event-extras", "Event Detail Extras"],
   ["share", "Share Dialog"],
   ["production-inventory", "Production Inventory"],
-  ["pinpoint-stickers", "Pinpoint Stickers"],
+  ["pinpoint-cartridge", "Pinpoint Cartridge"],
 ] as const;
 
 function Section({ id, title, kicker, children }: { id: string; title: string; kicker?: string; children: React.ReactNode }) {
@@ -3501,84 +3501,102 @@ function ShareDemo() {
         </div>
       </div>
 
-      <Section id="pinpoint-stickers" title="Pinpoint Stickers" kicker="∞ — Street Skate Sticker System">
+      <Section id="pinpoint-cartridge" title="Pinpoint Cartridge" kicker="∞ — Y2K Cartridge / Game Boy LCD">
         <p className="mb-6 max-w-2xl text-sm text-muted-foreground">
-          Visual language for <code>/pinpoint</code>. Collaged sticker cards, hand-drawn marker, hazard stripes, screen-print grain. Scoped under <code>.pp-root</code> — never bleeds into the main app.
+          Visual language for <code>/pinpoint</code>. Cartridge-cream cards, Game Boy LCD screens, 8-bit pixel borders, hard shadows. Scoped under <code>.pp-root</code> — never bleeds into the main app.
         </p>
         <div className="pp-root rounded-2xl p-6">
           <div className="grid grid-cols-2 gap-6 lg:grid-cols-3">
             {/* Palette */}
             <div className="pp-card p-4">
-              <div className="pp-marker mb-3 text-sm" style={{ color: "var(--pp-yellow)" }}>palette</div>
-              <div className="grid grid-cols-3 gap-2 text-[10px]">
+              <div className="pp-marker mb-3 text-[10px]" style={{ color: "var(--pp-yellow)" }}>PALETTE</div>
+              <div className="grid grid-cols-4 gap-2 text-[8px]">
                 {[
-                  ["paper", "var(--pp-paper)", "#efe7d3"],
-                  ["ink", "var(--pp-ink)", "#000"],
-                  ["red", "var(--pp-red)", "#fff"],
+                  ["paper", "var(--pp-paper)", "#9bff6f"],
+                  ["cream", "var(--pp-cream)", "#000"],
                   ["yellow", "var(--pp-yellow)", "#000"],
-                  ["green", "var(--pp-green-2)", "#000"],
-                  ["mute", "var(--pp-mute)", "#fff"],
+                  ["red", "var(--pp-red)", "#fff"],
+                  ["mint", "var(--pp-green)", "#000"],
+                  ["pink", "var(--pp-pink)", "#000"],
+                  ["blue", "var(--pp-blue)", "#000"],
+                  ["lcd", "var(--pp-screen-bg)", "var(--pp-screen-fg)"],
                 ].map(([name, bg, fg]) => (
-                  <div key={name} className="pp-stencil rounded-sm p-2 text-center" style={{ background: bg, color: fg, border: "2px solid #000" }}>
+                  <div key={name} className="pp-marker rounded-sm p-2 text-center" style={{ background: bg, color: fg, border: "2px solid #000" }}>
                     {name}
                   </div>
                 ))}
               </div>
             </div>
 
-            {/* Sticker logo */}
-            <div className="pp-card p-4">
-              <div className="pp-marker mb-3 text-sm" style={{ color: "var(--pp-yellow)" }}>logo sticker</div>
-              <div className="flex items-center gap-2">
-                <span
-                  className="pp-stencil pp-tilt-l px-3 py-1 text-2xl"
-                  style={{ background: "var(--pp-yellow)", color: "#000", border: "2px solid #000", boxShadow: "3px 3px 0 #000", borderRadius: "4px" }}
-                >
-                  PINPOINT
-                </span>
-                <span className="pp-marker pp-tilt-r text-sm" style={{ color: "var(--pp-red)" }}>beta</span>
+            {/* Player HUD */}
+            <div className="pp-card p-4 col-span-2">
+              <div className="pp-marker mb-3 text-[10px]" style={{ color: "var(--pp-yellow)" }}>PLAYER HUD · LV / XP / STREAK / TROPHIES</div>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="pp-card pp-card-cream p-3">
+                  <div className="flex items-center gap-3">
+                    <div className="flex size-12 items-center justify-center rounded-md text-2xl" style={{ background: "var(--pp-pink)", border: "3px solid #1a1a1a", boxShadow: "3px 3px 0 #1a1a1a" }}>🎮</div>
+                    <div className="flex-1">
+                      <div className="flex items-baseline gap-2">
+                        <span className="pp-stencil text-[10px]" style={{ color: "#1a1a1a" }}>LV</span>
+                        <span className="pp-stencil text-xl" style={{ color: "#1a1a1a" }}>07</span>
+                        <span className="pp-streak ml-auto">🔥 ×4</span>
+                      </div>
+                      <div className="pp-xp-track mt-1.5"><div className="pp-xp-fill" style={{ width: "62%" }} /></div>
+                    </div>
+                  </div>
+                </div>
+                <div className="pp-card pp-card-cream p-3">
+                  <div className="pp-marker mb-2 text-[10px]" style={{ color: "#1a1a1a" }}>TROPHY CASE</div>
+                  <div className="flex flex-wrap gap-1.5">
+                    <span className="pp-trophy unlocked">🥇</span>
+                    <span className="pp-trophy unlocked">🔥</span>
+                    <span className="pp-trophy unlocked">💎</span>
+                    <span className="pp-trophy">⚡</span>
+                    <span className="pp-trophy">👑</span>
+                    <span className="pp-trophy">⭐</span>
+                  </div>
+                </div>
               </div>
             </div>
 
-            {/* Hazard stripes */}
+            {/* LCD screen */}
             <div className="pp-card p-4">
-              <div className="pp-marker mb-3 text-sm" style={{ color: "var(--pp-yellow)" }}>hazard stripes</div>
-              <div className="pp-hazard-stripes mb-2" />
-              <div className="pp-hazard-stripes-red" />
-              <p className="mt-2 text-[10px]" style={{ color: "var(--pp-mute)" }}>
-                Use above/below liquidation, stop-all, and high-leverage surfaces.
-              </p>
+              <div className="pp-marker mb-3 text-[10px]" style={{ color: "var(--pp-yellow)" }}>LCD SCREEN</div>
+              <div className="pp-lcd p-3">
+                <div className="pp-num text-2xl" style={{ color: "var(--pp-green-2)" }}>0:42</div>
+                <div className="pp-num text-base" style={{ color: "var(--pp-green-2)" }}>BAL ... $9,420</div>
+                <div className="pp-num text-base" style={{ color: "var(--pp-yellow)" }}>STREAK . ×4</div>
+              </div>
             </div>
 
             {/* Typography */}
             <div className="pp-card p-4 col-span-2">
-              <div className="pp-marker mb-3 text-sm" style={{ color: "var(--pp-yellow)" }}>typography</div>
-              <div className="space-y-2">
-                <div className="pp-headline text-3xl" style={{ color: "var(--pp-ink)" }}>ANTON · HEADLINE</div>
-                <div className="pp-stencil text-xl" style={{ color: "var(--pp-yellow)" }}>BUNGEE · STENCIL</div>
-                <div className="pp-marker text-lg" style={{ color: "var(--pp-red)" }}>permanent marker · caption</div>
-                <div className="pp-num text-base" style={{ color: "var(--pp-ink)" }}>0123456789 · JetBrains Mono</div>
+              <div className="pp-marker mb-3 text-[10px]" style={{ color: "var(--pp-yellow)" }}>TYPOGRAPHY</div>
+              <div className="space-y-3">
+                <div className="pp-headline text-2xl" style={{ color: "var(--pp-yellow)" }}>PRESS START 2P</div>
+                <div className="pp-marker text-lg" style={{ color: "var(--pp-green-2)" }}>SILKSCREEN · LABEL</div>
+                <div className="pp-num text-3xl" style={{ color: "var(--pp-green-2)" }}>0123456789 · VT323</div>
+                <div style={{ color: "var(--pp-ink)", fontFamily: "Space Grotesk, sans-serif" }}>Space Grotesk — body copy when readability matters.</div>
               </div>
             </div>
 
-            {/* Stamps */}
+            {/* Buttons */}
             <div className="pp-card p-4">
-              <div className="pp-marker mb-3 text-sm" style={{ color: "var(--pp-yellow)" }}>stamps</div>
-              <div className="flex flex-wrap items-center gap-3">
-                <span className="pp-stamp" style={{ color: "var(--pp-green-2)" }}>WON</span>
-                <span className="pp-stamp" style={{ color: "var(--pp-red)" }}>LOST</span>
-                <span className="pp-stamp pp-stamp-circle" style={{ color: "var(--pp-yellow)" }}>LIVE</span>
+              <div className="pp-marker mb-3 text-[10px]" style={{ color: "var(--pp-yellow)" }}>BUTTONS</div>
+              <div className="flex flex-wrap gap-2">
+                <button className="pp-btn px-4 py-2 text-[10px]">START</button>
+                <button className="pp-btn pp-btn-pink px-4 py-2 text-[10px]">BET</button>
+                <button className="pp-btn pp-btn-mint px-4 py-2 text-[10px]">CONTINUE</button>
+                <button className="pp-stop pp-stencil px-4 py-2 text-[10px]">STOP</button>
               </div>
             </div>
 
-            {/* Buttons & chips */}
+            {/* Hazard stripes */}
             <div className="pp-card p-4 col-span-2">
-              <div className="pp-marker mb-3 text-sm" style={{ color: "var(--pp-yellow)" }}>buttons & chips</div>
-              <div className="flex flex-wrap gap-3">
-                <button className="pp-stop pp-stencil px-5 py-3 text-sm">STOP ALL</button>
-                <button className="pp-chip pp-stencil px-4 py-2 text-xs" style={{ color: "var(--pp-ink)" }}>IDLE CHIP</button>
-                <button className="pp-chip pp-chip-active pp-stencil px-4 py-2 text-xs" style={{ color: "var(--pp-red)" }}>ACTIVE</button>
-                <button className="pp-chip pp-chip-active-yellow pp-stencil px-4 py-2 text-xs" style={{ color: "var(--pp-yellow)" }}>SELECTED</button>
+              <div className="pp-marker mb-3 text-[10px]" style={{ color: "var(--pp-yellow)" }}>GAME OVER PANEL</div>
+              <div className="pp-lcd p-4 text-center">
+                <div className="pp-headline pp-flicker text-3xl" style={{ color: "var(--pp-red)", textShadow: "3px 3px 0 #000" }}>GAME<br />OVER</div>
+                <div className="pp-stencil pp-blink mt-3 text-[10px]" style={{ color: "var(--pp-yellow)" }}>▶ INSERT COIN</div>
               </div>
             </div>
           </div>
