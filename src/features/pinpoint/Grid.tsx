@@ -132,6 +132,9 @@ export function Grid({
   // Timestamp of the most recently rendered RAF frame; used to compensate
   // for the cells' continuous leftward drift when hit-testing clicks/hover.
   const lastRenderNowRef = useRef<number>(Date.now());
+  // Smoothed vertical offset for the price pill so it can dodge active
+  // hit-flash callouts on the NOW line without snapping.
+  const pillOffsetYRef = useRef<number>(0);
   // Cell rect cache (built each frame for hit-testing)
   const futureCellsRef = useRef<
     Array<{
@@ -317,11 +320,28 @@ export function Grid({
         ctx.fill();
         ctx.shadowBlur = 0;
 
-        // Price pill (anchored to tip, drifts left of NOW_X)
+        // Price pill (anchored to tip, drifts left of NOW_X).
+        // Dodge active hit-flash callouts that sit on the same row as the
+        // current price, otherwise the two collide on every column expiry.
         const pillW = 70;
         const pillH = 24;
-        const pillX = HISTORY_W - pillW - 12;
-        const pillY = tipY - pillH / 2;
+        const priceRow = Math.round(priceRef.current);
+        const collides = hitFlashRef.current.some((hf) => {
+          const age = now - hf.startAt;
+          if (age > HIT_FLASH_MS) return false;
+          const hfCenter = center + (5 - hf.row);
+          return Math.round(hfCenter) === priceRow;
+        });
+        // Target vertical offset: one row up if there's room, else one row down.
+        let targetOffset = 0;
+        if (collides) {
+          const upY = tipY - PITCH_Y - pillH / 2;
+          targetOffset = upY < 2 ? PITCH_Y : -PITCH_Y;
+        }
+        // Lerp toward target so the pill slides rather than snaps.
+        pillOffsetYRef.current += (targetOffset - pillOffsetYRef.current) * 0.25;
+        const pillX = HISTORY_W - pillW - (collides ? 18 : 12);
+        const pillY = tipY + pillOffsetYRef.current - pillH / 2;
         roundRect(ctx, pillX, pillY, pillW, pillH, 12);
         const pg = ctx.createLinearGradient(0, pillY, 0, pillY + pillH);
         pg.addColorStop(0, up ? "#ffd400" : "#ff3b1f");
@@ -341,6 +361,22 @@ export function Grid({
         ctx.fillText(`${priceRef.current.toFixed(1)}¢`, pillX + pillW / 2, pillY + pillH / 2);
         ctx.textAlign = "start";
         ctx.textBaseline = "alphabetic";
+
+        // Leader line from the tip dot to the displaced pill so the user
+        // still reads it as "current price". Only when displaced.
+        if (Math.abs(pillOffsetYRef.current) > 1.5) {
+          ctx.save();
+          ctx.strokeStyle = stroke;
+          ctx.globalAlpha = 0.7;
+          ctx.lineWidth = 1;
+          ctx.setLineDash([2, 3]);
+          ctx.beginPath();
+          ctx.moveTo(HISTORY_W, tipY);
+          ctx.lineTo(pillX + pillW, pillY + pillH / 2);
+          ctx.stroke();
+          ctx.setLineDash([]);
+          ctx.restore();
+        }
       }
 
       // ── 3. NOW divider ─────────────────────────────────────────────
