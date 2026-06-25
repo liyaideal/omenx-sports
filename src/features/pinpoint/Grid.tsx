@@ -235,21 +235,21 @@ export function Grid({
         NOW_X + (expiryMs - now) * PX_PER_MS;
 
       // ── 1. Background ────────────────────────────────────────────────
-      ctx.fillStyle = "#141210";
+      ctx.fillStyle = "#0d1a10"; // LCD screen wash
       ctx.fillRect(0, 0, W, H);
-      // subtle radial vignette glow
-      const grad = ctx.createRadialGradient(W * 0.85, H * 0.85, 0, W * 0.85, H * 0.85, W * 0.7);
-      grad.addColorStop(0, "rgba(255,59,31,0.05)");
-      grad.addColorStop(1, "rgba(255,59,31,0)");
+      // LCD pixel-grid texture (subtle 3px dots)
+      const grad = ctx.createRadialGradient(W * 0.5, H * 0.3, 0, W * 0.5, H * 0.5, W * 0.8);
+      grad.addColorStop(0, "rgba(155,255,111,0.06)");
+      grad.addColorStop(1, "rgba(155,255,111,0)");
       ctx.fillStyle = grad;
       ctx.fillRect(0, 0, W, H);
 
       // Horizontal price guides at every 2¢
-      ctx.font = '10px "JetBrains Mono", monospace';
+      ctx.font = '14px "VT323","Silkscreen",monospace';
       ctx.textBaseline = "alphabetic";
       for (let i = -4; i <= 4; i += 2) {
         const py = yFor(center + i);
-        ctx.strokeStyle = "rgba(239,231,211,0.06)";
+        ctx.strokeStyle = "rgba(155,255,111,0.08)";
         ctx.lineWidth = 1;
         ctx.setLineDash([2, 4]);
         ctx.beginPath();
@@ -257,7 +257,7 @@ export function Grid({
         ctx.lineTo(W, py);
         ctx.stroke();
         ctx.setLineDash([]);
-        ctx.fillStyle = "rgba(239,231,211,0.55)";
+        ctx.fillStyle = "rgba(155,255,111,0.7)";
         ctx.fillText(`${center + i}¢`, 4, py - 3);
       }
 
