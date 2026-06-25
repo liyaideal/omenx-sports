@@ -255,7 +255,7 @@ export function Sidebar({
       {/* v3: no STOP / active close. Frozen-session indicator instead. */}
       {frozen ? (
         <div
-          className="pp-stencil flex items-center justify-between gap-2 whitespace-nowrap px-3 py-2 text-[10px]"
+          className="pp-stencil flex flex-col items-center gap-1 px-3 py-2.5 text-center text-[10px]"
           style={{
             color: "var(--pp-red)",
             background: "#0a0a0a",
@@ -264,11 +264,13 @@ export function Sidebar({
           }}
           title={`Session frozen — MMR ${(mmr * 100).toFixed(0)}%. No new bets accepted.`}
         >
-          <span className="flex items-center gap-1.5">
+          <span className="flex items-center gap-1.5 text-[11px]">
             <Lock className="size-3" />
             FROZEN · MMR {(mmr * 100).toFixed(0)}%
           </span>
-          <span style={{ color: "var(--pp-mute)" }}>NO NEW BETS</span>
+          <span className="text-[9px]" style={{ color: "var(--pp-mute)" }}>
+            NO NEW BETS ACCEPTED
+          </span>
         </div>
       ) : null}
     </div>
