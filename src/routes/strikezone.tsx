@@ -397,6 +397,7 @@ function StrikezoneInner({
             leverage={state.leverage}
             onPlace={handlePlace}
             onCancel={cancelPosition}
+            onLiquidate={(id, atPrice) => settlePosition(id, "liquidated", atPrice)}
             recentHits={recentHits}
           />
 
