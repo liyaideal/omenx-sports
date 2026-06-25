@@ -120,7 +120,10 @@ function PinpointInner({
   // Arcade HUD stats (XP, level, streak, trophies)
   const gameStats = useGameStats();
   // Sound mute state
-  const [muted, setMutedState] = useState<boolean>(() => soundsIsMuted());
+  const [muted, setMutedState] = useState<boolean>(true);
+  useEffect(() => {
+    setMutedState(soundsIsMuted());
+  }, []);
   const toggleMute = useCallback(() => {
     setMutedState((m) => { const next = !m; soundsSetMuted(next); if (!next) sndClick(); return next; });
   }, []);
