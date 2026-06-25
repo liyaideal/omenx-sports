@@ -18,12 +18,21 @@ import {
   isMuted as soundsIsMuted,
   setMuted as soundsSetMuted,
   sndCoin,
-  sndWin,
+  sndWinTier,
   sndLose,
   sndGameOver,
   sndClick,
+  sndCombo,
+  sndStreakLost,
 } from "@/features/pinpoint/sounds";
+import { EffectsLayer } from "@/features/pinpoint/effects/EffectsLayer";
+import { StreakPill } from "@/features/pinpoint/StreakPill";
+import { emit, tierFromRatio, tierBumpForStreak } from "@/features/pinpoint/effects/effectsBus";
 import "@/features/pinpoint/pp-theme.css";
+
+// Tier ordering for "highest in a multi-hit batch".
+const TIER_ORDER = { S: 0, M: 1, L: 2, XL: 3 } as const;
+function tierWeight(t: "S" | "M" | "L" | "XL"): number { return TIER_ORDER[t]; }
 
 export const Route = createFileRoute("/pinpoint")({
   head: () => ({
@@ -146,6 +155,9 @@ function PinpointInner({
   useEffect(() => {
     const t = Date.now();
     const settled: { id: string; at: number; won: boolean; payout: number }[] = [];
+    let hadLoss = false;
+    const wonDetails: { netWin: number; stake: number; lev: number }[] = [];
+    const streakBefore = gameStats.stats.streak;
     for (const p of state.positions) {
       if (p.status !== "open") continue;
       if (p.targetAt <= t) {
@@ -155,7 +167,12 @@ function PinpointInner({
         const netWin = p.q * (1 - p.pEntry);
         const payout = hit ? p.stake + netWin : 0;
         gameStats.recordSettle({ won: hit, stake: p.stake, mult: p.odds, payout });
-        if (hit) sndWin(); else sndLose();
+        if (hit) {
+          wonDetails.push({ netWin, stake: p.stake, lev: p.leverage ?? 1 });
+        } else {
+          hadLoss = true;
+          sndLose();
+        }
         settled.push({
           id: p.id,
           at: t,
@@ -167,11 +184,30 @@ function PinpointInner({
     const wins = settled.filter((s) => s.won);
     if (wins.length) {
       setRecentHits((h) => [...wins.map((w) => ({ id: w.id, at: w.at })), ...h].slice(0, 20));
-      const big = Math.max(...wins.map((w) => w.payout));
-      toast.success(`HIT! +$${big.toFixed(0)}`, { duration: 2000 });
+      // Aggregate audio: one tiered chord per tick (not N "dings").
+      // Tier = best single ratio in the batch, bumped by current streak.
+      let bestTier = tierFromRatio(0);
+      let totalNet = 0;
+      for (const w of wonDetails) {
+        const ratio = w.netWin / Math.max(1, w.stake);
+        const tier = tierFromRatio(ratio, w.lev);
+        if (tierWeight(tier) > tierWeight(bestTier)) bestTier = tier;
+        totalNet += w.netWin;
+      }
+      const lifted = tierBumpForStreak(bestTier, streakBefore + wins.length);
+      sndWinTier(lifted);
+      if (wins.length >= 2) {
+        emit("combo", { count: wins.length, totalAmount: totalNet, tier: lifted });
+        sndCombo(wins.length);
+      }
       setTimeout(() => {
         setRecentHits((h) => h.filter((x) => !wins.some((w) => w.id === x.id)));
       }, 1200);
+    }
+    // Streak break feedback (lose without any win on same tick, when prior streak > 0).
+    if (hadLoss && wins.length === 0 && streakBefore > 0) {
+      emit("streakBreak", undefined);
+      sndStreakLost();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tickSec]);
@@ -315,6 +351,7 @@ function PinpointInner({
   return (
     <div className="pp-root relative min-h-screen w-full overflow-hidden">
       <div className="pp-stars" />
+      <EffectsLayer />
 
       {/* Topbar */}
       <header className="relative z-10 flex h-14 items-center gap-4 px-4">
@@ -476,7 +513,8 @@ function PinpointInner({
           </div>
 
           {/* Grid */}
-          <div className="min-h-0 flex-1">
+          <div className="relative min-h-0 flex-1">
+            <StreakPill streak={gameStats.stats.streak} />
             <Grid
             currentPrice={price}
             history={history}
