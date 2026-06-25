@@ -559,7 +559,12 @@ export function Grid({
       const toDelete: string[] = [];
       effectsRef.current.forEach((eff, id) => {
         const age = now - eff.startAt;
-        const totalMs = eff.kind === "win" ? WIN_BURST_MS : SETTLE_MS;
+        const totalMs =
+          eff.kind === "win"
+            ? WIN_BURST_MS
+            : eff.kind === "liquidate"
+              ? HIT_FLASH_MS
+              : SETTLE_MS;
         if (age > totalMs) {
           toDelete.push(id);
           return;
@@ -567,7 +572,8 @@ export function Grid({
         const t01 = Math.min(1, age / totalMs);
         const p = eff.p;
         // Keep bet cell pinned at the NOW line so the player can see the
-        // exact strike position before the burst.
+        // exact strike position before the burst. Liquidations also pin
+        // there — they happen mid-flight but the burst belongs on screen.
         const cx = NOW_X;
         const cy = yFor(p.cellCenter);
         const x = cx - COL_W / 2;
@@ -585,6 +591,17 @@ export function Grid({
               baseY: cy - ROW_H / 2,
             });
             spawnStars(starsRef.current, cx, cy, now);
+          }
+        } else if (eff.kind === "liquidate") {
+          drawLiquidateBurst(ctx, x, y, COL_W, ROW_H, t01, p);
+          if (!eff._popped) {
+            eff._popped = true;
+            popsRef.current.push({
+              startAt: now,
+              amount: -p.stake,
+              baseX: cx,
+              baseY: cy - ROW_H / 2,
+            });
           }
         } else {
           drawLoseFade(ctx, x, y, COL_W, ROW_H, t01, p);
