@@ -162,6 +162,13 @@ export function usePinpointSession() {
           balance: merged.balance + refund,
           positions: migrated,
           sessionStatus: merged.sessionStatus ?? "active",
+          // v4 migration: pre-deposit users had an implicit $10k seed. Treat
+          // any existing balance as their lifetime deposit so the new
+          // sub-account UX makes sense for grandfathered accounts.
+          totalDeposited:
+            merged.totalDeposited != null
+              ? merged.totalDeposited
+              : Math.max(0, merged.balance + refund),
         };
       });
     }
