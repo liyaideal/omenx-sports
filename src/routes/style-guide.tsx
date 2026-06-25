@@ -180,6 +180,7 @@ const SECTIONS = [
   ["event-extras", "Event Detail Extras"],
   ["share", "Share Dialog"],
   ["production-inventory", "Production Inventory"],
+  ["pinpoint-stickers", "Pinpoint Stickers"],
 ] as const;
 
 function Section({ id, title, kicker, children }: { id: string; title: string; kicker?: string; children: React.ReactNode }) {
