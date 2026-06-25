@@ -16,6 +16,10 @@ interface Props {
   initialBalance: number;
   /** Opens the deposit sheet (main wallet → Pinpoint transfer). */
   onDeposit?: () => void;
+  /** Session has been liquidated → freeze the margin readout. */
+  frozen?: boolean;
+  /** MMR snapshot at liquidation moment (0..1). */
+  mmrAtFreeze?: number;
 }
 
 /**
@@ -36,6 +40,8 @@ export function AccountBlock({
   lockedStake,
   initialBalance,
   onDeposit,
+  frozen = false,
+  mmrAtFreeze,
 }: Props) {
   const ts = trophies ?? TROPHIES.map((t) => ({ ...t, unlocked: t.got(stats) }));
   const need = xpForNext(stats.level);
