@@ -143,7 +143,8 @@ function PinpointInner({
   const [showRules, setShowRules] = useState(false);
   const [showLiquidated, setShowLiquidated] = useState<{
     liquidatedCount: number;
-    lossAmount: number;
+    marginLost: number;
+    balanceWiped: number;
     mmrAtFreeze: number;
   } | null>(null);
   const [showDeposit, setShowDeposit] = useState(false);
@@ -326,18 +327,18 @@ function PinpointInner({
       return; // require 2 consecutive ticks
     }
     const mmrAtFreeze = mmr;
-    const { liquidatedIds } = liquidateAll({ mmr: mmrAtFreeze });
+    const { liquidatedIds, marginLost, balanceWiped } = liquidateAll({
+      mmr: mmrAtFreeze,
+    });
     if (liquidatedIds.length > 0) {
       sndGameOver();
       gameStats.breakStreak();
       const at = Date.now();
       setRecentLiqs((h) => [...liquidatedIds.map((id) => ({ id, at })), ...h].slice(0, 40));
-      const lossAmount = state.positions
-        .filter((p) => p.status === "open" && liquidatedIds.includes(p.id))
-        .reduce((s, p) => s + p.stake, 0);
       setShowLiquidated({
         liquidatedCount: liquidatedIds.length,
-        lossAmount,
+        marginLost,
+        balanceWiped,
         mmrAtFreeze,
       });
       setTimeout(() => {
