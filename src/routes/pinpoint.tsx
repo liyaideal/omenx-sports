@@ -401,7 +401,7 @@ function PinpointInner({
         </div>
       </header>
 
-      <div className="relative z-10 flex gap-3 px-3 pb-4">
+      <div className="relative z-10 flex h-[calc(100vh-56px)] gap-3 px-3 pb-4">
         {/* Sidebar */}
         <Sidebar
           stats={gameStats.stats}
@@ -428,7 +428,7 @@ function PinpointInner({
         />
 
         {/* Main */}
-        <main className="flex flex-1 flex-col gap-3 p-2">
+        <main className="flex min-h-0 min-w-0 flex-1 flex-col gap-3 p-2">
           {/* Match header — small line above grid */}
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
@@ -489,7 +489,8 @@ function PinpointInner({
           </div>
 
           {/* Grid */}
-          <Grid
+          <div className="min-h-0 flex-1">
+            <Grid
             currentPrice={price}
             history={history}
             positions={openPositions}
@@ -499,7 +500,8 @@ function PinpointInner({
             onCancel={cancelPosition}
             recentHits={recentHits}
             recentLiquidations={recentLiqs}
-          />
+            />
+          </div>
 
           {/* Help line */}
           <div className="flex items-center justify-between">
