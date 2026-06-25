@@ -258,24 +258,25 @@ export function Sidebar({
 
       {/* v3: no STOP / active close. Frozen-session indicator instead. */}
       {frozen ? (
-        <div
-          className="pp-stencil flex flex-col items-center gap-1 px-3 py-2.5 text-center text-[10px]"
+        <button
+          onClick={onDeposit}
+          className="pp-stencil flex flex-col items-center gap-1 px-3 py-2.5 text-center text-[10px] transition hover:brightness-125"
           style={{
             color: "var(--pp-red)",
             background: "#0a0a0a",
             border: "1px solid var(--pp-red)",
             borderRadius: 4,
           }}
-          title={`Session frozen — MMR ${(mmr * 100).toFixed(0)}%. No new bets accepted.`}
+          title={`Session frozen — MMR ${(mmr * 100).toFixed(0)}%. Deposit to resume.`}
         >
           <span className="flex items-center gap-1.5 text-[11px]">
             <Lock className="size-3" />
             FROZEN · MMR {(mmr * 100).toFixed(0)}%
           </span>
-          <span className="text-[9px]" style={{ color: "var(--pp-mute)" }}>
-            NO NEW BETS ACCEPTED
+          <span className="text-[9px]" style={{ color: "var(--pp-yellow)" }}>
+            TAP TO DEPOSIT & RESUME
           </span>
-        </div>
+        </button>
       ) : null}
     </div>
   );
