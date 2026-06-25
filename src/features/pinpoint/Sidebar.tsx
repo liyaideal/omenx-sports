@@ -1,6 +1,9 @@
-import { Volume2, VolumeX, BookOpen, Info, Square, Zap } from "lucide-react";
+import { Square, Zap } from "lucide-react";
 import { BET_SIZE_OPTIONS, LEVERAGE_OPTIONS } from "./hooks/usePinpointSession";
 import type { SportsMarket, Outcome } from "@/data/sports-markets";
+import { AccountBlock } from "./AccountBlock";
+import { EventSelector } from "./EventSelector";
+import type { GameStats, Trophy } from "./hooks/useGameStats";
 
 export interface OutcomeChoice {
   market: SportsMarket;
@@ -9,11 +12,22 @@ export interface OutcomeChoice {
 }
 
 interface Props {
+  // lifetime / account
+  stats: GameStats;
+  trophies?: (Trophy & { unlocked: boolean })[];
   balance: number;
   sessionPL: number;
   openCount: number;
-  /** Active event (single match). Outcomes are its markets. */
-  activeEvent: SportsMarket;
+  equity: number;
+  maintenance: number;
+  lockedStake: number;
+  initialBalance: number;
+  // events
+  events: SportsMarket[];
+  activeEventId: string;
+  onPickEvent: (id: string) => void;
+  openCountByEvent: Record<string, number>;
+  // markets within active event
   outcomes: OutcomeChoice[];
   activeOutcomeId: string;
   onPickOutcome: (id: string) => void;
@@ -24,21 +38,22 @@ interface Props {
   onLeverage: (n: number) => void;
   // stop
   onStop: () => void;
-  onShowRules: () => void;
-  // cross-margin live metrics
-  equity: number;
-  maintenance: number;
-  lockedStake: number;
-  initialBalance: number;
-  muted: boolean;
-  onToggleMute: () => void;
 }
 
 export function Sidebar({
+  stats,
+  trophies,
   balance,
   sessionPL,
   openCount,
-  activeEvent,
+  equity,
+  maintenance,
+  lockedStake,
+  initialBalance,
+  events,
+  activeEventId,
+  onPickEvent,
+  openCountByEvent,
   outcomes,
   activeOutcomeId,
   onPickOutcome,
@@ -47,100 +62,44 @@ export function Sidebar({
   leverage,
   onLeverage,
   onStop,
-  onShowRules,
-  equity,
-  maintenance,
-  lockedStake,
-  initialBalance,
-  muted,
-  onToggleMute,
 }: Props) {
-  const plPositive = sessionPL >= 0;
   const highRisk = leverage >= 3;
-  const eventLabel = activeEvent.fixture
-    ? `${activeEvent.fixture.home.short} VS ${activeEvent.fixture.away.short}`
-    : activeEvent.title.toUpperCase();
   const notional = betSize * leverage;
-  const levCopy =
-    leverage === 1
-      ? "NO LEVERAGE · SAFE"
-      : leverage === 2
-        ? "2× PAYOUT · CROSS RISK"
-        : "⚠ 3× PAYOUT · HIGH CROSS RISK";
-
-  // Margin-health bar: 1 when equity == initialBalance (or above), 0 at maintenance.
-  const denom = Math.max(1, initialBalance - 0);
-  const health = lockedStake > 0
-    ? Math.max(0, Math.min(1, (equity - maintenance) / Math.max(1, denom - maintenance)))
-    : 1;
-  const healthColor = health > 0.6 ? "var(--pp-green)" : health > 0.3 ? "#ffcc4d" : "var(--pp-red)";
-  const healthLabel = health > 0.6 ? "HEALTHY" : health > 0.3 ? "WARN" : "DANGER";
+  const riskLabel =
+    leverage === 1 ? "SAFE · 1× PAYOUT" : leverage === 2 ? "CROSS · 2× PAYOUT" : "HIGH RISK · CROSS · 3× PAYOUT";
 
   return (
-    <div className="flex w-[260px] shrink-0 flex-col gap-3 p-3">
-      {/* BALANCE / SESSION / MARGIN — single compact card */}
-      <div className="pp-card p-3" title={`Equity $${equity.toFixed(0)} · Maintenance $${maintenance.toFixed(0)}`}>
-        <div className="flex items-baseline justify-between">
-          <span className="pp-stencil text-[9px]" style={{ color: "var(--pp-yellow)" }}>BALANCE</span>
-          <span className="pp-stencil text-[8px]" style={{ color: "var(--pp-mute)" }}>{openCount} OPEN</span>
-        </div>
-        <div
-          className="pp-headline pp-stamp-green mt-1 text-3xl"
-          style={{ color: "var(--pp-green)" }}
-        >
-          ${balance.toLocaleString(undefined, { maximumFractionDigits: 0 })}
-        </div>
+    <div className="flex w-[260px] shrink-0 flex-col gap-2 p-3">
+      {/* ── ACCOUNT block (lifetime + this session) ─────────────── */}
+      <AccountBlock
+        stats={stats}
+        trophies={trophies}
+        balance={balance}
+        sessionPL={sessionPL}
+        openCount={openCount}
+        equity={equity}
+        maintenance={maintenance}
+        lockedStake={lockedStake}
+        initialBalance={initialBalance}
+      />
 
-        <div className="mt-2 flex items-baseline justify-between">
-          <span className="pp-stencil text-[9px]" style={{ color: "var(--pp-yellow)" }}>SESSION</span>
-          <span
-            className="pp-headline text-base"
-            style={{
-              color: plPositive ? "var(--pp-green)" : "var(--pp-red)",
-              textShadow: "1px 1px 0 #000",
-            }}
-          >
-            {plPositive ? "+" : "−"}${Math.abs(sessionPL).toFixed(0)}
-          </span>
-        </div>
+      {/* ── PER-BET stack: Event → Market → Size → Leverage → Stop */}
+      <EventSelector
+        events={events}
+        activeEventId={activeEventId}
+        onPick={onPickEvent}
+        openCountByEvent={openCountByEvent}
+      />
 
-        <div className="mt-2 flex items-center justify-between">
-          <span className="pp-stencil text-[9px]" style={{ color: "var(--pp-yellow)" }}>MARGIN</span>
-          <span
-            className="pp-stencil text-[8px]"
-            style={{ color: healthColor, textShadow: "1px 1px 0 #000" }}
-          >
-            {healthLabel}
-          </span>
-        </div>
-        <div
-          className="mt-1 h-1.5 w-full overflow-hidden rounded-full"
-          style={{ background: "rgba(0,0,0,0.5)", border: "1px solid var(--pp-card-border)" }}
-        >
-          <div
-            className={health <= 0.3 ? "animate-pulse" : ""}
-            style={{
-              width: `${health * 100}%`,
-              height: "100%",
-              background: healthColor,
-              boxShadow: "inset 0 -2px 0 rgba(0,0,0,0.35)",
-              transition: "width 200ms linear",
-            }}
-          />
-        </div>
-      </div>
-
-      {/* MARKETS for active event */}
+      {/* MARKET — outcomes inside the active event */}
       <div className="pp-card p-2.5">
         <div className="mb-1.5 flex items-center justify-between">
           <span className="pp-stencil text-[10px]" style={{ color: "var(--pp-yellow)" }}>
-            {eventLabel}
+            MARKET
           </span>
-          {activeEvent.liveClock && (
-            <span className="pp-stencil text-[8px]" style={{ color: "var(--pp-mute)" }}>
-              {activeEvent.liveClock}
-            </span>
-          )}
+          <span className="pp-stencil text-[8px]" style={{ color: "var(--pp-mute)" }}>
+            PICK OUTCOME
+          </span>
         </div>
         <div
           className="grid gap-1.5"
@@ -204,7 +163,7 @@ export function Sidebar({
         </div>
       </div>
 
-      {/* LEVERAGE card */}
+      {/* LEVERAGE card — 4 clean rows so labels never overlap */}
       <div
         className="pp-card p-2.5"
         style={
@@ -217,16 +176,24 @@ export function Sidebar({
             : undefined
         }
       >
+        {/* Row 1 — title + current value */}
         <div className="flex items-center justify-between">
-          <span className="pp-stencil flex items-center gap-1 text-[10px]" style={{ color: highRisk ? "#ffcc4d" : "var(--pp-yellow)" }}>
+          <span
+            className="pp-stencil flex items-center gap-1 text-[10px]"
+            style={{ color: highRisk ? "#ffcc4d" : "var(--pp-yellow)" }}
+          >
             <Zap className="size-3" />
             LEVERAGE
           </span>
-          <span className="pp-stencil text-[8px]" style={{ color: highRisk ? "#ffcc4d" : "var(--pp-mute)" }}>
-            {levCopy}
-            <span className="ml-2" style={{ color: "var(--pp-mute)" }}>Q/E</span>
+          <span
+            className="pp-headline text-sm"
+            style={{ color: highRisk ? "#ffcc4d" : "var(--pp-yellow)" }}
+          >
+            {leverage}×
           </span>
         </div>
+
+        {/* Row 2 — chip selector */}
         <div className="mt-1.5 grid grid-cols-3 gap-1">
           {LEVERAGE_OPTIONS.map((l) => {
             const active = leverage === l;
@@ -235,20 +202,34 @@ export function Sidebar({
                 key={l}
                 onClick={() => onLeverage(l)}
                 className={`pp-chip pp-stencil py-1.5 text-[10px] ${active ? "pp-chip-active" : ""}`}
-                style={{
-                  color: active ? "var(--pp-yellow)" : "var(--pp-mute)",
-                }}
+                style={{ color: active ? "var(--pp-yellow)" : "var(--pp-mute)" }}
               >
                 {l}×
               </button>
             );
           })}
         </div>
+
+        {/* Row 3 — margin / notional readout */}
         <div
-          className="pp-stencil mt-1 text-center text-[8px]"
+          className="pp-stencil mt-1.5 flex items-baseline justify-between text-[8px]"
           style={{ color: "var(--pp-mute)" }}
         >
-          MARGIN ${betSize} · NOTIONAL ${notional}
+          <span>
+            MARGIN <span style={{ color: "var(--pp-yellow)" }}>${betSize}</span>
+          </span>
+          <span>
+            NOTIONAL <span style={{ color: "var(--pp-yellow)" }}>${notional}</span>
+          </span>
+        </div>
+
+        {/* Row 4 — caption */}
+        <div
+          className="pp-stencil mt-1 flex items-baseline justify-between text-[8px]"
+          style={{ color: highRisk ? "#ffcc4d" : "var(--pp-mute)" }}
+        >
+          <span>{riskLabel}</span>
+          <span style={{ color: "var(--pp-mute)" }}>Q/E</span>
         </div>
       </div>
 
@@ -261,35 +242,6 @@ export function Sidebar({
         <Square className="size-3.5 fill-current" />
         STOP
       </button>
-
-      {/* footer trio */}
-      <div className="mt-auto grid grid-cols-3 gap-1.5">
-        <button
-          onClick={onToggleMute}
-          className={`pp-chip pp-stencil flex items-center justify-center gap-1 py-1.5 text-[9px] ${
-            muted ? "" : "pp-chip-active-yellow"
-          }`}
-          style={{ color: muted ? "var(--pp-mute)" : "var(--pp-yellow)" }}
-          title={muted ? "Sound off — click to enable 8-bit FX" : "Sound on"}
-        >
-          {muted ? <VolumeX className="size-3" /> : <Volume2 className="size-3" />}
-          {muted ? "OFF" : "ON"}
-        </button>
-        <button
-          onClick={onShowRules}
-          className="pp-chip pp-stencil flex items-center justify-center gap-1 py-1.5 text-[9px]"
-          style={{ color: "var(--pp-mute)" }}
-        >
-          <BookOpen className="size-3" />
-          RULES
-        </button>
-        <button
-          className="pp-chip pp-stencil flex items-center justify-center py-1.5"
-          style={{ color: "var(--pp-mute)" }}
-        >
-          <Info className="size-3.5" />
-        </button>
-      </div>
     </div>
   );
 }
