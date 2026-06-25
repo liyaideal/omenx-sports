@@ -6,12 +6,13 @@ import { MATCH_MARKETS } from "@/data/sports-markets";
 import {
   usePinpointSession,
   computeEquity,
-  INITIAL_BALANCE,
+  MARGIN_HEALTH_ANCHOR,
 } from "@/features/pinpoint/hooks/usePinpointSession";
 import { LIQ_TRIGGER_MMR } from "@/features/pinpoint/constants";
 import { useLiveTicker } from "@/features/pinpoint/hooks/useLiveTicker";
 import { Sidebar, type OutcomeChoice } from "@/features/pinpoint/Sidebar";
 import { Grid } from "@/features/pinpoint/Grid";
+import { DepositSheet } from "@/features/pinpoint/DepositSheet";
 import { useGameStats } from "@/features/pinpoint/hooks/useGameStats";
 import {
   isMuted as soundsIsMuted,
@@ -110,7 +111,7 @@ function PinpointInner({
     settlePosition,
     cancelPosition,
     liquidateAll,
-    reset,
+    deposit,
     setBetSize,
     cycleBetSize,
     setLeverage,
@@ -134,7 +135,9 @@ function PinpointInner({
   const [showLiquidated, setShowLiquidated] = useState<{
     liquidatedCount: number;
     lossAmount: number;
+    mmrAtFreeze: number;
   } | null>(null);
+  const [showDeposit, setShowDeposit] = useState(false);
   const liqArmedRef = useRef(false);
 
   // Settlement on tick
@@ -286,7 +289,8 @@ function PinpointInner({
       liqArmedRef.current = true;
       return; // require 2 consecutive ticks
     }
-    const { liquidatedIds } = liquidateAll();
+    const mmrAtFreeze = mmr;
+    const { liquidatedIds } = liquidateAll({ mmr: mmrAtFreeze });
     if (liquidatedIds.length > 0) {
       sndGameOver();
       gameStats.breakStreak();
@@ -298,6 +302,7 @@ function PinpointInner({
       setShowLiquidated({
         liquidatedCount: liquidatedIds.length,
         lossAmount,
+        mmrAtFreeze,
       });
       setTimeout(() => {
         setRecentLiqs((h) => h.filter((x) => !liquidatedIds.includes(x.id)));
@@ -392,7 +397,7 @@ function PinpointInner({
           equity={equity}
           maintenance={maintenance}
           lockedStake={lockedStake}
-          initialBalance={INITIAL_BALANCE}
+          initialBalance={Math.max(state.balance + lockedStake, MARGIN_HEALTH_ANCHOR)}
           events={groups.map((g) => g.market)}
           activeEventId={activeEventId}
           onPickEvent={onPickEvent}
@@ -406,6 +411,7 @@ function PinpointInner({
           onLeverage={setLeverage}
           frozen={state.sessionStatus === "frozen"}
           mmr={mmr}
+          onDeposit={() => setShowDeposit(true)}
         />
 
         {/* Main */}
@@ -543,7 +549,7 @@ function PinpointInner({
                 SESSION<br />FROZEN
               </div>
               <p className="pp-marker mt-4 text-[10px]" style={{ color: "var(--pp-yellow)" }}>
-                MMR ≥ 100% · LIQUIDATION IN PROGRESS
+                MMR {(showLiquidated.mmrAtFreeze * 100).toFixed(0)}% · CROSS-MARGIN WIPE
               </p>
               <div className="pp-lcd mx-auto mt-5 inline-block px-4 py-2 text-left">
                 <p className="pp-num text-base" style={{ color: "var(--pp-green-2)" }}>
@@ -553,30 +559,29 @@ function PinpointInner({
                   MARGIN LOST . −${showLiquidated.lossAmount.toFixed(0)}
                 </p>
                 <p className="pp-num text-base" style={{ color: "var(--pp-yellow)" }}>
-                  CREDITS ..... ${state.balance.toFixed(0)}
+                  PINPOINT BAL ${state.balance.toFixed(0)}
                 </p>
               </div>
               <p
-                className="pp-stencil pp-blink mt-5 text-[9px]"
-                style={{ color: "var(--pp-yellow)" }}
+                className="pp-stencil mt-5 text-[9px] leading-relaxed"
+                style={{ color: "var(--pp-mute)" }}
               >
-                ▶ FUND TRANSFER COMING SOON
+                YOUR MAIN OMENX WALLET WAS NOT TOUCHED.<br />
+                FUND PINPOINT TO KEEP PLAYING.
               </p>
               <div className="mt-5 flex gap-2">
                 <button
-                  disabled
-                  className="pp-btn pp-btn-mint flex-1 py-3 text-[10px]"
-                  style={{ opacity: 0.4, cursor: "not-allowed" }}
-                  title="Deposit to sub-account — coming next iteration"
+                  onClick={() => { sndClick(); setShowLiquidated(null); }}
+                  className="pp-chip pp-stencil flex-1 py-3 text-[10px]"
+                  style={{ color: "var(--pp-mute)" }}
                 >
-                  ADD FUNDS
+                  CLOSE
                 </button>
                 <button
-                  onClick={() => { sndClick(); reset(); setShowLiquidated(null); }}
-                  className="pp-stop pp-stencil flex-1 py-3 text-[10px]"
-                  style={{ color: "#fff" }}
+                  onClick={() => { sndClick(); setShowLiquidated(null); setShowDeposit(true); }}
+                  className="pp-btn pp-btn-mint flex-1 py-3 text-[10px]"
                 >
-                  RESET
+                  DEPOSIT
                 </button>
               </div>
             </div>
@@ -584,6 +589,14 @@ function PinpointInner({
           </div>
         </ModalShell>
       )}
+
+      {/* DEPOSIT — main wallet → Pinpoint sub-account transfer */}
+      <DepositSheet
+        open={showDeposit}
+        onClose={() => setShowDeposit(false)}
+        pinpointBalance={state.balance}
+        onDeposit={(amount) => deposit(amount)}
+      />
 
       {/* RULES modal */}
       {showRules && (

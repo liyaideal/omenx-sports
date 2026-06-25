@@ -56,14 +56,30 @@ export interface PinpointState {
   positions: PinpointPosition[];
   /** `frozen` = session is in liquidation; no more bets, no cancels, UI locked. */
   sessionStatus: "active" | "frozen";
+  /** MMR captured at the moment of liquidation (for the frozen UI). */
+  frozenMmr?: number;
+  /** Wall-clock ms when the session was frozen. */
+  frozenAt?: number;
+  /** Pinpoint sub-account lifetime deposits — for "house edge" disclosure. */
+  totalDeposited: number;
 }
 
 const BET_SIZES = [10, 25, 100, 500, 1000, 5000] as const;
 export const BET_SIZE_OPTIONS = BET_SIZES;
 
 export const LEVERAGE_OPTIONS = LEVS;
-/** Default starting balance — used by margin-health UI as the "full" anchor. */
-export const INITIAL_BALANCE = 10000;
+/**
+ * Default starting balance for the Pinpoint sub-account.
+ *
+ * Pinpoint is a *separate* play-money pocket inside OmenX; users explicitly
+ * fund it from their main wallet. We seed first-time users with $0 — the
+ * onboarding deposit flow handles the first transfer (and after a liquidation
+ * the same deposit sheet is the only way back in). Margin-health UI uses
+ * `Math.max(balance + lockedStake, fallback)` as the "full" anchor.
+ */
+export const INITIAL_BALANCE = 0;
+/** Anchor used by the margin-health bar when balance is empty / brand-new. */
+export const MARGIN_HEALTH_ANCHOR = 1000;
 
 const clamp = (v: number, lo: number, hi: number) =>
   Math.max(lo, Math.min(hi, v));
@@ -119,6 +135,7 @@ const DEFAULT_STATE: PinpointState = {
   sessionPL: 0,
   positions: [],
   sessionStatus: "active",
+  totalDeposited: 0,
 };
 
 export function usePinpointSession() {
@@ -145,6 +162,13 @@ export function usePinpointSession() {
           balance: merged.balance + refund,
           positions: migrated,
           sessionStatus: merged.sessionStatus ?? "active",
+          // v4 migration: pre-deposit users had an implicit $10k seed. Treat
+          // any existing balance as their lifetime deposit so the new
+          // sub-account UX makes sense for grandfathered accounts.
+          totalDeposited:
+            merged.totalDeposited != null
+              ? merged.totalDeposited
+              : Math.max(0, merged.balance + refund),
         };
       });
     }
@@ -309,7 +333,9 @@ export function usePinpointSession() {
    * into the final "all out" state for UI fidelity.
    */
   const liquidateAll = useCallback(
-    (): { liquidatedIds: string[] } => {
+    (
+      ctx?: { mmr?: number }
+    ): { liquidatedIds: string[] } => {
       const liquidatedIds: string[] = [];
       const now = Date.now();
       setState((s) => {
@@ -332,6 +358,8 @@ export function usePinpointSession() {
           sessionPL: s.sessionPL + plDelta,
           positions: next,
           sessionStatus: "frozen" as const,
+          frozenMmr: ctx?.mmr,
+          frozenAt: now,
         };
       });
       return { liquidatedIds };
@@ -366,6 +394,24 @@ export function usePinpointSession() {
 
   const reset = useCallback(() => setState(DEFAULT_STATE), []);
 
+  /**
+   * Credit the Pinpoint sub-account from an external source (the OmenX main
+   * wallet). If the session was frozen, depositing automatically unfreezes —
+   * a frozen session has no open legs by construction, so it's safe to resume.
+   * The caller is responsible for debiting the main wallet (`debitWallet`).
+   */
+  const deposit = useCallback((amount: number) => {
+    if (!(amount > 0)) return;
+    setState((s) => ({
+      ...s,
+      balance: s.balance + amount,
+      sessionStatus: "active" as const,
+      frozenMmr: undefined,
+      frozenAt: undefined,
+      totalDeposited: (s.totalDeposited ?? 0) + amount,
+    }));
+  }, []);
+
   return {
     state,
     hydrated,
@@ -373,6 +419,7 @@ export function usePinpointSession() {
     settlePosition,
     cancelPosition,
     liquidateAll,
+    deposit,
     setBetSize,
     cycleBetSize,
     setLeverage,
