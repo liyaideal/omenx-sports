@@ -357,6 +357,63 @@ export function Grid({
       // ── 4. Future grid cells ───────────────────────────────────────
       // Determine visible expirySec range
       const nowSec = now / 1000;
+
+      // ── 4a. Liquidation check on open bets ──────────────────────────
+      // Real-contract style: if |price - cellCenter| > liqDistance before
+      // settlement, force-close the position with full margin loss.
+      const livePrice = priceRef.current;
+      for (const p of positionsRef.current) {
+        if (effectsRef.current.has(p.id)) continue;
+        if (liquidatedLocalRef.current.has(p.id)) continue;
+        const lev = p.leverage ?? 1;
+        if (lev <= 1) continue; // 1× has no effective liquidation under current ¢ range
+        const liqDist = p.liqDistance ?? (4.5 / lev);
+        if (Math.abs(livePrice - p.cellCenter) > liqDist) {
+          liquidatedLocalRef.current.add(p.id);
+          // Visual effect immediately at the bet's column position.
+          effectsRef.current.set(p.id, {
+            kind: "liquidate",
+            startAt: now,
+            p,
+          });
+          if (onLiquidate) onLiquidate(p.id, livePrice);
+        }
+      }
+
+      // ── 4b. Liquidation rails for OPEN positions (red dashed) ──────
+      for (const p of positionsRef.current) {
+        if (effectsRef.current.has(p.id)) continue;
+        const lev = p.leverage ?? 1;
+        if (lev <= 1) continue;
+        const liqDist = p.liqDistance ?? (4.5 / lev);
+        const px = xForExpiry(p.targetAt);
+        if (px < NOW_X) continue;
+        const yUp = yFor(p.cellCenter + liqDist);
+        const yDn = yFor(p.cellCenter - liqDist);
+        ctx.save();
+        ctx.strokeStyle = "rgba(255,60,90,0.55)";
+        ctx.lineWidth = 1;
+        ctx.setLineDash([4, 4]);
+        ctx.beginPath();
+        ctx.moveTo(NOW_X, yUp);
+        ctx.lineTo(Math.min(W, px + COL_W / 2), yUp);
+        ctx.moveTo(NOW_X, yDn);
+        ctx.lineTo(Math.min(W, px + COL_W / 2), yDn);
+        ctx.stroke();
+        ctx.setLineDash([]);
+        // tiny "LIQ" tag at right end
+        ctx.fillStyle = "rgba(255,60,90,0.85)";
+        ctx.font = '700 8px "Chakra Petch",monospace';
+        ctx.textAlign = "right";
+        ctx.textBaseline = "middle";
+        const tagX = Math.min(W - 2, px + COL_W / 2);
+        ctx.fillText("LIQ", tagX, yUp - 6);
+        ctx.fillText("LIQ", tagX, yDn + 6);
+        ctx.textAlign = "start";
+        ctx.textBaseline = "alphabetic";
+        ctx.restore();
+      }
+
       // First column expiry = ceil(now/1000) — that one is currently sliding toward NOW_X.
       const firstSec = Math.ceil(nowSec);
       // How many columns fit?
