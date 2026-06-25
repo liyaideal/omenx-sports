@@ -1,28 +1,79 @@
-## Problem
+## 结论
 
-When the session is liquidated → `frozen`, `liquidateAll` closes all open positions, so `lockedStake` drops to 0. The margin-health formula in `AccountBlock.tsx` short-circuits to `health = 1` whenever `lockedStake <= 0`, which paints the bar full green and labels it **HEALTHY** — directly contradicting the "SESSION FROZEN · MMR 0%" banner on the grid.
+你的理解是对的：如果 Pinpoint 子账户本身就是 cross margin / 联合保证金池，那么爆仓不应该只没收 open positions 的 stake，而应该把整个 Pinpoint 子账户可用余额也一起归零。
 
-## Fix
+现在的实现是“保证金下注账户”：开仓时只扣 `stake + fee`，爆仓时只把 open positions 的 `stake` 记为亏损，剩余 `balance` 保留。这和我们现在想表达的“Pinpoint 子账户 = 一个独立 cross-margin 风险池”不一致。
 
-Make `AccountBlock` aware of the frozen state and render an unambiguous wiped-out margin row instead of the healthy default.
+## 要改成的产品语义
 
-### Changes
+- 主站 OmenX wallet 不受影响。
+- Pinpoint balance 是用户主动转入的独立风险池。
+- 只要进入 Pinpoint cross-margin 交易，所有 Pinpoint balance 都是这一池的 equity buffer。
+- 触发 liquidation 时：
+  - 所有 open positions 被强平。
+  - Pinpoint balance 归 0。
+  - session P/L 增加一笔“account wipe loss”，使 P/L 和余额对得上。
+  - session 状态保持 `frozen`，因为账户已经没钱，必须从主钱包重新 transfer/top up 后才能继续。
 
-1. **`src/routes/pinpoint.tsx`** — pass two new props into `<AccountBlock />`:
-   - `frozen={state.sessionStatus === "frozen"}`
-   - `mmrAtFreeze={showLiquidated?.mmrAtFreeze}` (already computed)
+## 实施计划
 
-2. **`src/features/pinpoint/AccountBlock.tsx`**
-   - Accept `frozen?: boolean` and `mmrAtFreeze?: number`.
-   - When `frozen` is true, override the health block:
-     - Label: **LIQUIDATED** (red, `var(--pp-red)`).
-     - Sub-label on the right: `MMR {mmrAtFreeze%}` instead of the percentage placeholder.
-     - Bar: full width, solid red, with the existing `animate-pulse`, plus a subtle diagonal-stripe overlay to read as "wiped" rather than "full".
-     - Add a one-line CTA hint underneath: `TAP + FUND TO RESUME` (small, yellow), reusing the existing `onDeposit` handler — clickable.
-   - Keep the healthy/warn/danger path unchanged for the non-frozen case.
-   - Update the card `title` tooltip to include `· FROZEN` when applicable.
+### 1. 修正底层会计逻辑
 
-### Out of scope
+文件：`src/features/pinpoint/hooks/usePinpointSession.ts`
 
-- Liquidation trigger logic, MMR formula, deposit flow — all already correct; this is purely a display-state bug in the margin widget.
-- No changes to Sidebar's frozen alert bar (already correct).
+- 修改 `liquidateAll()`：
+  - 继续把所有 open positions 标成 `liquidated`、`payout = 0`。
+  - 计算 liquidation 总损失：
+    - open position margin loss：所有 open positions 的 `stake`。
+    - remaining balance wipe：当前 `s.balance`。
+  - 返回 state 时设置：
+    - `balance: 0`
+    - `sessionPL: s.sessionPL - openStakeLoss - s.balance`
+    - `sessionStatus: "frozen"`
+    - `frozenMmr / frozenAt` 保留用于 UI。
+- 保持 `deposit()` 逻辑：充值后自动 `sessionStatus: "active"`，余额恢复后才能继续下注。
+
+### 2. 修正弹窗金额展示
+
+文件：`src/routes/pinpoint.tsx`
+
+- `setShowLiquidated` 增加 `balanceWiped` 或 `accountWiped` 字段，用来展示这次爆仓不只是 margin lost。
+- 弹窗从：
+  - `MARGIN LOST . -$x`
+  - `PINPOINT BAL $4677`
+- 改成类似：
+  ```text
+  POSITIONS .... 03
+  MARGIN LOST .. -$x
+  BALANCE WIPED  -$y
+  PINPOINT BAL .. $0
+  ```
+- 文案强调：
+  - `PINPOINT ACCOUNT WIPED`
+  - `MAIN OMENX WALLET WAS NOT TOUCHED`
+
+### 3. 修正左侧 AccountBlock 展示
+
+文件：`src/features/pinpoint/AccountBlock.tsx`
+
+- frozen 时：
+  - balance 必须显示 `$0`（由底层 state 驱动）。
+  - MARGIN 行继续显示 `LIQUIDATED`。
+  - 下方 `TAP + FUND TO RESUME →` 保留。
+- 保留刚刚已做的换行修复，不再显示 `MMR 0%`。
+
+### 4. 检查所有 frozen 门禁是否符合语义
+
+文件：`src/features/pinpoint/Sidebar.tsx`、`src/routes/pinpoint.tsx`、`Grid.tsx`
+
+- 保留 frozen 禁止新下注逻辑。
+- 保留 frozen alert / grid overlay。
+- 确认只有 `deposit()` 能解除 frozen。
+
+## 验收标准
+
+- 触发 liquidation 后，Pinpoint BAL 立即变成 `$0`。
+- SESSION P/L 反映整个 Pinpoint 子账户被 wipe 的损失。
+- Grid 和 Sidebar 仍显示 frozen，不能继续下注。
+- 点击 `+ FUND` / `TAP + FUND TO RESUME` 打开充值面板；充值后恢复 active，可以继续交易。
+- 主站 wallet 不被 liquidation 扣款，只在用户主动 transfer 到 Pinpoint 时扣款。

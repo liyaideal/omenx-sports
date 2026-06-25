@@ -143,7 +143,8 @@ function PinpointInner({
   const [showRules, setShowRules] = useState(false);
   const [showLiquidated, setShowLiquidated] = useState<{
     liquidatedCount: number;
-    lossAmount: number;
+    marginLost: number;
+    balanceWiped: number;
     mmrAtFreeze: number;
   } | null>(null);
   const [showDeposit, setShowDeposit] = useState(false);
@@ -326,18 +327,18 @@ function PinpointInner({
       return; // require 2 consecutive ticks
     }
     const mmrAtFreeze = mmr;
-    const { liquidatedIds } = liquidateAll({ mmr: mmrAtFreeze });
+    const { liquidatedIds, marginLost, balanceWiped } = liquidateAll({
+      mmr: mmrAtFreeze,
+    });
     if (liquidatedIds.length > 0) {
       sndGameOver();
       gameStats.breakStreak();
       const at = Date.now();
       setRecentLiqs((h) => [...liquidatedIds.map((id) => ({ id, at })), ...h].slice(0, 40));
-      const lossAmount = state.positions
-        .filter((p) => p.status === "open" && liquidatedIds.includes(p.id))
-        .reduce((s, p) => s + p.stake, 0);
       setShowLiquidated({
         liquidatedCount: liquidatedIds.length,
-        lossAmount,
+        marginLost,
+        balanceWiped,
         mmrAtFreeze,
       });
       setTimeout(() => {
@@ -588,17 +589,20 @@ function PinpointInner({
                 SESSION<br />FROZEN
               </div>
               <p className="pp-marker mt-4 text-[10px]" style={{ color: "var(--pp-yellow)" }}>
-                MMR {(showLiquidated.mmrAtFreeze * 100).toFixed(0)}% · CROSS-MARGIN WIPE
+                MMR {(showLiquidated.mmrAtFreeze * 100).toFixed(0)}% · PINPOINT ACCOUNT WIPED
               </p>
               <div className="pp-lcd mx-auto mt-5 inline-block px-4 py-2 text-left">
                 <p className="pp-num text-base" style={{ color: "var(--pp-green-2)" }}>
                   POSITIONS .... {String(showLiquidated.liquidatedCount).padStart(2, "0")}
                 </p>
                 <p className="pp-num text-base" style={{ color: "var(--pp-red)" }}>
-                  MARGIN LOST . −${showLiquidated.lossAmount.toFixed(0)}
+                  MARGIN LOST . −${showLiquidated.marginLost.toFixed(0)}
+                </p>
+                <p className="pp-num text-base" style={{ color: "var(--pp-red)" }}>
+                  BAL WIPED ... −${showLiquidated.balanceWiped.toFixed(0)}
                 </p>
                 <p className="pp-num text-base" style={{ color: "var(--pp-yellow)" }}>
-                  PINPOINT BAL ${state.balance.toFixed(0)}
+                  PINPOINT BAL $0
                 </p>
               </div>
               <p
