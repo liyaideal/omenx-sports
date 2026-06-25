@@ -312,38 +312,43 @@ function PinpointInner({
         <Link
           to="/"
           className="pp-stencil flex items-center gap-2 rounded px-2 py-1.5 text-[10px] hover:opacity-80"
-          style={{ color: "var(--pp-yellow)" }}
+          style={{ color: "var(--pp-ink)" }}
         >
           <ArrowLeft className="size-3.5" />
           BACK
         </Link>
+        {/* PINPOINT sticker logo */}
         <div className="ml-2 flex items-center gap-2">
-          <Zap className="size-5" style={{ color: "var(--pp-green)" }} />
           <span
-            className="pp-headline pp-stamp-green text-xl"
-            style={{ color: "var(--pp-green)" }}
+            className="pp-stencil px-3 py-1 text-2xl pp-tilt-l"
+            style={{
+              background: "var(--pp-yellow)",
+              color: "#000",
+              border: "2px solid #000",
+              boxShadow: "3px 3px 0 #000",
+              borderRadius: "4px",
+            }}
           >
             PINPOINT
           </span>
           <span
-            className="pp-stencil rounded px-1.5 py-0.5 text-[8px]"
-            style={{
-              color: "var(--pp-red)",
-              border: "1px solid var(--pp-red)",
-            }}
+            className="pp-marker text-sm pp-tilt-r"
+            style={{ color: "var(--pp-red)" }}
           >
-            BETA
+            beta
           </span>
         </div>
 
         {undoMsLeft > 0 && (
           <button
             onClick={handleUndo}
-            className="pp-stencil ml-auto rounded px-3 py-1.5 text-[9px]"
+            className="pp-stencil ml-auto px-3 py-1.5 text-[10px]"
             style={{
-              color: "var(--pp-yellow)",
-              border: "1px solid var(--pp-red)",
-              background: "rgba(255,107,26,0.1)",
+              color: "#000",
+              background: "var(--pp-yellow)",
+              border: "2px solid #000",
+              borderRadius: "4px",
+              boxShadow: "2px 2px 0 #000",
             }}
           >
             UNDO {(undoMsLeft / 1000).toFixed(1)}S [Z]
