@@ -1,38 +1,25 @@
-## Fix 1 — Sidebar can't scroll
+## 问题
 
-`src/features/pinpoint/Sidebar.tsx` root is `flex w-[288px] shrink-0 flex-col gap-3 p-4`. Its parent in `src/routes/pinpoint.tsx` is a fixed-height flex row (`h-[calc(100vh-56px)]`), but the sidebar itself has no `overflow-y` and no `min-h-0`, so anything past the viewport (LEVERAGE card, the new disclosure footer) is simply clipped and unreachable.
+左栏底部的小字 `NO MANUAL CLOSE · BETS RESOLVE AT JUDGEMENT` 跟 Rules 弹窗里 04 条已经说的内容完全重复：
 
-- Change the root to `flex w-[288px] shrink-0 flex-col gap-3 p-4 overflow-y-auto min-h-0 pp-sidebar-scroll`.
-- Add a tiny scoped scrollbar style in `pp-theme.css` (`.pp-sidebar-scroll::-webkit-scrollbar { width: 6px }` + LCD-green thumb) so the scrollbar matches the cartridge look instead of the default OS bar.
+> 04 — Click your own bet to cancel & refund the margin … **No active close — bets resolve at judgement or get liquidated if account MMR ≥ 100%.**
 
-## Fix 2 — Balance card overflows and SESSION P/L is orphaned
+放在 Sidebar 底部既占视觉空间，又让用户每次都要看一遍同一句规则，没有额外信息量。
 
-Today in `AccountBlock.tsx`:
-- `$11,843` renders at `text-3xl` (Press Start 2P) inside a ~256px-wide card → it eats the whole row and pushes `+$1…` off the right edge.
-- The `+$xxx` chip sits on the balance row while the label `SESSION P/L` lives on a separate row below it, so the two halves of the same datum are visually divorced.
+## 改动
 
-Rebuild the balance zone so it always fits 256px and keeps each datum unified:
+**1. `src/features/pinpoint/Sidebar.tsx`**
+- 删掉底部那块 `NO MANUAL CLOSE · BETS RESOLVE AT JUDGEMENT` 的小字（含外层 wrapper 与 `title` tooltip，约 270–280 行附近）。
+- 不替换成别的内容，让 Sidebar 自然收尾在 Account / Disclosure 区块下方，整体更紧凑。
 
-```text
-BALANCE                                 1 OPEN
-$11,843
-SESSION P/L                          +$19
-─────────────────────────── (margin bar below)
-```
+**2. `src/routes/pinpoint.tsx`（Rules 弹窗 04 条）**
+- 保留现有 04 条文案不动，作为该规则的唯一出处。
+- 可选微调：把 "No active close" 这半句加粗或单独换行，让用户在 Rules 里更容易扫到（不改语义）。
 
-Concrete changes in `AccountBlock.tsx`:
-1. Drop the balance display from `text-3xl` to `text-2xl` and add `tabular-nums leading-none` so 5–6 digit balances never wrap or overflow. For 7+ digits, fall back to compact format (`$1.2M`).
-2. Move the `+$xx` session-P/L value onto the same row as the `SESSION P/L` label (label left, value right, `justify-between`). Remove the standalone P/L chip from the balance row.
-3. Keep `BALANCE` + `N OPEN` as the top row, then balance number on its own row, then `SESSION P/L … ±$xx` row, then the MARGIN/HEALTHY bar exactly as today.
-4. Use `min-w-0` on the flex children so long numbers truncate rather than push siblings off-screen.
+**3. `src/routes/style-guide.tsx`**
+- 同步删除第 3628 行附近的 "NO MANUAL CLOSE BUTTON · BETS RESOLVE AT JUDGEMENT OR LIQUIDATION" 演示，保持 playground 与产品一致。
 
-## Out of scope
+## 不动的部分
 
-No economic / spec changes. No restyle of LV / XP / trophies / MARGIN bar — only the balance row layout and the sidebar scroll behavior.
-
-## Files touched
-
-- `src/features/pinpoint/Sidebar.tsx` — add `overflow-y-auto min-h-0` + scrollbar class on root.
-- `src/features/pinpoint/AccountBlock.tsx` — rebuild balance zone (font size, row layout, P/L pairing, compact formatter).
-- `src/features/pinpoint/pp-theme.css` — add `.pp-sidebar-scroll` webkit scrollbar styling.
-- `src/routes/style-guide.tsx` — mirror the new balance-row layout in the Player HUD demo so playground stays in sync (Core memory rule).
+- Rules 弹窗本身、入口按钮、cancel/lock window 逻辑都不变。
+- Sidebar 其它模块（Account、Leverage、Disclosure、Margin Health）布局不动。
