@@ -1,104 +1,88 @@
-# Pinpoint 重命名 + 街头滑板贴纸风格改造
+## Pinpoint → Y2K Cartridge 改版计划
 
-## 1. 重命名 strikezone → pinpoint
+### 总方向
+丢掉「贴纸 + 黑黄危险条」的静态平面感，换成 **Y2K 任天堂卡带 / 早期掌机** 的可玩感：像素质感 + 棱形按钮 + 进度条 + 关卡感 + 战绩册。每一局看起来像在「过一关」，不像在看图表。
 
-### 路由
-- 新建 `src/routes/pinpoint.tsx`（由旧 `strikezone.tsx` 改名），`createFileRoute("/pinpoint")`
-- 删除 `src/routes/strikezone.tsx`
-- `routeTree.gen.ts` 由插件自动重建，不手动改
+---
 
-### 目录与文件
-- `src/features/strikezone/` → `src/features/pinpoint/`
-- `sz-theme.css` → `pp-theme.css`（内容整体重写，见第 3 节）
-- `useStrikezoneSession.ts` → `usePinpointSession.ts`
-- storage key `omenx.strikezone.v1` → `omenx.pinpoint.v1`（旧数据自然失效，反正一直在洗）
+### 1. 视觉语言（替换 `pp-theme.css`）
 
-### 命名 token 全量替换
-- 类型/Hook：`StrikezonePosition` → `PinpointPosition`，`StrikezoneState` → `PinpointState`，`useStrikezoneSession` → `usePinpointSession`，`useStrikezoneGroups` → `usePinpointGroups`，`StrikezonePage/Inner` → `PinpointPage/Inner`
-- CSS 前缀 `sz-*` → `pp-*`（`sz-card`、`sz-pixel`、`sz-display`、`sz-chip`、`sz-stop`、`--sz-cyan` 等所有变量与类）
-- 文案：UI 内 `STRIKEZONE` 大字、页面 title/og 全部改为 `PINPOINT`
-- `.lovable/plan.md` 内提及同步更新
+**色板（卡带塑料 + CRT 屏幕）**
+- 卡带外壳：奶油白 `#f4ecd8`、薄荷 `#7ed4b2`、樱粉 `#ff9bb3`、电光蓝 `#5ec8ff`
+- 屏幕：暗绿 LCD `#0f1a14` 底 + 亮绿像素 `#9bff6f`
+- 强调：警报红 `#ff3b3b`、金币黄 `#ffcc00`
+- 中性：`#2a2620` 文字、`#d8cdb5` 边
 
-### 用户可见路径
-- 旧的 `/strikezone` 直接 404（用户没要求做 301，保持简单）
+**字体（用 `@fontsource`，不用贴纸的 Anton/Permanent Marker）**
+- `@fontsource/press-start-2p`：分数、计时、价格（像素感）
+- `@fontsource/silkscreen`：标签、按钮
+- `@fontsource/space-grotesk`：正文（保证可读性，不全像素）
+- `@fontsource/vt323`：行情滚动条
 
-## 2. 设计方向：街头滑板贴纸
+**质感**
+- 卡片 = 卡带：4px 实线深色描边 + 2 层硬阴影偏移 `4px 4px 0 #2a2620, 8px 8px 0 rgba(0,0,0,.15)`，圆角 12px
+- 内嵌「LCD 屏」面板：暗绿底 + 1px 像素网格 + 微微 CRT 扫描线
+- 按钮：棱形/胶囊带高光，按下时 `translate(2px,2px)` 阴影变浅，配 8-bit「咔哒」音效
+- 不用渐变模糊；只用纯色 + 硬阴影 + 1px 像素描边
 
-定调：滑板品牌物料（Supreme / Palace / Thrasher / Stüssy）的能量，不是儿童贴纸。核心是"拼贴 + 撕边 + 丝印感"，而不是霓虹发光。
+---
 
-### 风格关键词
-- **拼贴层叠**：卡片像被一张张贴上去的方贴，带轻微旋转（-2°~+3°）、错位阴影
-- **丝印质感**：套色不准（offset print misregistration），印刷颗粒（grain noise）覆盖
-- **黑黄危险条**：警示斜条用于强提示（爆仓、止损、高杠杆区）
-- **手写体 + 工业体混排**：标题用粗压扁体（Anton / Bungee），副标题用涂鸦手写（Permanent Marker / Rubik Mono One），数字用 mono（JetBrains Mono）保持可读
-- **大字标语**：`PINPOINT`、`LIQUIDATED`、`ALL-IN` 这种关键词做"贴纸标题"
-- **图章/印戳**：状态用圆/方戳子表达（WON / LOST / LIVE），带半透明红/黑墨水感
-- **撕纸边**：卡片边缘可选锯齿/撕边 SVG mask
+### 2. 可玩性增强（这是重点）
 
-### 色板（取消霓虹）
-- 纸底 `#f4ede0`（米黄牛皮纸）/ 深底 `#141210`（沥青黑）双主题，先做深底
-- 主强调 `#ff3b1f`（消防红）
-- 次强调 `#ffd400`（出租车黄）
-- 辅助 `#1f8a4c`（深绿，用于赢/上涨）
-- 中性 `#e7e1d3`（米白文字）/ `#7a736a`（哑灰）
-- 警示斜条 `#000` + `#ffd400`
+**A. 动效与反馈**
+- 价格变化：数字翻牌（split-flap），上涨绿色弹跳 + ↑像素箭头，下跌红色震屏
+- 下注瞬间：卡片闪白 1 帧 + 「INSERT COIN」金币掉落动画
+- 开奖：LCD 屏从模糊到聚焦，命中时全屏放烟花像素 + 「STAGE CLEAR」横幅；未命中显示「GAME OVER」+ 灰屏
+- 倒计时：最后 10 秒红色脉冲 + 节拍音
+- 8-bit 音效（可静音开关）：下注、确认、开奖、连胜
 
-### 不要的东西
-- 任何 cyan/magenta 霓虹发光（`text-shadow: 0 0 8px`）
-- 像素体（Press Start 2P）街机风
-- 暗黑 + 蓝紫赛博朋克
+**B. 进度与收集（新增轻量化模块）**
+- 顶部「玩家卡带」：头像 + 等级 LV + 经验条 + 当前连胜 🔥×N
+- 战绩册 (Trophy Case)：徽章网格，已解锁亮色像素图标，未解锁灰色剪影（首胜、3 连胜、10 连胜、千倍局、爆冷等）
+- Streak 系统：连胜显示在 HUD 右上，断了有「COMBO BROKEN」抖动
+- 每日任务条：「今日完成 3 局 / 命中 1 次冷门」进度像素条
 
-## 3. 视觉实现范围（本轮只换"皮"，不动业务）
+**C. 社交炫耀**
+- 每局结束生成「战绩卡」：卡带外形 + 玩家名 + 命中事件 + 倍率 + 像素角色，一键分享 PNG
+- 排行榜 Tab：当日连胜榜、当日倍率榜，前 3 名配金/银/铜像素奖杯
+- 战绩可复制成 ASCII 块，方便贴 Discord/X
 
-- 全量重写 `pp-theme.css`：删掉所有 glow / pixel / scanline，引入 grain noise（CSS `background-image` 用 SVG turbulence）、贴纸阴影 token `--pp-sticker-shadow`、警示条 utility `pp-hazard-stripes`
-- 字体：用 `@fontsource/anton`、`@fontsource/permanent-marker`、`@fontsource/bungee`、`@fontsource/jetbrains-mono`（4 个包，安装后在 `src/main.tsx` 引入；不动 `index.html`）
-- 组件级最小改动：
-  - `Sidebar.tsx`：把 sz-card / sz-pixel / sz-display 替换为 pp-sticker / pp-marker / pp-headline；保持结构和数据绑定
-  - `Grid.tsx`：canvas 调色板换成新色板，关键文字（HIT / LIQ / +$xx）改成印戳样式；DOM 浮层用新字体
-  - `EventTabs.tsx`：tab 改成贴纸条
-  - 路由页头部 `STRIKEZONE` 大字 → `PINPOINT` 贴纸 logo（带轻微旋转 + 黄底黑字）
-- 爆仓 modal：换成"红章 + LIQUIDATED 印戳 + 黑黄斜条边"
-- 不改任何 hook 逻辑、equity 计算、liquidation 触发条件、下单流程
+---
 
-## 4. /style-guide 同步
+### 3. 改动范围
 
-按 Core 规则，`/style-guide` 加 `Pinpoint Stickers` 区块演示：sticker card、hazard stripes、印戳、headline、marker text、新色板。
+**重写**
+- `src/features/pinpoint/pp-theme.css` —— 全部替换为 Cartridge tokens（保留 `pp-*` 类名）
+- `src/main.tsx` —— 换字体包：移除 anton/bungee/permanent-marker，加 press-start-2p / silkscreen / vt323 / space-grotesk
+- `src/routes/__root.tsx` —— 同步字体 `<link>` 清理
+- `src/routes/pinpoint.tsx` —— Logo 改成「PINPOINT」像素卡带 logo；LIQUIDATED 模态改为「GAME OVER」LCD 风
+- `src/features/pinpoint/Grid.tsx` —— Canvas 配色改 LCD 绿底 + 像素字体；命中/未命中加爆点动画
+- `src/features/pinpoint/Sidebar.tsx` —— 卡带式卡片 + 像素按钮 + 翻牌价格
+- `src/features/pinpoint/PriceCapsule.tsx` —— 翻牌数字
+- `src/features/pinpoint/EventTabs.tsx` —— 关卡式 Tab（STAGE 1 / STAGE 2）
 
-## 5. 不在本轮范围
+**新增**
+- `src/features/pinpoint/PlayerHUD.tsx` —— 等级 / 经验 / 连胜
+- `src/features/pinpoint/TrophyCase.tsx` —— 徽章网格（mock 数据，纯前端）
+- `src/features/pinpoint/ResultCard.tsx` —— 战绩分享卡（html2canvas 导出 PNG）
+- `src/features/pinpoint/sounds.ts` —— 8-bit 音效（mock 用 WebAudio 合成，无需音频文件）
 
-- 暗/亮双主题切换（先只做深底）
-- 旧路由 301 重定向
-- 撕边 SVG mask（先用直角 + 错位阴影达到贴纸感，撕边作为后续优化）
-- 真实丝印套色不准动画（先静态错位）
+**Style Guide 同步**
+- `/style-guide` 的 Pinpoint 区块整体替换为「Pinpoint Cartridge」demo：卡带卡片、LCD 屏、棱形按钮、徽章、翻牌数字、HUD
 
-## 技术细节
+**只换皮 + 加轻量 UI 模块**，不动业务逻辑、不改持仓/订单/价格计算。所有「进度/徽章/连胜」先用 mock 数据，等后续接后端。
 
-### 文件操作
-```
-mv src/features/strikezone → src/features/pinpoint
-mv src/routes/strikezone.tsx → src/routes/pinpoint.tsx
-rm src/features/pinpoint/sz-theme.css → 新建 pp-theme.css
-```
-之后全局 sed 替换 import 路径与符号名。
+---
 
-### 字体安装
-```
-bun add @fontsource/anton @fontsource/permanent-marker @fontsource/bungee @fontsource/jetbrains-mono
-```
-在 `src/main.tsx` 顶部 import 这 4 个包；`src/styles.css` 的 `@theme` 加 `--font-display: "Anton"`、`--font-marker: "Permanent Marker"`、`--font-sticker: "Bungee"`、`--font-mono: "JetBrains Mono"`。
+### 4. 不做
+- 不做真音频文件（用 WebAudio 合成 8-bit 即可，体积 0）
+- 不做暗/亮主题切换
+- 不真做后端的「等级/经验」系统，先 localStorage mock
+- 不引入 framer-motion 重型库；优先 CSS keyframes + Tailwind animate
 
-### 关键 CSS token（pp-theme.css 节选）
-```css
---pp-paper: #141210;
---pp-ink: #e7e1d3;
---pp-red: #ff3b1f;
---pp-yellow: #ffd400;
---pp-green: #1f8a4c;
---pp-mute: #7a736a;
---pp-sticker-shadow: 3px 3px 0 #000, 6px 6px 0 rgba(255,212,0,0.35);
---pp-grain: url("data:image/svg+xml;utf8,<svg ...turbulence.../>");
-```
+---
 
-### 验证
-- `code--exec` 跑 `rg -i "strikezone|sz-"` 应返回空（除 routeTree.gen.ts 自动重建窗口外）
-- Playwright 截图 `/pinpoint`、`/style-guide` 确认风格转向、无霓虹残留、字体加载成功
+### 5. 验证
+- `rg "anton|bungee|permanent-marker"` 应清空
+- Playwright 截图 `/pinpoint` 和 `/style-guide` 对比新卡带风
+- 手测：下注 → 翻牌 → 开奖 → 战绩卡生成 → 连胜计数 +1
