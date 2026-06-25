@@ -1,0 +1,161 @@
+import { useEffect, useRef, useState } from "react";
+import { ChevronDown } from "lucide-react";
+import type { SportsMarket } from "@/data/sports-markets";
+
+interface Props {
+  events: SportsMarket[];
+  activeEventId: string;
+  onPick: (id: string) => void;
+  openCountByEvent: Record<string, number>;
+}
+
+/**
+ * Top card of the per-bet stack. Closed state shows the active matchup +
+ * live clock. Click to open a popover listing every live event with score
+ * + time; clicking one switches the grid to that event.
+ */
+export function EventSelector({ events, activeEventId, onPick, openCountByEvent }: Props) {
+  const [open, setOpen] = useState(false);
+  const wrapRef = useRef<HTMLDivElement>(null);
+  const active = events.find((m) => m.id === activeEventId) ?? events[0];
+
+  useEffect(() => {
+    if (!open) return;
+    const onDoc = (e: MouseEvent) => {
+      if (!wrapRef.current?.contains(e.target as Node)) setOpen(false);
+    };
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setOpen(false);
+    };
+    document.addEventListener("mousedown", onDoc);
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.removeEventListener("mousedown", onDoc);
+      document.removeEventListener("keydown", onKey);
+    };
+  }, [open]);
+
+  if (!active) return null;
+  const home = active.fixture?.home;
+  const away = active.fixture?.away;
+  const score = active.liveScore;
+  const activeOpen = openCountByEvent[active.id] ?? 0;
+
+  return (
+    <div ref={wrapRef} className="relative">
+      <button
+        onClick={() => setOpen((v) => !v)}
+        className="pp-card flex w-full items-center gap-2 p-2.5 text-left"
+        title="Switch event"
+      >
+        <span
+          className="size-1.5 shrink-0 animate-pulse rounded-full"
+          style={{ background: "var(--pp-red)", boxShadow: "1px 1px 0 #000" }}
+        />
+        <span className="pp-stencil text-[9px]" style={{ color: "var(--pp-red)" }}>
+          LIVE
+        </span>
+        <span
+          className="pp-stencil truncate text-[10px]"
+          style={{ color: "var(--pp-yellow)" }}
+        >
+          {home?.short ?? "—"}
+          {score && (
+            <span className="pp-num mx-1 tabular-nums" style={{ color: "#fff" }}>
+              {score.home}–{score.away}
+            </span>
+          )}
+          {away?.short ?? "—"}
+        </span>
+        <span
+          className="pp-stencil ml-auto text-[8px] tabular-nums"
+          style={{ color: "var(--pp-mute)" }}
+        >
+          {active.liveClock ?? ""}
+        </span>
+        {activeOpen > 0 && (
+          <span
+            className="pp-stencil flex h-3.5 min-w-3.5 items-center justify-center rounded-full px-1 text-[8px]"
+            style={{ color: "#fff", background: "var(--pp-red)", boxShadow: "1px 1px 0 #000" }}
+          >
+            {activeOpen}
+          </span>
+        )}
+        <ChevronDown
+          className="size-3 shrink-0"
+          style={{
+            color: "var(--pp-mute)",
+            transform: open ? "rotate(180deg)" : "none",
+            transition: "transform 160ms",
+          }}
+        />
+      </button>
+
+      {open && (
+        <div
+          className="pp-card absolute left-0 right-0 top-full z-30 mt-1 flex flex-col gap-1 p-1.5"
+          style={{ boxShadow: "3px 3px 0 #000" }}
+        >
+          {events.map((m) => {
+            const isActive = m.id === activeEventId;
+            const h = m.fixture?.home;
+            const a = m.fixture?.away;
+            const s = m.liveScore;
+            const c = openCountByEvent[m.id] ?? 0;
+            return (
+              <button
+                key={m.id}
+                onClick={() => {
+                  onPick(m.id);
+                  setOpen(false);
+                }}
+                className={`pp-chip flex items-center gap-1.5 px-2 py-1.5 ${
+                  isActive ? "pp-chip-active-yellow" : ""
+                }`}
+              >
+                <span
+                  className="pp-stencil text-[9px]"
+                  style={{ color: isActive ? "var(--pp-yellow)" : "var(--pp-mute)" }}
+                >
+                  {h?.short ?? "—"}
+                </span>
+                {s && (
+                  <span
+                    className="pp-num text-[10px] tabular-nums"
+                    style={{ color: isActive ? "#fff" : "#aaa" }}
+                  >
+                    {s.home}–{s.away}
+                  </span>
+                )}
+                <span
+                  className="pp-stencil text-[9px]"
+                  style={{ color: isActive ? "var(--pp-yellow)" : "var(--pp-mute)" }}
+                >
+                  {a?.short ?? "—"}
+                </span>
+                <span
+                  className="pp-stencil ml-auto text-[8px] tabular-nums"
+                  style={{ color: "var(--pp-mute)" }}
+                >
+                  {m.liveClock ?? ""}
+                </span>
+                {c > 0 && (
+                  <span
+                    className="pp-stencil flex h-3.5 min-w-3.5 items-center justify-center rounded-full px-1 text-[8px]"
+                    style={{
+                      color: "#fff",
+                      background: "var(--pp-red)",
+                      boxShadow: "1px 1px 0 #000",
+                    }}
+                  >
+                    {c}
+                  </span>
+                )}
+              </button>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}
