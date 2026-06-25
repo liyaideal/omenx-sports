@@ -4,7 +4,10 @@ import { ArrowLeft, X, Zap } from "lucide-react";
 import { toast } from "sonner";
 import "@fontsource/press-start-2p/400.css";
 import { MATCH_MARKETS } from "@/data/sports-markets";
-import { useStrikezoneSession } from "@/features/strikezone/hooks/useStrikezoneSession";
+import {
+  useStrikezoneSession,
+  liqDistanceFor,
+} from "@/features/strikezone/hooks/useStrikezoneSession";
 import { useLiveTicker } from "@/features/strikezone/hooks/useLiveTicker";
 import { Sidebar, type OutcomeChoice } from "@/features/strikezone/Sidebar";
 import { Grid } from "@/features/strikezone/Grid";
@@ -163,6 +166,8 @@ function StrikezoneInner({
         stake: state.betSize,
         mult,
         leverage: state.leverage,
+        notional: state.betSize * state.leverage,
+        liqDistance: liqDistanceFor(state.leverage),
       });
     },
     [activeChoice, state.balance, state.betSize, state.leverage, placeBet]
@@ -392,6 +397,7 @@ function StrikezoneInner({
             leverage={state.leverage}
             onPlace={handlePlace}
             onCancel={cancelPosition}
+            onLiquidate={(id, atPrice) => settlePosition(id, "liquidated", atPrice)}
             recentHits={recentHits}
           />
 

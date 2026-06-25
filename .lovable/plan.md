@@ -1,52 +1,93 @@
+# Strikezone 杠杆模型重构：保证金 + 强平
 
-## 目标
+## 经济模型
 
-参考截图修两件事，让"K 线撞到哪个格子"一目了然，命中下注格子时有强烈的赌博命中爽感。
+下注时：
+- **stake = 保证金**（用户支付的本金）
+- **名义价值 = stake × leverage**
+- 入场扣 stake（和现在一致）
 
-1. **撞击瞬间，同列其他格子立刻消失，只留下被撞的那一格短暂停留并发光**——目前是整列一起淡出，看不出哪个被撞。
-2. **如果被撞的格子是用户下注的格子，爆出一圈金/绿色星星粒子**（叠加在现有的金光环 + `+$xxx` 飘字之上）。
+结算：
+| 情况 | 触发条件 | 资金变化 |
+|---|---|---|
+| 赢 | K 线在结算时落在格子内 | 收回 stake × mult × lev |
+| 平仓亏 | 结算时未命中且未爆仓 | 亏 stake |
+| **强平爆仓** | 结算前 K 线偏离格中心超过强平距离 | 亏 stake，立即结算 |
+| 退款 | 用户取消 / stopAll | 退还 stake |
 
-## 修改范围
+**关键差异 vs. 现状**：现在「输」会扣 stake × lev；新模型「输」只扣 stake（保证金封顶），但加强平机制让高杠杆有真实风险。
 
-只动 `src/features/strikezone/Grid.tsx`（Canvas 渲染层）。不动业务逻辑、session、结算逻辑。
+## 杠杆档位调整
 
-## 实现要点
+把档位从 `[1, 2, 5, 10]` 改成 `[1, 2, 3]`，最大 3x。
 
-### A. 列结算时区分 "hit row" vs 其他 row
+## 强平距离公式
 
-`Grid.tsx` 现在 RAF 循环里检测到 `prevFirstSec < firstSec`（一列刚跨过 NOW 线）时，给该列 11 行全部 push 同样速度的 `DyingCell`。改为：
+```
+liqDistance = LIQ_BASE / leverage   （从格中心算，单位 ¢）
+LIQ_BASE = 4.5
+```
 
-- 在跨过 NOW 的那一帧，取 `hitRow = round(priceRef.current) → 对应的 row index`（用 `centerRef.current` 反推），作为这列被 K 线撞到的格子。
-- **非 hit row**：以更快的速度淡出（`DYING_MS` 从 220ms 调到约 140ms），同时轻微向内塌缩 + 透明度直降，让"周围立刻清空"的感觉成立。
-- **hit row**：新增一个 `HitFlashCell` 状态（约 650ms）：
-  - 0–120ms：白→金色亮度 punch，scale 1 → 1.18 → 1，边框由橙变金（`#ffd84a`）。
-  - 120–450ms：保持高亮 + 脉冲发光环。
-  - 450–650ms：渐隐到 0。
-  - 该格在期间始终绘制，覆盖在淡出列之上。
-- 已是 user bet 的列（`settledColumnsRef` 已加），现在的逻辑跳过 dying，改为：**仍然对非 bet 行 spawn 快速淡出 DyingCell**（让用户清楚看到"K 线就撞到我下注那行"），bet 行交给已有 win/lose effect 处理。
+| 杠杆 | 强平距离 | 直观感受 |
+|---|---|---|
+| 1x | ±4.5¢ | 基本不会爆，等于无杠杆 |
+| 2x | ±2.25¢ | 偏离 ~2 行就爆，需要稍微贴近 |
+| 3x | ±1.5¢ | 偏离 1.5 行就爆，明显紧张 |
 
-### B. 命中下注格的星星粒子
+3x 仍有真实强平压力但不会"开局秒爆"，体感平衡。
 
-新增 `StarParticle` 数组 + `drawStars()`，在 win effect 创建时一并 spawn ~14–18 个：
+## 代码改动
 
-- 粒子属性：`x, y, vx, vy, life, maxLife, size, hue (gold/green 二选一)`。
-- 初速度径向向外 + 微随机角度，重力 `gy ≈ 0.0008 px/ms²` 让它略下坠。
-- 渲染：四角星形（两个旋转 45° 的矩形 + 中心高光圆点），亮度随 `1 - life/max` 衰减；附带 8px 金色 shadowBlur。
-- 寿命 ~900ms，与 `WIN_BURST_MS` 接近。
-- 同步生成 ~6 颗较大的"主爆星"+ 12 颗"碎星"，营造截图里"满天黄绿小星"的密度。
+### 1. `hooks/useStrikezoneSession.ts`
 
-Lose 不加星星（保持只有红色塌缩）。
+- `LEVERAGES = [1, 2, 3] as const`
+- `StrikezonePosition` 加字段：`notional`、`liqDistance`、`liquidatedAt?`；`status` 多一种 `"liquidated"`
+- `placeBet` 计算并存 `notional = stake * leverage`、`liqDistance = LIQ_BASE / leverage`
+- `settlePosition` 重写：
+  - `won`: `payout = stake * mult * lev`、`pl = payout - stake`
+  - `lost` / `liquidated`: `payout = 0`、`pl = -stake`（去掉 extraLoss、去掉 `* lev`）
+  - `refunded`: 不变
+- 通过 `settlePosition(id, "liquidated", price)` 触发爆仓
+- **迁移**：hydrate 后，把所有 `status === "open"` 的旧仓位退款 + 标 `refunded`，写 `migrationV: 2` 防重复
 
-### C. 细节
+### 2. `Grid.tsx`
 
-- `drawIdleCell` 在非 hit row 的 dying 阶段加 0.6 倍 fade 曲线（先快后慢），避免一下消失太突兀。
-- `prevFirstSecRef` 的设置时机不变。
-- 不改 props、不改外部 API。
-- `/style-guide` 不需要更新（Grid 不是独立 showcased 组件，且只是视觉调整）。
+- `placeBet` 调用处传入新字段
+- 每帧检查所有 open 仓位：`|priceRef.current - p.cellCenter| > p.liqDistance` → 触发强平
+- 强平视觉：
+  - 红色冲击波（复用 `HitFlashCell`，红色 + "LIQ" 文字）
+  - 下注格子立即 `DyingCell` 红色快速淡出（120ms）
+  - 弹红色 `-$stake LIQUIDATED` pop
+- 渲染期间，每个 open 仓位在格中心 ± `liqDistance` 处画两条**强平虚线**（红 50% 透明）。高杠杆下贴近格子边缘，肉眼可见危险区
+- `drawIdleCell` 在下注格子上画小 `⚠` 标记（仅 lev > 1）
 
-## 验收
+### 3. `Sidebar.tsx`
 
-- 一根 K 线撞到某列时，眼睛能在 ~150ms 内只看到那一格亮起，其他格已消失。
-- 撞到自己下注的格子时，金/绿色星星向外散开 + 原有 `+$xxx` 飘字 + 环。
-- 撞到空格子时，只有金色 hit-flash，没有星星。
-- 输的格子继续走红色塌缩，无星星。
+杠杆卡片改为三档，副文案：
+- 1x: `NO LEVERAGE · SAFE`
+- 2x: `2× PAYOUT · LIQ ±2.25¢`
+- 3x: `⚠ 3× PAYOUT · LIQ ±1.5¢`
+
+`highRisk` 阈值改成 `leverage >= 3`。下注按钮副标显示「Margin $X · Notional $(X×lev)」。
+
+### 4. `lib/multiplier.ts`
+
+不动。
+
+### 5. 历史/账单 UI
+
+grep `status ===` 与 `"lost"` 使用点，给 `"liquidated"` 加红色 `LIQ` 徽章区分普通 `LOST`。
+
+## 不在本次改动范围
+
+- 强平阈值进一步调参（先用 `LIQ_BASE = 4.5`）
+- 部分爆仓 / 维持保证金率等复杂机制
+- /style-guide 同步（无新通用组件）
+
+## 测试
+
+实施后浏览器验证：
+1. 1x 下注 → 行为不变
+2. 3x 下注偏远格 → K 线偏出 1.5¢ 触发强平，亏 stake（不是 stake×3）
+3. 3x 下注命中 → 收 stake × mult × 3
+4. 刷新 → 旧 open 仓位被退款清空

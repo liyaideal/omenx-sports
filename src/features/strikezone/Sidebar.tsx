@@ -43,10 +43,18 @@ export function Sidebar({
   onShowRules,
 }: Props) {
   const plPositive = sessionPL >= 0;
-  const highRisk = leverage >= 5;
+  const highRisk = leverage >= 3;
   const eventLabel = activeEvent.fixture
     ? `${activeEvent.fixture.home.short} VS ${activeEvent.fixture.away.short}`
     : activeEvent.title.toUpperCase();
+  const notional = betSize * leverage;
+  const liqDist = (4.5 / Math.max(1, leverage)).toFixed(2);
+  const levCopy =
+    leverage === 1
+      ? "NO LEVERAGE · SAFE"
+      : leverage === 2
+        ? `2× PAYOUT · LIQ ±${liqDist}¢`
+        : `⚠ 3× PAYOUT · LIQ ±${liqDist}¢`;
 
   return (
     <div className="flex w-[300px] shrink-0 flex-col gap-4 p-4">
@@ -215,7 +223,7 @@ export function Sidebar({
             Q/E
           </span>
         </div>
-        <div className="mt-2 grid grid-cols-4 gap-1.5">
+        <div className="mt-2 grid grid-cols-3 gap-1.5">
           {LEVERAGE_OPTIONS.map((l) => {
             const active = leverage === l;
             return (
@@ -236,7 +244,13 @@ export function Sidebar({
           className="sz-pixel mt-2 text-center text-[8px]"
           style={{ color: highRisk ? "#ffcc4d" : "var(--sz-muted)" }}
         >
-          {highRisk ? "⚠ HIGH RISK · LOSS × LEV" : "PAYOUT × LEV · LOSS × LEV"}
+          {levCopy}
+        </div>
+        <div
+          className="sz-pixel mt-1 text-center text-[8px]"
+          style={{ color: "var(--sz-muted)" }}
+        >
+          MARGIN ${betSize} · NOTIONAL ${notional}
         </div>
       </div>
 

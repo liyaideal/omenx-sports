@@ -34,6 +34,7 @@ interface Props {
   leverage: number;
   onPlace: (cellCenter: number, distanceCents: number, secondsAhead: number, mult: number) => void;
   onCancel?: (positionId: string) => void;
+  onLiquidate?: (positionId: string, atPrice: number) => void;
   recentHits: { id: string; at: number }[];
 }
 
@@ -49,6 +50,12 @@ type Effect =
       kind: "lose";
       startAt: number;
       p: StrikezonePosition;
+    }
+  | {
+      kind: "liquidate";
+      startAt: number;
+      p: StrikezonePosition;
+      _popped?: boolean;
     };
 
 type DyingCell = {
@@ -92,6 +99,7 @@ export function Grid({
   leverage,
   onPlace,
   onCancel,
+  onLiquidate,
   recentHits,
 }: Props) {
   const wrapRef = useRef<HTMLDivElement | null>(null);
@@ -118,6 +126,9 @@ export function Grid({
   const hitFlashRef = useRef<HitFlashCell[]>([]);
   const starsRef = useRef<StarParticle[]>([]);
   const popsRef = useRef<ProfitPop[]>([]);
+  // Track which positions we've already liquidated locally (avoid double-fire
+  // before parent state propagates).
+  const liquidatedLocalRef = useRef<Set<string>>(new Set());
   // Mouse hover
   const hoverRef = useRef<{ x: number; y: number } | null>(null);
   // Cell rect cache (built each frame for hit-testing)
@@ -164,6 +175,12 @@ export function Grid({
     const next = new Map<string, StrikezonePosition>();
     for (const p of positions) next.set(p.id, p);
     prevPositionsRef.current = next;
+    // Clean liquidatedLocal set of ids that are no longer tracked anywhere.
+    for (const id of liquidatedLocalRef.current) {
+      if (!currIds.has(id) && !effectsRef.current.has(id)) {
+        liquidatedLocalRef.current.delete(id);
+      }
+    }
   }, [positions, recentHits]);
 
   // ── Resize observer ───────────────────────────────────────────────────
@@ -340,6 +357,63 @@ export function Grid({
       // ── 4. Future grid cells ───────────────────────────────────────
       // Determine visible expirySec range
       const nowSec = now / 1000;
+
+      // ── 4a. Liquidation check on open bets ──────────────────────────
+      // Real-contract style: if |price - cellCenter| > liqDistance before
+      // settlement, force-close the position with full margin loss.
+      const livePrice = priceRef.current;
+      for (const p of positionsRef.current) {
+        if (effectsRef.current.has(p.id)) continue;
+        if (liquidatedLocalRef.current.has(p.id)) continue;
+        const lev = p.leverage ?? 1;
+        if (lev <= 1) continue; // 1× has no effective liquidation under current ¢ range
+        const liqDist = p.liqDistance ?? (4.5 / lev);
+        if (Math.abs(livePrice - p.cellCenter) > liqDist) {
+          liquidatedLocalRef.current.add(p.id);
+          // Visual effect immediately at the bet's column position.
+          effectsRef.current.set(p.id, {
+            kind: "liquidate",
+            startAt: now,
+            p,
+          });
+          if (onLiquidate) onLiquidate(p.id, livePrice);
+        }
+      }
+
+      // ── 4b. Liquidation rails for OPEN positions (red dashed) ──────
+      for (const p of positionsRef.current) {
+        if (effectsRef.current.has(p.id)) continue;
+        const lev = p.leverage ?? 1;
+        if (lev <= 1) continue;
+        const liqDist = p.liqDistance ?? (4.5 / lev);
+        const px = xForExpiry(p.targetAt);
+        if (px < NOW_X) continue;
+        const yUp = yFor(p.cellCenter + liqDist);
+        const yDn = yFor(p.cellCenter - liqDist);
+        ctx.save();
+        ctx.strokeStyle = "rgba(255,60,90,0.55)";
+        ctx.lineWidth = 1;
+        ctx.setLineDash([4, 4]);
+        ctx.beginPath();
+        ctx.moveTo(NOW_X, yUp);
+        ctx.lineTo(Math.min(W, px + COL_W / 2), yUp);
+        ctx.moveTo(NOW_X, yDn);
+        ctx.lineTo(Math.min(W, px + COL_W / 2), yDn);
+        ctx.stroke();
+        ctx.setLineDash([]);
+        // tiny "LIQ" tag at right end
+        ctx.fillStyle = "rgba(255,60,90,0.85)";
+        ctx.font = '700 8px "Chakra Petch",monospace';
+        ctx.textAlign = "right";
+        ctx.textBaseline = "middle";
+        const tagX = Math.min(W - 2, px + COL_W / 2);
+        ctx.fillText("LIQ", tagX, yUp - 6);
+        ctx.fillText("LIQ", tagX, yDn + 6);
+        ctx.textAlign = "start";
+        ctx.textBaseline = "alphabetic";
+        ctx.restore();
+      }
+
       // First column expiry = ceil(now/1000) — that one is currently sliding toward NOW_X.
       const firstSec = Math.ceil(nowSec);
       // How many columns fit?
@@ -485,7 +559,12 @@ export function Grid({
       const toDelete: string[] = [];
       effectsRef.current.forEach((eff, id) => {
         const age = now - eff.startAt;
-        const totalMs = eff.kind === "win" ? WIN_BURST_MS : SETTLE_MS;
+        const totalMs =
+          eff.kind === "win"
+            ? WIN_BURST_MS
+            : eff.kind === "liquidate"
+              ? HIT_FLASH_MS
+              : SETTLE_MS;
         if (age > totalMs) {
           toDelete.push(id);
           return;
@@ -493,7 +572,8 @@ export function Grid({
         const t01 = Math.min(1, age / totalMs);
         const p = eff.p;
         // Keep bet cell pinned at the NOW line so the player can see the
-        // exact strike position before the burst.
+        // exact strike position before the burst. Liquidations also pin
+        // there — they happen mid-flight but the burst belongs on screen.
         const cx = NOW_X;
         const cy = yFor(p.cellCenter);
         const x = cx - COL_W / 2;
@@ -511,6 +591,17 @@ export function Grid({
               baseY: cy - ROW_H / 2,
             });
             spawnStars(starsRef.current, cx, cy, now);
+          }
+        } else if (eff.kind === "liquidate") {
+          drawLiquidateBurst(ctx, x, y, COL_W, ROW_H, t01, p);
+          if (!eff._popped) {
+            eff._popped = true;
+            popsRef.current.push({
+              startAt: now,
+              amount: -p.stake,
+              baseX: cx,
+              baseY: cy - ROW_H / 2,
+            });
           }
         } else {
           drawLoseFade(ctx, x, y, COL_W, ROW_H, t01, p);
@@ -822,15 +913,80 @@ function drawProfitPop(
   ctx.globalAlpha = Math.max(0, alpha);
   ctx.translate(cx, cy);
   ctx.scale(scale, scale);
-  ctx.fillStyle = "#00ff9d";
-  ctx.shadowColor = "rgba(0,255,157,0.95)";
+  const negative = pop.amount < 0;
+  ctx.fillStyle = negative ? "#ff3a5a" : "#00ff9d";
+  ctx.shadowColor = negative ? "rgba(255,58,90,0.95)" : "rgba(0,255,157,0.95)";
   ctx.shadowBlur = 22;
   ctx.font = '800 30px "Audiowide","Chakra Petch",sans-serif';
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
-  ctx.fillText(`+$${pop.amount.toFixed(0)}`, 0, 0);
+  const sign = negative ? "−" : "+";
+  const mag = Math.abs(pop.amount).toFixed(0);
+  ctx.fillText(`${sign}$${mag}${negative ? "  LIQ" : ""}`, 0, 0);
   ctx.shadowBlur = 0;
   ctx.restore();
+}
+
+function drawLiquidateBurst(
+  ctx: CanvasRenderingContext2D,
+  x: number,
+  y: number,
+  w: number,
+  h: number,
+  t: number,
+  _p: StrikezonePosition
+) {
+  // Sharp red impact: scale punch 0..0.18, then fade quickly.
+  const scale =
+    t < 0.18 ? 0.95 + (t / 0.18) * 0.28 : t < 0.5 ? 1.23 - ((t - 0.18) / 0.32) * 0.18 : 1.05;
+  const alpha = t < 0.6 ? 1 : 1 - (t - 0.6) / 0.4;
+  const cx = x + w / 2;
+  const cy = y + h / 2;
+
+  ctx.save();
+  ctx.globalAlpha = Math.max(0, alpha);
+  ctx.translate(cx, cy);
+  ctx.scale(scale, scale);
+  ctx.translate(-cx, -cy);
+
+  roundRect(ctx, x, y, w, h, 8);
+  const g = ctx.createLinearGradient(0, y, 0, y + h);
+  const flash = Math.min(1, t / 0.18);
+  g.addColorStop(0, flash < 1 ? "#ffffff" : "#ff7a8a");
+  g.addColorStop(1, flash < 1 ? "#ffaab2" : "#8a0a18");
+  ctx.fillStyle = g;
+  ctx.shadowColor = "rgba(255,60,90,0.95)";
+  ctx.shadowBlur = 28 * (1 - t * 0.5);
+  ctx.fill();
+  ctx.shadowBlur = 0;
+  ctx.lineWidth = 2;
+  ctx.strokeStyle = "#ff3a5a";
+  ctx.stroke();
+
+  ctx.fillStyle = "#fff";
+  ctx.font = '800 11px "Audiowide","Chakra Petch",sans-serif';
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  ctx.fillText("LIQ", cx, cy);
+  ctx.textAlign = "start";
+  ctx.textBaseline = "alphabetic";
+  ctx.restore();
+
+  // Expanding red ring
+  const ringT = Math.min(1, t / 0.55);
+  if (ringT > 0 && ringT < 1) {
+    ctx.save();
+    ctx.globalAlpha = 0.85 * (1 - ringT);
+    const rScale = 0.6 + ringT * 1.8;
+    ctx.translate(cx, cy);
+    ctx.scale(rScale, rScale);
+    ctx.translate(-cx, -cy);
+    roundRect(ctx, x, y, w, h, 10);
+    ctx.lineWidth = 2;
+    ctx.strokeStyle = "#ff3a5a";
+    ctx.stroke();
+    ctx.restore();
+  }
 }
 
 function drawCountdownBadge(

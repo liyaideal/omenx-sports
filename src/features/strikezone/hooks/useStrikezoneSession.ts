@@ -17,10 +17,16 @@ export interface StrikezonePosition {
   distanceCents: number;
   stake: number;
   mult: number;
-  /** Platform leverage applied at placement (1, 2, 5, 10). */
+  /** Platform leverage applied at placement (1, 2, 3). */
   leverage: number;
+  /** Notional exposure = stake × leverage. */
+  notional: number;
+  /** Liquidation distance (¢) from cellCenter. Reached → forced close, full margin loss. */
+  liqDistance: number;
+  /** Set when forcibly liquidated before targetAt. */
+  liquidatedAt?: number;
   placedAt: number;
-  status: "open" | "won" | "lost" | "refunded";
+  status: "open" | "won" | "lost" | "refunded" | "liquidated";
   /** Settlement price ¢ (when settled). */
   settledPrice?: number;
   /** Payout received (stake × mult when won, stake when refunded, 0 when lost). */
@@ -38,8 +44,13 @@ export interface StrikezoneState {
 const BET_SIZES = [10, 25, 100, 500, 1000, 5000] as const;
 export const BET_SIZE_OPTIONS = BET_SIZES;
 
-const LEVERAGES = [1, 2, 5, 10] as const;
+const LEVERAGES = [1, 2, 3] as const;
 export const LEVERAGE_OPTIONS = LEVERAGES;
+/** Base liquidation distance in cents. Per-position = LIQ_BASE / leverage. */
+export const LIQ_BASE = 4.5;
+export function liqDistanceFor(leverage: number): number {
+  return LIQ_BASE / Math.max(1, leverage);
+}
 
 const DEFAULT_STATE: StrikezoneState = {
   balance: 10000,
@@ -55,7 +66,21 @@ export function useStrikezoneSession() {
 
   useEffect(() => {
     const loaded = loadState();
-    if (loaded) setState((s) => ({ ...s, ...loaded }));
+    if (loaded) {
+      setState((s) => {
+        const merged = { ...s, ...loaded } as StrikezoneState;
+        // Migration: legacy open positions used old leverage rules → refund them.
+        let refund = 0;
+        const migrated = (merged.positions || []).map((p) => {
+          if (p.status === "open") {
+            refund += p.stake;
+            return { ...p, status: "refunded" as const, payout: p.stake };
+          }
+          return p;
+        });
+        return { ...merged, balance: merged.balance + refund, positions: migrated };
+      });
+    }
     setHydrated(true);
   }, []);
 
@@ -92,33 +117,40 @@ export function useStrikezoneSession() {
   );
 
   const settlePosition = useCallback(
-    (id: string, result: "won" | "lost" | "refunded", settledPrice: number) => {
+    (id: string, result: "won" | "lost" | "refunded" | "liquidated", settledPrice: number) => {
       setState((s) => {
         const idx = s.positions.findIndex((p) => p.id === id);
         if (idx === -1 || s.positions[idx].status !== "open") return s;
         const p = s.positions[idx];
         const lev = p.leverage ?? 1;
-        // Win: stake × mult × leverage paid back.
-        // Loss: keep stake forfeited AND deduct extra stake × (lev-1).
-        // Refund: stake returned untouched.
+        // Contract semantics: stake = margin (already deducted in placeBet).
+        //   Win   → payout = stake × mult × leverage (notional × mult)
+        //   Lost  → payout = 0, margin forfeited (capped at stake)
+        //   Liq   → same as lost, flagged separately for UI
+        //   Refund→ stake returned
         const payout =
           result === "won"
             ? p.stake * p.mult * lev
             : result === "refunded"
               ? p.stake
               : 0;
-        const extraLoss = result === "lost" ? p.stake * (lev - 1) : 0;
         const next = [...s.positions];
-        next[idx] = { ...p, status: result, settledPrice, payout };
+        next[idx] = {
+          ...p,
+          status: result,
+          settledPrice,
+          payout,
+          ...(result === "liquidated" ? { liquidatedAt: Date.now() } : {}),
+        };
         const pl =
           result === "won"
             ? payout - p.stake
-            : result === "lost"
-              ? -p.stake * lev
+            : result === "lost" || result === "liquidated"
+              ? -p.stake
               : 0;
         return {
           ...s,
-          balance: s.balance + payout - extraLoss,
+          balance: s.balance + payout,
           sessionPL: s.sessionPL + pl,
           positions: next,
         };
