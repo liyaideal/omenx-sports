@@ -267,15 +267,7 @@ export function Sidebar({
           <Lock className="size-4" />
           SESSION FROZEN · MMR {(mmr * 100).toFixed(0)}%
         </div>
-      ) : (
-        <div
-          className="pp-stencil flex items-center justify-center py-2 text-[9px]"
-          style={{ color: "var(--pp-mute)" }}
-          title="Bets resolve at judgement or via liquidation — no manual close."
-        >
-          NO MANUAL CLOSE · BETS RESOLVE AT JUDGEMENT
-        </div>
-      )}
+      ) : null}
     </div>
   );
 }
