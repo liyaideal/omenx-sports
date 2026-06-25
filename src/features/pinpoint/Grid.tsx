@@ -240,6 +240,11 @@ export function Grid({
       lastT = t;
       const W = cssSize.w;
       const H = cssSize.h;
+      // Recompute geometry from the current container height each frame
+      // and publish via ref for event handlers to read.
+      const layout = deriveLayout(H);
+      layoutRef.current = layout;
+      const { rowH: ROW_H, colW: COL_W, pitchX: PITCH_X, pitchY: PITCH_Y, pxPerMs: PX_PER_MS, totalH: TOTAL_H } = layout;
       const dpr = window.devicePixelRatio || 1;
       if (canvas.width !== Math.round(W * dpr)) canvas.width = Math.round(W * dpr);
       if (canvas.height !== Math.round(H * dpr)) canvas.height = Math.round(H * dpr);
