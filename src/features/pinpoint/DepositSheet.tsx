@@ -188,7 +188,7 @@ export function DepositSheet({
             </div>
 
             <p className="pp-stencil mt-3 text-[9px] leading-relaxed" style={{ color: "var(--pp-mute)" }}>
-              ONLY FUNDS YOU TRANSFER HERE ARE AT RISK. LIQUIDATION CANNOT TOUCH YOUR MAIN WALLET.
+              YOUR PINPOINT BALANCE IS A SEPARATE PLAY POCKET — KEEP IT TOPPED UP FOR HOT STREAKS, MAIN WALLET STAYS UNTOUCHED.
             </p>
 
             <button
