@@ -325,12 +325,13 @@ export function Grid({
         // current price, otherwise the two collide on every column expiry.
         const pillW = 70;
         const pillH = 24;
-        const priceRow = Math.round(priceRef.current);
+        // Compare visual y positions directly so a mid-flight `center`
+        // re-snap can't desync the check from the hit-flash's actual row.
         const collides = hitFlashRef.current.some((hf) => {
           const age = now - hf.startAt;
           if (age > HIT_FLASH_MS) return false;
-          const hfCenter = center + (5 - hf.row);
-          return Math.round(hfCenter) === priceRow;
+          const hfY = yFor(center + (5 - hf.row));
+          return Math.abs(hfY - tipY) < ROW_H * 0.75;
         });
         // Target vertical offset: one row up if there's room, else one row down.
         let targetOffset = 0;
