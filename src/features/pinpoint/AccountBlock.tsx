@@ -1,12 +1,6 @@
 import type { GameStats, Trophy } from "./hooks/useGameStats";
 import { TROPHIES, xpForNext } from "./hooks/useGameStats";
-
-/** Compact balance formatter — keeps the row inside ~240px even at 7+ digits. */
-function formatBalance(n: number): string {
-  const abs = Math.abs(n);
-  if (abs >= 1_000_000) return `$${(n / 1_000_000).toFixed(abs >= 10_000_000 ? 0 : 1)}M`;
-  return `$${Math.round(n).toLocaleString()}`;
-}
+import { RollingBalance } from "./effects/RollingBalance";
 
 interface Props {
   // identity / lifetime
@@ -175,13 +169,13 @@ export function AccountBlock({
         </div>
       </div>
       <div className="mt-0.5 flex items-baseline justify-between gap-2">
-        <div
+        <RollingBalance
+          value={balance}
+          data-pp-balance-anchor
           className="pp-headline pp-stamp-green truncate text-2xl leading-none tabular-nums"
-          style={{ color: "var(--pp-green)" }}
+          style={{ color: "var(--pp-green)", display: "inline-block", transformOrigin: "left center" }}
           title={`$${balance.toLocaleString(undefined, { maximumFractionDigits: 0 })}`}
-        >
-          {formatBalance(balance)}
-        </div>
+        />
         <span
           className="pp-stencil shrink-0 text-[9px]"
           style={{ color: "var(--pp-mute)" }}
