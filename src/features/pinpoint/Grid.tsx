@@ -320,29 +320,18 @@ export function Grid({
         ctx.fill();
         ctx.shadowBlur = 0;
 
-        // Price pill (anchored to tip, drifts left of NOW_X).
-        // Dodge active hit-flash callouts that sit on the same row as the
-        // current price, otherwise the two collide on every column expiry.
+        // Price pill: always anchored a full row ABOVE the K-line tip so it
+        // can never collide with the hit-flash callout that lives on the
+        // price row. A short leader line keeps the link to the tip clear.
         const pillW = 70;
         const pillH = 24;
-        // Compare visual y positions directly so a mid-flight `center`
-        // re-snap can't desync the check from the hit-flash's actual row.
-        const collides = hitFlashRef.current.some((hf) => {
-          const age = now - hf.startAt;
-          if (age > HIT_FLASH_MS) return false;
-          const hfY = yFor(center + (5 - hf.row));
-          return Math.abs(hfY - tipY) < ROW_H * 0.75;
-        });
-        // Target vertical offset: one row up if there's room, else one row down.
-        let targetOffset = 0;
-        if (collides) {
-          const upY = tipY - PITCH_Y - pillH / 2;
-          targetOffset = upY < 2 ? PITCH_Y : -PITCH_Y;
+        let pillCenterY = tipY - PITCH_Y;
+        if (pillCenterY - pillH / 2 < 2) {
+          // Near the top of the canvas — flip below the tip instead.
+          pillCenterY = tipY + PITCH_Y;
         }
-        // Lerp toward target so the pill slides rather than snaps.
-        pillOffsetYRef.current += (targetOffset - pillOffsetYRef.current) * 0.25;
-        const pillX = HISTORY_W - pillW - (collides ? 18 : 12);
-        const pillY = tipY + pillOffsetYRef.current - pillH / 2;
+        const pillX = HISTORY_W - pillW - 14;
+        const pillY = pillCenterY - pillH / 2;
         roundRect(ctx, pillX, pillY, pillW, pillH, 12);
         const pg = ctx.createLinearGradient(0, pillY, 0, pillY + pillH);
         pg.addColorStop(0, up ? "#ffd400" : "#ff3b1f");
@@ -363,21 +352,18 @@ export function Grid({
         ctx.textAlign = "start";
         ctx.textBaseline = "alphabetic";
 
-        // Leader line from the tip dot to the displaced pill so the user
-        // still reads it as "current price". Only when displaced.
-        if (Math.abs(pillOffsetYRef.current) > 1.5) {
-          ctx.save();
-          ctx.strokeStyle = stroke;
-          ctx.globalAlpha = 0.7;
-          ctx.lineWidth = 1;
-          ctx.setLineDash([2, 3]);
-          ctx.beginPath();
-          ctx.moveTo(HISTORY_W, tipY);
-          ctx.lineTo(pillX + pillW, pillY + pillH / 2);
-          ctx.stroke();
-          ctx.setLineDash([]);
-          ctx.restore();
-        }
+        // Leader line from the tip dot to the displaced pill.
+        ctx.save();
+        ctx.strokeStyle = stroke;
+        ctx.globalAlpha = 0.7;
+        ctx.lineWidth = 1;
+        ctx.setLineDash([2, 3]);
+        ctx.beginPath();
+        ctx.moveTo(HISTORY_W, tipY);
+        ctx.lineTo(pillX + pillW, pillY + pillH / 2);
+        ctx.stroke();
+        ctx.setLineDash([]);
+        ctx.restore();
       }
 
       // ── 3. NOW divider ─────────────────────────────────────────────
