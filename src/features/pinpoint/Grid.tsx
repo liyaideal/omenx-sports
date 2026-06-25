@@ -10,15 +10,34 @@ import type { PinpointPosition } from "./hooks/usePinpointSession";
 
 // ── Layout constants (in CSS pixels) ──────────────────────────────────────
 const ROWS = 11; // ±5¢ around center
-const ROW_H = 50;
-const ROW_GAP = 5;
-const COL_W = 78;
-const COL_GAP = 6;
-const PITCH_X = COL_W + COL_GAP;
-const PITCH_Y = ROW_H + ROW_GAP;
-const TOTAL_H = ROWS * ROW_H + (ROWS - 1) * ROW_GAP;
 const HISTORY_FRAC = 0.34; // left chart takes ~34% of width
-const PX_PER_MS = PITCH_X / 1000; // one column per second
+// Defaults used until the first ResizeObserver tick lands.
+const DEFAULT_ROW_H = 50;
+const DEFAULT_ROW_GAP = 5;
+const DEFAULT_TOTAL_H = ROWS * DEFAULT_ROW_H + (ROWS - 1) * DEFAULT_ROW_GAP;
+
+const clamp = (v: number, lo: number, hi: number) => Math.max(lo, Math.min(hi, v));
+
+/** Derive runtime cell geometry from the container size. Keeps the
+ *  "1 column per second" time semantics — pitchX just scales visually. */
+function deriveLayout(containerH: number) {
+  const availH = Math.max(360, containerH);
+  const rowGap = availH < 520 ? 4 : availH < 680 ? 5 : 6;
+  const rowH = clamp(Math.floor((availH - (ROWS - 1) * rowGap) / ROWS), 36, 68);
+  const colGap = rowH < 44 ? 4 : 6;
+  const colW = clamp(Math.round(rowH * 1.55), 60, 108);
+  const totalH = ROWS * rowH + (ROWS - 1) * rowGap;
+  return {
+    rowH,
+    rowGap,
+    colW,
+    colGap,
+    pitchX: colW + colGap,
+    pitchY: rowH + rowGap,
+    totalH,
+    pxPerMs: (colW + colGap) / 1000,
+  };
+}
 const DYING_MS = 150; // non-hit cells in an expired column vanish quickly
 const HIT_FLASH_MS = 650; // hit cell lingers and pulses
 const SETTLE_MS = 750;
@@ -105,7 +124,10 @@ export function Grid({
 }: Props) {
   const wrapRef = useRef<HTMLDivElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
-  const [cssSize, setCssSize] = useState({ w: 0, h: TOTAL_H });
+  const [cssSize, setCssSize] = useState({ w: 0, h: DEFAULT_TOTAL_H });
+  // Latest derived geometry (kept in a ref so RAF / event handlers
+  // read the current values without re-binding).
+  const layoutRef = useRef(deriveLayout(DEFAULT_TOTAL_H));
 
   // Latest values readable from RAF without re-binding.
   const priceRef = useRef(currentPrice);
@@ -189,11 +211,17 @@ export function Grid({
     const el = wrapRef.current;
     const ro = new ResizeObserver(() => {
       const r = el.getBoundingClientRect();
-      setCssSize({ w: Math.max(320, Math.floor(r.width)), h: TOTAL_H });
+      setCssSize({
+        w: Math.max(320, Math.floor(r.width)),
+        h: Math.max(320, Math.floor(r.height)),
+      });
     });
     ro.observe(el);
     const r = el.getBoundingClientRect();
-    setCssSize({ w: Math.max(320, Math.floor(r.width)), h: TOTAL_H });
+    setCssSize({
+      w: Math.max(320, Math.floor(r.width)),
+      h: Math.max(320, Math.floor(r.height)),
+    });
     return () => ro.disconnect();
   }, []);
 
@@ -212,6 +240,11 @@ export function Grid({
       lastT = t;
       const W = cssSize.w;
       const H = cssSize.h;
+      // Recompute geometry from the current container height each frame
+      // and publish via ref for event handlers to read.
+      const layout = deriveLayout(H);
+      layoutRef.current = layout;
+      const { rowH: ROW_H, colW: COL_W, pitchX: PITCH_X, pitchY: PITCH_Y, pxPerMs: PX_PER_MS, totalH: TOTAL_H } = layout;
       const dpr = window.devicePixelRatio || 1;
       if (canvas.width !== Math.round(W * dpr)) canvas.width = Math.round(W * dpr);
       if (canvas.height !== Math.round(H * dpr)) canvas.height = Math.round(H * dpr);
@@ -614,7 +647,7 @@ export function Grid({
     const y = e.clientY - r.top;
     // Same drift compensation as onClick: align hover with the cell that will
     // be hit if the user clicks now.
-    const dx = Math.max(0, (Date.now() - lastRenderNowRef.current) * PX_PER_MS);
+    const dx = Math.max(0, (Date.now() - lastRenderNowRef.current) * layoutRef.current.pxPerMs);
     hoverRef.current = { x: rawX + dx, y };
   }, []);
   const onMouseLeave = useCallback(() => {
@@ -631,7 +664,7 @@ export function Grid({
       // so the cursor sits over the cell that was visually to the RIGHT of
       // the target. Compensate by shifting the click x rightward by the
       // distance the cells have drifted since the last rendered frame.
-      const dx = Math.max(0, (Date.now() - lastRenderNowRef.current) * PX_PER_MS);
+      const dx = Math.max(0, (Date.now() - lastRenderNowRef.current) * layoutRef.current.pxPerMs);
       const x = rawX + dx;
       const cells = futureCellsRef.current;
       for (const c of cells) {
@@ -657,8 +690,7 @@ export function Grid({
   return (
     <div
       ref={wrapRef}
-      className="relative w-full"
-      style={{ height: TOTAL_H }}
+      className="relative h-full w-full"
     >
       <canvas
         ref={canvasRef}
@@ -667,7 +699,7 @@ export function Grid({
         onClick={onClick}
         style={{
           width: "100%",
-          height: TOTAL_H,
+          height: "100%",
           display: "block",
           cursor: "crosshair",
         }}

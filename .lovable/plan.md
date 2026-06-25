@@ -1,42 +1,55 @@
+## 问题
+
+`Grid.tsx` 的格子尺寸是写死的（`ROW_H=50`、`COL_W=78`、`ROWS=11`，总高 600px）。结果：
+- **小屏 / 低高度**（如 1024×780）：sidebar 那列拉高后，Grid 上方 header 把可用高度挤掉，但 600 是常量，没办法收缩 → 看起来拥挤、底部仍有间隙。
+- **大屏 / 高分辨率**：Grid 高度永远 600，上下出现明显黑色空白带；列宽 78 也固定，宽屏只是多塞几列而不是把格子放大。
+
 ## 目标
 
-左侧整列从「为了塞下而压缩」改成「自然舒展，填满一屏」。当前 sidebar 卡片 padding=10px、间距 gap=8px、字号 8–10px，挤在 780px 高度上但底部还留白；要利用这部分空间放松节奏，同时不引入新功能。
+让 Grid 在不同视口下整体等比缩放，始终占满 `<main>` 里 header 与帮助行之间的可用空间，行高/列宽随之联动，时间维度（每秒一列、撞击瞬间）保持不变。
 
-## 调整内容（仅 UI / 排版）
+## 改动
 
-### 1. Sidebar 容器（`src/features/pinpoint/Sidebar.tsx`）
-- 宽度 `260px → 288px`
-- 容器 `gap-2 p-3` → `gap-3 p-4`
-- 卡片 padding：所有 `p-2.5` → `p-3.5`
-- 卡片头部行与正文之间 `mb-1.5 / mt-1.5` → `mb-2.5 / mt-2.5`
-- 标题字号 `text-[10px] → text-[11px]`，副标签 `text-[8px] → text-[9px]`
-- 数值行字号：BET SIZE / LEVERAGE 顶部数字 `text-sm → text-base`
-- 选项 chip：BET / LEVERAGE / MARKET 的 `py-1.5` → `py-2.5`，字号 `text-[9px/10px]` → `text-[11px]`
-- LEVERAGE 卡片 row 3 / row 4 的 `text-[8px]` → `text-[10px]`，`mt-1.5 / mt-1` → `mt-2.5 / mt-2`
-- STOP 按钮 `py-2.5 text-xs` → `py-3 text-sm`
+### 1. `src/features/pinpoint/Grid.tsx` — 动态尺寸
 
-### 2. AccountBlock（`src/features/pinpoint/AccountBlock.tsx`）
-- 整体 padding 与内部间距放大一档（与上面同比例）
-- 头像 / LV / XP 行高度增加约 8px，让 P1 牌与 LV 数字不再贴边
-- 战绩行 W/L/BEST 字号上调，让 trophy 排在更舒展的网格里
-- BALANCE / SESSION P/L / MARGIN 三段之间 divider 加 `mt-3 / pt-3`
+把布局常量从 module-scope 升级成由容器尺寸推导的运行时值：
 
-### 3. EventSelector（`src/features/pinpoint/EventSelector.tsx`）
-- 卡片改为两行布局：第 1 行 LIVE 标签 + 比赛时钟，第 2 行队名缩写与比分；当前是单行被截断成 `USA 1-…`
-- padding 同步放大
+- `ResizeObserver` 同时观察容器的 `width` 与 `height`（之前只用 width）。
+- 新增推导：
+  ```ts
+  const availH = containerH;            // 实际可用高度
+  const rowGap = availH < 520 ? 4 : 5;
+  const rowH   = clamp(Math.floor((availH - (ROWS-1)*rowGap) / ROWS), 36, 64);
+  const colW   = clamp(Math.round(rowH * 1.55), 60, 104);
+  const colGap = rowH < 44 ? 4 : 6;
+  const pitchX = colW + colGap;
+  const pitchY = rowH + rowGap;
+  const totalH = ROWS*rowH + (ROWS-1)*rowGap;
+  ```
+- 用 `useRef` 把 `{rowH,colW,colGap,rowGap,pitchX,pitchY,totalH}` 暴露给 RAF loop（RAF 读取 ref，避免重建 loop）。
+- `PX_PER_MS = pitchX / 1000`：保持「1 秒推一列」的时间语义不变，只是每一列在画面上变宽/变窄。
+- 单元格内字体（`mult` 字号、bet stake、payout）从 `rowH` 推导：
+  ```ts
+  const fontMain = Math.max(11, Math.round(rowH * 0.26));
+  const fontSub  = Math.max(8,  Math.round(rowH * 0.18));
+  ```
+- canvas 的 CSS `height` 由 `totalH` 决定，DPR 缩放逻辑不动。
 
-### 4. 整体右侧网格不动
-Grid 自身已经按容器自适应高度，sidebar 变宽 28px 后 grid 列数仍按容器自适应；不调整 Grid 内部参数。
+### 2. `src/routes/pinpoint.tsx` — 让 main 真正给出可用高度
 
-### 5. 主页根容器（`src/routes/pinpoint.tsx`）
-- 仅调整左右两栏间距 `gap` 与外层 padding（如有挤压），保证 1280×800 视口下整屏铺满、底部不再有大块空白。
+当前 `<div className="relative z-10 flex gap-3 px-3 pb-4">` 没有限定整屏高度，`<main>` 用 `flex-1` 但父级没有约束 → Grid 容器拿到的是「内容自然撑出来的高度」，不是「屏幕剩余高度」。
 
-## 不做的事
-- 不动业务逻辑、hooks、Grid 渲染、音效、动效
-- 不引入新组件 / 不删除现有模块
-- 不改顶部 header 的 PlayerCard / utility 按钮组成
+- 给整个布局容器加 `min-h-[calc(100vh-56px)]`（56 是 header 大致高度，用同样的 token），同时给 `<main>` 加 `min-h-0`。
+- Grid 外层 wrapper 改为 `flex-1 min-h-0`，让 ResizeObserver 测到的是「header + 帮助行去掉之后」剩下的高度。
+
+### 3. 不动的地方
+
+- `ROWS = 11`、HISTORY_FRAC = 0.34、时间常量（DYING_MS、HIT_FLASH_MS、SETTLE_MS）、price 撞击逻辑、星星/Pop 动画。
+- 业务逻辑、`usePinpointSession`、sidebar、AccountBlock、EventSelector。
 
 ## 验收
-- 1280×800 与 1024×780 两个视口下，左栏自然占满高度，没有明显空白条
-- LEVERAGE 卡片标签在 1× / 2× / 3× 切换时都不再贴边或换行
-- EventSelector 第 2 行能完整显示「USA 1-0」之类的赛况，不再被 `…` 截断
+
+- 1280×800：grid 完全填满 header 与帮助行之间，没有黑色空白带；rowH ≈ 56、colW ≈ 86，整体放大但不顶到边。
+- 1024×780：grid 收缩到 rowH ≈ 44、colW ≈ 68，仍能完整显示 11 行 + 部分右侧列；底部不再出现盈余空间。
+- 1920×1080：rowH 命中上限 64、colW 命中 100；不再是「小格子+大量空白」。
+- 价格线在 NOW 边界的撞击、列消失/星星动画、点击命中检测在三种分辨率下都对齐（pitchX 改了，但 RAF 已经按 ref 读最新值）。
