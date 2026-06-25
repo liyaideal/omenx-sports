@@ -1,100 +1,126 @@
-/* Pinpoint scoped theme — Bettle-inspired neon arcade look.
- * All variables scoped under .pp-root so they do not leak into the rest of
- * the app. */
+/* Pinpoint scoped theme — "Street Skate Stickers".
+ * Collaged sticker cards, hazard stripes, screen-print grain.
+ * All variables and classes are scoped under .pp-root so they do not leak. */
 
 .pp-root {
-  --pp-bg: #0a0a1f;
-  --pp-bg-2: #0d0d28;
-  --pp-card: rgba(13, 13, 40, 0.85);
-  --pp-cyan: #00f0ff;
-  --pp-cyan-dim: rgba(0, 240, 255, 0.35);
-  --pp-green: #00ff9d;
-  --pp-green-dim: rgba(0, 255, 157, 0.4);
-  --pp-orange: #ff6b1a;
-  --pp-orange-bright: #ff8a3d;
-  --pp-red: #ff2d4a;
-  --pp-muted: #5a5a78;
+  --pp-paper: #141210;
+  --pp-paper-2: #1c1a17;
+  --pp-ink: #efe7d3;
+  --pp-mute: #8a8275;
+  --pp-red: #ff3b1f;
+  --pp-red-2: #c41f0a;
+  --pp-yellow: #ffd400;
+  --pp-yellow-2: #ffb800;
+  --pp-green: #1f8a4c;
+  --pp-green-2: #2dd76a;
+  --pp-card-bg: #1a1815;
+  --pp-card-border: #2a2620;
 
-  background-color: var(--pp-bg);
+  --pp-sticker-shadow: 3px 3px 0 #000;
+  --pp-sticker-shadow-yellow: 3px 3px 0 #000, 6px 6px 0 rgba(255, 212, 0, 0.35);
+  --pp-sticker-shadow-red: 3px 3px 0 #000, 6px 6px 0 rgba(255, 59, 31, 0.35);
+
+  /* Hazard stripes (black / taxi yellow) */
+  --pp-hazard: repeating-linear-gradient(
+    -45deg,
+    #000 0 10px,
+    var(--pp-yellow) 10px 20px
+  );
+  /* Red/black danger stripes */
+  --pp-hazard-red: repeating-linear-gradient(
+    -45deg,
+    #000 0 10px,
+    var(--pp-red) 10px 20px
+  );
+
+  background-color: var(--pp-paper);
   background-image:
-    radial-gradient(circle at 12% 18%, rgba(0, 240, 255, 0.06) 0%, transparent 40%),
-    radial-gradient(circle at 88% 82%, rgba(255, 107, 26, 0.05) 0%, transparent 45%);
-  color: #e8e8ff;
-  font-family: "Chakra Petch", "JetBrains Mono", monospace;
+    /* paper grain via SVG turbulence */
+    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='240' height='240'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 0.12 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>"),
+    radial-gradient(circle at 15% 12%, rgba(255, 212, 0, 0.05) 0%, transparent 45%),
+    radial-gradient(circle at 85% 88%, rgba(255, 59, 31, 0.05) 0%, transparent 45%);
+  color: var(--pp-ink);
+  font-family: "Archivo Black", "Anton", "Inter", sans-serif;
 }
 
-/* Starfield — 3 layered tiny dot patterns at different densities */
+/* Backdrop accent — torn-poster scraps in the corners */
 .pp-stars {
   position: absolute;
   inset: 0;
   pointer-events: none;
   background-image:
-    radial-gradient(1px 1px at 23% 12%, rgba(255, 255, 255, 0.45), transparent),
-    radial-gradient(1px 1px at 67% 28%, rgba(255, 255, 255, 0.35), transparent),
-    radial-gradient(1px 1px at 14% 73%, rgba(255, 255, 255, 0.4), transparent),
-    radial-gradient(1px 1px at 82% 64%, rgba(255, 255, 255, 0.3), transparent),
-    radial-gradient(1px 1px at 48% 41%, rgba(255, 255, 255, 0.5), transparent),
-    radial-gradient(1px 1px at 91% 88%, rgba(255, 255, 255, 0.25), transparent),
-    radial-gradient(1px 1px at 35% 89%, rgba(255, 255, 255, 0.35), transparent),
-    radial-gradient(1.5px 1.5px at 56% 12%, rgba(0, 240, 255, 0.4), transparent),
-    radial-gradient(1.5px 1.5px at 8% 38%, rgba(255, 107, 26, 0.3), transparent),
-    radial-gradient(1px 1px at 73% 92%, rgba(255, 255, 255, 0.3), transparent),
-    radial-gradient(1px 1px at 19% 56%, rgba(255, 255, 255, 0.25), transparent),
-    radial-gradient(1px 1px at 95% 18%, rgba(255, 255, 255, 0.35), transparent);
+    /* small sticker patches */
+    radial-gradient(circle at 7% 9%, rgba(255, 212, 0, 0.08) 0%, transparent 8%),
+    radial-gradient(circle at 92% 11%, rgba(255, 59, 31, 0.06) 0%, transparent 7%),
+    radial-gradient(circle at 12% 88%, rgba(45, 215, 106, 0.05) 0%, transparent 6%),
+    radial-gradient(circle at 88% 92%, rgba(255, 212, 0, 0.05) 0%, transparent 8%);
   background-size: 100% 100%;
 }
 
-/* Card — cyan-edged rounded panel */
-.pp-card {
-  position: relative;
-  border-radius: 14px;
-  background: var(--pp-card);
-  border: 1.5px solid var(--pp-cyan-dim);
-  box-shadow:
-    inset 0 0 24px rgba(0, 240, 255, 0.05),
-    0 0 18px rgba(0, 240, 255, 0.08);
-}
+/* ───────────────────────────  TYPOGRAPHY  ─────────────────────────── */
 
-.pp-card-orange {
-  border-color: rgba(255, 107, 26, 0.45);
-  box-shadow:
-    inset 0 0 24px rgba(255, 107, 26, 0.05),
-    0 0 18px rgba(255, 107, 26, 0.1);
-}
-
-/* Pixel & display font helpers */
+/* Big stencil / brand cap — used for headers, "PINPOINT", "LIVE" labels */
 .pp-stencil {
-  font-family: "Press Start 2P", "Chakra Petch", monospace;
-  letter-spacing: 0.05em;
+  font-family: "Bungee", "Archivo Black", "Anton", sans-serif;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  font-weight: 400;
 }
+
+/* Hero / display — tall condensed industrial */
 .pp-headline {
-  font-family: "Audiowide", "Chakra Petch", sans-serif;
-  letter-spacing: 0.04em;
+  font-family: "Anton", "Bungee", "Archivo Black", sans-serif;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  font-weight: 400;
 }
-.pp-num {
-  font-family: "Chakra Petch", "JetBrains Mono", monospace;
-  font-weight: 700;
+
+/* Marker scrawl — hand-drawn captions, "BETA", "WARN" */
+.pp-marker {
+  font-family: "Permanent Marker", "Bungee", sans-serif;
   letter-spacing: 0.02em;
 }
 
-.pp-stamp-yellow {
-  text-shadow: 0 0 8px rgba(0, 240, 255, 0.8), 0 0 16px rgba(0, 240, 255, 0.4);
-}
-.pp-stamp-green {
-  text-shadow: 0 0 10px rgba(0, 255, 157, 0.9), 0 0 24px rgba(0, 255, 157, 0.5);
-}
-.pp-stamp-red {
-  text-shadow: 0 0 8px rgba(255, 107, 26, 0.8), 0 0 16px rgba(255, 107, 26, 0.4);
-}
-.pp-stamp-red {
-  text-shadow: 0 0 8px rgba(255, 45, 74, 0.8), 0 0 16px rgba(255, 45, 74, 0.4);
+/* Numbers — monospace for tabular alignment */
+.pp-num {
+  font-family: "JetBrains Mono", "Chakra Petch", monospace;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  font-feature-settings: "tnum" 1;
 }
 
-/* Cell — orange heat */
+/* ──────────────────────  STAMP / STICKER LABELS  ───────────────────── */
+
+/* Color "stamps" — replace the old glow utilities. Solid inked color, no blur. */
+.pp-stamp-yellow { color: var(--pp-yellow); }
+.pp-stamp-red    { color: var(--pp-red); }
+.pp-stamp-green  { color: var(--pp-green-2); }
+
+/* ──────────────────────────  CARDS (STICKERS)  ─────────────────────── */
+
+.pp-card {
+  position: relative;
+  border-radius: 6px;
+  background: var(--pp-card-bg);
+  border: 2px solid var(--pp-ink);
+  box-shadow: var(--pp-sticker-shadow);
+  /* Subtle paper grain on every card */
+  background-image:
+    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='1.1' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 0.06 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+}
+
+/* Accent variant — yellow border + yellow drop-shadow echo */
+.pp-card-accent {
+  border-color: var(--pp-yellow);
+  box-shadow: var(--pp-sticker-shadow-yellow);
+}
+
+/* ─────────────────────────────  CELLS  ─────────────────────────────── */
+
 .pp-cell {
   position: relative;
-  border-radius: 8px;
-  border: 1px solid rgba(255, 107, 26, 0.25);
+  border-radius: 4px;
+  border: 1.5px solid #000;
   transition:
     transform 120ms ease,
     border-color 150ms ease,
@@ -103,81 +129,131 @@
   overflow: hidden;
 }
 .pp-cell:hover {
-  border-color: var(--pp-cyan);
-  box-shadow: 0 0 14px rgba(0, 240, 255, 0.4);
-  transform: translateY(-1px);
+  border-color: var(--pp-yellow);
+  box-shadow: 2px 2px 0 #000;
+  transform: translate(-1px, -1px);
 }
 .pp-cell:active {
   transform: scale(0.96);
 }
 .pp-cell-bet {
-  border-color: var(--pp-cyan) !important;
-  box-shadow:
-    0 0 16px rgba(0, 240, 255, 0.55),
-    inset 0 0 12px rgba(0, 240, 255, 0.18) !important;
+  border-color: var(--pp-yellow) !important;
+  box-shadow: 2px 2px 0 #000 !important;
 }
-.pp-cell-hit {
-  animation: pp-hit 0.6s ease-out;
+
+/* ─────────────────────────────  CHIPS  ─────────────────────────────── */
+
+.pp-chip {
+  border: 2px solid var(--pp-card-border);
+  border-radius: 4px;
+  background: rgba(0, 0, 0, 0.35);
+  transition: all 120ms ease;
+  box-shadow: 2px 2px 0 #000;
 }
+.pp-chip:hover {
+  border-color: var(--pp-ink);
+  transform: translate(-1px, -1px);
+  box-shadow: 3px 3px 0 #000;
+}
+.pp-chip-active {
+  border-color: var(--pp-red) !important;
+  background: rgba(255, 59, 31, 0.18) !important;
+  box-shadow: 2px 2px 0 #000 !important;
+}
+.pp-chip-active-yellow {
+  border-color: var(--pp-yellow) !important;
+  background: rgba(255, 212, 0, 0.15) !important;
+  box-shadow: 2px 2px 0 #000 !important;
+}
+
+/* ─────────────────────────────  STOP / ALARM BUTTON  ────────────────── */
+
+.pp-stop {
+  background: var(--pp-red);
+  border: 2px solid #000;
+  border-radius: 4px;
+  color: #fff;
+  box-shadow: 3px 3px 0 #000;
+  transition: transform 120ms ease, box-shadow 120ms ease;
+  text-transform: uppercase;
+}
+.pp-stop:hover {
+  transform: translate(-1px, -1px);
+  box-shadow: 4px 4px 0 #000;
+}
+.pp-stop:active {
+  transform: translate(1px, 1px);
+  box-shadow: 1px 1px 0 #000;
+}
+
+/* Hazard stripe header strip — small height bar above critical UI */
+.pp-hazard-stripes {
+  background: var(--pp-hazard);
+  height: 10px;
+  width: 100%;
+}
+.pp-hazard-stripes-red {
+  background: var(--pp-hazard-red);
+  height: 10px;
+  width: 100%;
+}
+
+/* ─────────────────────────────  PRICE PILL  ────────────────────────── */
+
+.pp-pill {
+  background: var(--pp-yellow);
+  color: #000;
+  border: 2px solid #000;
+  border-radius: 999px;
+  box-shadow: 2px 2px 0 #000;
+}
+
+/* ─────────────────────────────  STAMP / TILT  ──────────────────────── */
+
+/* Tilt utilities so cards feel "stuck on" by hand. Combine with rotation. */
+.pp-tilt-l { transform: rotate(-1.5deg); }
+.pp-tilt-r { transform: rotate(1.5deg); }
+.pp-tilt-l2 { transform: rotate(-3deg); }
+.pp-tilt-r2 { transform: rotate(3deg); }
+
+/* Round stamp (WON / LOST / LIVE). Use with text inside. */
+.pp-stamp {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.45em 0.9em;
+  border: 3px solid currentColor;
+  border-radius: 4px;
+  font-family: "Bungee", sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  transform: rotate(-4deg);
+  opacity: 0.92;
+}
+.pp-stamp-circle {
+  border-radius: 999px;
+  padding: 0.6em 1.2em;
+}
+
+/* ─────────────────────  ANIMATIONS (kept, retuned)  ────────────────── */
+
 @keyframes pp-hit {
-  0% {
-    transform: scale(1);
-    box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.9);
-    filter: brightness(2.5);
-  }
-  100% {
-    transform: scale(1);
-    box-shadow: 0 0 0 30px rgba(255, 255, 255, 0);
-    filter: brightness(1);
-  }
+  0%   { transform: scale(1); filter: brightness(2.2); }
+  100% { transform: scale(1); filter: brightness(1); }
 }
+.pp-cell-hit { animation: pp-hit 0.5s ease-out; }
 
-/* WIN burst — marker pinned at NOW line, big punchy flash */
 @keyframes pp-win-burst {
-  0% {
-    transform: translate(-50%, -50%) scale(0.9);
-    filter: brightness(1) saturate(1);
-    box-shadow:
-      0 0 0 0 rgba(255, 255, 255, 0.95),
-      0 0 24px rgba(255, 200, 80, 0.9);
-  }
-  18% {
-    transform: translate(-50%, -50%) scale(1.45);
-    filter: brightness(2.4) saturate(1.4);
-    box-shadow:
-      0 0 0 14px rgba(255, 255, 255, 0.18),
-      0 0 60px rgba(255, 200, 80, 1);
-  }
-  55% {
-    transform: translate(-50%, -50%) scale(1.15);
-    filter: brightness(1.4);
-    box-shadow:
-      0 0 0 28px rgba(255, 200, 80, 0),
-      0 0 40px rgba(255, 200, 80, 0.7);
-  }
-  100% {
-    transform: translate(-50%, -50%) scale(1);
-    opacity: 0;
-    filter: brightness(1);
-    box-shadow: 0 0 0 0 rgba(255, 200, 80, 0);
-  }
+  0%   { transform: translate(-50%, -50%) scale(0.9) rotate(-4deg); filter: brightness(1); }
+  18%  { transform: translate(-50%, -50%) scale(1.35) rotate(2deg); filter: brightness(1.8); }
+  55%  { transform: translate(-50%, -50%) scale(1.1)  rotate(-2deg); filter: brightness(1.2); }
+  100% { transform: translate(-50%, -50%) scale(1)    rotate(0); opacity: 0; }
 }
-.pp-win-burst {
-  animation: pp-win-burst 1100ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
-}
+.pp-win-burst { animation: pp-win-burst 1100ms cubic-bezier(0.22, 1, 0.36, 1) forwards; }
 
-/* Expanding ring used inside winning marker */
 @keyframes pp-ring {
-  0% {
-    transform: translate(-50%, -50%) scale(0.4);
-    opacity: 0.9;
-    border-width: 3px;
-  }
-  100% {
-    transform: translate(-50%, -50%) scale(2.6);
-    opacity: 0;
-    border-width: 1px;
-  }
+  0%   { transform: translate(-50%, -50%) scale(0.4); opacity: 0.9; border-width: 3px; }
+  100% { transform: translate(-50%, -50%) scale(2.4); opacity: 0; border-width: 1px; }
 }
 .pp-ring {
   position: absolute;
@@ -185,126 +261,34 @@
   top: 50%;
   width: 100%;
   height: 100%;
-  border-radius: 12px;
-  border: 3px solid #ffd97a;
+  border-radius: 4px;
+  border: 3px solid var(--pp-yellow);
   pointer-events: none;
   animation: pp-ring 900ms ease-out forwards;
 }
 .pp-ring-2 {
   animation-delay: 180ms;
-  border-color: #ff8a3d;
+  border-color: var(--pp-red);
 }
 
-/* LOSS fade — marker desaturates to red, shrinks, fades */
 @keyframes pp-loss-fade {
-  0% {
-    transform: translate(-50%, -50%) scale(1);
-    opacity: 1;
-    filter: grayscale(0) hue-rotate(0deg);
-    background: linear-gradient(180deg, rgba(255,138,61,0.95) 0%, rgba(255,107,26,0.95) 100%);
-  }
-  30% {
-    background: linear-gradient(180deg, rgba(120,30,40,0.95) 0%, rgba(80,15,25,0.95) 100%);
-    filter: grayscale(0.5);
-  }
-  100% {
-    transform: translate(-50%, -50%) scale(0.78);
-    opacity: 0;
-    background: linear-gradient(180deg, rgba(80,15,25,0.6) 0%, rgba(40,8,15,0.4) 100%);
-    filter: grayscale(0.7);
-  }
+  0%   { transform: translate(-50%, -50%) scale(1) rotate(0); opacity: 1; }
+  60%  { transform: translate(-50%, -50%) scale(0.92) rotate(-3deg); opacity: 0.7; }
+  100% { transform: translate(-50%, -50%) scale(0.78) rotate(-6deg); opacity: 0; }
 }
-.pp-loss-fade {
-  animation: pp-loss-fade 600ms ease-out forwards;
-}
+.pp-loss-fade { animation: pp-loss-fade 600ms ease-out forwards; }
 
-/* Big profit float — text rises and fades */
 @keyframes pp-profit-pop {
-  0% {
-    opacity: 0;
-    transform: translate(-50%, 10px) scale(0.7);
-  }
-  18% {
-    opacity: 1;
-    transform: translate(-50%, -8px) scale(1.15);
-  }
-  40% {
-    opacity: 1;
-    transform: translate(-50%, -28px) scale(1);
-  }
-  100% {
-    opacity: 0;
-    transform: translate(-50%, -80px) scale(0.95);
-  }
+  0%   { opacity: 0; transform: translate(-50%, 10px) scale(0.7) rotate(-6deg); }
+  18%  { opacity: 1; transform: translate(-50%, -8px) scale(1.15) rotate(-2deg); }
+  40%  { opacity: 1; transform: translate(-50%, -28px) scale(1) rotate(0); }
+  100% { opacity: 0; transform: translate(-50%, -80px) scale(0.95) rotate(3deg); }
 }
-.pp-profit-pop {
-  animation: pp-profit-pop 1400ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
-}
+.pp-profit-pop { animation: pp-profit-pop 1400ms cubic-bezier(0.22, 1, 0.36, 1) forwards; }
 
-/* Price capsule */
-.pp-pill {
-  background: linear-gradient(180deg, #0a3a26 0%, #042418 100%);
-  border: 2px solid var(--pp-green);
-  border-radius: 999px;
-  box-shadow:
-    0 0 18px rgba(0, 255, 157, 0.5),
-    inset 0 0 10px rgba(0, 255, 157, 0.25);
-}
-
-/* STOP button */
-.pp-stop {
-  background: linear-gradient(180deg, #ff4661 0%, #c8112d 100%);
-  border: 2px solid rgba(255, 80, 100, 0.9);
-  border-radius: 14px;
-  box-shadow:
-    0 0 22px rgba(255, 45, 74, 0.5),
-    inset 0 -4px 0 rgba(0, 0, 0, 0.25),
-    inset 0 1px 0 rgba(255, 255, 255, 0.2);
-  transition: all 150ms ease;
-}
-.pp-stop:hover {
-  box-shadow:
-    0 0 32px rgba(255, 45, 74, 0.8),
-    inset 0 -4px 0 rgba(0, 0, 0, 0.25),
-    inset 0 1px 0 rgba(255, 255, 255, 0.3);
-  transform: translateY(-1px);
-}
-
-.pp-chip {
-  border: 1.5px solid rgba(0, 240, 255, 0.2);
-  border-radius: 8px;
-  background: rgba(0, 0, 0, 0.3);
-  transition: all 150ms ease;
-}
-.pp-chip:hover {
-  border-color: var(--pp-cyan-dim);
-  background: rgba(0, 240, 255, 0.05);
-}
-.pp-chip-active {
-  border-color: var(--pp-orange) !important;
-  background: rgba(255, 107, 26, 0.12) !important;
-  box-shadow: 0 0 14px rgba(255, 107, 26, 0.35);
-}
-.pp-chip-active-yellow {
-  border-color: var(--pp-cyan) !important;
-  background: rgba(0, 240, 255, 0.1) !important;
-  box-shadow: 0 0 14px rgba(0, 240, 255, 0.35);
-}
-
-/* Float text — multiplier flying up on hit */
 @keyframes pp-float {
-  0% {
-    opacity: 0;
-    transform: translate(-50%, 0);
-  }
-  20% {
-    opacity: 1;
-  }
-  100% {
-    opacity: 0;
-    transform: translate(-50%, -60px);
-  }
+  0%   { opacity: 0; transform: translate(-50%, 0); }
+  20%  { opacity: 1; }
+  100% { opacity: 0; transform: translate(-50%, -60px); }
 }
-.pp-float {
-  animation: pp-float 1.2s ease-out forwards;
-}
+.pp-float { animation: pp-float 1.2s ease-out forwards; }
