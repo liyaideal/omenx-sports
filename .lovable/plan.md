@@ -1,75 +1,104 @@
-# Cross Margin 改造
+# Pinpoint 重命名 + 街头滑板贴纸风格改造
 
-把"单仓爆仓"换成"账户级强平"。
+## 1. 重命名 strikezone → pinpoint
 
-## 经济模型
+### 路由
+- 新建 `src/routes/pinpoint.tsx`（由旧 `strikezone.tsx` 改名），`createFileRoute("/pinpoint")`
+- 删除 `src/routes/strikezone.tsx`
+- `routeTree.gen.ts` 由插件自动重建，不手动改
 
-| 项 | 公式 |
-|---|---|
-| 入场 | 扣 `stake`（保证金，不变） |
-| 单仓赢 | 收 `stake × mult × lev` |
-| 单仓输（正常到期） | 已扣 stake，无额外（不变） |
-| **实时 equity** | `balance + Σ(开仓中：当前价在格子内 ? stake × mult × lev : 0)` |
-| **维持保证金阈值** | `maintenance = 0.15 × Σ(开仓 stake)` |
-| **强平触发** | `equity ≤ maintenance`（连续 2 帧成立才触发，防抖） |
-| 强平时 | 全部 open 仓按"当前价是否在格子内"二元结算；不在格内的全部判 `liquidated`、亏 stake；在格内的判 `won`、按 mult×lev 赔付；之后弹"LIQUIDATED"模态 |
+### 目录与文件
+- `src/features/strikezone/` → `src/features/pinpoint/`
+- `sz-theme.css` → `pp-theme.css`（内容整体重写，见第 3 节）
+- `useStrikezoneSession.ts` → `usePinpointSession.ts`
+- storage key `omenx.strikezone.v1` → `omenx.pinpoint.v1`（旧数据自然失效，反正一直在洗）
 
-这样 cross 的张力来自：你的余额被多笔大下注掏空、同时这些仓位都不在格子里 → equity 撑不住维持线 → 一起爆。杠杆通过放大 stake×mult×lev 的潜在收益让 in-cell 仓位救场能力更强，但 out-cell 时对 equity 毫无贡献，等于"你押得越大越激进，越快爆"。
+### 命名 token 全量替换
+- 类型/Hook：`StrikezonePosition` → `PinpointPosition`，`StrikezoneState` → `PinpointState`，`useStrikezoneSession` → `usePinpointSession`，`useStrikezoneGroups` → `usePinpointGroups`，`StrikezonePage/Inner` → `PinpointPage/Inner`
+- CSS 前缀 `sz-*` → `pp-*`（`sz-card`、`sz-pixel`、`sz-display`、`sz-chip`、`sz-stop`、`--sz-cyan` 等所有变量与类）
+- 文案：UI 内 `STRIKEZONE` 大字、页面 title/og 全部改为 `PINPOINT`
+- `.lovable/plan.md` 内提及同步更新
 
-## 代码改动
+### 用户可见路径
+- 旧的 `/strikezone` 直接 404（用户没要求做 301，保持简单）
 
-### 1. `hooks/useStrikezoneSession.ts`
+## 2. 设计方向：街头滑板贴纸
 
-- 移除 `liqDistance` / `liquidatedAt` / `notional` 字段（不再需要单仓爆仓信息）。`liqDistanceFor` 和 `LIQ_BASE` 删除。
-- 保留 `status: "liquidated"`，含义改为"被账户强平"。
-- 新增 selector / helper `computeEquity(state, livePricesByOutcome)`：
-  - 入参：state + 每个 outcomeId 当前价（Grid 在用同一个 ticker，传 map 即可，也可只传 `activeOutcomeId → price` 用于当前事件；其它事件的开仓按上次已知价处理，先简化为只看当前事件）。
-  - 简化版：组件层算好 equity 后直接传入 hook 的 `liquidateAll(price, predicate)` action。
-- 新增 action `liquidateAll(currentPriceByOutcome)`：遍历所有 open 仓位，按当前价格 in-cell/out-cell 分别结算 won / liquidated，调用现有 settle 逻辑。
-- 持久化 key 不变（上一轮迁移已经把旧 open 清掉了）。
+定调：滑板品牌物料（Supreme / Palace / Thrasher / Stüssy）的能量，不是儿童贴纸。核心是"拼贴 + 撕边 + 丝印感"，而不是霓虹发光。
 
-### 2. `Grid.tsx`
+### 风格关键词
+- **拼贴层叠**：卡片像被一张张贴上去的方贴，带轻微旋转（-2°~+3°）、错位阴影
+- **丝印质感**：套色不准（offset print misregistration），印刷颗粒（grain noise）覆盖
+- **黑黄危险条**：警示斜条用于强提示（爆仓、止损、高杠杆区）
+- **手写体 + 工业体混排**：标题用粗压扁体（Anton / Bungee），副标题用涂鸦手写（Permanent Marker / Rubik Mono One），数字用 mono（JetBrains Mono）保持可读
+- **大字标语**：`PINPOINT`、`LIQUIDATED`、`ALL-IN` 这种关键词做"贴纸标题"
+- **图章/印戳**：状态用圆/方戳子表达（WON / LOST / LIVE），带半透明红/黑墨水感
+- **撕纸边**：卡片边缘可选锯齿/撕边 SVG mask
 
-- **删除**：per-position 实时距离检测（`liquidatedLocalRef`）、`onLiquidate` prop、红色 LIQ 虚线、`drawLiquidateBurst` 调用（函数本身可保留用于全局爆仓特效）。
-- 全局强平由父组件统一触发，Grid 收到 effects 后只负责画结算特效（已有 win burst / lose fade / 现在也接 liquidate kind 当作"红色 lose"渲染）。
+### 色板（取消霓虹）
+- 纸底 `#f4ede0`（米黄牛皮纸）/ 深底 `#141210`（沥青黑）双主题，先做深底
+- 主强调 `#ff3b1f`（消防红）
+- 次强调 `#ffd400`（出租车黄）
+- 辅助 `#1f8a4c`（深绿，用于赢/上涨）
+- 中性 `#e7e1d3`（米白文字）/ `#7a736a`（哑灰）
+- 警示斜条 `#000` + `#ffd400`
 
-### 3. `routes/strikezone.tsx`
+### 不要的东西
+- 任何 cyan/magenta 霓虹发光（`text-shadow: 0 0 8px`）
+- 像素体（Press Start 2P）街机风
+- 暗黑 + 蓝紫赛博朋克
 
-- 每个 ticker 帧（已有 `useEffect` on `tickSec`）里：
-  1. 先做正常到期结算（不变）。
-  2. 算 `equity = balance + Σ in-cell ? stake×mult×lev : 0`（只对当前事件的 open 仓位；多事件先简化）。
-  3. 算 `maintenance = 0.15 × Σ stake(open)`。
-  4. 如果 `equity ≤ maintenance` **且** 上一帧也成立（用 `liqArmedRef`）→ 触发 `liquidateAll`，弹 `showLiquidated` 模态。
-- 移除 Grid `onLiquidate` 回调。
-- 新模态 `<LiquidatedModal>`：红色大字 "LIQUIDATED · ACCOUNT WIPED"、列出 N 个仓位的亏损总额、按钮 `RESET ACCOUNT`（调 `reset()`）/ `CONTINUE`（仅关闭模态，balance 还有就继续）。
+## 3. 视觉实现范围（本轮只换"皮"，不动业务）
 
-### 4. `Sidebar.tsx`
+- 全量重写 `pp-theme.css`：删掉所有 glow / pixel / scanline，引入 grain noise（CSS `background-image` 用 SVG turbulence）、贴纸阴影 token `--pp-sticker-shadow`、警示条 utility `pp-hazard-stripes`
+- 字体：用 `@fontsource/anton`、`@fontsource/permanent-marker`、`@fontsource/bungee`、`@fontsource/jetbrains-mono`（4 个包，安装后在 `src/main.tsx` 引入；不动 `index.html`）
+- 组件级最小改动：
+  - `Sidebar.tsx`：把 sz-card / sz-pixel / sz-display 替换为 pp-sticker / pp-marker / pp-headline；保持结构和数据绑定
+  - `Grid.tsx`：canvas 调色板换成新色板，关键文字（HIT / LIQ / +$xx）改成印戳样式；DOM 浮层用新字体
+  - `EventTabs.tsx`：tab 改成贴纸条
+  - 路由页头部 `STRIKEZONE` 大字 → `PINPOINT` 贴纸 logo（带轻微旋转 + 黄底黑字）
+- 爆仓 modal：换成"红章 + LIQUIDATED 印戳 + 黑黄斜条边"
+- 不改任何 hook 逻辑、equity 计算、liquidation 触发条件、下单流程
 
-- 杠杆卡片副文案改为不再提单仓 LIQ ±X¢：
-  - 1×：`NO LEVERAGE · SAFE`
-  - 2×：`2× PAYOUT · CROSS RISK`
-  - 3×：`⚠ 3× PAYOUT · HIGH CROSS RISK`
-- 在 BALANCE 卡下方新增一行 "MARGIN HEALTH" 进度条：
-  - 比例 = `min(1, max(0, (equity - maintenance) / (initial - maintenance)))`
-  - 颜色：>60% 青绿、30–60% 琥珀、<30% 红色脉动
-  - 数字显示 `EQUITY $X / MAINT $Y`
-- equity 由父组件每帧算好传进来（新 prop `equity`、`maintenance`）。
+## 4. /style-guide 同步
 
-### 5. 视觉与文案
+按 Core 规则，`/style-guide` 加 `Pinpoint Stickers` 区块演示：sticker card、hazard stripes、印戳、headline、marker text、新色板。
 
-- 全局强平触发时：屏幕轻微红色震动 80ms（在 `sz-root` 上加临时 class），所有 Grid 的下注格子瞬间变红淡出（复用现有 `drawLiquidateBurst`）。
-- toast 不弹（被模态替代）。
+## 5. 不在本轮范围
 
-## 不在本次范围
+- 暗/亮双主题切换（先只做深底）
+- 旧路由 301 重定向
+- 撕边 SVG mask（先用直角 + 错位阴影达到贴纸感，撕边作为后续优化）
+- 真实丝印套色不准动画（先静态错位）
 
-- 多事件持仓的 equity 聚合（当前只统计 active event 的仓位；多事件持仓的 mark 仍按"上次见到的价"处理，先简化为"非当前事件仓位按入场价 in-cell 估值"——实际就是 +stake×mult×lev 当成中性贡献。如果用户后续拉多事件玩再补）。
-- 维持保证金率 0.15 的调参，先固定。
-- 部分爆仓（一次只平到 equity 回升到维持线以上）——直接全平。
+## 技术细节
 
-## 测试
+### 文件操作
+```
+mv src/features/strikezone → src/features/pinpoint
+mv src/routes/strikezone.tsx → src/routes/pinpoint.tsx
+rm src/features/pinpoint/sz-theme.css → 新建 pp-theme.css
+```
+之后全局 sed 替换 import 路径与符号名。
 
-build mode 后浏览器跑一遍：
-1. 1× 杠杆连下 100 笔 $100 → balance 用完后，下一笔被余额检查拦截，不会触发爆仓
-2. 3× 杠杆把 balance 大部分压在远离当前价的格子 → 一旦 K 线远离这些格子且未命中，equity ≤ maintenance → 全平、弹模态
-3. equity 接近维持线时 health bar 变红脉动
-4. 中途有一笔进入格子内时 equity 回升、模态不触发
+### 字体安装
+```
+bun add @fontsource/anton @fontsource/permanent-marker @fontsource/bungee @fontsource/jetbrains-mono
+```
+在 `src/main.tsx` 顶部 import 这 4 个包；`src/styles.css` 的 `@theme` 加 `--font-display: "Anton"`、`--font-marker: "Permanent Marker"`、`--font-sticker: "Bungee"`、`--font-mono: "JetBrains Mono"`。
+
+### 关键 CSS token（pp-theme.css 节选）
+```css
+--pp-paper: #141210;
+--pp-ink: #e7e1d3;
+--pp-red: #ff3b1f;
+--pp-yellow: #ffd400;
+--pp-green: #1f8a4c;
+--pp-mute: #7a736a;
+--pp-sticker-shadow: 3px 3px 0 #000, 6px 6px 0 rgba(255,212,0,0.35);
+--pp-grain: url("data:image/svg+xml;utf8,<svg ...turbulence.../>");
+```
+
+### 验证
+- `code--exec` 跑 `rg -i "strikezone|sz-"` 应返回空（除 routeTree.gen.ts 自动重建窗口外）
+- Playwright 截图 `/pinpoint`、`/style-guide` 确认风格转向、无霓虹残留、字体加载成功

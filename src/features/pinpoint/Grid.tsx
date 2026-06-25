@@ -6,7 +6,7 @@ import {
   multiplierTextColor,
   applyLeverage,
 } from "./lib/multiplier";
-import type { StrikezonePosition } from "./hooks/useStrikezoneSession";
+import type { PinpointPosition } from "./hooks/usePinpointSession";
 
 // ── Layout constants (in CSS pixels) ──────────────────────────────────────
 const ROWS = 11; // ±5¢ around center
@@ -29,7 +29,7 @@ const STAR_LIFE_MS = 950;
 interface Props {
   currentPrice: number;
   history: number[];
-  positions: StrikezonePosition[];
+  positions: PinpointPosition[];
   betSize: number;
   leverage: number;
   onPlace: (cellCenter: number, distanceCents: number, secondsAhead: number, mult: number) => void;
@@ -43,19 +43,19 @@ type Effect =
   | {
       kind: "win";
       startAt: number;
-      p: StrikezonePosition;
+      p: PinpointPosition;
       payoutNet: number;
       _popped?: boolean;
     }
   | {
       kind: "lose";
       startAt: number;
-      p: StrikezonePosition;
+      p: PinpointPosition;
     }
   | {
       kind: "liquidate";
       startAt: number;
-      p: StrikezonePosition;
+      p: PinpointPosition;
       _popped?: boolean;
     };
 
@@ -146,7 +146,7 @@ export function Grid({
   >([]);
 
   // ── Detect parent settlements: positions that vanish → push Effect ─────
-  const prevPositionsRef = useRef<Map<string, StrikezonePosition>>(new Map());
+  const prevPositionsRef = useRef<Map<string, PinpointPosition>>(new Map());
   const hitIdsRef = useRef<Set<string>>(new Set());
   hitIdsRef.current = new Set(recentHits.map((h) => h.id));
   const liqIdsRef = useRef<Set<string>>(new Set());
@@ -175,7 +175,7 @@ export function Grid({
         }
       }
     }
-    const next = new Map<string, StrikezonePosition>();
+    const next = new Map<string, PinpointPosition>();
     for (const p of positions) next.set(p.id, p);
     prevPositionsRef.current = next;
   }, [positions, recentHits, recentLiquidations]);
@@ -235,21 +235,21 @@ export function Grid({
         NOW_X + (expiryMs - now) * PX_PER_MS;
 
       // ── 1. Background ────────────────────────────────────────────────
-      ctx.fillStyle = "#0a0a1f";
+      ctx.fillStyle = "#141210";
       ctx.fillRect(0, 0, W, H);
       // subtle radial vignette glow
       const grad = ctx.createRadialGradient(W * 0.85, H * 0.85, 0, W * 0.85, H * 0.85, W * 0.7);
-      grad.addColorStop(0, "rgba(255,107,26,0.06)");
-      grad.addColorStop(1, "rgba(255,107,26,0)");
+      grad.addColorStop(0, "rgba(255,59,31,0.05)");
+      grad.addColorStop(1, "rgba(255,59,31,0)");
       ctx.fillStyle = grad;
       ctx.fillRect(0, 0, W, H);
 
       // Horizontal price guides at every 2¢
-      ctx.font = '10px "Chakra Petch", monospace';
+      ctx.font = '10px "JetBrains Mono", monospace';
       ctx.textBaseline = "alphabetic";
       for (let i = -4; i <= 4; i += 2) {
         const py = yFor(center + i);
-        ctx.strokeStyle = "rgba(0,240,255,0.07)";
+        ctx.strokeStyle = "rgba(239,231,211,0.06)";
         ctx.lineWidth = 1;
         ctx.setLineDash([2, 4]);
         ctx.beginPath();
@@ -257,7 +257,7 @@ export function Grid({
         ctx.lineTo(W, py);
         ctx.stroke();
         ctx.setLineDash([]);
-        ctx.fillStyle = "rgba(0,240,255,0.55)";
+        ctx.fillStyle = "rgba(239,231,211,0.55)";
         ctx.fillText(`${center + i}¢`, 4, py - 3);
       }
 
@@ -269,8 +269,8 @@ export function Grid({
         const first = hist[0];
         const last = hist[N - 1];
         const up = last >= first;
-        const stroke = up ? "#00ff9d" : "#ff2d4a";
-        const glow = up ? "rgba(0,255,157,0.6)" : "rgba(255,45,74,0.6)";
+        const stroke = up ? "#2dd76a" : "#ff3b1f";
+        const glow = up ? "rgba(45,215,106,0.5)" : "rgba(255,59,31,0.5)";
 
         // Area fill
         ctx.beginPath();
@@ -283,8 +283,8 @@ export function Grid({
         ctx.lineTo(HISTORY_W, H);
         ctx.closePath();
         const ag = ctx.createLinearGradient(0, 0, 0, H);
-        ag.addColorStop(0, up ? "rgba(0,255,157,0.18)" : "rgba(255,45,74,0.18)");
-        ag.addColorStop(1, up ? "rgba(0,255,157,0)" : "rgba(255,45,74,0)");
+        ag.addColorStop(0, up ? "rgba(45,215,106,0.18)" : "rgba(255,59,31,0.18)");
+        ag.addColorStop(1, up ? "rgba(45,215,106,0)" : "rgba(255,59,31,0)");
         ctx.fillStyle = ag;
         ctx.fill();
 
@@ -320,8 +320,8 @@ export function Grid({
         const pillY = tipY - pillH / 2;
         roundRect(ctx, pillX, pillY, pillW, pillH, 12);
         const pg = ctx.createLinearGradient(0, pillY, 0, pillY + pillH);
-        pg.addColorStop(0, up ? "#0a3a26" : "#3a0a14");
-        pg.addColorStop(1, up ? "#042418" : "#240a10");
+        pg.addColorStop(0, up ? "#ffd400" : "#ff3b1f");
+        pg.addColorStop(1, up ? "#ffb800" : "#c41f0a");
         ctx.fillStyle = pg;
         ctx.shadowColor = glow;
         ctx.shadowBlur = 12;
@@ -331,7 +331,7 @@ export function Grid({
         ctx.strokeStyle = stroke;
         ctx.stroke();
         ctx.fillStyle = stroke;
-        ctx.font = '700 13px "Audiowide","Chakra Petch",sans-serif';
+        ctx.font = '700 13px "Bungee","Anton",sans-serif';
         ctx.textAlign = "center";
         ctx.textBaseline = "middle";
         ctx.shadowColor = glow;
@@ -344,10 +344,10 @@ export function Grid({
 
       // ── 3. NOW divider ─────────────────────────────────────────────
       const ndg = ctx.createLinearGradient(0, 0, 0, H);
-      ndg.addColorStop(0, "rgba(255,107,26,0)");
-      ndg.addColorStop(0.12, "rgba(255,107,26,0.45)");
-      ndg.addColorStop(0.88, "rgba(255,107,26,0.45)");
-      ndg.addColorStop(1, "rgba(255,107,26,0)");
+      ndg.addColorStop(0, "rgba(255,59,31,0)");
+      ndg.addColorStop(0.12, "rgba(255,59,31,0.55)");
+      ndg.addColorStop(0.88, "rgba(255,59,31,0.55)");
+      ndg.addColorStop(1, "rgba(255,59,31,0)");
       ctx.fillStyle = ndg;
       ctx.fillRect(NOW_X - 0.5, 0, 1, H);
 
@@ -361,7 +361,7 @@ export function Grid({
       const futureW = W - NOW_X;
       const visibleCols = Math.ceil(futureW / PITCH_X) + 2;
 
-      const positionByKey = new Map<string, StrikezonePosition>();
+      const positionByKey = new Map<string, PinpointPosition>();
       for (const p of positionsRef.current) {
         const k = `${Math.round(p.targetAt / 1000)}:${Math.round(p.cellCenter)}`;
         positionByKey.set(k, p);
@@ -673,8 +673,8 @@ function drawIdleCell(
   ctx.fill();
   ctx.lineWidth = 1;
   if (hover) {
-    ctx.strokeStyle = "#00f0ff";
-    ctx.shadowColor = "rgba(0,240,255,0.6)";
+    ctx.strokeStyle = "#ffd400";
+    ctx.shadowColor = "rgba(255,212,0,0.7)";
     ctx.shadowBlur = 12;
   } else {
     ctx.strokeStyle = "rgba(255,107,26,0.35)";
@@ -683,7 +683,7 @@ function drawIdleCell(
   ctx.shadowBlur = 0;
   // mult text
   ctx.fillStyle = multiplierTextColor(mult);
-  ctx.font = '700 13px "Chakra Petch","JetBrains Mono",monospace';
+  ctx.font = '700 13px "JetBrains Mono",monospace';
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
   ctx.fillText(formatMultiplier(mult), x + w / 2, y + h / 2);
@@ -697,21 +697,21 @@ function drawBetCell(
   y: number,
   w: number,
   h: number,
-  p: StrikezonePosition,
+  p: PinpointPosition,
   hover: boolean
 ) {
   // Solid bright orange bet cell with 3-line text
   roundRect(ctx, x, y, w, h, 8);
   const g = ctx.createLinearGradient(0, y, 0, y + h);
-  g.addColorStop(0, "#ff8a3d");
-  g.addColorStop(1, "#ff6b1a");
+  g.addColorStop(0, "#ff5a36");
+  g.addColorStop(1, "#ff3b1f");
   ctx.fillStyle = g;
-  ctx.shadowColor = "rgba(255,138,61,0.7)";
+  ctx.shadowColor = "rgba(255,90,54,0.55)";
   ctx.shadowBlur = 14;
   ctx.fill();
   ctx.shadowBlur = 0;
   ctx.lineWidth = 1.5;
-  ctx.strokeStyle = hover ? "#fff" : "#ffd9b8";
+  ctx.strokeStyle = hover ? "#fff" : "#ffd400";
   ctx.stroke();
 
   const lev = p.leverage ?? 1;
@@ -720,15 +720,15 @@ function drawBetCell(
   ctx.textBaseline = "middle";
   // top line: stake (×lev)
   ctx.fillStyle = "rgba(255,255,255,0.92)";
-  ctx.font = '700 9px "Chakra Petch",monospace';
+  ctx.font = '700 9px "JetBrains Mono",monospace';
   ctx.fillText(`$${p.stake}${lev > 1 ? `×${lev}` : ""}`, x + w / 2, y + 10);
   // mid line: mult
   ctx.fillStyle = "#fff";
-  ctx.font = '700 13px "Audiowide","Chakra Petch",sans-serif';
+  ctx.font = '700 13px "Bungee","Anton",sans-serif';
   ctx.fillText(formatMultiplier(applyLeverage(p.mult, lev)), x + w / 2, y + h / 2);
   // bottom line: +$payout
-  ctx.fillStyle = "#00ff9d";
-  ctx.font = '700 9px "Chakra Petch",monospace';
+  ctx.fillStyle = "#2dd76a";
+  ctx.font = '700 9px "JetBrains Mono",monospace';
   ctx.fillText(`+$${payoutNet.toFixed(0)}`, x + w / 2, y + h - 9);
   ctx.textAlign = "start";
   ctx.textBaseline = "alphabetic";
@@ -741,7 +741,7 @@ function drawWinBurst(
   w: number,
   h: number,
   t: number, // 0..1 over WIN_BURST_MS
-  _p: StrikezonePosition,
+  _p: PinpointPosition,
   _payoutNet: number
 ) {
   // Scale: 0.9 → 1.45 → 1
@@ -764,11 +764,11 @@ function drawWinBurst(
   // Body — bright gold-orange gradient
   roundRect(ctx, x, y, w, h, 8);
   const g = ctx.createLinearGradient(0, y, 0, y + h);
-  g.addColorStop(0, "#fff6c4");
-  g.addColorStop(0.55, "#ffb347");
-  g.addColorStop(1, "#ff6b1a");
+  g.addColorStop(0, "#fff2b0");
+  g.addColorStop(0.55, "#ffd400");
+  g.addColorStop(1, "#ff3b1f");
   ctx.fillStyle = g;
-  ctx.shadowColor = "rgba(255,220,120,0.95)";
+  ctx.shadowColor = "rgba(255,212,0,0.85)";
   ctx.shadowBlur = 30 * brightness;
   ctx.fill();
   ctx.shadowBlur = 0;
@@ -790,7 +790,7 @@ function drawWinBurst(
     ctx.translate(-cx, -cy);
     roundRect(ctx, x, y, w, h, 12);
     ctx.lineWidth = 3 - ringT * 2;
-    ctx.strokeStyle = i === 0 ? "#ffd97a" : "#ff8a3d";
+    ctx.strokeStyle = i === 0 ? "#ffd400" : "#ff5a36";
     ctx.stroke();
     ctx.restore();
   }
@@ -803,7 +803,7 @@ function drawLoseFade(
   w: number,
   h: number,
   t: number,
-  _p: StrikezonePosition
+  _p: PinpointPosition
 ) {
   const alpha = 1 - t;
   const scale = 1 - t * 0.22;
@@ -855,10 +855,10 @@ function drawProfitPop(
   ctx.translate(cx, cy);
   ctx.scale(scale, scale);
   const negative = pop.amount < 0;
-  ctx.fillStyle = negative ? "#ff3a5a" : "#00ff9d";
-  ctx.shadowColor = negative ? "rgba(255,58,90,0.95)" : "rgba(0,255,157,0.95)";
+  ctx.fillStyle = negative ? "#ff3b1f" : "#2dd76a";
+  ctx.shadowColor = negative ? "rgba(255,59,31,0.9)" : "rgba(45,215,106,0.9)";
   ctx.shadowBlur = 22;
-  ctx.font = '800 30px "Audiowide","Chakra Petch",sans-serif';
+  ctx.font = '800 30px "Bungee","Anton",sans-serif';
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
   const sign = negative ? "−" : "+";
@@ -875,7 +875,7 @@ function drawLiquidateBurst(
   w: number,
   h: number,
   t: number,
-  _p: StrikezonePosition
+  _p: PinpointPosition
 ) {
   // Sharp red impact: scale punch 0..0.18, then fade quickly.
   const scale =
@@ -893,19 +893,19 @@ function drawLiquidateBurst(
   roundRect(ctx, x, y, w, h, 8);
   const g = ctx.createLinearGradient(0, y, 0, y + h);
   const flash = Math.min(1, t / 0.18);
-  g.addColorStop(0, flash < 1 ? "#ffffff" : "#ff7a8a");
-  g.addColorStop(1, flash < 1 ? "#ffaab2" : "#8a0a18");
+  g.addColorStop(0, flash < 1 ? "#ffffff" : "#ff5a36");
+  g.addColorStop(1, flash < 1 ? "#ffd2c8" : "#5a0a08");
   ctx.fillStyle = g;
-  ctx.shadowColor = "rgba(255,60,90,0.95)";
+  ctx.shadowColor = "rgba(255,59,31,0.9)";
   ctx.shadowBlur = 28 * (1 - t * 0.5);
   ctx.fill();
   ctx.shadowBlur = 0;
   ctx.lineWidth = 2;
-  ctx.strokeStyle = "#ff3a5a";
+  ctx.strokeStyle = "#ff3b1f";
   ctx.stroke();
 
   ctx.fillStyle = "#fff";
-  ctx.font = '800 11px "Audiowide","Chakra Petch",sans-serif';
+  ctx.font = '800 11px "Bungee","Anton",sans-serif';
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
   ctx.fillText("LIQ", cx, cy);
@@ -924,7 +924,7 @@ function drawLiquidateBurst(
     ctx.translate(-cx, -cy);
     roundRect(ctx, x, y, w, h, 10);
     ctx.lineWidth = 2;
-    ctx.strokeStyle = "#ff3a5a";
+    ctx.strokeStyle = "#ff3b1f";
     ctx.stroke();
     ctx.restore();
   }
@@ -937,7 +937,7 @@ function drawCountdownBadge(
   secs: number
 ) {
   const text = `0:${String(secs).padStart(2, "0")}`;
-  ctx.font = '700 14px "Audiowide","Chakra Petch",sans-serif';
+  ctx.font = '700 14px "Bungee","Anton",sans-serif';
   const tw = ctx.measureText(text).width;
   const padX = 12;
   const w = tw + padX * 2;
@@ -945,16 +945,16 @@ function drawCountdownBadge(
   const x = cx - w / 2;
   const y = topY;
   roundRect(ctx, x, y, w, h, 6);
-  ctx.fillStyle = "rgba(8,16,28,0.92)";
-  ctx.shadowColor = "rgba(0,240,255,0.45)";
+  ctx.fillStyle = "rgba(20,18,16,0.95)";
+  ctx.shadowColor = "rgba(255,212,0,0.5)";
   ctx.shadowBlur = 14;
   ctx.fill();
   ctx.shadowBlur = 0;
   ctx.lineWidth = 1.5;
-  ctx.strokeStyle = "#00f0ff";
+  ctx.strokeStyle = "#ffd400";
   ctx.stroke();
-  ctx.fillStyle = "#00f0ff";
-  ctx.shadowColor = "rgba(0,240,255,0.8)";
+  ctx.fillStyle = "#ffd400";
+  ctx.shadowColor = "rgba(255,212,0,0.9)";
   ctx.shadowBlur = 6;
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
@@ -993,19 +993,19 @@ function drawHitFlash(
   const g = ctx.createLinearGradient(0, y, 0, y + h);
   // White-hot at start, settle to gold
   const fadeToGold = Math.min(1, t / 0.25);
-  g.addColorStop(0, fadeToGold < 1 ? "#ffffff" : "#fff6c4");
-  g.addColorStop(1, fadeToGold < 1 ? "#ffe9a0" : "#ffb347");
+  g.addColorStop(0, fadeToGold < 1 ? "#ffffff" : "#fff2b0");
+  g.addColorStop(1, fadeToGold < 1 ? "#ffe066" : "#ffd400");
   ctx.fillStyle = g;
-  ctx.shadowColor = "rgba(255,220,120,0.95)";
+  ctx.shadowColor = "rgba(255,212,0,0.85)";
   ctx.shadowBlur = 24 * (1 - t * 0.5);
   ctx.fill();
   ctx.shadowBlur = 0;
   ctx.lineWidth = 2;
-  ctx.strokeStyle = "#ffd84a";
+  ctx.strokeStyle = "#ffd400";
   ctx.stroke();
 
-  ctx.fillStyle = "#3b1a00";
-  ctx.font = '700 13px "Chakra Petch","JetBrains Mono",monospace';
+  ctx.fillStyle = "#000";
+  ctx.font = '700 13px "JetBrains Mono",monospace';
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
   ctx.fillText(formatMultiplier(mult), cx, cy);
@@ -1024,7 +1024,7 @@ function drawHitFlash(
     ctx.translate(-cx, -cy);
     roundRect(ctx, x, y, w, h, 10);
     ctx.lineWidth = 2;
-    ctx.strokeStyle = "#ffd84a";
+    ctx.strokeStyle = "#ffd400";
     ctx.stroke();
     ctx.restore();
   }
@@ -1079,8 +1079,8 @@ function drawStar(
   t: number
 ) {
   const alpha = t < 0.15 ? t / 0.15 : 1 - (t - 0.15) / 0.85;
-  const color = s.hue === "gold" ? "#ffd84a" : "#7cffb2";
-  const glow = s.hue === "gold" ? "rgba(255,216,74,0.95)" : "rgba(124,255,178,0.9)";
+  const color = s.hue === "gold" ? "#ffd400" : "#2dd76a";
+  const glow = s.hue === "gold" ? "rgba(255,212,0,0.95)" : "rgba(45,215,106,0.9)";
   ctx.save();
   ctx.globalAlpha = Math.max(0, Math.min(1, alpha));
   ctx.translate(s.x, s.y);

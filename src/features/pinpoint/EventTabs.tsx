@@ -14,11 +14,11 @@ export function EventTabs({ events, activeEventId, onPick, openCountByEvent }: P
       <div className="flex shrink-0 items-center gap-2">
         <span
           className="size-2 animate-pulse rounded-full"
-          style={{ background: "var(--sz-red)", boxShadow: "0 0 8px var(--sz-red)" }}
+          style={{ background: "var(--pp-red)", boxShadow: "2px 2px 0 #000" }}
         />
         <span
-          className="sz-pixel text-[10px]"
-          style={{ color: "var(--sz-red)" }}
+          className="pp-stencil text-[10px]"
+          style={{ color: "var(--pp-red)" }}
         >
           LIVE
         </span>
@@ -34,45 +34,45 @@ export function EventTabs({ events, activeEventId, onPick, openCountByEvent }: P
             <button
               key={m.id}
               onClick={() => onPick(m.id)}
-              className={`sz-chip relative flex shrink-0 items-center gap-2.5 px-3 py-2 ${
-                isActive ? "sz-chip-cyan-active" : ""
+              className={`pp-chip relative flex shrink-0 items-center gap-2.5 px-3 py-2 ${
+                isActive ? "pp-chip-active-yellow" : ""
               }`}
             >
               <span
-                className="sz-pixel text-[10px]"
-                style={{ color: isActive ? "var(--sz-cyan)" : "var(--sz-muted)" }}
+                className="pp-stencil text-[10px]"
+                style={{ color: isActive ? "var(--pp-yellow)" : "var(--pp-mute)" }}
               >
                 {home?.short ?? "—"}
               </span>
               {score && (
                 <span
-                  className="sz-num text-[12px] tabular-nums"
+                  className="pp-num text-[12px] tabular-nums"
                   style={{ color: isActive ? "#fff" : "#aaa" }}
                 >
                   {score.home}–{score.away}
                 </span>
               )}
               <span
-                className="sz-pixel text-[10px]"
-                style={{ color: isActive ? "var(--sz-cyan)" : "var(--sz-muted)" }}
+                className="pp-stencil text-[10px]"
+                style={{ color: isActive ? "var(--pp-yellow)" : "var(--pp-mute)" }}
               >
                 {away?.short ?? "—"}
               </span>
               {m.liveClock && (
                 <span
-                  className="sz-pixel text-[8px]"
-                  style={{ color: "var(--sz-muted)" }}
+                  className="pp-stencil text-[8px]"
+                  style={{ color: "var(--pp-mute)" }}
                 >
                   · {m.liveClock}
                 </span>
               )}
               {openCount > 0 && (
                 <span
-                  className="sz-pixel absolute -right-1.5 -top-1.5 flex h-4 min-w-4 items-center justify-center rounded-full px-1 text-[8px]"
+                  className="pp-stencil absolute -right-1.5 -top-1.5 flex h-4 min-w-4 items-center justify-center rounded-full px-1 text-[8px]"
                   style={{
                     color: "#fff",
-                    background: "var(--sz-orange)",
-                    boxShadow: "0 0 8px rgba(255,107,26,0.6)",
+                    background: "var(--pp-red)",
+                    boxShadow: "2px 2px 0 #000",
                   }}
                 >
                   {openCount}
