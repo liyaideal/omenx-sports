@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState, useCallback } from "react";
-import { ArrowLeft, X, Zap } from "lucide-react";
+import { ArrowLeft, X, Zap, Volume2, VolumeX, BookOpen } from "lucide-react";
 import { toast } from "sonner";
 import { MATCH_MARKETS } from "@/data/sports-markets";
 import {
@@ -11,8 +11,6 @@ import {
 import { useLiveTicker } from "@/features/pinpoint/hooks/useLiveTicker";
 import { Sidebar, type OutcomeChoice } from "@/features/pinpoint/Sidebar";
 import { Grid } from "@/features/pinpoint/Grid";
-import { EventTabs } from "@/features/pinpoint/EventTabs";
-import { PlayerCard } from "@/features/pinpoint/PlayerCard";
 import { useGameStats } from "@/features/pinpoint/hooks/useGameStats";
 import {
   isMuted as soundsIsMuted,
@@ -380,25 +378,45 @@ function PinpointInner({
               UNDO {(undoMsLeft / 1000).toFixed(1)}S [Z]
             </button>
           )}
-          <PlayerCard stats={gameStats.stats} trophies={gameStats.trophies} />
+          <button
+            onClick={toggleMute}
+            className={`pp-chip pp-stencil flex items-center gap-1 px-2.5 py-1.5 text-[9px] ${
+              muted ? "" : "pp-chip-active-yellow"
+            }`}
+            style={{ color: muted ? "var(--pp-mute)" : "var(--pp-yellow)" }}
+            title={muted ? "Sound off — click to enable 8-bit FX" : "Sound on"}
+          >
+            {muted ? <VolumeX className="size-3" /> : <Volume2 className="size-3" />}
+            {muted ? "OFF" : "ON"}
+          </button>
+          <button
+            onClick={() => setShowRules(true)}
+            className="pp-chip pp-stencil flex items-center gap-1 px-2.5 py-1.5 text-[9px]"
+            style={{ color: "var(--pp-mute)" }}
+            title="How to play"
+          >
+            <BookOpen className="size-3" />
+            RULES
+          </button>
         </div>
       </header>
-
-      {/* Event tabs */}
-      <EventTabs
-        events={groups.map((g) => g.market)}
-        activeEventId={activeEventId}
-        onPick={onPickEvent}
-        openCountByEvent={openCountByEvent}
-      />
 
       <div className="relative z-10 flex gap-2 px-2 pb-4">
         {/* Sidebar */}
         <Sidebar
+          stats={gameStats.stats}
+          trophies={gameStats.trophies}
           balance={state.balance}
           sessionPL={state.sessionPL}
           openCount={openCount}
-          activeEvent={activeGroup.market}
+          equity={equity}
+          maintenance={maintenance}
+          lockedStake={lockedStake}
+          initialBalance={INITIAL_BALANCE}
+          events={groups.map((g) => g.market)}
+          activeEventId={activeEventId}
+          onPickEvent={onPickEvent}
+          openCountByEvent={openCountByEvent}
           outcomes={activeGroup.outcomes}
           activeOutcomeId={activeOutcomeId}
           onPickOutcome={onPickOutcome}
@@ -407,13 +425,6 @@ function PinpointInner({
           leverage={state.leverage}
           onLeverage={setLeverage}
           onStop={() => setShowStop(true)}
-          onShowRules={() => setShowRules(true)}
-          equity={equity}
-          maintenance={maintenance}
-          lockedStake={lockedStake}
-          initialBalance={INITIAL_BALANCE}
-          muted={muted}
-          onToggleMute={toggleMute}
         />
 
         {/* Main */}
