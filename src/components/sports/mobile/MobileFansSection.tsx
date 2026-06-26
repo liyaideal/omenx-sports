@@ -1,40 +1,450 @@
-import { MatchMarketCard } from "@/components/sports/dashboard/MatchMarketCard";
-import { FansZoneEmpty } from "@/components/sports/dashboard/FansZoneEmpty";
-import { LiveActivityCard } from "@/components/sports/dashboard/LiveActivityCard";
-import { FanZoneHeader } from "@/components/sports/dashboard/FanZoneHeader";
-import { FEATURED_MATCH } from "@/data/sports-markets";
+import { useState } from "react";
+import { Check, ChevronDown, Clock, Plus, Trophy, Users } from "lucide-react";
+import { toast } from "sonner";
+import { TeamPickerSheet } from "@/components/sports/dashboard/TeamPickerSheet";
 import {
   FOLLOWED_TEAMS,
   LIVE_TRADES,
   SUGGESTED_TEAMS,
   TEAMS,
-  type TeamKey,
+  type LiveTrade,
+  type TeamLite,
 } from "@/data/sports-mock";
 
 /**
- * Full mobile Fans page section. Pure presentational — no internal state.
+ * Mobile /fans page — 1:1 Figma frame 1:10216.
+ * Desktop/data/business logic unchanged; this is a presentation-only mobile
+ * rebuild. Interactions (Add Teams → TeamPickerSheet, crest toggle, Save toast)
+ * mirror the desktop FanZoneHeader / FollowTeamsPanel.
  */
 export function MobileFansSection() {
-  const followedKeys = (Object.keys(TEAMS) as TeamKey[]).filter((k) =>
-    FOLLOWED_TEAMS.includes(TEAMS[k]),
+  return (
+    <div className="space-y-6 pb-6">
+      <FansZoneHeaderBlock />
+      <EditorPickCard />
+      <FollowTeamCard />
+      <LiveActivityBlock trades={LIVE_TRADES} />
+    </div>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/* Shared bits                                                         */
+/* ------------------------------------------------------------------ */
+
+function SectionLabel({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="flex items-center gap-2.5">
+      <span className="h-3.5 w-[3px] rounded-sm bg-[#00e676]" />
+      <h2 className="font-display text-[13px] font-bold uppercase tracking-[0.08em] text-white">
+        {children}
+      </h2>
+    </div>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/* Fans zone header                                                    */
+/* ------------------------------------------------------------------ */
+
+function FansZoneHeaderBlock() {
+  const [open, setOpen] = useState(false);
+  const [followed, setFollowed] = useState<string[]>(
+    FOLLOWED_TEAMS.map((t) => t.name),
   );
   return (
-    <section className="space-y-3">
-      <FanZoneHeader
-        followingCount={FOLLOWED_TEAMS.length}
-        suggested={SUGGESTED_TEAMS}
-        followedNames={FOLLOWED_TEAMS.map((t) => t.name)}
+    <header className="space-y-2">
+      <div className="flex items-center justify-between gap-3">
+        <SectionLabel>Fans zone</SectionLabel>
+        <button
+          type="button"
+          onClick={() => setOpen(true)}
+          className="inline-flex items-center gap-1.5 rounded-full border border-white/15 bg-white/[0.03] px-3 py-1 font-mono text-[10px] uppercase tracking-wider text-white/80 transition hover:bg-white/[0.06]"
+        >
+          <Users className="h-3 w-3" />
+          {followed.length > 0 ? `${followed.length} teams` : "Add Teams"}
+          <ChevronDown className="h-3 w-3" />
+        </button>
+      </div>
+      <p className="text-[11px] text-white/45">
+        Editor's pick · follow your team to personalize
+      </p>
+      <TeamPickerSheet
+        open={open}
+        onOpenChange={setOpen}
+        variant="dialog"
+        groups={[{ label: "Suggested", teams: SUGGESTED_TEAMS }]}
+        initialFollowed={followed}
+        title="Manage teams you follow"
+        description="Tap a crest to follow or unfollow. We'll surface their matches, polls, and fan posts here."
+        onSave={(names) => {
+          setFollowed(names);
+          toast.success(
+            names.length > 0
+              ? `Following ${names.length} team${names.length === 1 ? "" : "s"}`
+              : "Cleared your followed teams",
+          );
+        }}
       />
-      {FOLLOWED_TEAMS.length > 0 ? (
-        <MatchMarketCard market={FEATURED_MATCH} />
-      ) : (
-        <FansZoneEmpty editorPick={FEATURED_MATCH} suggested={SUGGESTED_TEAMS} />
-      )}
-      <LiveActivityCard
-        trades={LIVE_TRADES}
-        followedTeams={FOLLOWED_TEAMS}
-        followedKeys={followedKeys}
-      />
+    </header>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/* Editor's pick — CAN vs BIH three-way card                           */
+/* ------------------------------------------------------------------ */
+
+interface PickOutcome {
+  name: string;
+  short: string;
+  cents: number;
+  delta: number;
+  color: "green" | "grey" | "red";
+}
+
+const PICK_HOME = TEAMS.canada;
+const PICK_AWAY = TEAMS.bosnia;
+const PICK_OUTCOMES: PickOutcome[] = [
+  { name: "Canada", short: "CAN", cents: 53, delta: 2, color: "green" },
+  { name: "Draw", short: "X", cents: 26, delta: 0, color: "grey" },
+  { name: "Bosnia and Herzegovina", short: "BIH", cents: 22, delta: -2, color: "red" },
+];
+
+function EditorPickCard() {
+  const dotColor = (c: PickOutcome["color"]) =>
+    c === "green" ? "bg-[#00e676]" : c === "red" ? "bg-[#ff4c4d]" : "bg-white/40";
+  const barColor = (c: PickOutcome["color"]) =>
+    c === "green" ? "bg-[#00e676]" : c === "red" ? "bg-[#ff4c4d]" : "bg-white/25";
+
+  return (
+    <article className="overflow-hidden rounded-2xl border border-white/[0.08] bg-[#11161c]">
+      {/* Header strip with team flags */}
+      <div className="relative">
+        <div className="absolute inset-0 grid grid-cols-2">
+          <div
+            className="opacity-40"
+            style={{
+              backgroundImage: `url(${PICK_HOME.logo})`,
+              backgroundSize: "cover",
+              backgroundPosition: "center",
+            }}
+          />
+          <div
+            className="opacity-40"
+            style={{
+              backgroundImage: `url(${PICK_AWAY.logo})`,
+              backgroundSize: "cover",
+              backgroundPosition: "center",
+            }}
+          />
+        </div>
+        <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-black/55 to-[#11161c]" />
+        <div className="relative px-4 pt-4">
+          <span className="inline-flex items-center gap-1.5 rounded-md bg-[#ffca16] px-2 py-1 font-mono text-[10px] font-bold uppercase tracking-wider text-black">
+            <Trophy className="h-3 w-3" />
+            World Cup
+          </span>
+          <div className="mt-4 flex items-center justify-between pb-5">
+            <div className="flex items-center gap-2">
+              <img
+                src={PICK_HOME.logo}
+                alt=""
+                className="h-7 w-10 rounded-sm object-cover ring-1 ring-white/20"
+              />
+              <span className="font-display text-2xl font-bold tracking-tight text-white">
+                {PICK_HOME.short}
+              </span>
+            </div>
+            <span className="text-xs uppercase tracking-wider text-white/45">
+              vs
+            </span>
+            <div className="flex items-center gap-2">
+              <span className="font-display text-2xl font-bold tracking-tight text-white">
+                {PICK_AWAY.short}
+              </span>
+              <img
+                src={PICK_AWAY.logo}
+                alt=""
+                className="h-7 w-10 rounded-sm object-cover ring-1 ring-white/20"
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Probability bar */}
+      <div className="flex h-[3px] w-full overflow-hidden">
+        {PICK_OUTCOMES.map((o) => (
+          <span
+            key={o.short}
+            className={barColor(o.color)}
+            style={{ width: `${o.cents}%` }}
+          />
+        ))}
+      </div>
+
+      {/* Outcome rows */}
+      <ul className="divide-y divide-white/[0.05] px-4">
+        {PICK_OUTCOMES.map((o) => (
+          <li
+            key={o.short}
+            className="flex items-center justify-between gap-3 py-3"
+          >
+            <div className="flex items-center gap-2.5 min-w-0">
+              <span className={`h-2 w-2 rounded-full ${dotColor(o.color)}`} />
+              <span className="truncate text-sm text-white/85">{o.name}</span>
+            </div>
+            <div className="flex shrink-0 items-center gap-2">
+              <span className="font-display text-base font-bold tabular-nums text-white">
+                {o.cents}¢
+              </span>
+              <TrendPill delta={o.delta} />
+            </div>
+          </li>
+        ))}
+      </ul>
+
+      {/* Footer */}
+      <div className="flex items-center justify-between gap-2 border-t border-white/[0.05] px-4 py-3 text-[11px] text-white/50">
+        <span className="inline-flex items-center gap-1.5">
+          <Clock className="h-3 w-3" />
+          Tomorrow 3:00pm
+        </span>
+        <span className="inline-flex items-center gap-3 font-mono">
+          <span className="inline-flex items-center gap-1">
+            <Users className="h-3 w-3" />
+            1,840
+          </span>
+          <span>Vol $208K</span>
+        </span>
+      </div>
+    </article>
+  );
+}
+
+function TrendPill({ delta }: { delta: number }) {
+  if (delta === 0) {
+    return (
+      <span className="inline-flex min-w-[42px] items-center justify-center gap-0.5 rounded-md border border-white/10 bg-white/[0.04] px-1.5 py-0.5 font-mono text-[10px] text-white/55">
+        — 0¢
+      </span>
+    );
+  }
+  const up = delta > 0;
+  return (
+    <span
+      className={`inline-flex min-w-[42px] items-center justify-center gap-0.5 rounded-md px-1.5 py-0.5 font-mono text-[10px] font-semibold ${
+        up
+          ? "bg-[#00e676]/12 text-[#00e676]"
+          : "bg-[#ff4c4d]/12 text-[#ff4c4d]"
+      }`}
+    >
+      {up ? "▲" : "▼"} {up ? "+" : ""}{delta}¢
+    </span>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/* Follow your team                                                    */
+/* ------------------------------------------------------------------ */
+
+function FollowTeamCard() {
+  const [followed, setFollowed] = useState<Set<string>>(
+    () => new Set([TEAMS.koreaRep.name, TEAMS.czechia.name]),
+  );
+  const toggle = (name: string) =>
+    setFollowed((prev) => {
+      const next = new Set(prev);
+      if (next.has(name)) next.delete(name);
+      else next.add(name);
+      return next;
+    });
+  const save = () => {
+    toast.success(
+      followed.size > 0
+        ? `Following ${followed.size} team${followed.size === 1 ? "" : "s"}`
+        : "Cleared your followed teams",
+    );
+  };
+
+  return (
+    <section className="rounded-2xl border border-white/[0.08] bg-[#11161c] p-4">
+      <h3 className="font-display text-base font-bold uppercase tracking-wider text-white">
+        Follow your team
+      </h3>
+      <p className="mt-1 text-[11px] leading-relaxed text-white/45">
+        Pick a few clubs and we'll surface their matches, polls, and fan posts
+        here.
+      </p>
+
+      <ul className="mt-4 grid grid-cols-5 gap-1">
+        {SUGGESTED_TEAMS.map((team) => (
+          <li key={team.name}>
+            <CrestButton
+              team={team}
+              following={followed.has(team.name)}
+              onClick={() => toggle(team.name)}
+            />
+          </li>
+        ))}
+      </ul>
+
+      <div className="mt-4 flex items-center justify-between gap-3">
+        <span className="text-[11px] text-white/45">
+          {followed.size > 0
+            ? `${followed.size} selected`
+            : "Tap a crest to follow"}
+        </span>
+        <button
+          type="button"
+          onClick={save}
+          className="rounded-md bg-[#00e676] px-5 py-2 font-display text-xs font-bold uppercase tracking-wider text-black transition active:scale-95 disabled:opacity-40"
+          disabled={followed.size === 0}
+        >
+          Save
+        </button>
+      </div>
     </section>
   );
+}
+
+function CrestButton({
+  team,
+  following,
+  onClick,
+}: {
+  team: TeamLite;
+  following: boolean;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      aria-pressed={following}
+      className="group flex w-full flex-col items-center gap-1.5"
+    >
+      <span
+        className={`relative grid h-12 w-12 place-items-center rounded-full bg-[#1a2026] p-1.5 ring-2 transition ${
+          following ? "ring-[#00e676]" : "ring-white/10 group-hover:ring-white/25"
+        }`}
+      >
+        <img
+          src={team.logo}
+          alt=""
+          className="h-full w-full rounded-full object-cover"
+        />
+        <span
+          className={`absolute -bottom-0.5 -right-0.5 grid h-4 w-4 place-items-center rounded-full ring-2 ring-[#11161c] ${
+            following
+              ? "bg-[#00e676] text-black"
+              : "bg-white/[0.12] text-white/70"
+          }`}
+        >
+          {following ? (
+            <Check className="h-2.5 w-2.5" strokeWidth={3} />
+          ) : (
+            <Plus className="h-2.5 w-2.5" strokeWidth={3} />
+          )}
+        </span>
+      </span>
+      <span className="font-mono text-[10px] font-medium text-white/55 group-hover:text-white">
+        {team.short}
+      </span>
+    </button>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/* Live activity                                                       */
+/* ------------------------------------------------------------------ */
+
+function LiveActivityBlock({ trades }: { trades: LiveTrade[] }) {
+  const recent = trades.slice(0, 6);
+  return (
+    <section className="space-y-3">
+      <div className="flex items-center justify-between gap-3">
+        <SectionLabel>Live activity</SectionLabel>
+        <span className="rounded-full border border-white/15 bg-white/[0.03] px-2.5 py-0.5 font-mono text-[10px] uppercase tracking-wider text-white/70">
+          9 in 5m
+        </span>
+      </div>
+      <p className="text-[11px] text-white/45">
+        Following · United States, Mexico
+      </p>
+      <ul className="overflow-hidden rounded-2xl border border-white/[0.08] bg-[#11161c]">
+        {recent.map((t, i) => (
+          <li
+            key={t.id}
+            className={
+              i === 0 ? "px-4 py-3" : "border-t border-white/[0.05] px-4 py-3"
+            }
+          >
+            <LiveTradeRow trade={t} />
+          </li>
+        ))}
+      </ul>
+    </section>
+  );
+}
+
+function LiveTradeRow({ trade }: { trade: LiveTrade }) {
+  const t = trade;
+  return (
+    <div className="flex items-start gap-3">
+      {t.avatar ? (
+        <img
+          src={t.avatar}
+          alt=""
+          className="h-9 w-9 shrink-0 rounded-full object-cover"
+        />
+      ) : (
+        <span
+          className="grid h-9 w-9 shrink-0 place-items-center rounded-full text-[13px] font-bold text-white"
+          style={{ background: `oklch(0.55 0.18 ${t.hue})` }}
+        >
+          {t.handle.replace("@", "").charAt(0).toUpperCase()}
+        </span>
+      )}
+      <div className="min-w-0 flex-1">
+        <div className="flex items-center justify-between gap-2">
+          <span className="truncate text-[13px] font-medium text-white">
+            {t.handle}
+          </span>
+          <span className="shrink-0 font-mono text-[10px] uppercase tracking-wider text-white/40">
+            {formatAgo(t.secondsAgo)}
+          </span>
+        </div>
+        <div className="mt-0.5 flex items-center gap-2">
+          <span
+            className={`font-display text-xs font-bold uppercase tracking-wider ${
+              t.side === "bought" ? "text-[#00e676]" : "text-[#ff4c4d]"
+            }`}
+          >
+            {t.side === "bought" ? "Bought" : "Sold"}
+          </span>
+          <span
+            className={`inline-flex items-center gap-1 rounded-md px-1.5 py-0.5 font-mono text-[10px] ${
+              t.side === "bought"
+                ? "border border-[#00e676]/30 bg-[#00e676]/10 text-[#00e676]"
+                : "border border-[#ff4c4d]/30 bg-[#ff4c4d]/10 text-[#ff4c4d]"
+            }`}
+          >
+            {t.outcomeLabel} · {t.price}¢
+          </span>
+        </div>
+        <p className="mt-1 truncate text-[11px] text-white/45">
+          {t.eventTitle}
+        </p>
+      </div>
+    </div>
+  );
+}
+
+function formatAgo(seconds: number): string {
+  if (seconds < 60) return `${seconds}s`;
+  const m = Math.floor(seconds / 60);
+  if (m < 60) return `${m}m`;
+  const h = Math.floor(m / 60);
+  return `${h}h`;
 }
