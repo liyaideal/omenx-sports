@@ -262,20 +262,20 @@ function WorldCupCarnivalBadge() {
     >
       <span className="relative inline-flex h-9 w-9 shrink-0 items-center justify-center overflow-visible">
         <AnimatedJersey className="h-9 w-9" />
-        <span className="absolute -right-0.5 -top-0.5 z-10 inline-flex h-2 w-2">
-          <span className="absolute inset-0 animate-ping rounded-full bg-red-500/80" />
-          <span className="relative inline-flex h-2 w-2 rounded-full bg-red-500 ring-[1.5px] ring-[#0b0d12]" />
+        <span className="pointer-events-none absolute right-[5px] top-[3px] z-10 inline-flex h-[7px] w-[7px]">
+          <span className="absolute inset-0 animate-ping rounded-full bg-red-500/70" />
+          <span className="relative inline-flex h-[7px] w-[7px] rounded-full bg-red-500 ring-[1.5px] ring-[#0b0d12]" />
         </span>
       </span>
-      <span className="flex flex-col items-start leading-[1.05]">
-        <span className="font-display text-[10px] font-extrabold uppercase tracking-[0.16em] text-white/90">
+      <span className="flex flex-col items-start leading-[1.1]">
+        <span className="font-display text-[11px] font-extrabold uppercase tracking-[0.14em] text-[#b9a7ff]">
           World Cup
         </span>
-        <span className="font-display text-[10px] font-extrabold uppercase tracking-[0.16em] text-white/90">
+        <span className="font-display text-[11px] font-extrabold uppercase tracking-[0.14em] text-[#b9a7ff]">
           Carnival
         </span>
       </span>
-      <ChevronRight className="h-3.5 w-3.5 text-white/45 transition-transform group-hover/wc:translate-x-0.5 group-hover/wc:text-white/80" />
+      <ChevronRight className="h-4 w-4 text-white/55 transition-transform group-hover/wc:translate-x-0.5 group-hover/wc:text-white/85" />
     </Link>
   );
 }
