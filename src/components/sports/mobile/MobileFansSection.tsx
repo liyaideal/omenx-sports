@@ -277,7 +277,7 @@ function FollowTeamCard() {
         here.
       </p>
 
-      <ul className="mt-4 grid grid-cols-5 gap-1">
+      <ul className="mt-4 grid grid-cols-5 gap-2">
         {SUGGESTED_TEAMS.map((team) => (
           <li key={team.name}>
             <CrestButton
@@ -289,7 +289,7 @@ function FollowTeamCard() {
         ))}
       </ul>
 
-      <div className="mt-4 flex items-center justify-between gap-3">
+      <div className="mt-5 flex items-center justify-between gap-3">
         <span className="text-[11px] text-white/45">
           {followed.size > 0
             ? `${followed.size} selected`
@@ -298,7 +298,7 @@ function FollowTeamCard() {
         <button
           type="button"
           onClick={save}
-          className="rounded-md bg-[#00e676] px-5 py-2 font-display text-xs font-bold uppercase tracking-wider text-black transition active:scale-95 disabled:opacity-40"
+          className="rounded-full bg-[#00e676] px-7 py-2.5 font-display text-xs font-extrabold uppercase tracking-[0.12em] text-black shadow-[0_4px_18px_-6px_rgba(0,230,118,0.6)] transition active:scale-95 disabled:opacity-40"
           disabled={followed.size === 0}
         >
           Save
@@ -322,10 +322,10 @@ function CrestButton({
       type="button"
       onClick={onClick}
       aria-pressed={following}
-      className="group flex w-full flex-col items-center gap-1.5"
+      className="group flex w-full flex-col items-center gap-2"
     >
       <span
-        className={`relative grid h-12 w-12 place-items-center rounded-full bg-[#1a2026] p-1.5 ring-2 transition ${
+        className={`relative grid h-14 w-14 place-items-center rounded-full bg-[#1a2026] p-1.5 ring-2 transition ${
           following ? "ring-[#00e676]" : "ring-white/10 group-hover:ring-white/25"
         }`}
       >
