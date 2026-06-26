@@ -260,12 +260,9 @@ function WorldCupCarnivalBadge() {
       aria-label="World Cup Carnival"
       className="group/wc relative hidden shrink-0 items-center gap-2.5 whitespace-nowrap rounded-2xl border border-white/10 bg-white/[0.03] px-2.5 py-1.5 transition-all hover:border-white/20 hover:bg-white/[0.06] xl:flex"
     >
-      <span className="relative inline-flex h-7 w-7 items-center justify-center">
-        <JerseyIcon className="h-7 w-7" />
-        <span className="pointer-events-none absolute inset-x-0 top-[11px] text-center font-display text-[9px] font-black leading-none text-white">
-          10
-        </span>
-        <span className="absolute -right-0.5 -top-0.5 inline-flex h-2 w-2">
+      <span className="relative inline-flex h-9 w-9 shrink-0 items-center justify-center overflow-visible">
+        <AnimatedJersey className="h-9 w-9" />
+        <span className="absolute -right-0.5 -top-0.5 z-10 inline-flex h-2 w-2">
           <span className="absolute inset-0 animate-ping rounded-full bg-red-500/80" />
           <span className="relative inline-flex h-2 w-2 rounded-full bg-red-500 ring-[1.5px] ring-[#0b0d12]" />
         </span>
@@ -283,16 +280,94 @@ function WorldCupCarnivalBadge() {
   );
 }
 
-function JerseyIcon({ className }: { className?: string }) {
+function AnimatedJersey({ className }: { className?: string }) {
   return (
-    <svg viewBox="0 0 24 24" fill="none" className={className} aria-hidden>
-      <path
-        d="M7.5 3.2 4 4.6 2.6 8.3l2.6 1.2.7-1.6V20a1 1 0 0 0 1 1h10.2a1 1 0 0 0 1-1V7.9l.7 1.6 2.6-1.2L20 4.6l-3.5-1.4-1.5 2.1a3.5 3.5 0 0 1-6 0L7.5 3.2Z"
-        fill="#5b6cff"
-        stroke="#a8b4ff"
-        strokeWidth="0.8"
-        strokeLinejoin="round"
-      />
-    </svg>
+    <span className={`jf-stage ${className ?? ""}`} aria-hidden>
+      <style>{JERSEY_CSS}</style>
+      <span className="jf-halowrap">
+        <svg className="jf-halosvg" viewBox="0 0 184 184">
+          <defs>
+            <radialGradient id="jfHalo2">
+              <stop offset="0" stopColor="#fff0c0" stopOpacity="0.95" />
+              <stop offset="60%" stopColor="#ffd76a" stopOpacity="0.3" />
+              <stop offset="100%" stopColor="#ffd76a" stopOpacity="0" />
+            </radialGradient>
+          </defs>
+          <circle className="jf-halo" cx="92" cy="92" r="62" fill="url(#jfHalo2)" />
+        </svg>
+      </span>
+      <span className="jf-life">
+        <span className="jf-sway">
+          <svg className="jf-jsvg" viewBox="0 0 120 140">
+            <defs>
+              <linearGradient id="jfShine2" x1="0" y1="0" x2="1" y2="0">
+                <stop offset="0" stopColor="#fff" stopOpacity="0" />
+                <stop offset="0.5" stopColor="#fff" stopOpacity="0.7" />
+                <stop offset="1" stopColor="#fff" stopOpacity="0" />
+              </linearGradient>
+              <path
+                id="jfBody2"
+                d="M34 30 L47 24 Q60 34 73 24 L86 30 L109 47 L94 66 L86 58 L86 105 L34 105 L34 58 L26 66 L11 47 Z"
+              />
+              <clipPath id="jfClip2">
+                <use href="#jfBody2" />
+              </clipPath>
+            </defs>
+            <use href="#jfBody2" fill="#6c5ce7" />
+            <g clipPath="url(#jfClip2)">
+              <rect x="20" y="0" width="11" height="140" fill="#4d3cc0" />
+              <rect x="42" y="0" width="11" height="140" fill="#4d3cc0" />
+              <rect x="64" y="0" width="11" height="140" fill="#4d3cc0" />
+              <rect x="86" y="0" width="11" height="140" fill="#4d3cc0" />
+              <path d="M11 47 L26 66 L30 61 L15 42 Z" fill="#ffd76a" />
+              <path d="M109 47 L94 66 L90 61 L105 42 Z" fill="#ffd76a" />
+              <rect x="31" y="99" width="58" height="5" fill="#ffd76a" />
+              <path d="M46 27 L17 45" stroke="#ff6f9c" strokeWidth="2.4" fill="none" strokeLinecap="round" />
+              <path d="M74 27 L103 45" stroke="#ff6f9c" strokeWidth="2.4" fill="none" strokeLinecap="round" />
+            </g>
+            <use href="#jfBody2" fill="none" stroke="#ffffff" strokeWidth="3" strokeLinejoin="round" />
+            <path d="M47 24 Q60 34 73 24" fill="none" stroke="#ffd76a" strokeWidth="3.6" strokeLinecap="round" />
+            <path d="M47 24 Q60 34 73 24" fill="none" stroke="#ffffff" strokeWidth="1.3" strokeLinecap="round" />
+            <circle cx="45" cy="48" r="7" fill="#ffd76a" stroke="#e0a93a" strokeWidth="1" />
+            <path
+              d="M45 44 l1.4 2.9 3.2.4 -2.3 2.2 .6 3.1 -2.9-1.5 -2.9 1.5 .6-3.1 -2.3-2.2 3.2-.4 z"
+              fill="#6c4a08"
+            />
+            <text
+              x="64"
+              y="93"
+              fontSize="26"
+              fontWeight="800"
+              fill="#ffffff"
+              stroke="#ffd76a"
+              strokeWidth="0.8"
+              textAnchor="middle"
+              fontFamily="sans-serif"
+            >
+              10
+            </text>
+            <g clipPath="url(#jfClip2)">
+              <rect className="jf-shine" x="0" y="-8" width="30" height="156" fill="url(#jfShine2)" />
+            </g>
+          </svg>
+        </span>
+      </span>
+    </span>
   );
 }
+
+const JERSEY_CSS = `
+.jf-stage{position:relative;display:inline-flex;align-items:center;justify-content:center;overflow:visible;}
+.jf-halowrap{position:absolute;inset:-40%;display:flex;align-items:center;justify-content:center;pointer-events:none;}
+.jf-halosvg{width:160%;height:160%;overflow:visible;}
+.jf-jsvg{width:100%;height:100%;display:block;overflow:visible;}
+.jf-life{position:relative;width:78%;height:90%;display:flex;align-items:center;justify-content:center;transform-origin:center;animation:jf-life 4.5s ease-in-out infinite;}
+.jf-sway{width:100%;height:100%;display:flex;align-items:center;justify-content:center;transform-origin:50% 8%;animation:jf-sway 4.5s ease-in-out infinite;}
+.jf-halo{transform-box:fill-box;transform-origin:center;animation:jf-halo 4.5s ease-in-out infinite;}
+.jf-shine{transform-box:fill-box;animation:jf-shine 4.5s ease-in-out infinite;}
+@keyframes jf-life{0%{transform:scale(1)}22%{transform:scale(1.035)}44%{transform:scale(1)}56%{transform:scale(1.10)}63%{transform:scale(.985)}70%{transform:scale(1.025)}78%,100%{transform:scale(1)}}
+@keyframes jf-sway{0%,100%{transform:skewX(1deg) rotate(.6deg)}50%{transform:skewX(-1deg) rotate(-.6deg)}}
+@keyframes jf-halo{0%{transform:scale(.85);opacity:.4}22%{transform:scale(1.05);opacity:.8}44%{transform:scale(.85);opacity:.4}56%{transform:scale(1.22);opacity:1}70%{transform:scale(1);opacity:.6}100%{transform:scale(.85);opacity:.4}}
+@keyframes jf-shine{0%,8%{transform:translateX(-72px) skewX(-16deg)}26%{transform:translateX(188px) skewX(-16deg)}100%{transform:translateX(188px) skewX(-16deg)}}
+@media (prefers-reduced-motion: reduce){.jf-life,.jf-sway,.jf-halo,.jf-shine{animation:none}}
+`;
