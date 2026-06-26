@@ -63,6 +63,7 @@ import { MATCH_MARKETS, FEATURED_MATCH } from "@/data/sports-markets";
 import { MobileTopBar } from "@/components/sports/mobile/MobileTopBar";
 import omenxLogo from "@/assets/omenx-logo.svg";
 import { MobileBottomNav } from "@/components/sports/mobile/MobileBottomNav";
+import { MobileFansSection } from "@/components/sports/mobile/MobileFansSection";
 import { MobileLiveHero } from "@/components/sports/mobile/MobileLiveHero";
 import { MeSheet } from "@/components/sports/mobile/MeSheet";
 import { ACCOUNT_STATS } from "@/data/sports-markets";
