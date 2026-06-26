@@ -1,4 +1,3 @@
-import { Bell } from "lucide-react";
 import omenxLogo from "@/assets/omenx-logo.svg";
 
 /**
@@ -18,9 +17,9 @@ export function MobileTopBar({
   onAvatarClick: () => void;
 }) {
   return (
-    <header className="sticky top-0 z-40 border-b border-border/40 bg-background/85 backdrop-blur-xl">
+    <header className="sticky top-0 z-40 border-b border-white/[0.06] bg-[#0a0a0a]/95 backdrop-blur-xl">
       <div className="flex h-14 items-center justify-between gap-3 px-4">
-        {/* Logo lockup — mirrors desktop AppTopBar (OmenX mark + neon divider + Sports) */}
+        {/* Logo lockup — Figma mobile spec: OMENX (white) | SPORTS (green italic) */}
         <a
           href="/"
           aria-label="OmenX Sports"
@@ -33,37 +32,15 @@ export function MobileTopBar({
           />
           <span
             aria-hidden
-            className="relative h-7 w-[2px] overflow-hidden rounded-full bg-white/5"
-          >
-            <span
-              className="absolute inset-0 bg-gradient-to-b from-primary via-primary to-accent"
-              style={{
-                boxShadow:
-                  "0 0 10px color-mix(in oklab, var(--primary) 60%, transparent)",
-              }}
-            />
-          </span>
-          <span
-            className="bg-gradient-to-br from-primary to-accent bg-clip-text font-display text-lg font-black italic uppercase tracking-normal text-transparent"
-            style={{
-              filter:
-                "drop-shadow(0 0 12px color-mix(in oklab, var(--primary) 35%, transparent))",
-            }}
-          >
+            className="h-6 w-[2px] rounded-full bg-white/15"
+          />
+          <span className="font-display text-lg font-black italic uppercase tracking-normal text-[#00e676]">
             Sports
           </span>
         </a>
 
-        {/* Right cluster */}
-        <div className="flex items-center gap-1.5">
-          <button
-            type="button"
-            aria-label="Notifications"
-            className="relative grid h-9 w-9 place-items-center rounded-full bg-white/[0.04] text-muted-foreground transition active:scale-95"
-          >
-            <Bell className="h-4 w-4" />
-            <span className="absolute right-2 top-2 h-1.5 w-1.5 rounded-full bg-[oklch(0.7_0.22_25)] shadow-[0_0_6px_oklch(0.7_0.22_25)]" />
-          </button>
+        {/* Right cluster — Figma keeps it minimal: just the avatar entry */}
+        <div className="flex items-center">
           <button
             type="button"
             onClick={onAvatarClick}
@@ -73,7 +50,7 @@ export function MobileTopBar({
             <img
               src={userAvatar}
               alt={userName}
-              className="h-9 w-9 rounded-full border-2 border-primary/50 object-cover"
+              className="h-9 w-9 rounded-full border border-white/15 object-cover"
             />
           </button>
         </div>
