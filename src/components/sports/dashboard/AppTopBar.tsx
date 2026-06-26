@@ -10,12 +10,12 @@ import {
   MessageCircle,
   Settings as SettingsIcon,
   Shield,
-  Trophy,
   Users,
 } from "lucide-react";
 import { omenxUrl, OMENX_BASE } from "@/lib/omenx";
 import { Link } from "@tanstack/react-router";
 import omenxLogo from "@/assets/omenx-logo.svg";
+import { ChevronRight } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -113,27 +113,7 @@ export function AppTopBar({
           </a>
 
           <nav className="flex min-w-0 items-center gap-1">
-            <Link
-              to="/promo/world-cup"
-              search={{ tab: "overview" }}
-              className="group/wc relative hidden shrink-0 items-center gap-1.5 overflow-hidden whitespace-nowrap rounded-lg border border-[oklch(0.7_0.18_145)]/40 bg-[oklch(0.7_0.18_145)]/10 px-3 py-2 font-pitch text-xs font-bold uppercase tracking-[0.14em] text-[oklch(0.7_0.18_145)] transition-all hover:bg-[oklch(0.7_0.18_145)]/20 hover:text-white xl:flex xl:px-3.5"
-              style={{
-                boxShadow:
-                  "inset 0 0 0 1px oklch(0.7 0.18 145 / 0.3), 0 0 18px -6px oklch(0.7 0.18 145 / 0.7)",
-              }}
-            >
-              <span aria-hidden className="pointer-events-none absolute inset-0 bg-carnival-led-dots opacity-40" />
-              <span
-                aria-hidden
-                className="pointer-events-none absolute inset-y-0 -left-1/2 w-1/2 -skew-x-12 bg-gradient-to-r from-transparent via-[oklch(0.7_0.18_145)]/40 to-transparent transition-transform duration-700 ease-out group-hover/wc:translate-x-[400%]"
-              />
-              <Trophy className="relative h-3.5 w-3.5 transition-transform duration-300 group-hover/wc:-rotate-12 group-hover/wc:scale-110" />
-              <span className="relative">World Cup Carnival</span>
-              <span className="relative ml-0.5 inline-flex h-1.5 w-1.5">
-                <span className="absolute inset-0 animate-ping rounded-full bg-amber-400 opacity-80" />
-                <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-amber-400" />
-              </span>
-            </Link>
+            <WorldCupCarnivalBadge />
             {NAV.map((item) => (
               <a
                 key={item.label}
@@ -269,5 +249,50 @@ export function AppTopBar({
         </div>
       </div>
     </header>
+  );
+}
+
+function WorldCupCarnivalBadge() {
+  return (
+    <Link
+      to="/promo/world-cup"
+      search={{ tab: "overview" }}
+      aria-label="World Cup Carnival"
+      className="group/wc relative hidden shrink-0 items-center gap-2.5 whitespace-nowrap rounded-2xl border border-white/10 bg-white/[0.03] px-2.5 py-1.5 transition-all hover:border-white/20 hover:bg-white/[0.06] xl:flex"
+    >
+      <span className="relative inline-flex h-7 w-7 items-center justify-center">
+        <JerseyIcon className="h-7 w-7" />
+        <span className="pointer-events-none absolute inset-x-0 top-[11px] text-center font-display text-[9px] font-black leading-none text-white">
+          10
+        </span>
+        <span className="absolute -right-0.5 -top-0.5 inline-flex h-2 w-2">
+          <span className="absolute inset-0 animate-ping rounded-full bg-red-500/80" />
+          <span className="relative inline-flex h-2 w-2 rounded-full bg-red-500 ring-[1.5px] ring-[#0b0d12]" />
+        </span>
+      </span>
+      <span className="flex flex-col items-start leading-[1.05]">
+        <span className="font-display text-[10px] font-extrabold uppercase tracking-[0.16em] text-white/90">
+          World Cup
+        </span>
+        <span className="font-display text-[10px] font-extrabold uppercase tracking-[0.16em] text-white/90">
+          Carnival
+        </span>
+      </span>
+      <ChevronRight className="h-3.5 w-3.5 text-white/45 transition-transform group-hover/wc:translate-x-0.5 group-hover/wc:text-white/80" />
+    </Link>
+  );
+}
+
+function JerseyIcon({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" className={className} aria-hidden>
+      <path
+        d="M7.5 3.2 4 4.6 2.6 8.3l2.6 1.2.7-1.6V20a1 1 0 0 0 1 1h10.2a1 1 0 0 0 1-1V7.9l.7 1.6 2.6-1.2L20 4.6l-3.5-1.4-1.5 2.1a3.5 3.5 0 0 1-6 0L7.5 3.2Z"
+        fill="#5b6cff"
+        stroke="#a8b4ff"
+        strokeWidth="0.8"
+        strokeLinejoin="round"
+      />
+    </svg>
   );
 }
