@@ -106,7 +106,7 @@ interface PickOutcome {
   short: string;
   cents: number;
   delta: number;
-  color: "green" | "grey" | "red";
+  color: "blue" | "green" | "grey" | "red";
 }
 
 const PICK_HOME = TEAMS.canada;
