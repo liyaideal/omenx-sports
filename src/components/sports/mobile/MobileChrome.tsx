@@ -25,7 +25,7 @@ export function MobileChrome({
 }) {
   const [meOpen, setMeOpen] = useState(false);
   return (
-    <div className="md:hidden">
+    <div className="bg-[#0a0a0a] md:hidden">
       <MobileTopBar
         userName={USER_NAME}
         userAvatar={USER_AVATAR}
