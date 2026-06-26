@@ -390,8 +390,8 @@ function LiveActivityBlock({ trades }: { trades: LiveTrade[] }) {
     <section className="space-y-2">
       <div className="flex items-center justify-between gap-3">
         <SectionLabel>Live activity</SectionLabel>
-        <span className="rounded-full border border-white/15 bg-white/[0.03] px-2.5 py-0.5 font-mono text-[10px] uppercase tracking-wider text-white/70">
-          9 in 5m
+        <span className="inline-flex items-center gap-1 rounded-full border border-white/15 bg-white/[0.03] px-2.5 py-0.5 font-mono text-[10px] uppercase tracking-wider text-white/70">
+          2 Teams
         </span>
       </div>
       <p className="text-[12px] text-white/55">
