@@ -64,9 +64,9 @@ const USER_AVATAR =
 
 function Index() {
   // Mobile renders the Figma mobile home; desktop layout untouched below.
+  // IMPORTANT: call all hooks unconditionally before any early return so the
+  // hook count stays stable between SSR (isMobile=false) and hydration.
   const isMobile = useIsMobile();
-  if (isMobile) return <MobileHomeFigma />;
-
   const followedKeys = (Object.keys(TEAMS) as TeamKey[]).filter((k) =>
     FOLLOWED_TEAMS.includes(TEAMS[k]),
   );
@@ -109,6 +109,7 @@ function Index() {
     d.setDate(d.getDate() + selectedOffset);
     return d.toLocaleDateString(undefined, { weekday: "long", month: "short", day: "numeric" });
   }, [selectedOffset]);
+  if (isMobile) return <MobileHomeFigma />;
   return (
     <AppShell>
       {/* Desktop top bar */}
