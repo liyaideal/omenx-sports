@@ -15,6 +15,7 @@ import {
 import { omenxUrl, OMENX_BASE } from "@/lib/omenx";
 import { Link } from "@tanstack/react-router";
 import omenxLogo from "@/assets/omenx-logo.svg";
+import { ChevronRight } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -248,5 +249,50 @@ export function AppTopBar({
         </div>
       </div>
     </header>
+  );
+}
+
+function WorldCupCarnivalBadge() {
+  return (
+    <Link
+      to="/promo/world-cup"
+      search={{ tab: "overview" }}
+      aria-label="World Cup Carnival"
+      className="group/wc relative hidden shrink-0 items-center gap-2.5 whitespace-nowrap rounded-2xl border border-white/10 bg-white/[0.03] px-2.5 py-1.5 transition-all hover:border-white/20 hover:bg-white/[0.06] xl:flex"
+    >
+      <span className="relative inline-flex h-7 w-7 items-center justify-center">
+        <JerseyIcon className="h-7 w-7" />
+        <span className="pointer-events-none absolute inset-x-0 top-[11px] text-center font-display text-[9px] font-black leading-none text-white">
+          10
+        </span>
+        <span className="absolute -right-0.5 -top-0.5 inline-flex h-2 w-2">
+          <span className="absolute inset-0 animate-ping rounded-full bg-red-500/80" />
+          <span className="relative inline-flex h-2 w-2 rounded-full bg-red-500 ring-[1.5px] ring-[#0b0d12]" />
+        </span>
+      </span>
+      <span className="flex flex-col items-start leading-[1.05]">
+        <span className="font-display text-[10px] font-extrabold uppercase tracking-[0.16em] text-white/90">
+          World Cup
+        </span>
+        <span className="font-display text-[10px] font-extrabold uppercase tracking-[0.16em] text-white/90">
+          Carnival
+        </span>
+      </span>
+      <ChevronRight className="h-3.5 w-3.5 text-white/45 transition-transform group-hover/wc:translate-x-0.5 group-hover/wc:text-white/80" />
+    </Link>
+  );
+}
+
+function JerseyIcon({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" className={className} aria-hidden>
+      <path
+        d="M7.5 3.2 4 4.6 2.6 8.3l2.6 1.2.7-1.6V20a1 1 0 0 0 1 1h10.2a1 1 0 0 0 1-1V7.9l.7 1.6 2.6-1.2L20 4.6l-3.5-1.4-1.5 2.1a3.5 3.5 0 0 1-6 0L7.5 3.2Z"
+        fill="#5b6cff"
+        stroke="#a8b4ff"
+        strokeWidth="0.8"
+        strokeLinejoin="round"
+      />
+    </svg>
   );
 }
