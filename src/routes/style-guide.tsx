@@ -63,6 +63,7 @@ import { MATCH_MARKETS, FEATURED_MATCH } from "@/data/sports-markets";
 import { MobileTopBar } from "@/components/sports/mobile/MobileTopBar";
 import omenxLogo from "@/assets/omenx-logo.svg";
 import { MobileBottomNav } from "@/components/sports/mobile/MobileBottomNav";
+import { MobileFansSection } from "@/components/sports/mobile/MobileFansSection";
 import { MobileLiveHero } from "@/components/sports/mobile/MobileLiveHero";
 import { MeSheet } from "@/components/sports/mobile/MeSheet";
 import { ACCOUNT_STATS } from "@/data/sports-markets";
@@ -1496,6 +1497,41 @@ function StyleGuide() {
                   </ul>
                 </div>
                 <MeSheetPreviewLauncher />
+              </div>
+            </div>
+          </Section>
+
+          <Section id="mobile-fans" title="Mobile Fans Zone" kicker="18b — /fans (mobile, Figma 1:10216)">
+            <p className="mb-6 max-w-3xl text-sm text-muted-foreground">
+              Mobile rebuild of the Fans tab. Header + Editor's pick match card +
+              Follow your team grid + Live activity feed. Desktop and data /
+              interaction logic are unchanged — this is a presentation-only
+              mobile UI matching the Figma frame.
+            </p>
+            <div className="grid gap-6 lg:grid-cols-[360px_minmax(0,1fr)]">
+              <PhoneFrame>
+                <MobileTopBar
+                  userName="Jeremy"
+                  userAvatar="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=120&h=120&fit=crop&crop=faces&q=80"
+                  onAvatarClick={() => {}}
+                />
+                <div className="px-4 py-4">
+                  <MobileFansSection />
+                </div>
+                <div className="pointer-events-none sticky bottom-0">
+                  <MobileBottomNav onMeClick={() => {}} />
+                </div>
+              </PhoneFrame>
+              <div className="space-y-4">
+                <div className="rounded-2xl border border-border bg-surface p-5 shadow-card text-xs text-muted-foreground">
+                  <div className="mb-2 font-mono text-[10px] uppercase tracking-widest">Composition</div>
+                  <ul className="space-y-1.5">
+                    <li>• Section header: green 3px bar + "FANS ZONE" + Add Teams pill → opens <code className="font-mono text-foreground">TeamPickerSheet</code></li>
+                    <li>• Editor's pick card: three-way market (CAN / Draw / BIH) with tri-segment probability bar, trend pills, and footer meta</li>
+                    <li>• Follow your team: 5 crests with toggle + green Save (toast)</li>
+                    <li>• Live activity: handle + Bought/Sold + colored outcome pill + event title + relative time</li>
+                  </ul>
+                </div>
               </div>
             </div>
           </Section>
