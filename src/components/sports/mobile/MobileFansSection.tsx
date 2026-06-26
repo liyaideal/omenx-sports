@@ -36,7 +36,7 @@ function SectionLabel({ children }: { children: React.ReactNode }) {
   return (
     <div className="flex items-center gap-2.5">
       <span className="h-3.5 w-[3px] rounded-sm bg-[#00e676]" />
-      <h2 className="font-display text-[13px] font-bold uppercase tracking-[0.08em] text-white">
+      <h2 className="font-display text-[13px] font-bold uppercase tracking-[0.08em] text-[#00e676]">
         {children}
       </h2>
     </div>
