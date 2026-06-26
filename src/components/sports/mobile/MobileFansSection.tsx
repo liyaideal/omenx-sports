@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Check, Clock, Plus, TrendingDown, TrendingUp, Trophy, Users } from "lucide-react";
+import { Check, ChevronRight, Clock, Plus, Settings, TrendingDown, TrendingUp, Trophy, Users } from "lucide-react";
 import { toast } from "sonner";
 import { TeamPickerSheet } from "@/components/sports/dashboard/TeamPickerSheet";
 import {
@@ -68,13 +68,15 @@ function FansZoneHeaderBlock() {
         <button
           type="button"
           onClick={() => setOpen(true)}
-          className="inline-flex items-center rounded-full border border-white/20 bg-transparent px-3 py-1 text-[11px] font-medium text-white/85 transition hover:bg-white/[0.04]"
+          className="inline-flex items-center gap-1.5 rounded-full border border-white/15 bg-white/[0.03] px-2.5 py-1 font-mono text-[10px] uppercase tracking-wider text-white/80 transition hover:bg-white/[0.06]"
         >
-          Add Teams
+          <Settings className="h-3 w-3" strokeWidth={2} />
+          <span>{followed.length} Teams</span>
+          <ChevronRight className="h-3 w-3" strokeWidth={2.5} />
         </button>
       </div>
-      <p className="text-[12px] text-white/50">
-        Editor's pick · follow your team to personalize
+      <p className="text-[12px] leading-snug text-white/50">
+        Tap a crest to follow or unfollow. We'll surface their matches, polls, and fan posts here.
       </p>
       <TeamPickerSheet
         open={open}
