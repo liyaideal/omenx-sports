@@ -78,7 +78,7 @@ export function MobileBottomNav({ onMeClick }: { onMeClick: () => void }) {
               </span>
               <span
                 className={cn(
-                  "font-mono text-[10px] uppercase tracking-wider",
+                  "text-[11px] tracking-tight",
                   isActive ? "font-semibold text-[#00e676]" : "font-medium",
                 )}
               >

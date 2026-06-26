@@ -1,15 +1,24 @@
 import { useState } from "react";
-import { Check, ChevronDown, Clock, Plus, Trophy, Users } from "lucide-react";
+import { Check, Clock, Plus, TrendingDown, TrendingUp, Trophy, Users } from "lucide-react";
 import { toast } from "sonner";
 import { TeamPickerSheet } from "@/components/sports/dashboard/TeamPickerSheet";
 import {
   FOLLOWED_TEAMS,
   LIVE_TRADES,
-  SUGGESTED_TEAMS,
   TEAMS,
   type LiveTrade,
   type TeamLite,
 } from "@/data/sports-mock";
+
+// Figma roster: KOR / CAN / CZE / USA / BIH (overrides desktop SUGGESTED_TEAMS
+// just for this mobile shelf — desktop unchanged).
+const FANS_SUGGESTED: TeamLite[] = [
+  TEAMS.koreaRep,
+  TEAMS.canada,
+  TEAMS.czechia,
+  TEAMS.usa,
+  TEAMS.bosnia,
+];
 
 /**
  * Mobile /fans page — 1:1 Figma frame 1:10216.
@@ -19,7 +28,7 @@ import {
  */
 export function MobileFansSection() {
   return (
-    <div className="space-y-6 pb-6">
+    <div className="space-y-4 px-4 pt-4 pb-6">
       <FansZoneHeaderBlock />
       <EditorPickCard />
       <FollowTeamCard />
@@ -53,27 +62,25 @@ function FansZoneHeaderBlock() {
     FOLLOWED_TEAMS.map((t) => t.name),
   );
   return (
-    <header className="space-y-2">
+    <header className="space-y-1.5">
       <div className="flex items-center justify-between gap-3">
         <SectionLabel>Fans zone</SectionLabel>
         <button
           type="button"
           onClick={() => setOpen(true)}
-          className="inline-flex items-center gap-1.5 rounded-full border border-white/15 bg-white/[0.03] px-3 py-1 font-mono text-[10px] uppercase tracking-wider text-white/80 transition hover:bg-white/[0.06]"
+          className="inline-flex items-center rounded-full border border-white/20 bg-transparent px-3 py-1 text-[11px] font-medium text-white/85 transition hover:bg-white/[0.04]"
         >
-          <Users className="h-3 w-3" />
-          {followed.length > 0 ? `${followed.length} teams` : "Add Teams"}
-          <ChevronDown className="h-3 w-3" />
+          Add Teams
         </button>
       </div>
-      <p className="text-[11px] text-white/45">
+      <p className="text-[12px] text-white/50">
         Editor's pick · follow your team to personalize
       </p>
       <TeamPickerSheet
         open={open}
         onOpenChange={setOpen}
         variant="dialog"
-        groups={[{ label: "Suggested", teams: SUGGESTED_TEAMS }]}
+        groups={[{ label: "Suggested", teams: FANS_SUGGESTED }]}
         initialFollowed={followed}
         title="Manage teams you follow"
         description="Tap a crest to follow or unfollow. We'll surface their matches, polls, and fan posts here."
@@ -99,25 +106,38 @@ interface PickOutcome {
   short: string;
   cents: number;
   delta: number;
-  color: "green" | "grey" | "red";
+  color: "blue" | "green" | "grey" | "red";
 }
 
 const PICK_HOME = TEAMS.canada;
 const PICK_AWAY = TEAMS.bosnia;
 const PICK_OUTCOMES: PickOutcome[] = [
-  { name: "Canada", short: "CAN", cents: 53, delta: 2, color: "green" },
+  // Figma palette: Canada=blue, Draw=grey, Bosnia=green.
+  { name: "Canada", short: "CAN", cents: 53, delta: 2, color: "blue" },
   { name: "Draw", short: "X", cents: 26, delta: 0, color: "grey" },
-  { name: "Bosnia and Herzegovina", short: "BIH", cents: 22, delta: -2, color: "red" },
+  { name: "Bosnia and Herzegovina", short: "BIH", cents: 22, delta: -2, color: "green" },
 ];
 
 function EditorPickCard() {
   const dotColor = (c: PickOutcome["color"]) =>
-    c === "green" ? "bg-[#00e676]" : c === "red" ? "bg-[#ff4c4d]" : "bg-white/40";
+    c === "blue"
+      ? "bg-[#3b82f6]"
+      : c === "green"
+        ? "bg-[#00e676]"
+        : c === "red"
+          ? "bg-[#ff4c4d]"
+          : "bg-white/40";
   const barColor = (c: PickOutcome["color"]) =>
-    c === "green" ? "bg-[#00e676]" : c === "red" ? "bg-[#ff4c4d]" : "bg-white/25";
+    c === "blue"
+      ? "bg-[#3b82f6]"
+      : c === "green"
+        ? "bg-[#00e676]"
+        : c === "red"
+          ? "bg-[#ff4c4d]"
+          : "bg-white/25";
 
   return (
-    <article className="overflow-hidden rounded-2xl border border-white/[0.08] bg-[#11161c]">
+    <article className="overflow-hidden rounded-2xl border border-white/[0.08] bg-[#0f1318]">
       {/* Header strip with team flags */}
       <div className="relative">
         <div className="absolute inset-0 grid grid-cols-2">
@@ -138,18 +158,18 @@ function EditorPickCard() {
             }}
           />
         </div>
-        <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-black/55 to-[#11161c]" />
+        <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-black/55 to-[#0f1318]" />
         <div className="relative px-4 pt-4">
-          <span className="inline-flex items-center gap-1.5 rounded-md bg-[#ffca16] px-2 py-1 font-mono text-[10px] font-bold uppercase tracking-wider text-black">
+          <span className="inline-flex items-center gap-1.5 rounded-md border border-[#00e676]/60 bg-[#00e676]/[0.08] px-2 py-1 font-mono text-[10px] font-bold uppercase tracking-wider text-[#00e676]">
             <Trophy className="h-3 w-3" />
             World Cup
           </span>
-          <div className="mt-4 flex items-center justify-between pb-5">
+          <div className="mt-3 flex items-center justify-between pb-5">
             <div className="flex items-center gap-2">
               <img
                 src={PICK_HOME.logo}
                 alt=""
-                className="h-7 w-10 rounded-sm object-cover ring-1 ring-white/20"
+                className="h-6 w-8 rounded-sm object-cover ring-1 ring-white/20"
               />
               <span className="font-display text-2xl font-bold tracking-tight text-white">
                 {PICK_HOME.short}
@@ -165,7 +185,7 @@ function EditorPickCard() {
               <img
                 src={PICK_AWAY.logo}
                 alt=""
-                className="h-7 w-10 rounded-sm object-cover ring-1 ring-white/20"
+                className="h-6 w-8 rounded-sm object-cover ring-1 ring-white/20"
               />
             </div>
           </div>
@@ -184,11 +204,11 @@ function EditorPickCard() {
       </div>
 
       {/* Outcome rows */}
-      <ul className="divide-y divide-white/[0.05] px-4">
+      <ul className="px-4 pt-1">
         {PICK_OUTCOMES.map((o) => (
           <li
             key={o.short}
-            className="flex items-center justify-between gap-3 py-3"
+            className="flex items-center justify-between gap-3 py-2.5"
           >
             <div className="flex items-center gap-2.5 min-w-0">
               <span className={`h-2 w-2 rounded-full ${dotColor(o.color)}`} />
@@ -205,7 +225,7 @@ function EditorPickCard() {
       </ul>
 
       {/* Footer */}
-      <div className="flex items-center justify-between gap-2 border-t border-white/[0.05] px-4 py-3 text-[11px] text-white/50">
+      <div className="mt-1 flex items-center justify-between gap-2 border-t border-white/[0.05] px-4 py-3 text-[11px] text-white/50">
         <span className="inline-flex items-center gap-1.5">
           <Clock className="h-3 w-3" />
           Tomorrow 3:00pm
@@ -233,13 +253,18 @@ function TrendPill({ delta }: { delta: number }) {
   const up = delta > 0;
   return (
     <span
-      className={`inline-flex min-w-[42px] items-center justify-center gap-0.5 rounded-md px-1.5 py-0.5 font-mono text-[10px] font-semibold ${
+      className={`inline-flex min-w-[46px] items-center justify-center gap-1 rounded-md px-1.5 py-0.5 font-mono text-[10px] font-semibold ${
         up
           ? "bg-[#00e676]/12 text-[#00e676]"
           : "bg-[#ff4c4d]/12 text-[#ff4c4d]"
       }`}
     >
-      {up ? "▲" : "▼"} {up ? "+" : ""}{delta}¢
+      {up ? (
+        <TrendingUp className="h-3 w-3" strokeWidth={2.5} />
+      ) : (
+        <TrendingDown className="h-3 w-3" strokeWidth={2.5} />
+      )}
+      {up ? "+" : ""}{delta}¢
     </span>
   );
 }
@@ -268,17 +293,17 @@ function FollowTeamCard() {
   };
 
   return (
-    <section className="rounded-2xl border border-white/[0.08] bg-[#11161c] p-4">
-      <h3 className="font-display text-base font-bold uppercase tracking-wider text-white">
+    <section className="rounded-2xl border border-white/[0.08] bg-[#0f1318] p-4">
+      <h3 className="font-display text-[15px] font-bold uppercase tracking-[0.06em] text-white/55">
         Follow your team
       </h3>
-      <p className="mt-1 text-[11px] leading-relaxed text-white/45">
+      <p className="mt-1 text-[11px] leading-relaxed text-white/40">
         Pick a few clubs and we'll surface their matches, polls, and fan posts
         here.
       </p>
 
       <ul className="mt-4 grid grid-cols-5 gap-2">
-        {SUGGESTED_TEAMS.map((team) => (
+        {FANS_SUGGESTED.map((team) => (
           <li key={team.name}>
             <CrestButton
               team={team}
@@ -290,15 +315,13 @@ function FollowTeamCard() {
       </ul>
 
       <div className="mt-5 flex items-center justify-between gap-3">
-        <span className="text-[11px] text-white/45">
-          {followed.size > 0
-            ? `${followed.size} selected`
-            : "Tap a crest to follow"}
+        <span className="text-[12px] text-white/45">
+          Tap a crest to follow
         </span>
         <button
           type="button"
           onClick={save}
-          className="rounded-full bg-[#00e676] px-7 py-2.5 font-display text-xs font-extrabold uppercase tracking-[0.12em] text-black shadow-[0_4px_18px_-6px_rgba(0,230,118,0.6)] transition active:scale-95 disabled:opacity-40"
+          className="rounded-md bg-[#00e676] px-5 py-2 text-[13px] font-bold text-black transition active:scale-95 disabled:opacity-40"
           disabled={followed.size === 0}
         >
           Save
@@ -325,7 +348,7 @@ function CrestButton({
       className="group flex w-full flex-col items-center gap-2"
     >
       <span
-        className={`relative grid h-14 w-14 place-items-center rounded-full bg-[#1a2026] p-1.5 ring-2 transition ${
+        className={`relative grid h-12 w-12 place-items-center rounded-full bg-[#1a2026] p-1 ring-2 transition ${
           following ? "ring-[#00e676]" : "ring-white/10 group-hover:ring-white/25"
         }`}
       >
@@ -335,7 +358,7 @@ function CrestButton({
           className="h-full w-full rounded-full object-cover"
         />
         <span
-          className={`absolute -bottom-0.5 -right-0.5 grid h-4 w-4 place-items-center rounded-full ring-2 ring-[#11161c] ${
+          className={`absolute -bottom-0.5 -right-0.5 grid h-4 w-4 place-items-center rounded-full ring-2 ring-[#0f1318] ${
             following
               ? "bg-[#00e676] text-black"
               : "bg-white/[0.12] text-white/70"
@@ -348,7 +371,7 @@ function CrestButton({
           )}
         </span>
       </span>
-      <span className="font-mono text-[10px] font-medium text-white/55 group-hover:text-white">
+      <span className="text-[11px] font-medium text-white/55 group-hover:text-white">
         {team.short}
       </span>
     </button>
@@ -362,22 +385,22 @@ function CrestButton({
 function LiveActivityBlock({ trades }: { trades: LiveTrade[] }) {
   const recent = trades.slice(0, 6);
   return (
-    <section className="space-y-3">
+    <section className="space-y-2">
       <div className="flex items-center justify-between gap-3">
         <SectionLabel>Live activity</SectionLabel>
         <span className="rounded-full border border-white/15 bg-white/[0.03] px-2.5 py-0.5 font-mono text-[10px] uppercase tracking-wider text-white/70">
           9 in 5m
         </span>
       </div>
-      <p className="text-[11px] text-white/45">
-        Following · United States, Mexico
+      <p className="text-[12px] text-white/55">
+        Following · <span className="font-semibold text-white/85">United States, Mexico</span>
       </p>
-      <ul className="overflow-hidden rounded-2xl border border-white/[0.08] bg-[#11161c]">
+      <ul className="overflow-hidden rounded-2xl border border-white/[0.08] bg-[#0f1318]">
         {recent.map((t, i) => (
           <li
             key={t.id}
             className={
-              i === 0 ? "px-4 py-3" : "border-t border-white/[0.05] px-4 py-3"
+              i === 0 ? "px-3 py-2.5" : "border-t border-white/[0.05] px-3 py-2.5"
             }
           >
             <LiveTradeRow trade={t} />
@@ -391,16 +414,16 @@ function LiveActivityBlock({ trades }: { trades: LiveTrade[] }) {
 function LiveTradeRow({ trade }: { trade: LiveTrade }) {
   const t = trade;
   return (
-    <div className="flex items-start gap-3">
+    <div className="flex items-start gap-2.5">
       {t.avatar ? (
         <img
           src={t.avatar}
           alt=""
-          className="h-9 w-9 shrink-0 rounded-full object-cover"
+          className="h-8 w-8 shrink-0 rounded-full object-cover"
         />
       ) : (
         <span
-          className="grid h-9 w-9 shrink-0 place-items-center rounded-full text-[13px] font-bold text-white"
+          className="grid h-8 w-8 shrink-0 place-items-center rounded-full text-[12px] font-bold text-white"
           style={{ background: `oklch(0.55 0.18 ${t.hue})` }}
         >
           {t.handle.replace("@", "").charAt(0).toUpperCase()}
@@ -408,23 +431,23 @@ function LiveTradeRow({ trade }: { trade: LiveTrade }) {
       )}
       <div className="min-w-0 flex-1">
         <div className="flex items-center justify-between gap-2">
-          <span className="truncate text-[13px] font-medium text-white">
+          <span className="truncate text-[13px] font-semibold text-white">
             {t.handle}
           </span>
-          <span className="shrink-0 font-mono text-[10px] uppercase tracking-wider text-white/40">
+          <span className="shrink-0 font-mono text-[10px] uppercase text-white/40">
             {formatAgo(t.secondsAgo)}
           </span>
         </div>
-        <div className="mt-0.5 flex items-center gap-2">
+        <div className="mt-px flex items-center gap-2">
           <span
-            className={`font-display text-xs font-bold uppercase tracking-wider ${
+            className={`text-[12px] font-bold ${
               t.side === "bought" ? "text-[#00e676]" : "text-[#ff4c4d]"
             }`}
           >
             {t.side === "bought" ? "Bought" : "Sold"}
           </span>
           <span
-            className={`inline-flex items-center gap-1 rounded-md px-1.5 py-0.5 font-mono text-[10px] ${
+            className={`inline-flex items-center gap-1 rounded-md border px-1.5 py-px font-mono text-[10px] ${
               t.side === "bought"
                 ? "border border-[#00e676]/30 bg-[#00e676]/10 text-[#00e676]"
                 : "border border-[#ff4c4d]/30 bg-[#ff4c4d]/10 text-[#ff4c4d]"
@@ -433,7 +456,7 @@ function LiveTradeRow({ trade }: { trade: LiveTrade }) {
             {t.outcomeLabel} · {t.price}¢
           </span>
         </div>
-        <p className="mt-1 truncate text-[11px] text-white/45">
+        <p className="mt-0.5 truncate text-[11px] text-white/40">
           {t.eventTitle}
         </p>
       </div>
