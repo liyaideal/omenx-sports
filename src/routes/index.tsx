@@ -1,7 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
-import { useNavigate } from "@tanstack/react-router";
 import { AppShell } from "@/components/sports/dashboard/AppShell";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { MobileHomeFigma } from "@/components/home/mobile/MobileHomeFigma";
 import { AppTopBar } from "@/components/sports/dashboard/AppTopBar";
 import { MatchMarketCard } from "@/components/sports/dashboard/MatchMarketCard";
 import { EventMarketTileCard } from "@/components/sports/dashboard/EventMarketTileCard";
@@ -62,15 +63,9 @@ const USER_AVATAR =
   "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=120&h=120&fit=crop&crop=faces&q=80";
 
 function Index() {
-  // Mobile: there is no Home tab — redirect to /events (the default mobile entry).
-  // Desktop home stays intact.
-  const navigate = useNavigate();
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    if (window.matchMedia("(max-width: 767px)").matches) {
-      navigate({ to: "/events", replace: true });
-    }
-  }, [navigate]);
+  // Mobile renders the Figma mobile home; desktop layout untouched below.
+  const isMobile = useIsMobile();
+  if (isMobile) return <MobileHomeFigma />;
 
   const followedKeys = (Object.keys(TEAMS) as TeamKey[]).filter((k) =>
     FOLLOWED_TEAMS.includes(TEAMS[k]),
