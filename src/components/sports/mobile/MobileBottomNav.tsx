@@ -1,17 +1,32 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { CalendarDays, Users, User, type LucideIcon } from "lucide-react";
+import { Home, Radio, Trophy, Star, User, type LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 type Tab = {
-  key: "events" | "fans" | "me";
+  key: "home" | "live" | "world-cup" | "fans" | "me";
   label: string;
   icon: LucideIcon;
-  to?: "/events" | "/fans";
+  to?: "/" | "/events" | "/promo/world-cup" | "/fans";
+  badge?: { kind: "count" | "hot"; value?: string };
 };
 
 const TABS: Tab[] = [
-  { key: "events", label: "Events", icon: CalendarDays, to: "/events" },
-  { key: "fans", label: "Fans", icon: Users, to: "/fans" },
+  { key: "home", label: "Home", icon: Home, to: "/" },
+  {
+    key: "live",
+    label: "Live",
+    icon: Radio,
+    to: "/events",
+    badge: { kind: "count", value: "6" },
+  },
+  {
+    key: "world-cup",
+    label: "World Cup",
+    icon: Trophy,
+    to: "/promo/world-cup",
+    badge: { kind: "hot" },
+  },
+  { key: "fans", label: "Fans", icon: Star, to: "/fans" },
   { key: "me", label: "Me", icon: User },
 ];
 
@@ -32,29 +47,39 @@ export function MobileBottomNav({ onMeClick }: { onMeClick: () => void }) {
 
   return (
     <nav
-      className="fixed bottom-0 left-0 right-0 z-50 border-t border-border/60 bg-background/95 backdrop-blur-xl md:hidden"
+      className="fixed bottom-0 left-0 right-0 z-50 border-t border-white/[0.06] bg-[#0a0a0a]/95 backdrop-blur-xl md:hidden"
       style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
     >
-      <div className="mx-auto flex h-16 max-w-md items-stretch justify-around px-2">
+      <div className="mx-auto flex h-16 max-w-md items-stretch justify-around px-1">
         {TABS.map((tab) => {
           const Icon = tab.icon;
           const isActive = tab.to ? pathname === tab.to : false;
 
           const inner = (
             <>
-              {isActive && (
-                <span className="absolute inset-x-4 top-0 h-[2px] rounded-full bg-gradient-to-r from-primary via-accent to-primary shadow-[0_0_8px_var(--primary)]" />
-              )}
-              <Icon
-                className={cn(
-                  "h-5 w-5 transition-all",
-                  isActive && "text-primary drop-shadow-[0_0_6px_var(--primary)]",
+              <span className="relative">
+                <Icon
+                  className={cn(
+                    "h-[22px] w-[22px] transition-all",
+                    isActive && "text-[#00e676] drop-shadow-[0_0_6px_#00e676]",
+                  )}
+                  strokeWidth={isActive ? 2.4 : 1.8}
+                />
+                {tab.badge?.kind === "count" && (
+                  <span className="absolute -right-2 -top-1.5 grid h-[15px] min-w-[15px] place-items-center rounded-full bg-[#ff4c4d] px-1 font-mono text-[9px] font-bold text-white ring-2 ring-[#0a0a0a]">
+                    {tab.badge.value}
+                  </span>
                 )}
-              />
+                {tab.badge?.kind === "hot" && (
+                  <span className="absolute -right-3 -top-2 inline-flex items-center gap-0.5 rounded-full bg-[#ff7a18] px-1 py-px font-mono text-[8px] font-bold uppercase text-white ring-2 ring-[#0a0a0a]">
+                    🔥Hot
+                  </span>
+                )}
+              </span>
               <span
                 className={cn(
-                  "font-mono text-[10px] uppercase tracking-widest",
-                  isActive ? "font-semibold text-foreground" : "font-medium",
+                  "font-mono text-[10px] uppercase tracking-wider",
+                  isActive ? "font-semibold text-[#00e676]" : "font-medium",
                 )}
               >
                 {tab.label}
@@ -63,8 +88,8 @@ export function MobileBottomNav({ onMeClick }: { onMeClick: () => void }) {
           );
 
           const className = cn(
-            "relative flex flex-1 flex-col items-center justify-center gap-0.5 px-2 transition-transform active:scale-95",
-            isActive ? "text-foreground" : "text-muted-foreground",
+            "relative flex flex-1 flex-col items-center justify-center gap-1 px-1 transition-transform active:scale-95",
+            isActive ? "text-[#00e676]" : "text-white/55",
           );
 
           if (tab.key === "me") {
