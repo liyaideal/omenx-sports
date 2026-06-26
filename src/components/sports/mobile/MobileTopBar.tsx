@@ -1,25 +1,18 @@
 import omenxLogo from "@/assets/omenx-logo.svg";
 
 /**
- * Mobile-only top bar. A compact breadcrumb lockup (Ω OmenX › Sports) on
- * the left makes it obvious the user is inside a sub-zone of OmenX —
- * tapping the Ω jumps back to the main site, tapping `Sports` stays.
- * Right side: notifications bell (placeholder) + user avatar that opens
- * the Me sheet from the BottomNav layer above.
+ * Mobile-only top bar — Figma spec: OMENX (white) | SPORTS (green italic).
+ * Right side is intentionally empty; account entry lives in the bottom nav
+ * "Me" tab. Props are accepted but unused so existing callers keep working.
  */
-export function MobileTopBar({
-  userAvatar,
-  userName,
-  onAvatarClick,
-}: {
-  userAvatar: string;
-  userName: string;
-  onAvatarClick: () => void;
+export function MobileTopBar(_props: {
+  userAvatar?: string;
+  userName?: string;
+  onAvatarClick?: () => void;
 }) {
   return (
     <header className="sticky top-0 z-40 border-b border-white/[0.06] bg-[#0a0a0a]/95 backdrop-blur-xl">
-      <div className="flex h-14 items-center justify-between gap-3 px-4">
-        {/* Logo lockup — Figma mobile spec: OMENX (white) | SPORTS (green italic) */}
+      <div className="flex h-14 items-center gap-3 px-4">
         <a
           href="/"
           aria-label="OmenX Sports"
@@ -38,22 +31,6 @@ export function MobileTopBar({
             Sports
           </span>
         </a>
-
-        {/* Right cluster — Figma keeps it minimal: just the avatar entry */}
-        <div className="flex items-center">
-          <button
-            type="button"
-            onClick={onAvatarClick}
-            aria-label={`Open ${userName} menu`}
-            className="transition active:scale-95"
-          >
-            <img
-              src={userAvatar}
-              alt={userName}
-              className="h-9 w-9 rounded-full border border-white/15 object-cover"
-            />
-          </button>
-        </div>
       </div>
     </header>
   );
