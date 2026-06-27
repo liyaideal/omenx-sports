@@ -97,12 +97,11 @@ function seedTickets(): SubmittedTicket[] {
       stakeU: 10,
       lockedActivityOdds: 14.2,
       grossPayoutU: 142,
-      wonLegCount: 4,
+      wonLegCount: 3,
       legs: [
         legOf("WC26_GRPA_ARG_MEX", "HOME"),
         legOf("WC26_GRPB_BRA_JPN", "HOME"),
         legOf("WC26_GRPD_ESP_USA", "HOME"),
-        legOf("WC26_GRPE_GER_CAN", "HOME"),
       ],
     },
     {
@@ -112,11 +111,10 @@ function seedTickets(): SubmittedTicket[] {
       stakeU: 10,
       lockedActivityOdds: 22.5,
       grossPayoutU: 225,
-      wonLegCount: 3,
+      wonLegCount: 2,
       legs: [
         legOf("WC26_GRPF_POR_GHA", "HOME"),
         legOf("WC26_GRPG_NED_KOR", "HOME"),
-        legOf("WC26_GRPH_BEL_EGY", "HOME"),
         legOf("WC26_GRPI_ITA_AUS", "AWAY"),
       ],
     },
@@ -130,7 +128,6 @@ function seedTickets(): SubmittedTicket[] {
       legs: [
         legOf("WC26_R16_BRA_POR", "HOME"),
         legOf("WC26_R16_ARG_NED", "HOME"),
-        legOf("WC26_R16_FRA_BEL", "HOME"),
         legOf("WC26_QF_BRA_FRA", "HOME"),
       ],
     },
@@ -213,7 +210,7 @@ export function useComboState() {
           return next;
         }
         if (prev.length >= COMBO_MAX_PICKS) {
-          toast.error("You already have 4 picks. Remove one before adding another.");
+          toast.error(`You already have ${COMBO_MAX_PICKS} picks. Remove one before adding another.`);
           return prev;
         }
         return [...prev, legFromOutcome(match, market, outcome)];
@@ -247,7 +244,7 @@ export function useComboState() {
     }
   }, [canPreview, selectedLegs, stake]);
 
-  // Auto-preview: as soon as the user has 4 picks (or the existing quote
+  // Auto-preview: as soon as the user has all picks (or the existing quote
   // expires), fetch fresh odds without making them tap a button. Debounced
   // so rapid pick swaps coalesce into a single request.
   useEffect(() => {
