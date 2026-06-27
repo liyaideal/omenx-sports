@@ -452,7 +452,11 @@ function MoneylineSection({
             outcome={o}
             selected={selected?.outcomeId === o.outcomeId}
             disabled={disabled}
-            onClick={() => ctrl.selectOutcome(match, market, o)}
+            onClick={() =>
+              selected?.outcomeId === o.outcomeId
+                ? ctrl.removeLeg(market.marketId)
+                : ctrl.selectOutcome(match, market, o)
+            }
           />
         ))}
       </div>
@@ -503,7 +507,11 @@ function LinedMarketSection({
               outcome={o}
               selected={selected?.outcomeId === o.outcomeId}
               disabled={disabled}
-              onClick={() => ctrl.selectOutcome(match, market, o)}
+              onClick={() =>
+                selected?.outcomeId === o.outcomeId
+                  ? ctrl.removeLeg(market.marketId)
+                  : ctrl.selectOutcome(match, market, o)
+              }
             />
           ))}
         </div>
