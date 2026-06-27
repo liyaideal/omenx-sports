@@ -2,6 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { AppShell } from "@/components/sports/dashboard/AppShell";
 import { MobileChrome } from "@/components/sports/mobile/MobileChrome";
 import { MobileEventsSection } from "@/components/sports/mobile/MobileEventsSection";
+import { WorldCupFloatingBadge } from "@/components/sports/promo/WorldCupFloatingBadge";
 
 export const Route = createFileRoute("/events")({
   head: () => ({
@@ -30,6 +31,7 @@ function EventsPage() {
     <AppShell>
       <MobileChrome>
         <MobileEventsSection />
+        <WorldCupFloatingBadge />
       </MobileChrome>
       <div className="hidden min-h-screen items-center justify-center px-8 md:flex">
         <div className="max-w-md rounded-2xl border border-border bg-surface p-8 text-center shadow-card">
