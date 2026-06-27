@@ -839,7 +839,7 @@ function QuotePreviewPanel({ ctrl }: { ctrl: ComboController }) {
           QUOTE PREVIEW
         </div>
         <p className="mt-2 font-pitch text-sm font-semibold text-zinc-500">
-          Pick 4 outcomes — odds lock in <span className="text-amber-400">automatically</span>.
+          Pick 3 outcomes — odds lock in <span className="text-amber-400">automatically</span>.
         </p>
         <p className="mt-2 font-pitch text-[10px] font-semibold uppercase tracking-widest text-amber-400/80">
           Activity cap · {COMBO_MAX_ODDS}× max odds · {COMBO_MAX_ODDS * COMBO_STAKE_MAX}U max payout
