@@ -101,10 +101,11 @@ export interface ShareComboInput {
   onDownload?: () => void | Promise<void>;
 }
 export function shareCombo({ ticket, poster, onDownload }: ShareComboInput): ShareTargetBase {
+  const legCount = ticket.legs.length;
   const headline =
     ticket.status === "SETTLED_WON"
-      ? `4/4 correct — won ${ticket.grossPayoutU.toFixed(0)} U on a ${ticket.lockedActivityOdds.toFixed(2)}× combo`
-      : `My ${ticket.lockedActivityOdds.toFixed(2)}× 4-leg combo`;
+      ? `${legCount}/${legCount} correct — won ${ticket.grossPayoutU.toFixed(0)} U on a ${ticket.lockedActivityOdds.toFixed(2)}× combo`
+      : `My ${ticket.lockedActivityOdds.toFixed(2)}× ${legCount}-leg combo`;
   return {
     kindLabel: "COMBO TICKET",
     title: headline,
@@ -126,7 +127,7 @@ export interface ShareComboDraftInput {
   onDownload?: () => void | Promise<void>;
 }
 export function shareComboDraft({ legs, odds, grossPayoutU, poster, onDownload }: ShareComboDraftInput): ShareTargetBase {
-  const headline = `My ${odds.toFixed(2)}× 4-leg combo — ${grossPayoutU.toFixed(0)} U if it hits`;
+  const headline = `My ${odds.toFixed(2)}× ${legs.length}-leg combo — ${grossPayoutU.toFixed(0)} U if it hits`;
   return {
     kindLabel: "COMBO",
     title: headline,
