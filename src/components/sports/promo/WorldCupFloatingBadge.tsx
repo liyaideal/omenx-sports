@@ -12,13 +12,13 @@ export function WorldCupFloatingBadge() {
     <Link
       to="/promo/world-cup"
       aria-label="Open World Cup Carnival"
-      className="group fixed right-3 z-40 flex items-center gap-1.5 rounded-lg border border-amber-400/70 bg-black/90 py-1 pl-1 pr-1.5 shadow-[0_4px_14px_rgba(0,0,0,0.55)] transition active:scale-95 md:hidden"
+      className="group fixed right-3 z-40 flex items-center gap-1.5 rounded-lg border border-white/10 bg-black/40 py-1 pl-1 pr-1.5 shadow-[0_4px_14px_rgba(0,0,0,0.35)] backdrop-blur-sm transition active:scale-95 md:hidden"
       style={{ bottom: "calc(env(safe-area-inset-bottom) + 72px)" }}
     >
       <span className="grid h-7 w-7 place-items-center">
         <GiftBoxJerseyIcon className="h-7 w-7" />
       </span>
-      <span className="font-pitch text-[9px] font-bold uppercase leading-[1.05] tracking-wide text-amber-400">
+      <span className="font-mono text-[9px] font-bold uppercase leading-[1.05] tracking-wide text-amber-400">
         World Cup
         <br />
         Carnival
