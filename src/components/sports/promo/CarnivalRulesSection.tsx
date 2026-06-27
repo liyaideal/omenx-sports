@@ -31,7 +31,7 @@ const SECTIONS = [
     title: "Combo Challenge",
     body: [
       "Each combo locks 10 U at the odds shown at submission time.",
-      "All 4 legs must win. Combos pay 10 U × locked odds, capped at 50× (max 500 U).",
+      "All 3 legs must win. Combos pay 10 U × locked odds, capped at 50× (max 500 U).",
       "Max 3 combos per user. Identical combos may not be re-submitted.",
       "Markets within 30 minutes of kickoff are not eligible. Cancelled fixtures void the matching leg per page rules.",
     ],

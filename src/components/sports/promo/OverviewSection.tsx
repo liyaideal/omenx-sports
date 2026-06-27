@@ -34,7 +34,7 @@ const SERIES: SeriesEntry[] = [
     sec: "SEC-02",
     title: "Combo Challenge",
     highlight: "10 U → 500 U",
-    body: "Pick 4 World Cup outcomes. Land all 4 to win up to 50× your stake.",
+    body: "Pick 3 World Cup outcomes. Land all 3 to win up to 50× your stake.",
     accent: "#facc15",
     banner: comboAsset.url,
   },

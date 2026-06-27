@@ -100,7 +100,7 @@ export const INVITE_PROGRESS = { current: 2, max: 10, voucherPerFriend: 50 };
 
 export const COMBO_MAX_ODDS = 50;
 export const COMBO_STAKE = 10;
-export const COMBO_MAX_PICKS = 4;
+export const COMBO_MAX_PICKS = 3;
 export const COMBO_MAX_COMBOS_PER_USER = 3;
 
 export const COMBO_STAKE_MIN = 1;

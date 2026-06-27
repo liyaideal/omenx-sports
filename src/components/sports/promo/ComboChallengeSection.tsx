@@ -197,10 +197,10 @@ function CampaignHero({ ctrl }: { ctrl: ComboController }) {
             SEC-02 · COMBO CHALLENGE
           </div>
           <h3 className="mt-1 font-pitch text-2xl font-bold uppercase tracking-wide text-white">
-            World Cup 4-Leg Combo
+            World Cup 3-Leg Combo
           </h3>
           <p className="mt-1 font-pitch text-sm font-semibold text-zinc-400">
-            Pick 4 matches. All correct wins. 10 U can pay up to {COMBO_MAX_ODDS * 10} U.
+            Pick 3 matches. All correct wins. 10 U can pay up to {COMBO_MAX_ODDS * 10} U.
           </p>
         </div>
         <div className="text-left sm:text-right">
@@ -755,7 +755,7 @@ function BuilderCTA({
     );
   }
 
-  let label = "Select 4 picks";
+  let label = `Select ${COMBO_MAX_PICKS} picks`;
   let disabled = true;
   let onClick: () => void = () => {};
 
@@ -839,7 +839,7 @@ function QuotePreviewPanel({ ctrl }: { ctrl: ComboController }) {
           QUOTE PREVIEW
         </div>
         <p className="mt-2 font-pitch text-sm font-semibold text-zinc-500">
-          Pick 4 outcomes — odds lock in <span className="text-amber-400">automatically</span>.
+          Pick 3 outcomes — odds lock in <span className="text-amber-400">automatically</span>.
         </p>
         <p className="mt-2 font-pitch text-[10px] font-semibold uppercase tracking-widest text-amber-400/80">
           Activity cap · {COMBO_MAX_ODDS}× max odds · {COMBO_MAX_ODDS * COMBO_STAKE_MAX}U max payout
@@ -1026,14 +1026,14 @@ function SubmitConfirmModal({
       open={open}
       onOpenChange={(v) => !v && onClose()}
       accent="amber-400/60"
-      title="Confirm 4-pick combo"
+      title={`Confirm ${COMBO_MAX_PICKS}-pick combo`}
     >
         <div className="border-b border-zinc-800 p-4">
           <div className="font-scoreboard text-[10px] font-bold tracking-[0.25em] text-amber-400">
-            CONFIRM 4-LEG COMBO
+            CONFIRM {COMBO_MAX_PICKS}-LEG COMBO
           </div>
           <p className="mt-1 font-pitch text-sm font-semibold text-zinc-300">
-            All 4 picks must be correct to win. Odds lock only after submission.
+            All {COMBO_MAX_PICKS} picks must be correct to win. Odds lock only after submission.
           </p>
         </div>
         <div className="space-y-1 p-4">
@@ -1305,9 +1305,9 @@ function TicketStatusList({
 function TicketRow({ ticket, highlight = false }: { ticket: SubmittedTicket; highlight?: boolean }) {
   const statusInfo = {
     ACCEPTED: { label: "Waiting for results", tone: "text-amber-400 border-amber-400/40 bg-amber-400/10" },
-    SETTLED_WON: { label: "4/4 Correct — Won!", tone: "text-emerald-400 border-emerald-500/40 bg-emerald-500/10" },
+    SETTLED_WON: { label: `${COMBO_MAX_PICKS}/${COMBO_MAX_PICKS} Correct — Won!`, tone: "text-emerald-400 border-emerald-500/40 bg-emerald-500/10" },
     SETTLED_LOST: {
-      label: ticket.wonLegCount === 3 ? "So close — 3/4" : "Combo missed",
+      label: ticket.wonLegCount === COMBO_MAX_PICKS - 1 ? `So close — ${COMBO_MAX_PICKS - 1}/${COMBO_MAX_PICKS}` : "Combo missed",
       tone: "text-zinc-400 border-zinc-700 bg-zinc-900",
     },
   }[ticket.status];
@@ -1404,7 +1404,7 @@ function MobileStickyBar({
   onConfirm: () => void;
 }) {
   const { filled, quote, pageState, stake } = ctrl;
-  let cta = "Select 4 picks";
+  let cta = `Select ${COMBO_MAX_PICKS} picks`;
   let onClick: (() => void) | null = null;
   if (filled < COMBO_MAX_PICKS) cta = `Add ${COMBO_MAX_PICKS - filled} more`;
   else if (pageState === "READY" || pageState === "PREVIEW_LOADING" || pageState === "PREVIEW_EXPIRED") {
@@ -1649,7 +1649,7 @@ export function ShareCardPreview(props: ShareCardPreviewProps) {
               className="font-poster text-[1.65cqw] font-bold uppercase"
               style={{ color: POSTER_GOLD, letterSpacing: "0.25em" }}
             >
-              World Cup 4-Leg Combo
+              World Cup {COMBO_MAX_PICKS}-Leg Combo
             </div>
           </div>
 
@@ -1668,8 +1668,8 @@ export function ShareCardPreview(props: ShareCardPreviewProps) {
             className="mt-[1.5%] text-center font-poster text-[2.25cqw] font-bold uppercase"
             style={{ color: POSTER_NEON, letterSpacing: "0.18em" }}
           >
-            <span style={{ color: POSTER_GOLD }}>4</span> Picks. Hit All{" "}
-            <span style={{ color: POSTER_GOLD }}>4</span>.
+            <span style={{ color: POSTER_GOLD }}>{COMBO_MAX_PICKS}</span> Picks. Hit All{" "}
+            <span style={{ color: POSTER_GOLD }}>{COMBO_MAX_PICKS}</span>.
           </div>
 
           {/* === Main ticket === */}
@@ -1689,7 +1689,7 @@ export function ShareCardPreview(props: ShareCardPreviewProps) {
                         letterSpacing: "0.18em",
                       }}
                   >
-                    My 4-Leg Combo
+                    My {COMBO_MAX_PICKS}-Leg Combo
                   </span>
                   <span style={{ color: POSTER_NEON, opacity: 0.7, fontSize: "2.4cqw" }}>
                     {"//"}

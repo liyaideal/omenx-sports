@@ -51,7 +51,7 @@ export const Route = createFileRoute("/promo/world-cup")({
       {
         property: "og:description",
         content:
-          "Stack vouchers, run a 4-leg combo and spin the trophy vault for signed jerseys.",
+          "Stack vouchers, run a 3-leg combo and spin the trophy vault for signed jerseys.",
       },
     ],
   }),
