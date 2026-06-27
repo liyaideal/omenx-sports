@@ -275,6 +275,58 @@
   background-size: 8px 8px;
 }
 
+/* ---------------- Gift-box → jersey reveal icon (cb-*) ----------------
+ * Used by src/components/sports/promo/GiftBoxJerseyIcon.tsx. Class names
+ * are cb- prefixed to avoid collision with other animation utilities.
+ */
+.cb-svg { display: block; overflow: visible; }
+
+.cb-rock { transform-box: view-box; transform-origin: 100px 186px; animation: cb-rock 4.5s ease-in-out infinite; }
+@keyframes cb-rock { 0%{transform:rotate(0)} 7%{transform:rotate(-4deg)} 13%{transform:rotate(4deg)} 19%{transform:rotate(-5deg)} 24%{transform:rotate(5deg)} 29%{transform:rotate(-5.5deg)} 33%{transform:rotate(2.5deg)} 36%,100%{transform:rotate(0)} }
+
+.cb-squat { transform-box: fill-box; transform-origin: 50% 100%; animation: cb-squat 4.5s ease-in-out infinite; }
+@keyframes cb-squat { 0%,33%{transform:scaleY(1)} 36%{transform:scaleY(.9)} 39%{transform:scaleY(1.04)} 42%,100%{transform:scaleY(1)} }
+
+.cb-boxvis { animation: cb-boxvis 4.5s steps(1, jump-end) infinite; }
+@keyframes cb-boxvis { 0%{opacity:1} 44%{opacity:0} 88%{opacity:1} 100%{opacity:1} }
+
+.cb-lidvis { animation: cb-lidvis 4.5s steps(1, jump-end) infinite; }
+@keyframes cb-lidvis { 0%{opacity:1} 41%{opacity:0} 88%{opacity:1} 100%{opacity:1} }
+
+.cb-lid { transform-box: view-box; transform-origin: 100px 116px; animation: cb-lid 4.5s cubic-bezier(.3,.8,.4,1) infinite; }
+@keyframes cb-lid { 0%,35%{transform:translateY(0) rotate(0)} 39%{transform:translateY(-16px) rotate(-7deg)} 42%{transform:translateY(-26px) rotate(-11deg)} 86%{transform:translateY(-26px) rotate(-11deg)} 88%,100%{transform:translateY(0) rotate(0)} }
+
+.cb-jvis { animation: cb-jvis 4.5s linear infinite both; }
+@keyframes cb-jvis { 0%,36%{opacity:0} 37%,80%{opacity:1} 86%,100%{opacity:0} }
+
+.cb-rise { animation: cb-rise 4.5s cubic-bezier(.34,1.3,.5,1) infinite both; }
+@keyframes cb-rise { 0%,37%{transform:translateY(62px)} 46%{transform:translateY(-14px)} 52%{transform:translateY(5px)} 57%,80%{transform:translateY(0)} 86%,100%{transform:translateY(62px)} }
+
+.cb-grow { transform-box: fill-box; transform-origin: center; animation: cb-grow 4.5s cubic-bezier(.34,1.3,.5,1) infinite both; }
+@keyframes cb-grow { 0%,37%{transform:scale(.55)} 48%{transform:scale(1.08)} 55%,80%{transform:scale(1)} 86%,100%{transform:scale(.55)} }
+
+.cb-jpop { transform-box: fill-box; transform-origin: 50% 100%; animation: cb-jpop 4.5s ease-in-out infinite; }
+@keyframes cb-jpop { 0%,38%{transform:scale(1,1)} 45%{transform:scale(.9,1.14)} 52%{transform:scale(1.07,.93)} 59%,100%{transform:scale(1,1)} }
+
+.cb-wob { transform-box: view-box; transform-origin: 100px 150px; animation: cb-wob 4.5s ease-in-out infinite; }
+@keyframes cb-wob { 0%,57%{transform:rotate(0)} 63%{transform:rotate(3.5deg)} 71%{transform:rotate(-2.5deg)} 78%{transform:rotate(1.2deg)} 84%,100%{transform:rotate(0)} }
+
+.cb-halo { transform-box: fill-box; transform-origin: center; animation: cb-halo 4.5s ease-out infinite; }
+@keyframes cb-halo { 0%,38%{opacity:0;transform:scale(.5)} 47%{opacity:.9;transform:scale(1.15)} 60%{opacity:.4;transform:scale(1)} 74%{opacity:.12;transform:scale(1)} 84%,100%{opacity:0;transform:scale(.5)} }
+
+.cb-conf { opacity: 0; animation: cb-conf 4.5s ease-out infinite; }
+@keyframes cb-conf {
+  0%,38%   { opacity: 0; transform: translate(0,0) rotate(0) scale(.3); }
+  43%      { opacity: 1; }
+  58%      { opacity: 1; transform: translate(var(--tx), var(--ty)) rotate(var(--r)) scale(1); }
+  80%      { opacity: 0; transform: translate(var(--tx), calc(var(--ty) + 40px)) rotate(calc(var(--r) + 90deg)) scale(.9); }
+  100%     { opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cb-rock, .cb-squat, .cb-boxvis, .cb-lidvis, .cb-lid, .cb-jvis, .cb-rise, .cb-grow, .cb-jpop, .cb-wob, .cb-halo, .cb-conf { animation: none; }
+}
+
 /* ---------------- Figma Mobile (fm-*) — scoped tokens for the new
  * mobile design from Figma. Keeps the desktop lavender system intact;
  * mobile components reference these via arbitrary value classes,
