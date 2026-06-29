@@ -1465,6 +1465,15 @@ const POSTER_GOLD = "#F2D024";
 const POSTER_NEON = "#C6FF3D";
 const POSTER_BG = "#050505";
 
+/**
+ * Format a leg for ticket-list / confirm-modal display: every market
+ * type returns both the matchup and a human-readable pick so Draw /
+ * Spread / Total chips don't collapse to ambiguous strings.
+ */
+function formatLegDisplay(leg: SelectedLeg): { match: string; pick: string } {
+  return { match: leg.matchLabel, pick: leg.teamLabel };
+}
+
 function countryToFlag(label: string): string {
   const map: Record<string, string> = {
     argentina: "🇦🇷",
