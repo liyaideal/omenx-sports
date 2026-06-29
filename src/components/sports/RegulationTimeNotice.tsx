@@ -51,8 +51,8 @@ export function RegulationTimeNotice({
           <button
             type="button"
             aria-label="About settlement rules"
+            onPointerDown={(e) => e.stopPropagation()}
             onClick={(e) => {
-              e.preventDefault();
               e.stopPropagation();
             }}
             className={cn(
