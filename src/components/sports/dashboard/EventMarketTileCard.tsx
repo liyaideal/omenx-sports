@@ -7,6 +7,10 @@ import { TeamName } from "@/components/sports/TeamName";
 import { TypeChip } from "@/components/sports/CardChip";
 import { useTradeDrawer } from "@/components/sports/trade/TradeDrawerProvider";
 import { DrawIcon, isDrawOutcome } from "@/components/sports/draw";
+import {
+  RegulationTimeNotice,
+  marketUsesRegulationTimeResolution,
+} from "@/components/sports/RegulationTimeNotice";
 
 const HOT_PARTICIPANTS = 2000;
 const TRENDING_DELTA = 0.05;
@@ -108,7 +112,12 @@ export function EventMarketTileCard({
       )}
 
       <footer className="mt-auto flex items-center justify-between border-t border-border pt-3 text-[11px] font-mono text-muted-foreground">
-        <span className="inline-flex items-center gap-1.5"><Clock className="h-3 w-3" /> {market.endsLabel}</span>
+        <span className="inline-flex items-center gap-1.5">
+          <Clock className="h-3 w-3" /> {market.endsLabel}
+          {marketUsesRegulationTimeResolution(market) && (
+            <RegulationTimeNotice variant="tooltip" className="ml-0.5" />
+          )}
+        </span>
         <span className="inline-flex items-center gap-3">
           <span className="inline-flex items-center gap-1"><Users className="h-3 w-3" /> {market.participants.toLocaleString()}</span>
           <span className="text-foreground">Vol {market.volume}</span>
