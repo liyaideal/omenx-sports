@@ -433,7 +433,7 @@ function TierCard({
             <span className="flex min-w-0 items-center gap-1.5 text-zinc-300">
               {p.hero && <Trophy className="h-3 w-3 shrink-0 text-amber-400" />}
               <span className="truncate">{p.label}</span>
-              {p.hero && tier.id === "grand" && (
+              {p.hero && tier.id === "grand" && p.label.toLowerCase().includes("signed") && (
                 <Link
                   to="/promo/world-cup"
                   search={{ tab: "legend" }}
