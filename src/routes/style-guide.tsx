@@ -2446,6 +2446,58 @@ function StyleGuide() {
             </div>
           </Section>
 
+          <Section
+            id="regulation-time-notice"
+            title="Regulation time notice"
+            kicker="23d — P0 / settlement disclosure"
+          >
+            <p className="mb-6 max-w-3xl text-sm text-muted-foreground">
+              Shared <code className="font-mono text-foreground">RegulationTimeNotice</code> — surfaces the soccer match
+              settlement rule (90′ + stoppage only; extra time and penalties don't count). Gated by
+              <code className="mx-1 font-mono text-foreground">marketUsesRegulationTimeResolution(market)</code>
+              (currently <code className="font-mono text-foreground">market.kind === "match"</code>). Inline banner on
+              the event trade page; tooltip ⓘ on dense Games-tab cards.
+            </p>
+
+            <div className="grid gap-6 md:grid-cols-2">
+              <div className="rounded-2xl border border-border bg-surface p-5">
+                <div className="mb-3 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+                  Inline — event trade page
+                </div>
+                <RegulationTimeNotice />
+              </div>
+
+              <div className="rounded-2xl border border-border bg-surface p-5">
+                <div className="mb-3 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+                  Tooltip — Games-tab card
+                </div>
+                <div className="inline-flex items-center gap-1.5 rounded-full bg-white/[0.04] px-2.5 py-1 font-mono text-[11px] text-muted-foreground ring-1 ring-white/10">
+                  Tomorrow · 3:00 PM
+                  <RegulationTimeNotice variant="tooltip" />
+                </div>
+                <div className="mt-4 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+                  On media (LIVE card)
+                </div>
+                <div className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-black/60 px-2.5 py-1 font-mono text-[11px] text-white/80 ring-1 ring-white/15 backdrop-blur">
+                  Streaming now
+                  <RegulationTimeNotice variant="tooltip" tone="onMedia" />
+                </div>
+              </div>
+            </div>
+
+            <div className="mt-6 rounded-2xl border border-dashed border-white/15 bg-white/[0.02] p-5 text-xs">
+              <div className="mb-2 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+                Rules
+              </div>
+              <ul className="space-y-1.5 text-muted-foreground">
+                <li>• Only rendered when <code className="font-mono text-foreground">market.kind === "match"</code>. Futures / top-scorer / player-prop markets do not show it.</li>
+                <li>• Event trade page uses <code className="font-mono text-foreground">variant="inline"</code> below the header.</li>
+                <li>• <code className="font-mono text-foreground">EventMarketTileCard</code> and <code className="font-mono text-foreground">LiveStreamCard</code> use <code className="font-mono text-foreground">variant="tooltip"</code> to avoid breaking the dense card rhythm.</li>
+                <li>• Copy is fixed — do not localize or shorten without product sign-off; it's the legal-grade settlement rule.</li>
+              </ul>
+            </div>
+          </Section>
+
           <Section id="event-trade-bar" title="Mobile sticky trade bar" kicker="24 — P0 / event detail mobile">
             <p className="mb-6 max-w-3xl text-sm text-muted-foreground">
               Fixed bottom action bar shown on <code className="font-mono text-foreground">&lt;lg</code> screens of the event detail page.
