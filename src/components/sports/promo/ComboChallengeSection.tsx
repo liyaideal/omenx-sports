@@ -1042,8 +1042,11 @@ function SubmitConfirmModal({
               <span className="font-scoreboard text-[10px] font-bold tracking-widest text-amber-400">
                 {String(i + 1).padStart(2, "0")}
               </span>
-              <span className="flex-1 truncate font-pitch text-xs font-bold uppercase tracking-wide text-white">
-                {l.teamLabel}
+              <span className="flex flex-1 items-baseline gap-2 truncate font-pitch uppercase tracking-wide">
+                <span className="truncate text-xs font-bold text-white">{l.teamLabel}</span>
+                <span className="truncate text-[10px] font-semibold text-zinc-500">
+                  · {l.matchLabel}
+                </span>
               </span>
               <span className="font-scoreboard text-[10px] font-bold tabular-nums text-zinc-500">
                 {l.displayProbability}
@@ -1345,14 +1348,18 @@ function TicketRow({ ticket, highlight = false }: { ticket: SubmittedTicket; hig
         </div>
       </div>
       <div className="mt-2 flex flex-wrap gap-1">
-        {ticket.legs.map((l, i) => (
-          <span
-            key={i}
-            className="border border-zinc-800 bg-zinc-950 px-2 py-0.5 font-pitch text-[10px] font-bold uppercase tracking-widest text-zinc-400"
-          >
-            {l.teamLabel}
-          </span>
-        ))}
+        {ticket.legs.map((l, i) => {
+          const d = formatLegDisplay(l);
+          return (
+            <span
+              key={i}
+              className="inline-flex flex-col border border-zinc-800 bg-zinc-950 px-2 py-1 font-pitch uppercase tracking-widest"
+            >
+              <span className="text-[9px] font-semibold text-zinc-500">{d.match}</span>
+              <span className="text-[11px] font-bold text-white">{d.pick}</span>
+            </span>
+          );
+        })}
       </div>
       <WalletLine ticket={ticket} />
     </div>
@@ -1461,6 +1468,15 @@ const POSTER_GOLD = "#F2D024";
 const POSTER_NEON = "#C6FF3D";
 const POSTER_BG = "#050505";
 
+/**
+ * Format a leg for ticket-list / confirm-modal display: every market
+ * type returns both the matchup and a human-readable pick so Draw /
+ * Spread / Total chips don't collapse to ambiguous strings.
+ */
+function formatLegDisplay(leg: SelectedLeg): { match: string; pick: string } {
+  return { match: leg.matchLabel, pick: leg.teamLabel };
+}
+
 function countryToFlag(label: string): string {
   const map: Record<string, string> = {
     argentina: "🇦🇷",
@@ -1526,7 +1542,7 @@ function getLegPosterContent(leg: SelectedLeg): {
     return {
       flag: "⚽",
       primary: leg.teamLabel.toUpperCase(), // "OVER 2.5" / "UNDER 0.5"
-      suffix: "Win",
+      suffix: "",
       secondary: matchSub,
     };
   }
@@ -1536,11 +1552,20 @@ function getLegPosterContent(leg: SelectedLeg): {
     return {
       flag: countryToFlag(teamName),
       primary: leg.teamLabel.toUpperCase(),
-      suffix: "Win",
+      suffix: "",
       secondary: matchSub,
     };
   }
-  // MONEYLINE (incl. Draw)
+  // MONEYLINE — Draw or team win
+  if (leg.outcomeSide === "DRAW" || /^draw$/i.test(leg.teamLabel)) {
+    const home = leg.matchLabel.split(" vs ")[0]?.trim() ?? "";
+    return {
+      flag: countryToFlag(home),
+      primary: "DRAW",
+      suffix: "",
+      secondary: matchSub,
+    };
+  }
   const c = extractCountry(leg);
   return {
     flag: c.flag,
@@ -1751,12 +1776,14 @@ export function ShareCardPreview(props: ShareCardPreviewProps) {
                             >
                               {c.primary}
                             </span>
-                            <span
-                              className="font-poster font-bold uppercase"
-                              style={{ color: POSTER_NEON, fontSize: "2.65cqw" }}
-                            >
-                              {c.suffix}
-                            </span>
+                            {c.suffix ? (
+                              <span
+                                className="font-poster font-bold uppercase"
+                                style={{ color: POSTER_NEON, fontSize: "2.65cqw" }}
+                              >
+                                {c.suffix}
+                              </span>
+                            ) : null}
                           </div>
                           {c.secondary ? (
                             <span
