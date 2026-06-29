@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Info } from "lucide-react";
 import {
   Popover,
@@ -40,20 +41,35 @@ export function RegulationTimeNotice({
   className,
   tone = "muted",
 }: RegulationTimeNoticeProps) {
+  const [tooltipOpen, setTooltipOpen] = useState(false);
+
   if (variant === "tooltip") {
     const triggerCls =
       tone === "onMedia"
         ? "text-white/60 hover:text-white"
         : "text-muted-foreground hover:text-foreground";
+    const toggleTooltip = () => setTooltipOpen((open) => !open);
     return (
-      <Popover>
+      <Popover open={tooltipOpen} onOpenChange={setTooltipOpen}>
         <PopoverTrigger asChild>
           <button
             type="button"
             aria-label="About settlement rules"
-            onPointerDown={(e) => e.stopPropagation()}
-            onClick={(e) => {
+            aria-expanded={tooltipOpen}
+            onPointerDown={(e) => {
+              e.preventDefault();
               e.stopPropagation();
+            }}
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              toggleTooltip();
+            }}
+            onKeyDown={(e) => {
+              if (e.key !== "Enter" && e.key !== " ") return;
+              e.preventDefault();
+              e.stopPropagation();
+              toggleTooltip();
             }}
             className={cn(
               "inline-flex shrink-0 items-center justify-center rounded-full transition",
