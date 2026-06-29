@@ -31,6 +31,10 @@ import { ACCOUNT_STATS, getMarketById, type SportsMarket } from "@/data/sports-m
 import { LEAGUE_BG } from "@/lib/league-backgrounds";
 import { EventQuestionHeading } from "@/components/sports/event/EventQuestionHeading";
 import { LiveDelayInfo } from "@/components/sports/live/LiveDelayInfo";
+import {
+  RegulationTimeNotice,
+  marketUsesRegulationTimeResolution,
+} from "@/components/sports/RegulationTimeNotice";
 
 export const Route = createFileRoute("/event/$id")({
   validateSearch: (raw: Record<string, unknown>): { outcome?: string } => ({
@@ -565,6 +569,9 @@ function EventTradePage() {
             market={active}
             outcomeId={selected?.id}
           />
+          {marketUsesRegulationTimeResolution(market) && (
+            <RegulationTimeNotice />
+          )}
           {isPreMatch && <PreMatchStrip market={market} />}
           {isLive ? (
             <StageTabs

@@ -4,6 +4,10 @@ import type { SportsMarket } from "@/data/sports-markets";
 import { TeamName } from "@/components/sports/TeamName";
 import { useTradeDrawer } from "@/components/sports/trade/TradeDrawerProvider";
 import { LiveDelayInfo } from "@/components/sports/live/LiveDelayInfo";
+import {
+  RegulationTimeNotice,
+  marketUsesRegulationTimeResolution,
+} from "@/components/sports/RegulationTimeNotice";
 
 /**
  * Compact "we are streaming this match" tile, sized to drop into the same
@@ -131,6 +135,9 @@ export function LiveStreamCard({ market }: { market: SportsMarket }) {
             <span className="relative h-1.5 w-1.5 rounded-full bg-current" />
           </span>
           Streaming now
+          {marketUsesRegulationTimeResolution(market) && (
+            <RegulationTimeNotice variant="tooltip" className="ml-0.5 text-muted-foreground" />
+          )}
         </span>
         <span className="inline-flex items-center gap-3">
           <span className="inline-flex items-center gap-1"><Users className="h-3 w-3" /> {market.participants.toLocaleString()}</span>
