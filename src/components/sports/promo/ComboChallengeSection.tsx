@@ -1345,14 +1345,18 @@ function TicketRow({ ticket, highlight = false }: { ticket: SubmittedTicket; hig
         </div>
       </div>
       <div className="mt-2 flex flex-wrap gap-1">
-        {ticket.legs.map((l, i) => (
-          <span
-            key={i}
-            className="border border-zinc-800 bg-zinc-950 px-2 py-0.5 font-pitch text-[10px] font-bold uppercase tracking-widest text-zinc-400"
-          >
-            {l.teamLabel}
-          </span>
-        ))}
+        {ticket.legs.map((l, i) => {
+          const d = formatLegDisplay(l);
+          return (
+            <span
+              key={i}
+              className="inline-flex flex-col border border-zinc-800 bg-zinc-950 px-2 py-1 font-pitch uppercase tracking-widest"
+            >
+              <span className="text-[9px] font-semibold text-zinc-500">{d.match}</span>
+              <span className="text-[11px] font-bold text-white">{d.pick}</span>
+            </span>
+          );
+        })}
       </div>
       <WalletLine ticket={ticket} />
     </div>
