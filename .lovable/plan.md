@@ -1,43 +1,79 @@
-## Goal
-Surface a regulation-time resolution disclaimer on (a) the event trade page and (b) every game card in the league Games tab, so users know extra time / penalties don't count toward settlement.
+## Problem
 
-Copy (exact):
-> This market resolves based solely on the result at the end of regulation time (90 minutes plus stoppage time). Extra time and penalty shootouts are not counted.
+Two surfaces collapse leg context to just `leg.teamLabel`, so Draw / Spread / Total picks become unreadable.
 
-## Scope
-Applies only to soccer match-result markets — i.e. `market.kind === "match"`. League-winner / top-scorer / player-prop markets keep their own rules and are not touched. (All current `kind:"match"` data is soccer; if non-soccer matches are added later we can gate further on league.sport.)
+### A. "MY TICKETS" list (and Confirm-modal stepper)
 
-## Changes
+`src/components/sports/promo/ComboChallengeSection.tsx` — `TicketRow` (~L1348) and the confirm-modal list (~L1040) render only `leg.teamLabel`:
 
-### 1. New shared component
-**File:** `src/components/sports/RegulationTimeNotice.tsx`
-- Small presentational component with `variant`:
-  - `inline` — full-width subtle banner: `Info` icon + the full sentence, muted text, 1px border, rounded, same visual language as the existing amber live-delay notice but neutral (muted/border, not amber, since it isn't a warning).
-  - `tooltip` — just an ⓘ icon (12–14px, muted) wrapped in shadcn `Tooltip`; content is the full sentence. For dense card surfaces.
-- Helper export `marketUsesRegulationTimeResolution(market)` returning `market.kind === "match"` so callers don't repeat the gate.
+| Market    | Today's chip text   | Issue                       |
+|-----------|---------------------|-----------------------------|
+| Moneyline | `Brazil Win`        | OK                          |
+| Draw      | `Draw`              | No match — `DRAW · DRAW · DRAW` |
+| Spread    | `BRA -1.5`          | No matchup context          |
+| Total     | `Over 2.5`          | No team / match at all      |
 
-### 2. Event trade page
-**File:** `src/routes/event.$id.tsx`
-- Render `<RegulationTimeNotice variant="inline" />` just below the event header block (around line 745 area, after the header `</header>` and before the chart/outcomes section), gated by `marketUsesRegulationTimeResolution(market)`.
-- Mobile + desktop both show it; sits naturally above the price chart on both layouts.
+### B. Share poster (`ShareCardPreview`, same file ~L1518)
 
-### 3. Games-tab cards (league hub)
-Two card types render in `view === "games"`:
-- **`EventMarketTileCard`** (`src/components/sports/dashboard/EventMarketTileCard.tsx`) — the standard grid card.
-- **`LiveStreamCard`** (`src/components/sports/dashboard/LiveStreamCard.tsx`) — the featured-kickoff card.
+`getLegPosterContent` hardcodes `suffix: "Win"` for **every** market type and, for Draw, replaces the pick with the home team's name:
 
-For each, add a `<RegulationTimeNotice variant="tooltip" />` ⓘ icon next to the existing meta line (kickoff time / "LIVE" pill area), only when `marketUsesRegulationTimeResolution(market)`. Tooltip-based so the dense card layout isn't disrupted.
+| Market    | Poster today                | Issue                                 |
+|-----------|-----------------------------|---------------------------------------|
+| Moneyline | `BRAZIL WIN` + match sub    | OK                                    |
+| Draw      | `BRAZIL WIN` (home team!)   | Wrong pick — user actually bet Draw   |
+| Spread    | `BRAZIL -1.5 WIN`           | Redundant "WIN" tail                  |
+| Total     | `OVER 2.5 WIN` + match sub  | Nonsense suffix                       |
 
-### 4. Style guide
-Per the project's Core memory rule, add a small demo of both `inline` and `tooltip` variants to `src/routes/style-guide.tsx` under an appropriate section (e.g. existing notices / disclosures section, or a new "Market disclosures" block).
+Flags also default to a generic ⚽ on Total because no team is parsed.
+
+## Fix (UI only — no data / pricing changes)
+
+All edits inside `src/components/sports/promo/ComboChallengeSection.tsx`.
+
+### 1. Shared helper
+
+Add `formatLegDisplay(leg: SelectedLeg)` that returns `{ match, pick }`:
+
+| Market    | `match`         | `pick`              |
+|-----------|-----------------|---------------------|
+| Moneyline | `BRA vs JPN`    | `Brazil Win`        |
+| Draw      | `BRA vs JPN`    | `Draw`              |
+| Spread    | `BRA vs JPN`    | `BRA -1.5`          |
+| Total     | `BRA vs JPN`    | `Over 2.5`          |
+
+Both fields are derived from data already on `SelectedLeg` (`matchLabel`, `marketType`, `teamLabel`).
+
+### 2. Ticket list (`TicketRow`)
+
+Replace the single-line chip with a two-line chip per leg:
+- Line 1 (muted, smaller): match (`BRA vs JPN`)
+- Line 2 (bold, white): pick
+
+Keep amber/zinc palette and `font-pitch`. Allow chips to wrap so 3 legs always render in full instead of being truncated.
+
+### 3. Confirm modal leg list
+
+Append the match name as a muted suffix on the same row: `01 — Draw · BRA vs JPN`. Keeps the existing single-row stepper layout intact.
+
+### 4. Share poster (`getLegPosterContent` + render block)
+
+Rewrite the helper so each market type produces a correct, readable label and the right flag:
+
+- **Moneyline** → primary `{TEAM NAME}`, suffix `WIN`, secondary `{MATCH}`, flag from picked team.
+- **Draw** → primary `DRAW`, suffix dropped (no "WIN"), secondary `{MATCH}`, flag from home team.
+- **Spread** → primary `{TEAM} {±LINE}` (already concise), suffix dropped, secondary `{MATCH}`, flag parsed from team name (existing logic).
+- **Total** → primary `OVER {LINE}` / `UNDER {LINE}`, suffix dropped, secondary `{MATCH}`, flag stays neutral ⚽.
+
+Update the leg render block so `suffix` is rendered only when present (skip the spacing + colored span when empty), keeping the existing PosterTicketFrame layout untouched.
 
 ## Out of scope
-- Desktop dashboard match cards on `/` (not the Games tab).
-- TradeDrawer (separate surface, can follow up if needed).
-- Wording localization / per-league overrides.
+
+- `SelectedLeg` shape, mock API, pricing, seeded ticket data.
+- `LegSlot` (already shows `matchLabel`).
+- Poster geometry / colors / background.
 
 ## Verification
-1. `/league/world-cup-2026?view=games` — every game card shows an ⓘ next to kickoff/LIVE; hover reveals the full sentence.
-2. `/event/<a soccer match id>` — neutral banner visible below the header on desktop and mobile.
-3. `/event/<league-winner id>` and `/event/<top-scorer id>` — no banner shown.
-4. `/style-guide` — both variants render.
+
+- `/promo/world-cup?tab=combo` seeded tickets: each leg row shows match + pick; no row reads bare `DRAW`.
+- Build a fresh combo mixing Moneyline + Draw + Total → confirm-modal shows match per leg, accepted ticket row shows match per leg.
+- Open share dialog on each of the three seeded tickets (won / lost / pending): Draw leg shows `DRAW` (not "BRAZIL WIN"), Total leg shows `OVER 2.5` without trailing `WIN`, Spread leg shows `BRA -1.5` without trailing `WIN`. Moneyline still reads `BRAZIL WIN`.
