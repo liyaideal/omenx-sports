@@ -424,7 +424,7 @@ function TierCard({
         </div>
       </div>
 
-      <ul className="relative z-[3] space-y-1.5 border-t border-zinc-900 pt-3">
+      <ul className="relative z-[3] flex-1 space-y-1.5 border-t border-zinc-900 pt-3">
         {tier.prizes.map((p) => (
           <li
             key={p.label}
