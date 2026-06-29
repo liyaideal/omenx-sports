@@ -177,6 +177,7 @@ const SECTIONS = [
   ["event-live-stage", "Event Live Stage"],
   ["global-live-stream", "Global Live Stream"],
   ["live-delay-info", "Live Delay Disclosure"],
+  ["regulation-time-notice", "Regulation Time Notice"],
   ["event-trade-bar", "Mobile Sticky Trade Bar"],
   ["event-extras", "Event Detail Extras"],
   ["share", "Share Dialog"],
