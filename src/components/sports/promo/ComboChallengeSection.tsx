@@ -1042,8 +1042,11 @@ function SubmitConfirmModal({
               <span className="font-scoreboard text-[10px] font-bold tracking-widest text-amber-400">
                 {String(i + 1).padStart(2, "0")}
               </span>
-              <span className="flex-1 truncate font-pitch text-xs font-bold uppercase tracking-wide text-white">
-                {l.teamLabel}
+              <span className="flex flex-1 items-baseline gap-2 truncate font-pitch uppercase tracking-wide">
+                <span className="truncate text-xs font-bold text-white">{l.teamLabel}</span>
+                <span className="truncate text-[10px] font-semibold text-zinc-500">
+                  · {l.matchLabel}
+                </span>
               </span>
               <span className="font-scoreboard text-[10px] font-bold tabular-nums text-zinc-500">
                 {l.displayProbability}
