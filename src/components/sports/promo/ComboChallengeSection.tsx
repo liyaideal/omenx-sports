@@ -1776,12 +1776,14 @@ export function ShareCardPreview(props: ShareCardPreviewProps) {
                             >
                               {c.primary}
                             </span>
-                            <span
-                              className="font-poster font-bold uppercase"
-                              style={{ color: POSTER_NEON, fontSize: "2.65cqw" }}
-                            >
-                              {c.suffix}
-                            </span>
+                            {c.suffix ? (
+                              <span
+                                className="font-poster font-bold uppercase"
+                                style={{ color: POSTER_NEON, fontSize: "2.65cqw" }}
+                              >
+                                {c.suffix}
+                              </span>
+                            ) : null}
                           </div>
                           {c.secondary ? (
                             <span
