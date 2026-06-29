@@ -1542,7 +1542,7 @@ function getLegPosterContent(leg: SelectedLeg): {
     return {
       flag: "⚽",
       primary: leg.teamLabel.toUpperCase(), // "OVER 2.5" / "UNDER 0.5"
-      suffix: "Win",
+      suffix: "",
       secondary: matchSub,
     };
   }
@@ -1552,11 +1552,20 @@ function getLegPosterContent(leg: SelectedLeg): {
     return {
       flag: countryToFlag(teamName),
       primary: leg.teamLabel.toUpperCase(),
-      suffix: "Win",
+      suffix: "",
       secondary: matchSub,
     };
   }
-  // MONEYLINE (incl. Draw)
+  // MONEYLINE — Draw or team win
+  if (leg.outcomeSide === "DRAW" || /^draw$/i.test(leg.teamLabel)) {
+    const home = leg.matchLabel.split(" vs ")[0]?.trim() ?? "";
+    return {
+      flag: countryToFlag(home),
+      primary: "DRAW",
+      suffix: "",
+      secondary: matchSub,
+    };
+  }
   const c = extractCountry(leg);
   return {
     flag: c.flag,
