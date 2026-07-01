@@ -1,6 +1,6 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { motion } from "motion/react";
-import { Trophy, Sparkles, Gift, Check, Lock } from "lucide-react";
+import { Trophy, Sparkles, Gift, Ticket } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 import { toast } from "sonner";
 import {
@@ -20,14 +20,19 @@ const ACCENT: Record<LuckyBoxTier["accent"], string> = {
 const MAX_THRESHOLD =
   LUCKY_BOX_TIERS[LUCKY_BOX_TIERS.length - 1]?.volumeUnlock ?? 5000;
 
-type TierStatus = "active" | "surpassed" | "locked";
+type TicketMap = Record<string, number>;
 
-function computeActiveIndex(volume: number): number {
-  let idx = -1;
-  LUCKY_BOX_TIERS.forEach((t, i) => {
-    if (volume >= t.volumeUnlock) idx = i;
+/**
+ * Mock-only: on first render, seed 1 ticket per tier whose threshold is
+ * covered by today's volume. Real backend will grant tickets as volume
+ * crosses each threshold and persist them across days.
+ */
+function deriveInitialTickets(volume: number): TicketMap {
+  const t: TicketMap = {};
+  LUCKY_BOX_TIERS.forEach((tier) => {
+    t[tier.id] = volume >= tier.volumeUnlock ? 1 : 0;
   });
-  return idx;
+  return t;
 }
 
 export function LuckyBoxSection({
@@ -36,7 +41,18 @@ export function LuckyBoxSection({
   volumeOverride?: number;
 } = {}) {
   const todayVolume = volumeOverride ?? USER_CARNIVAL_STATE.todayVolume;
-  const activeIndex = computeActiveIndex(todayVolume);
+  const [tickets, setTickets] = useState<TicketMap>(() =>
+    deriveInitialTickets(todayVolume),
+  );
+  // If the volume override changes (style-guide fixtures), reseed.
+  useEffect(() => {
+    setTickets(deriveInitialTickets(todayVolume));
+  }, [todayVolume]);
+
+  const hasAnyTicket = useMemo(
+    () => Object.values(tickets).some((n) => n > 0),
+    [tickets],
+  );
   const tokenPct = Math.max(
     0,
     Math.min(100, (todayVolume / MAX_THRESHOLD) * 100),
@@ -59,33 +75,36 @@ export function LuckyBoxSection({
           </span>
         </h3>
         <p className="relative mt-1 text-sm text-zinc-400">
-          Higher daily volume unlocks a bigger vault tomorrow. One spin per
-          calendar day — first-come, first-served while pool stock lasts.
+          Every time your daily volume crosses a tier threshold, you earn 1
+          ticket for that vault. Tickets never expire — spend them any time.
         </p>
       </div>
 
       <VolumeLadder
         volume={todayVolume}
         tokenPct={tokenPct}
-        activeIndex={activeIndex}
+        tickets={tickets}
+        hasAnyTicket={hasAnyTicket}
       />
 
       <div className="relative grid grid-cols-1 gap-4 md:grid-cols-3">
-        {LUCKY_BOX_TIERS.map((t, i) => {
-          const status: TierStatus =
-            i === activeIndex
-              ? "active"
-              : i < activeIndex
-                ? "surpassed"
-                : "locked";
+        {LUCKY_BOX_TIERS.map((t) => {
           const remaining = Math.max(0, t.volumeUnlock - todayVolume);
+          const reached = todayVolume >= t.volumeUnlock;
+          const ticketCount = tickets[t.id] ?? 0;
           return (
             <TierCard
               key={t.id}
               tier={t}
-              status={status}
               remaining={remaining}
-              isFirstUnreached={i === activeIndex + 1}
+              reached={reached}
+              ticketCount={ticketCount}
+              onConsumeTicket={() =>
+                setTickets((prev) => ({
+                  ...prev,
+                  [t.id]: Math.max(0, (prev[t.id] ?? 0) - 1),
+                }))
+              }
             />
           );
         })}
@@ -99,14 +118,22 @@ export function LuckyBoxSection({
 function VolumeLadder({
   volume,
   tokenPct,
-  activeIndex,
+  tickets,
+  hasAnyTicket,
 }: {
   volume: number;
   tokenPct: number;
-  activeIndex: number;
+  tickets: TicketMap;
+  hasAnyTicket: boolean;
 }) {
-  const activeTier = activeIndex >= 0 ? LUCKY_BOX_TIERS[activeIndex] : null;
-  const activeColor = activeTier ? ACCENT[activeTier.accent] : "#facc15";
+  // Highest tier the user has ever unlocked (via current tickets or today's volume).
+  const topIdx = LUCKY_BOX_TIERS.reduce((acc, t, i) => {
+    const unlockedNow = volume >= t.volumeUnlock;
+    const hasTicket = (tickets[t.id] ?? 0) > 0;
+    return unlockedNow || hasTicket ? i : acc;
+  }, -1);
+  const topTier = topIdx >= 0 ? LUCKY_BOX_TIERS[topIdx] : null;
+  const activeColor = topTier ? ACCENT[topTier.accent] : "#facc15";
 
   // Express positions as `calc(... * (100% - 40px) + 20px)` so nodes align
   // with the track inset (px-5 padding).
@@ -135,7 +162,8 @@ function VolumeLadder({
         {/* Nodes */}
         {LUCKY_BOX_TIERS.map((t, i) => {
           const pct = (t.volumeUnlock / MAX_THRESHOLD) * 100;
-          const reached = i <= activeIndex;
+          const reached =
+            volume >= t.volumeUnlock || (tickets[t.id] ?? 0) > 0;
           const color = ACCENT[t.accent];
           const isLast = i === LUCKY_BOX_TIERS.length - 1;
           // Alternate labels above/below to avoid collision when thresholds
@@ -207,25 +235,17 @@ function VolumeLadder({
 
       {/* Caption */}
       <div className="mt-2 font-pitch text-[11px] uppercase tracking-[0.18em] text-zinc-500">
-        {activeTier ? (
-          <>
-            Your vault today
-            <span className="hidden sm:inline"> · </span>
-            <br className="sm:hidden" />
-            <span style={{ color: activeColor }}>
-              {activeTier.code} {activeTier.name}
-            </span>
-            <span className="hidden sm:inline"> · </span>
-            <br className="sm:hidden" />
-            only this vault applies
-          </>
+        {hasAnyTicket ? (
+          <span style={{ color: activeColor }}>
+            Tickets ready · spend any time
+          </span>
         ) : (
           <>
             Reach{" "}
             <span className="text-white">
               {LUCKY_BOX_TIERS[0]?.volumeUnlock.toLocaleString()} U
             </span>{" "}
-            to unlock your first vault
+            to earn your first ticket
           </>
         )}
       </div>
@@ -237,22 +257,21 @@ function VolumeLadder({
 
 function TierCard({
   tier,
-  status,
   remaining,
-  isFirstUnreached,
+  reached,
+  ticketCount,
+  onConsumeTicket,
 }: {
   tier: LuckyBoxTier;
-  status: TierStatus;
   remaining: number;
-  isFirstUnreached: boolean;
+  reached: boolean;
+  ticketCount: number;
+  onConsumeTicket: () => void;
 }) {
   const accent = ACCENT[tier.accent];
-  const isActive = status === "active";
-  const isSurpassed = status === "surpassed";
-  const isLocked = status === "locked";
+  const hasTicket = ticketCount > 0;
   const [spinning, setSpinning] = useState(false);
   const [result, setResult] = useState<LuckyBoxPrize | null>(null);
-  const [hasSpun, setHasSpun] = useState(false);
   const [scrollIdx, setScrollIdx] = useState(0);
 
   useEffect(() => {
@@ -265,14 +284,14 @@ function TierCard({
   }, [spinning, tier.prizes.length]);
 
   function spin() {
-    if (!isActive || hasSpun || spinning) return;
+    if (!hasTicket || spinning) return;
     setSpinning(true);
     setResult(null);
     const winner = drawPrize(tier.prizes);
+    onConsumeTicket();
     setTimeout(() => {
       setSpinning(false);
       setResult(winner);
-      setHasSpun(true);
       toast.success(`${tier.name}: ${winner.label}`);
     }, 2200);
   }
@@ -281,30 +300,34 @@ function TierCard({
     ? result.label
     : tier.prizes[scrollIdx]?.label ?? "—";
 
-  const progressPct = isLocked
-    ? Math.min(
-        100,
-        Math.round(((tier.volumeUnlock - remaining) / tier.volumeUnlock) * 100),
-      )
-    : 100;
+  const progressPct =
+    reached || hasTicket
+      ? 100
+      : Math.min(
+          100,
+          Math.round(
+            ((tier.volumeUnlock - remaining) / tier.volumeUnlock) * 100,
+          ),
+        );
 
   return (
     <div
       className={cn(
         "group relative flex flex-col gap-4 overflow-hidden border-2 bg-[#0a0a0a] p-5 transition-all",
-        isActive && "z-[1] shadow-[0_0_40px_rgba(250,204,21,0.35)]",
+        hasTicket && "z-[1]",
       )}
       style={{
-        borderColor: isActive
+        borderColor: hasTicket
           ? accent
-          : isSurpassed
+          : reached
             ? "rgb(63 63 70)"
             : "rgb(39 39 42)",
-        borderStyle: isLocked ? "dashed" : "solid",
+        borderStyle: hasTicket || reached ? "solid" : "dashed",
+        boxShadow: hasTicket ? `0 0 40px ${accent}40` : undefined,
       }}
     >
-      {/* Active spotlight cone */}
-      {isActive && (
+      {/* Spotlight cone when tickets available */}
+      {hasTicket && (
         <div
           aria-hidden
           className="pointer-events-none absolute inset-0 animate-pulse"
@@ -313,8 +336,8 @@ function TierCard({
           }}
         />
       )}
-      {/* Dim shroud over surpassed / locked */}
-      {!isActive && (
+      {/* Dim shroud when no ticket */}
+      {!hasTicket && (
         <div
           aria-hidden
           className="pointer-events-none absolute inset-0 z-[2] bg-black/55"
@@ -325,29 +348,22 @@ function TierCard({
       <div className="relative z-[3] flex items-center justify-between gap-2">
         <span
           className="font-scoreboard text-[10px] font-bold tracking-[0.25em]"
-          style={{ color: isActive ? accent : "rgb(113 113 122)" }}
+          style={{ color: hasTicket ? accent : "rgb(113 113 122)" }}
         >
           {tier.code}
         </span>
-        {isActive && (
+        {hasTicket && (
           <div
             className="flex items-center gap-1 px-2 py-0.5 font-scoreboard text-[9px] font-bold tracking-[0.22em]"
             style={{ background: accent, color: "black" }}
           >
-            <Sparkles className="h-2.5 w-2.5" />
-            YOUR TIER
+            <Ticket className="h-2.5 w-2.5" />×{ticketCount} TICKET
+            {ticketCount > 1 ? "S" : ""}
           </div>
         )}
-        {isSurpassed && (
-          <div className="flex items-center gap-1 border border-dashed border-zinc-500 px-2 py-0.5 font-scoreboard text-[9px] font-bold tracking-[0.22em] text-zinc-400">
-            <Check className="h-2.5 w-2.5" />
-            CLEARED
-          </div>
-        )}
-        {isLocked && (
-          <div className="flex items-center gap-1 border border-zinc-700 px-2 py-0.5 font-scoreboard text-[9px] font-bold tracking-[0.22em] text-zinc-500">
-            <Lock className="h-2.5 w-2.5" />
-            {isFirstUnreached ? "NEXT UP" : "LOCKED"}
+        {!hasTicket && !reached && (
+          <div className="flex items-center gap-1 border border-dashed border-zinc-700 px-2 py-0.5 font-scoreboard text-[9px] font-bold tracking-[0.22em] text-zinc-500">
+            +{remaining.toLocaleString()} U TO EARN
           </div>
         )}
       </div>
@@ -388,12 +404,12 @@ function TierCard({
           style={{
             color: result?.hero
               ? "#fde047"
-              : isActive
+              : hasTicket
                 ? accent
                 : "rgb(113 113 122)",
             filter: result?.hero
               ? "drop-shadow(0 0 14px rgba(253,224,71,0.7))"
-              : `drop-shadow(0 0 10px ${isActive ? accent : "transparent"})`,
+              : `drop-shadow(0 0 10px ${hasTicket ? accent : "transparent"})`,
           }}
         >
           {result?.hero && <Sparkles className="mr-2 inline h-5 w-5" />}
@@ -404,11 +420,11 @@ function TierCard({
       <div className="relative z-[3]">
         <div className="mb-1.5 flex items-center justify-between font-scoreboard text-[10px] font-bold tracking-[0.2em] text-zinc-500">
           <span>
-            {isLocked
-              ? `+${remaining.toLocaleString()} U to unlock`
-              : `Unlock at ${tier.volumeUnlock.toLocaleString()} U volume`}
+            {reached || hasTicket
+              ? `Ticket earned at ${tier.volumeUnlock.toLocaleString()} U volume`
+              : `+${remaining.toLocaleString()} U to earn a ticket`}
           </span>
-          <span style={{ color: !isLocked ? accent : undefined }}>
+          <span style={{ color: reached || hasTicket ? accent : undefined }}>
             {progressPct}%
           </span>
         </div>
@@ -418,7 +434,7 @@ function TierCard({
             style={{
               width: `${progressPct}%`,
               background: accent,
-              boxShadow: !isLocked ? `0 0 10px ${accent}` : undefined,
+              boxShadow: reached || hasTicket ? `0 0 10px ${accent}` : undefined,
             }}
           />
         </div>
@@ -453,23 +469,21 @@ function TierCard({
       <button
         type="button"
         onClick={spin}
-        disabled={!isActive || hasSpun || spinning}
+        disabled={!hasTicket || spinning}
         className="relative z-[3] border-2 px-4 py-2.5 font-pitch text-xs font-bold uppercase tracking-[0.25em] transition-colors disabled:cursor-not-allowed disabled:opacity-60"
         style={{
-          borderColor: isActive ? accent : "rgb(39 39 42)",
-          background: isActive && !hasSpun ? accent : "transparent",
-          color: isActive && !hasSpun ? "black" : "rgb(113 113 122)",
+          borderColor: hasTicket ? accent : "rgb(39 39 42)",
+          background: hasTicket ? accent : "transparent",
+          color: hasTicket ? "black" : "rgb(113 113 122)",
         }}
       >
-        {hasSpun
-          ? "Used today"
-          : spinning
-            ? "Spinning…"
-            : isActive
-              ? "Open vault"
-              : isSurpassed
-                ? "Outgrown · higher tier active"
-                : `+${remaining.toLocaleString()} U to unlock`}
+        {spinning
+          ? "Spinning…"
+          : hasTicket
+            ? `Open vault ×${ticketCount}`
+            : reached
+              ? "Trade more to earn another ticket"
+              : `+${remaining.toLocaleString()} U to earn a ticket`}
       </button>
     </div>
   );
