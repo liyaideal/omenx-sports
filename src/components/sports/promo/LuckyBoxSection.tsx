@@ -78,6 +78,7 @@ export function LuckyBoxSection({
           Every time your daily volume crosses a tier threshold, you earn 1
           ticket for that vault. Tickets never expire — spend them any time.
         </p>
+        <TicketLedger tickets={tickets} />
       </div>
 
       <VolumeLadder
@@ -114,6 +115,51 @@ export function LuckyBoxSection({
 }
 
 /* ---------------- Volume Ladder ---------------- */
+
+function TicketLedger({ tickets }: { tickets: TicketMap }) {
+  const total = Object.values(tickets).reduce((a, b) => a + b, 0);
+  if (total === 0) {
+    return (
+      <div className="relative mt-3 flex items-center gap-2 border-t border-zinc-900 pt-3 font-scoreboard text-[10px] font-bold tracking-[0.22em] text-zinc-500">
+        <Ticket className="h-3 w-3" />
+        NO TICKETS YET — REACH{" "}
+        <span className="text-zinc-300">
+          {LUCKY_BOX_TIERS[0]?.volumeUnlock.toLocaleString()} U
+        </span>{" "}
+        TODAY TO EARN YOUR FIRST
+      </div>
+    );
+  }
+  return (
+    <div className="relative mt-3 flex flex-wrap items-center gap-x-3 gap-y-2 border-t border-zinc-900 pt-3">
+      <div className="flex items-center gap-1.5 font-scoreboard text-[10px] font-bold tracking-[0.25em] text-zinc-500">
+        <Ticket className="h-3 w-3" />
+        TICKETS READY
+      </div>
+      <div className="flex items-center gap-1.5">
+        {LUCKY_BOX_TIERS.map((t, i) => {
+          const n = tickets[t.id] ?? 0;
+          const color = ACCENT[t.accent];
+          const on = n > 0;
+          return (
+            <div
+              key={t.id}
+              className="flex items-center gap-1 border px-1.5 py-0.5 font-scoreboard text-[10px] font-bold tracking-[0.18em] tabular-nums"
+              style={{
+                borderColor: on ? color : "rgb(39 39 42)",
+                color: on ? color : "rgb(82 82 91)",
+                boxShadow: on ? `0 0 8px ${color}55` : undefined,
+                background: on ? `${color}12` : "transparent",
+              }}
+            >
+              T{i + 1} ×{n}
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
 
 function VolumeLadder({
   volume,
