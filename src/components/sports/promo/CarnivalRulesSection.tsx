@@ -40,9 +40,10 @@ const SECTIONS = [
     code: "RULE-03",
     title: "Lucky Box",
     body: [
-      "One spin per user per day, granted the morning after qualifying volume is hit.",
-      "Daily volume tier locks the highest pool unlocked; tiers do not stack.",
-      "Each pool has a daily spin cap — first come, first served until depleted.",
+      "Each tier grants 1 ticket the first time your daily volume crosses its threshold (Basic 100 U, Premium 1,000 U, Grand 5,000 U). Tiers are independent — hitting 5,000 U in one day earns tickets for all three tiers at once.",
+      "Tickets never expire and are not cleared at day reset. Spend them any time from the Lucky Box tab.",
+      "Opening a vault consumes 1 ticket for that tier only and draws from that tier's own prize pool. Prize odds are shown on every card.",
+      "Volume does not carry over between days — a tier only grants a new ticket after a fresh day's volume crosses its threshold again.",
     ],
   },
 ];
