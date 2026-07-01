@@ -1,37 +1,75 @@
-## 调整：在 SEC-03 头卡加回"剩余抽奖券"展示
+## 交付文档：Lucky Box 累积抽奖券模型
 
-### 背景
-volume=0 的老用户进来只看到今日交易量 0，容易错过下面还未使用的历史券。头卡需要第一时间告诉用户"你还有 X 张券可用"。
+按 delivery-doc skill 骨架产出，写到 `/mnt/documents/lucky-box-tickets-spec.md`，然后以 artifact 交付。
 
-### UI 变化（仅一处）
-
-在 `LuckyBoxSection` 头卡（SEC-03 · DAILY LUCKY BOX 卡片）内，`<p>` 副标题下方新增一行 ticket ledger。
-
-结构：
+### 文档骨架
 
 ```
-┌───────────────────────────────────────────────┐
-│ SEC-03 · DAILY LUCKY BOX                      │
-│ TODAY'S VOLUME: 1,240 U                       │
-│ Every time your daily volume crosses…         │
-│                                               │
-│ TICKETS READY   T1 ×2   T2 ×1   T3 ×0         │
-└───────────────────────────────────────────────┘
+# Lucky Box 抽奖券模型（Lucky Box Tickets）— 交付说明 v2
+
+> 本次将 Lucky Box 从"每天限选一个 tier、机会当日清零"改为
+> "达标即发券、券永不清零"的累积模型。前端本次仅落 UI + mock
+> 状态，发券/持久化由后端在下一版接入。研发以本文档为准；v1
+> 的"active / surpassed / locked 三态"和"每日单次 spin"逻辑
+> 已废弃。
+
+## 1. 功能目标
+一句话产品定位 + 关键约束（每 tier 独立累积、跨天保留、只消耗券）。
+
+## 2. 券的发放与消耗规则
+表格：三列 tier / 门槛 / 发券条件；一段说明"跨门槛发券"示例
+（1,100 U → T1+1、T2+1、T3+0）。
+
+## 3. 状态与 UI 对照
+表格对比 v1 → v2：
+| 维度 | v1 | v2 |
+| 抽奖资格 | 每日仅最高达标 tier | 各 tier 独立按券判定 |
+| 券寿命 | 当日清零 | 永不清零 |
+| 卡片状态 | active / surpassed / locked | hasTicket / noTicket |
+| 按钮 | Open vault / Used today / Outgrown | Open vault ×N / Trade more… |
+| 徽章 | YOUR TIER / CLEARED / NEXT UP+LOCKED | ×N TICKETS / +X U TO EARN |
+
+## 4. 用户端流程
+- 4.1 头卡（SEC-03）
+  - Today's volume 数值
+  - 新副标题文案（原文引用）
+  - Ticket ledger 行：`TICKETS READY  T1 ×N  T2 ×N  T3 ×N`
+  - 零券态：`NO TICKETS YET — REACH 100 U TODAY TO EARN YOUR FIRST`
+- 4.2 Volume ladder
+  - 节点点亮条件改为"volume ≥ 门槛 或 该 tier 券 ≥ 1"
+  - Caption：有券 `Tickets ready · spend any time`；无券沿用旧文案
+- 4.3 Tier 卡片
+  - 两态渲染（列 hasTicket 与 noTicket 差异表）
+  - 抽奖交互：点击 → spin 2.2s → toast + 券 -1；可连击直至清零
+  - 已废弃 hasSpun 单次限制
+
+## 5. 数据 / 状态（前端）
+- `TicketMap = Record<tierId, number>`
+- `deriveInitialTickets(volume)`：mock seeding（每个达标 tier 各发 1 张）
+- 状态 owner：`LuckyBoxSection` 本地 useState，未接入 Cloud
+- 说明：真实持久化 + 跨门槛计数由后端在 v3 落地
+
+## 6. 已删除 / 已废弃（v1 → v2）
+表格列出：`TierStatus` 三态、`computeActiveIndex`、`isFirstUnreached`
+prop、`hasSpun` 状态、`CLEARED / NEXT UP / LOCKED` 徽章、"Used today
+/ Outgrown · higher tier active" 按钮文案。
+
+## 7. Style Guide
+`/style-guide#lucky-box`：三条 fixture 已存在
+（volumeOverride = 80 / 1240 / 6000），本次自动覆盖两态；无需新增。
+
+## 8. 涉及文件
+前端：
+- `src/components/sports/promo/LuckyBoxSection.tsx`（唯一改动）
+
+数据/后端：无。奖池数据 `src/data/world-cup-carnival.ts` 未动。
+
+## 9. 未变更项
+- 奖池奖品、概率、`LuckyBoxPrize/LuckyBoxTier` 类型、tier 门槛
+- 抽奖动效、reel、toast、GUESS WHO'S NEXT 入口
+- 按钮对齐、`flex-1` 奖品列布局
+- 移动端 / 桌面端整体布局未变
 ```
 
-细节：
-- 左侧标签 `TICKETS READY`：`font-scoreboard text-[10px] tracking-[0.25em] text-zinc-500`。
-- 三个 tier chip 横排，每个由 `T1/T2/T3` 编号 + `×N` 数值组成；用各自 accent 色（绿 / 黄 / 蓝）。
-- 券数 = 0 的 chip 降饱和：`text-zinc-600`，无 accent 色；避免"全部亮"喧宾夺主。
-- 券数 ≥ 1 的 chip：accent 色文字 + `border` 同色 + 微弱 glow，视觉上像个小 badge。
-- 总券数 = 0 时：整行改为一句提示 `No tickets yet — reach 100 U today to earn your first`（`text-zinc-500`）。
-- 桌面 & 移动端都在头卡内展示，不新增独立条。
-
-### 联动
-Tier 卡片内已有的 `×N TICKETS` 徽章保留 —— 头卡是快速一览，卡片内是操作入口，两者一致但不冲突。
-
-### 涉及文件
-`src/components/sports/promo/LuckyBoxSection.tsx`（唯一改动）。把 `tickets` 也传给头卡渲染即可，不动数据层。
-
-### 不改动
-奖池、券的领取/消耗逻辑、volume ladder、卡片交互、style-guide fixture。
+### 交付
+写完后用 `<presentation-artifact>` 挂出文件路径。
