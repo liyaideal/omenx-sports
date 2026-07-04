@@ -9,17 +9,17 @@ import { Trophy } from "lucide-react";
 const SECTIONS = [
   {
     code: "RULE-00",
-    title: "General 01",
+    title: "General",
     body: [
-      "111 Total reward pool: 3,000,000 U across the three series. Each series has its own quota; eligible rewards stack across series.",
-      "222 Effective volume = leveraged trades on supported markets with fee rate ≥ 0.04%.",
-      "333 Position vouchers stay claimable for 7 days. Open positions opened with a voucher are valid for 72 hours.",
-      "444 Sybil / wash trading / collusion / abuse disqualifies the account and forfeits rewards. OMENX reserves the final interpretation right.",
+      "Total reward pool: 3,000,000 U across the three series. Each series has its own quota; eligible rewards stack across series.",
+      "Effective volume = leveraged trades on supported markets with fee rate ≥ 0.04%.",
+      "Position vouchers stay claimable for 7 days. Open positions opened with a voucher are valid for 72 hours.",
+      "Sybil / wash trading / collusion / abuse disqualifies the account and forfeits rewards. OMENX reserves the final interpretation right.",
     ],
   },
   {
     code: "RULE-01",
-    title: "Welcome Pack 02",
+    title: "Welcome Pack",
     body: [
       "T-01 – T-03 are new-user only. T-04 (invite) is open to all users.",
       "Rewards are credited within 15 minutes after task completion.",
