@@ -278,6 +278,98 @@ function MeSheetPreviewLauncher() {
   );
 }
 
+/**
+ * ActivationDemos — three launcher buttons for the activation dialogs plus
+ * a note about how the CTAs are wired at page level. Kept inline in the
+ * style-guide route so the launchers can own their own open state without
+ * bleeding into the shared component API.
+ */
+function ActivationDemos() {
+  const [openVariant, setOpenVariant] = useState<ActivationVariant | null>(null);
+
+  const launchers: {
+    variant: ActivationVariant;
+    label: string;
+    caption: string;
+    ctaHint: string;
+  }[] = [
+    {
+      variant: "reward-pool",
+      label: "3M Reward Pool Live",
+      caption: "Cold visitor · New users claim 10 – 560 U",
+      ctaHint: "CTA → OmenX register modal → /promo/world-cup",
+    },
+    {
+      variant: "voucher",
+      label: "10U Voucher Is Here",
+      caption: "Claim within 24 hours · Don't miss out",
+      ctaHint: "CTA → https://omenx.lovable.app/vouchers",
+    },
+    {
+      variant: "deposit-match",
+      label: "Deposit 20U, Get 20U",
+      caption: "500 spots daily · first deposits only",
+      ctaHint: "CTA → OmenX deposit modal → /promo/world-cup",
+    },
+  ];
+
+  return (
+    <div className="flex flex-col gap-6">
+      <div className="grid gap-4 md:grid-cols-3">
+        {launchers.map((l) => (
+          <div
+            key={l.variant}
+            className="flex h-full flex-col gap-3 rounded-3xl border border-border bg-surface p-5 shadow-card"
+          >
+            <div className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+              {l.variant}
+            </div>
+            <div className="font-pitch text-base font-bold uppercase tracking-wide text-foreground">
+              {l.label}
+            </div>
+            <p className="text-xs text-muted-foreground">{l.caption}</p>
+            <p className="mt-auto rounded-lg border border-dashed border-border/70 bg-background/40 p-2 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+              {l.ctaHint}
+            </p>
+            <button
+              type="button"
+              onClick={() => setOpenVariant(l.variant)}
+              className="inline-flex h-10 items-center justify-center rounded-2xl bg-gradient-neon px-4 font-pitch text-xs font-bold uppercase tracking-[0.18em] text-white shadow-glow transition hover:opacity-95"
+            >
+              Open dialog
+            </button>
+          </div>
+        ))}
+      </div>
+
+      <RewardPoolLiveDialog
+        open={openVariant === "reward-pool"}
+        onOpenChange={(v) => !v && setOpenVariant(null)}
+        onRegister={() => {
+          toast.success("Opening OmenX register modal → navigate to /promo/world-cup on success");
+          setOpenVariant(null);
+        }}
+      />
+      <VoucherReadyDialog
+        open={openVariant === "voucher"}
+        onOpenChange={(v) => !v && setOpenVariant(null)}
+        onCta={() => {
+          toast.success("Would navigate to https://omenx.lovable.app/vouchers");
+          setOpenVariant(null);
+        }}
+      />
+      <DepositMatchDialog
+        open={openVariant === "deposit-match"}
+        onOpenChange={(v) => !v && setOpenVariant(null)}
+        onDeposit={() => {
+          toast.success("Opening OmenX deposit modal → navigate to /promo/world-cup on success");
+          setOpenVariant(null);
+        }}
+      />
+    </div>
+  );
+}
+
 function StyleGuide() {
   const [activeNav, setActiveNav] = useState<string>("home");
   const navItems = [
