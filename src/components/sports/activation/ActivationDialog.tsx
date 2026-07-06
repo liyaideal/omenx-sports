@@ -4,6 +4,12 @@ import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/compone
 import { Sheet, SheetContent, SheetTitle, SheetDescription } from "@/components/ui/sheet";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { cn } from "@/lib/utils";
+import desktopRewardPool from "@/assets/activation/desktop-reward-pool.png.asset.json";
+import desktopVoucher from "@/assets/activation/desktop-voucher.png.asset.json";
+import desktopDepositMatch from "@/assets/activation/desktop-deposit-match.png.asset.json";
+import mobileRewardPool from "@/assets/activation/mobile-reward-pool.png.asset.json";
+import mobileVoucher from "@/assets/activation/mobile-voucher.png.asset.json";
+import mobileDepositMatch from "@/assets/activation/mobile-deposit-match.png.asset.json";
 
 export type ActivationVariant = "reward-pool" | "voucher" | "deposit-match";
 
@@ -244,7 +250,7 @@ const HERO_IMAGES: Record<
   ActivationVariant,
   { desktop: string | null; mobile: string | null }
 > = {
-  "reward-pool": { desktop: null, mobile: null },
-  voucher: { desktop: null, mobile: null },
-  "deposit-match": { desktop: null, mobile: null },
+  "reward-pool": { desktop: desktopRewardPool.url, mobile: mobileRewardPool.url },
+  voucher: { desktop: desktopVoucher.url, mobile: mobileVoucher.url },
+  "deposit-match": { desktop: desktopDepositMatch.url, mobile: mobileDepositMatch.url },
 };
