@@ -3001,6 +3001,8 @@ function StyleGuide() {
           <footer className="mt-12 border-t border-border pt-6 text-center text-xs text-muted-foreground font-mono">
             Stadium Neon · v0.1 · sports prediction design system
           </footer>
+            </>
+          )}
         </main>
       </div>
     </div>
