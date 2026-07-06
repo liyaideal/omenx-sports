@@ -136,6 +136,13 @@ import {
   LegendRevealOverlay,
   type RevealOutcome,
 } from "@/components/sports/promo/LegendRevealOverlay";
+import {
+  RewardPoolLiveDialog,
+  VoucherReadyDialog,
+  DepositMatchDialog,
+  type ActivationVariant,
+} from "@/components/sports/activation";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/style-guide")({
   head: () => ({
@@ -182,6 +189,7 @@ const SECTIONS = [
   ["event-trade-bar", "Mobile Sticky Trade Bar"],
   ["event-extras", "Event Detail Extras"],
   ["share", "Share Dialog"],
+  ["activation", "Activation Dialogs"],
   ["production-inventory", "Production Inventory"],
 ] as const;
 
@@ -266,6 +274,98 @@ function MeSheetPreviewLauncher() {
         toClaim={ACCOUNT_STATS.toClaim}
       />
     </>
+  );
+}
+
+/**
+ * ActivationDemos — three launcher buttons for the activation dialogs plus
+ * a note about how the CTAs are wired at page level. Kept inline in the
+ * style-guide route so the launchers can own their own open state without
+ * bleeding into the shared component API.
+ */
+function ActivationDemos() {
+  const [openVariant, setOpenVariant] = useState<ActivationVariant | null>(null);
+
+  const launchers: {
+    variant: ActivationVariant;
+    label: string;
+    caption: string;
+    ctaHint: string;
+  }[] = [
+    {
+      variant: "reward-pool",
+      label: "3M Reward Pool Live",
+      caption: "Cold visitor · New users claim 10 – 560 U",
+      ctaHint: "CTA → OmenX register modal → /promo/world-cup",
+    },
+    {
+      variant: "voucher",
+      label: "10U Voucher Is Here",
+      caption: "Claim within 24 hours · Don't miss out",
+      ctaHint: "CTA → https://omenx.lovable.app/vouchers",
+    },
+    {
+      variant: "deposit-match",
+      label: "Deposit 20U, Get 20U",
+      caption: "500 spots daily · first deposits only",
+      ctaHint: "CTA → OmenX deposit modal → /promo/world-cup",
+    },
+  ];
+
+  return (
+    <div className="flex flex-col gap-6">
+      <div className="grid gap-4 md:grid-cols-3">
+        {launchers.map((l) => (
+          <div
+            key={l.variant}
+            className="flex h-full flex-col gap-3 rounded-3xl border border-border bg-surface p-5 shadow-card"
+          >
+            <div className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+              {l.variant}
+            </div>
+            <div className="font-pitch text-base font-bold uppercase tracking-wide text-foreground">
+              {l.label}
+            </div>
+            <p className="text-xs text-muted-foreground">{l.caption}</p>
+            <p className="mt-auto rounded-lg border border-dashed border-border/70 bg-background/40 p-2 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+              {l.ctaHint}
+            </p>
+            <button
+              type="button"
+              onClick={() => setOpenVariant(l.variant)}
+              className="inline-flex h-10 items-center justify-center rounded-2xl bg-gradient-neon px-4 font-pitch text-xs font-bold uppercase tracking-[0.18em] text-white shadow-glow transition hover:opacity-95"
+            >
+              Open dialog
+            </button>
+          </div>
+        ))}
+      </div>
+
+      <RewardPoolLiveDialog
+        open={openVariant === "reward-pool"}
+        onOpenChange={(v) => !v && setOpenVariant(null)}
+        onRegister={() => {
+          toast.success("Opening OmenX register modal → navigate to /promo/world-cup on success");
+          setOpenVariant(null);
+        }}
+      />
+      <VoucherReadyDialog
+        open={openVariant === "voucher"}
+        onOpenChange={(v) => !v && setOpenVariant(null)}
+        onCta={() => {
+          toast.success("Would navigate to https://omenx.lovable.app/vouchers");
+          setOpenVariant(null);
+        }}
+      />
+      <DepositMatchDialog
+        open={openVariant === "deposit-match"}
+        onOpenChange={(v) => !v && setOpenVariant(null)}
+        onDeposit={() => {
+          toast.success("Opening OmenX deposit modal → navigate to /promo/world-cup on success");
+          setOpenVariant(null);
+        }}
+      />
+    </div>
   );
 }
 
@@ -2558,6 +2658,20 @@ function StyleGuide() {
                 <li>• Poster slot — pass any JSX in the target's <code className="font-mono text-foreground">poster</code> field; the combo flow reuses <code className="font-mono text-foreground">ShareCardPreview</code>. Artwork is owned per target, not by the dialog.</li>
               </ul>
             </div>
+          </Section>
+
+          <Section id="activation" title="Activation dialogs" kicker="30 — user activation">
+            <p className="mb-6 max-w-3xl text-sm text-muted-foreground">
+              Three activation modals for the promo funnel: <b>reward-pool live</b>, <b>voucher ready</b>, and{" "}
+              <b>deposit match</b>. Shared shell in{" "}
+              <code className="font-mono text-foreground">ActivationDialog</code>, themed by{" "}
+              <code className="font-mono text-foreground">variant</code>. Mobile renders as a bottom sheet per{" "}
+              <code className="font-mono text-foreground">mem://rules/mobile-bottom-sheet</code>. The component owns UI + a{" "}
+              <code className="font-mono text-foreground">onCta</code> callback only — register / deposit flows are wired at
+              the page level (they open OmenX-side modals). After success, the caller navigates to{" "}
+              <code className="font-mono text-foreground">/promo/world-cup</code>.
+            </p>
+            <ActivationDemos />
           </Section>
 
           <Section id="production-inventory" title="Production Inventory" kicker="26 — playground ↔ product sync">

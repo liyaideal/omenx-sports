@@ -1,0 +1,6 @@
+---
+name: Activation dialogs
+description: 3M reward pool / 10U voucher / deposit-match modals — themed shell, mobile bottom sheet, CTA-only callback
+type: design
+---
+`ActivationDialog` (`src/components/sports/activation/`) is the shared shell for user-activation modals. Three variants: `reward-pool` (Trophy · magenta halo · "3,000,000 U" highlight), `voucher` (Ticket · amber halo · "10 U" highlight · 24h clock eyebrow), `deposit-match` (Wallet · green halo · "20 U + 20 U" highlight). Fixed layout: 60px gradient-neon icon well with Sparkles badge → eyebrow pill → `font-pitch` uppercase title → muted subtitle → variant highlight strip → full-width `bg-gradient-neon shadow-glow` CTA → `Maybe later` ghost dismiss. Mobile renders as bottom `Sheet` (`rounded-t-3xl`), desktop as centered `Dialog` (`max-w-sm`, `rounded-3xl`) — never a centered modal on mobile. Component owns UI + `onCta` callback only; register / deposit flows live in OmenX main project (page-level wiring opens those modals, then navigates to `/promo/world-cup` on success). Voucher CTA defaults to `https://omenx.lovable.app/vouchers`. Presets in `presets.tsx`: `RewardPoolLiveDialog` / `VoucherReadyDialog` / `DepositMatchDialog`. Playground: `/style-guide#activation`.
