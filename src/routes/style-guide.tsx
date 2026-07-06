@@ -696,6 +696,16 @@ function StyleGuide() {
         </aside>
 
         <main>
+          {!mounted ? (
+            <div className="space-y-4 py-16 text-center">
+              <div className="mx-auto h-3 w-40 animate-pulse rounded bg-white/10" />
+              <div className="mx-auto h-3 w-64 animate-pulse rounded bg-white/5" />
+              <p className="pt-6 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+                Loading style guide…
+              </p>
+            </div>
+          ) : (
+            <>
           {/* BRAND */}
           <Section id="brand" title="Stadium Neon" kicker="01 — Brand & Tone">
             <div className="mb-6 rounded-3xl border border-border bg-surface p-8 shadow-card">
