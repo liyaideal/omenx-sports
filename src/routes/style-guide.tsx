@@ -140,6 +140,7 @@ import {
   RewardPoolLiveDialog,
   VoucherReadyDialog,
   DepositMatchDialog,
+  CoachMarkOverlay,
   type ActivationVariant,
 } from "@/components/sports/activation";
 import { toast } from "sonner";
@@ -190,6 +191,7 @@ const SECTIONS = [
   ["event-extras", "Event Detail Extras"],
   ["share", "Share Dialog"],
   ["activation", "Activation Dialogs"],
+  ["coachmark", "Coach-Mark Overlay"],
   ["production-inventory", "Production Inventory"],
 ] as const;
 
