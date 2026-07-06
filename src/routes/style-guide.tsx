@@ -380,7 +380,7 @@ function ActivationDemos() {
  */
 function CoachMarkDemo() {
   const [open, setOpen] = useState(false);
-  const targetRef = React.useRef<HTMLDivElement | null>(null);
+  const targetRef = useRef<HTMLDivElement | null>(null);
 
   const demoTask: NewbieTask = {
     id: "register",
