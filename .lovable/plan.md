@@ -1,24 +1,21 @@
-## Change
-`CoachMarkOverlay` currently always renders the "STEP · 01" eyebrow. That chip should only appear when the guide has multiple steps.
+## Diagnosis
+`/style-guide` is a 3700-line single-page doc that loads many heavy sections (CarnivalFlagsMarquee, image cards, live tickers, etc.). When the browser opens `…/style-guide#activation` it scrolls to the anchor on the first paint, but content above (fonts, images, dynamic components) keeps loading and layout-shifts downward, so the pinned section drifts off screen — matching the "shows the tab then jumps away" behavior.
 
-## Rule
-- Single-step guide → no step eyebrow.
-- Multi-step guide → eyebrow shows `STEP · N / TOTAL` (e.g. `STEP · 1 / 3`).
+`scroll-mt-24` is already on every `<Section>`, so the offset is fine — the problem is timing.
 
-## Edits
+## Fix
+Add a hash-honoring effect at the top of `StyleGuide` in `src/routes/style-guide.tsx`:
 
-**`src/components/sports/activation/CoachMarkOverlay.tsx`**
-- Replace the `eyebrow?: string` prop with a stepper:
-  - `step?: number` (1-based)
-  - `totalSteps?: number`
-- Show the eyebrow chip only when `totalSteps && totalSteps > 1 && step`.  
-  Rendered text: `Step · {step} / {totalSteps}` (uppercased by CSS as today).
-- Update the JSDoc to state the rule explicitly.
+- On mount (and on `hashchange`), read `window.location.hash`.
+- If present, resolve the element by id and call `scrollIntoView({ block: "start" })` at these checkpoints so late layout shifts don't drift the anchor:
+  1. Immediately (next frame via `requestAnimationFrame`)
+  2. After `200ms`
+  3. After `800ms`
+  4. Once `document.fonts.ready` resolves (guard for browsers that expose it)
+- Cancel scheduled scrolls on unmount.
+- Also mirror the current hash into the sticky sidebar `activeNav` when the effect resolves an id (nice-to-have — only if it fits without expanding scope).
 
-**`src/routes/style-guide.tsx` → `CoachMarkDemo`**
-- Drop the `eyebrow="Step · 01"` prop from the demo call (single-step guide → chip hidden).
-- Add a second "Rules" bullet documenting the rule:  
-  "Step eyebrow only renders when `totalSteps > 1`; single-step guides hide it."
-- Optionally add a small note showing the multi-step form (`step={1} totalSteps={3}`) in the rules block so devs see both shapes — pure copy, no extra demo launcher.
+No changes to router config (`scrollRestoration: true` stays — it only affects back/forward). No changes to any other route or component. No dependencies added.
 
-No other files touched. No changes to `/promo/world-cup`.
+## Files touched
+- `src/routes/style-guide.tsx` — add ~25-line `useEffect` inside `StyleGuide` and nothing else.
