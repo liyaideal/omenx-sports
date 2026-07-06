@@ -3683,7 +3683,7 @@ function GlobalLiveStreamDemo() {
   // Style-guide never shows the floating mini player — clear any lingering
   // watching session on mount so the bottom-right pip does not follow the
   // user around this page.
-  React.useEffect(() => {
+  useEffect(() => {
     stopWatching();
     return () => stopWatching();
     // eslint-disable-next-line react-hooks/exhaustive-deps
