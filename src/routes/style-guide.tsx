@@ -136,6 +136,14 @@ import {
   LegendRevealOverlay,
   type RevealOutcome,
 } from "@/components/sports/promo/LegendRevealOverlay";
+import {
+  ActivationDialog,
+  RewardPoolLiveDialog,
+  VoucherReadyDialog,
+  DepositMatchDialog,
+  type ActivationVariant,
+} from "@/components/sports/activation";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/style-guide")({
   head: () => ({
@@ -182,6 +190,7 @@ const SECTIONS = [
   ["event-trade-bar", "Mobile Sticky Trade Bar"],
   ["event-extras", "Event Detail Extras"],
   ["share", "Share Dialog"],
+  ["activation", "Activation Dialogs"],
   ["production-inventory", "Production Inventory"],
 ] as const;
 
