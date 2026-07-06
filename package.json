@@ -13,7 +13,6 @@
   },
   "dependencies": {
     "@cloudflare/vite-plugin": "^1.42.2",
-    "@fontsource/jersey-25": "^5.2.8",
     "@fontsource/press-start-2p": "^5.2.7",
     "@fontsource/vt323": "^5.2.7",
     "@hookform/resolvers": "^5.2.2",
