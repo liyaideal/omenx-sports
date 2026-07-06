@@ -379,73 +379,68 @@ function ActivationDemos() {
  * `targetRef`, title, description and CTA copy.
  */
 function CoachMarkDemo() {
-  const [open, setOpen] = useState(false);
-  const targetRef = useRef<HTMLDivElement | null>(null);
-
-  const demoTask: NewbieTask = {
-    id: "register",
-    code: "T-01",
-    title: "Complete registration",
-    description:
-      "Open an OMENX account and verify your email to claim your welcome voucher.",
-    rewardLabel: "10 U Position Voucher",
-    progress: 1,
-    status: "claimable",
-    cta: "Claim 10 U",
-    newOnly: true,
-  };
-
-  const secondTask: NewbieTask = {
-    id: "first-deposit",
-    code: "T-02",
-    title: "First deposit ≥ 20 U",
-    description: "Top up at least 20 U to unlock the deposit voucher.",
-    rewardLabel: "20 U Position Voucher",
-    progress: 0,
-    status: "locked",
-    cta: "Locked",
-    newOnly: true,
-  };
-
   return (
-    <div className="flex flex-col gap-6">
-      <div className="flex flex-wrap items-center gap-3">
-        <button
-          type="button"
-          onClick={() => setOpen(true)}
-          className="inline-flex h-10 items-center justify-center rounded-2xl bg-gradient-neon px-5 font-pitch text-xs font-bold uppercase tracking-[0.18em] text-white shadow-glow transition hover:opacity-95"
-        >
-          Replay guide
-        </button>
-        <span className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
-          Target → T-01 Complete Registration
-        </span>
-      </div>
-
-      <div className="rounded-3xl border border-dashed border-white/15 bg-black/40 p-6">
-        <div className="mb-4 flex items-baseline justify-between">
-          <span className="font-scoreboard text-[10px] font-bold tracking-[0.25em] text-zinc-500">
-            SEC-01 · WELCOME PACK
-          </span>
-          <span className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
-            Playground stage
-          </span>
-        </div>
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-          <div ref={targetRef}>
-            <TaskCard task={demoTask} />
-          </div>
-          <TaskCard task={secondTask} />
-        </div>
-      </div>
-
-      <CoachMarkOverlay
-        open={open}
-        onOpenChange={setOpen}
-        targetRef={targetRef}
+    <div className="flex flex-col gap-8">
+      <CoachMarkStage
+        stageLabel="Stage 1 · Complete Registration"
+        targetLabel="T-01 Complete Registration"
         title="Claim Your 10U Sign-Up Reward"
         description="Registration complete — tap Claim to add your 10 U position voucher to your wallet."
-        ctaLabel="Got it"
+        firstTask={{
+          id: "register",
+          code: "T-01",
+          title: "Complete registration",
+          description:
+            "Open an OMENX account and verify your email to claim your welcome voucher.",
+          rewardLabel: "10 U Position Voucher",
+          progress: 1,
+          status: "claimable",
+          cta: "Claim 10 U",
+          newOnly: true,
+        }}
+        secondTask={{
+          id: "first-deposit",
+          code: "T-02",
+          title: "First deposit ≥ 20 U",
+          description: "Top up at least 20 U to unlock the deposit voucher.",
+          rewardLabel: "20 U Position Voucher",
+          progress: 0,
+          status: "locked",
+          cta: "Locked",
+          newOnly: true,
+        }}
+        targetSlot="first"
+      />
+
+      <CoachMarkStage
+        stageLabel="Stage 2 · First Deposit"
+        targetLabel="T-02 First Deposit ≥ 20 U"
+        title="Claim Your 20U Deposit Reward"
+        description="Deposit received — tap Claim to add your 20 U position voucher to your wallet."
+        firstTask={{
+          id: "register",
+          code: "T-01",
+          title: "Complete registration",
+          description:
+            "Open an OMENX account and verify your email to claim your welcome voucher.",
+          rewardLabel: "10 U Position Voucher",
+          progress: 1,
+          status: "claimed",
+          cta: "Claimed",
+          newOnly: true,
+        }}
+        secondTask={{
+          id: "first-deposit",
+          code: "T-02",
+          title: "First deposit ≥ 20 U",
+          description: "Top up at least 20 U to unlock the deposit voucher.",
+          rewardLabel: "20 U Position Voucher",
+          progress: 1,
+          status: "claimable",
+          cta: "Claim 20 U",
+          newOnly: true,
+        }}
+        targetSlot="second"
       />
 
       <div className="rounded-2xl border border-dashed border-white/15 bg-white/[0.02] p-5 text-xs">
@@ -462,6 +457,83 @@ function CoachMarkDemo() {
           <li>• Persistence (once-per-user, "don't show again") is the caller's responsibility.</li>
         </ul>
       </div>
+    </div>
+  );
+}
+
+function CoachMarkStage({
+  stageLabel,
+  targetLabel,
+  title,
+  description,
+  firstTask,
+  secondTask,
+  targetSlot,
+}: {
+  stageLabel: string;
+  targetLabel: string;
+  title: string;
+  description: string;
+  firstTask: NewbieTask;
+  secondTask: NewbieTask;
+  targetSlot: "first" | "second";
+}) {
+  const [open, setOpen] = useState(false);
+  const targetRef = useRef<HTMLDivElement | null>(null);
+
+  return (
+    <div className="flex flex-col gap-4">
+      <div className="flex flex-wrap items-center gap-3">
+        <span className="font-scoreboard text-[10px] font-bold tracking-[0.25em] text-neon">
+          {stageLabel}
+        </span>
+        <button
+          type="button"
+          onClick={() => setOpen(true)}
+          className="inline-flex h-10 items-center justify-center rounded-2xl bg-gradient-neon px-5 font-pitch text-xs font-bold uppercase tracking-[0.18em] text-white shadow-glow transition hover:opacity-95"
+        >
+          Replay guide
+        </button>
+        <span className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+          Target → {targetLabel}
+        </span>
+      </div>
+
+      <div className="rounded-3xl border border-dashed border-white/15 bg-black/40 p-6">
+        <div className="mb-4 flex items-baseline justify-between">
+          <span className="font-scoreboard text-[10px] font-bold tracking-[0.25em] text-zinc-500">
+            SEC-01 · WELCOME PACK
+          </span>
+          <span className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+            Playground stage
+          </span>
+        </div>
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+          {targetSlot === "first" ? (
+            <div ref={targetRef}>
+              <TaskCard task={firstTask} />
+            </div>
+          ) : (
+            <TaskCard task={firstTask} />
+          )}
+          {targetSlot === "second" ? (
+            <div ref={targetRef}>
+              <TaskCard task={secondTask} />
+            </div>
+          ) : (
+            <TaskCard task={secondTask} />
+          )}
+        </div>
+      </div>
+
+      <CoachMarkOverlay
+        open={open}
+        onOpenChange={setOpen}
+        targetRef={targetRef}
+        title={title}
+        description={description}
+        ctaLabel="Got it"
+      />
     </div>
   );
 }
