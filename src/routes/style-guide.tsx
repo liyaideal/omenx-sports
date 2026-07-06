@@ -371,6 +371,103 @@ function ActivationDemos() {
   );
 }
 
+/**
+ * CoachMarkDemo — showcases the spotlight coach-mark overlay used for
+ * first-visit onboarding. Uses the Welcome Pack → Complete Registration task
+ * as the highlighted target, mirroring how the pattern would appear on
+ * `/promo/world-cup`. The overlay itself is fully reusable — callers pass a
+ * `targetRef`, title, description and CTA copy.
+ */
+function CoachMarkDemo() {
+  const [open, setOpen] = useState(false);
+  const targetRef = React.useRef<HTMLDivElement | null>(null);
+
+  const demoTask: NewbieTask = {
+    id: "register",
+    code: "T-01",
+    title: "Complete registration",
+    description:
+      "Open an OMENX account and verify your email to claim your welcome voucher.",
+    rewardLabel: "10 U Position Voucher",
+    progress: 0,
+    status: "in-progress",
+    cta: "Register now",
+    ctaHref: "https://omenx.lovable.app/register",
+    ctaExternal: true,
+    newOnly: true,
+  };
+
+  const secondTask: NewbieTask = {
+    id: "first-deposit",
+    code: "T-02",
+    title: "First deposit ≥ 20 U",
+    description: "Top up at least 20 U to unlock the deposit voucher.",
+    rewardLabel: "20 U Position Voucher",
+    progress: 0,
+    status: "locked",
+    cta: "Locked",
+    newOnly: true,
+  };
+
+  return (
+    <div className="flex flex-col gap-6">
+      <div className="flex flex-wrap items-center gap-3">
+        <button
+          type="button"
+          onClick={() => setOpen(true)}
+          className="inline-flex h-10 items-center justify-center rounded-2xl bg-gradient-neon px-5 font-pitch text-xs font-bold uppercase tracking-[0.18em] text-white shadow-glow transition hover:opacity-95"
+        >
+          Replay guide
+        </button>
+        <span className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+          Target → T-01 Complete Registration
+        </span>
+      </div>
+
+      <div className="rounded-3xl border border-dashed border-white/15 bg-black/40 p-6">
+        <div className="mb-4 flex items-baseline justify-between">
+          <span className="font-scoreboard text-[10px] font-bold tracking-[0.25em] text-zinc-500">
+            SEC-01 · WELCOME PACK
+          </span>
+          <span className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+            Playground stage
+          </span>
+        </div>
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+          <div ref={targetRef}>
+            <TaskCard task={demoTask} />
+          </div>
+          <TaskCard task={secondTask} />
+        </div>
+      </div>
+
+      <CoachMarkOverlay
+        open={open}
+        onOpenChange={setOpen}
+        targetRef={targetRef}
+        eyebrow="Step · 01"
+        title="Claim Your 10U Sign-Up Reward"
+        description="Register a free OMENX account to unlock your 10 U position voucher — the first step of the World Cup Carnival welcome pack."
+        ctaLabel="Got it"
+      />
+
+      <div className="rounded-2xl border border-dashed border-white/15 bg-white/[0.02] p-5 text-xs">
+        <div className="mb-2 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+          Rules
+        </div>
+        <ul className="space-y-1.5 text-muted-foreground">
+          <li>• Single-step spotlight — one clear action, no multi-step tour.</li>
+          <li>• Scrim is non-dismissable; user must click the CTA (or Esc). Prevents accidental skips.</li>
+          <li>• Caller supplies the <code className="font-mono text-foreground">targetRef</code>; overlay measures and re-measures on scroll / resize.</li>
+          <li>• Card auto-flips above the target when the target sits in the lower half of the viewport.</li>
+          <li>• Mobile docks the card to the bottom of the viewport; spotlight ring stays anchored to the target.</li>
+          <li>• Persistence (once-per-user, "don't show again") is the caller's responsibility.</li>
+        </ul>
+      </div>
+    </div>
+  );
+}
+
 function StyleGuide() {
   const [activeNav, setActiveNav] = useState<string>("home");
   const navItems = [
