@@ -468,6 +468,44 @@ function CoachMarkDemo() {
 
 function StyleGuide() {
   const [activeNav, setActiveNav] = useState<string>("home");
+
+  // Anchor-scroll stabilizer. `/style-guide` is a very long page that
+  // renders heavy sections (image cards, tickers, marquees, fonts) which
+  // layout-shift after the browser's initial hash scroll — the anchor
+  // then drifts off screen. Re-apply `scrollIntoView` at a few checkpoints
+  // so the target section stays pinned once layout settles. Also runs on
+  // `hashchange` for in-page sidebar navigation.
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const timers: number[] = [];
+
+    const scrollToHash = () => {
+      const hash = window.location.hash?.slice(1);
+      if (!hash) return;
+      const el = document.getElementById(hash);
+      if (!el) return;
+      el.scrollIntoView({ block: "start" });
+    };
+
+    // rAF → next frame, then delayed retries after images / heavy sections settle.
+    const raf = window.requestAnimationFrame(scrollToHash);
+    timers.push(window.setTimeout(scrollToHash, 200));
+    timers.push(window.setTimeout(scrollToHash, 800));
+    timers.push(window.setTimeout(scrollToHash, 1600));
+
+    // Fire again once web fonts are ready (font swap changes vertical rhythm).
+    const fonts = (document as Document & { fonts?: { ready?: Promise<unknown> } }).fonts;
+    fonts?.ready?.then(scrollToHash).catch(() => {});
+
+    window.addEventListener("hashchange", scrollToHash);
+    return () => {
+      window.cancelAnimationFrame(raf);
+      timers.forEach((id) => window.clearTimeout(id));
+      window.removeEventListener("hashchange", scrollToHash);
+    };
+  }, []);
+
   const navItems = [
     { id: "home", icon: Home },
     { id: "compass", icon: Compass },
