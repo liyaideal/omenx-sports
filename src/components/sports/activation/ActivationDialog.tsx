@@ -248,5 +248,3 @@ const HERO_IMAGES: Record<
   voucher: { desktop: null, mobile: null },
   "deposit-match": { desktop: null, mobile: null },
 };
-  },
-};
