@@ -1,21 +1,21 @@
-## Diagnosis
-`/style-guide` is a 3700-line single-page doc that loads many heavy sections (CarnivalFlagsMarquee, image cards, live tickers, etc.). When the browser opens `…/style-guide#activation` it scrolls to the anchor on the first paint, but content above (fonts, images, dynamic components) keeps loading and layout-shifts downward, so the pinned section drifts off screen — matching the "shows the tab then jumps away" behavior.
+## Change
+Add a second playground stage to the Coach-Mark Overlay section in `/style-guide`, mirroring the T-01 example but for T-02 **First Deposit ≥ 20 U** after the user has completed a 20 U+ deposit.
 
-`scroll-mt-24` is already on every `<Section>`, so the offset is fine — the problem is timing.
+## Edits (style-guide only)
+`src/routes/style-guide.tsx` → `CoachMarkDemo`:
+- Rename the current stage internally to "Stage 1 · Complete Registration" (keep it exactly as-is).
+- Add a second stage below it, "Stage 2 · First Deposit":
+  - Own `useState` for open + own `useRef` for the target.
+  - "Replay guide" button + `TARGET → T-02 FIRST DEPOSIT ≥ 20 U` kicker, same visual as stage 1.
+  - Stage container mirrors SEC-01 header ("SEC-01 · WELCOME PACK") and grid.
+  - **T-02 card in `claimable` state**: `progress: 1`, `status: "claimable"`, `cta: "Claim 20 U"`, `newOnly: true`, no `ctaHref`.
+  - Sibling T-01 card stays visible as context in `claimed` state (`progress: 1`, `status: "claimed"`, `cta: "Claimed"`).
+  - `CoachMarkOverlay` with:
+    - `targetRef` → the T-02 card wrapper
+    - `title="Claim Your 20U Deposit Reward"`
+    - `description="Deposit received — tap Claim to add your 20 U position voucher to your wallet."`
+    - `ctaLabel="Got it"`
+    - No `step` / `totalSteps` (single-step guide → chip stays hidden per the rule we just added).
+- Keep the existing Rules block once at the bottom of the section (no duplication).
 
-## Fix
-Add a hash-honoring effect at the top of `StyleGuide` in `src/routes/style-guide.tsx`:
-
-- On mount (and on `hashchange`), read `window.location.hash`.
-- If present, resolve the element by id and call `scrollIntoView({ block: "start" })` at these checkpoints so late layout shifts don't drift the anchor:
-  1. Immediately (next frame via `requestAnimationFrame`)
-  2. After `200ms`
-  3. After `800ms`
-  4. Once `document.fonts.ready` resolves (guard for browsers that expose it)
-- Cancel scheduled scrolls on unmount.
-- Also mirror the current hash into the sticky sidebar `activeNav` when the effect resolves an id (nice-to-have — only if it fits without expanding scope).
-
-No changes to router config (`scrollRestoration: true` stays — it only affects back/forward). No changes to any other route or component. No dependencies added.
-
-## Files touched
-- `src/routes/style-guide.tsx` — add ~25-line `useEffect` inside `StyleGuide` and nothing else.
+No changes to `CoachMarkOverlay`, `/promo/world-cup`, `NewbieRewardsSection`, fixtures, or any other file.
