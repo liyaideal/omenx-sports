@@ -5,3 +5,5 @@ export {
   VoucherReadyDialog,
   DepositMatchDialog,
 } from "./presets";
+export { CoachMarkOverlay } from "./CoachMarkOverlay";
+export type { CoachMarkOverlayProps } from "./CoachMarkOverlay";
