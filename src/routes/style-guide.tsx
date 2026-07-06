@@ -2773,6 +2773,17 @@ function StyleGuide() {
             <ActivationDemos />
           </Section>
 
+          <Section id="coachmark" title="Coach-mark overlay" kicker="31 — onboarding spotlight">
+            <p className="mb-6 max-w-3xl text-sm text-muted-foreground">
+              First-visit spotlight for guiding users to a single high-value action on a page. Dark scrim with an
+              SVG cut-out around the target, neon ring, anchored tooltip card, one CTA. Reusable via{" "}
+              <code className="font-mono text-foreground">CoachMarkOverlay</code> — caller supplies a{" "}
+              <code className="font-mono text-foreground">targetRef</code>, copy and CTA handler. Example below
+              targets the Welcome Pack → <b>Complete Registration</b> task from <code className="font-mono text-foreground">/promo/world-cup</code>.
+            </p>
+            <CoachMarkDemo />
+          </Section>
+
           <Section id="production-inventory" title="Production Inventory" kicker="26 — playground ↔ product sync">
             <p className="mb-6 max-w-3xl text-sm text-muted-foreground">
               Components below are shipping in real routes but don't yet have a self-contained demo on this page.
