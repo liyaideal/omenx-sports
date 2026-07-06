@@ -10,8 +10,10 @@ export interface CoachMarkOverlayProps {
   targetRef: React.RefObject<HTMLElement | null>;
   title: string;
   description?: string;
-  /** Uppercase eyebrow above the title. Defaults to `STEP · 01`. */
-  eyebrow?: string;
+  /** 1-based step index. Rendered only alongside `totalSteps > 1`. */
+  step?: number;
+  /** Total steps in the guide. Eyebrow chip is hidden when this is 1 or unset. */
+  totalSteps?: number;
   /** Primary CTA label. Defaults to `Got it`. */
   ctaLabel?: string;
   /** CTA handler. Defaults to closing the overlay. */
@@ -40,6 +42,10 @@ interface Rect {
  *
  * Callers control persistence ("don't show again", per-user gating, etc.);
  * this component only owns the visual and dismissal via the CTA.
+ *
+ * Step indicator rule: the `STEP · N / TOTAL` eyebrow chip renders **only**
+ * when the guide has more than one step (`totalSteps > 1`). Single-step
+ * guides hide the chip — the title alone communicates the action.
  */
 export function CoachMarkOverlay({
   open,
@@ -47,7 +53,8 @@ export function CoachMarkOverlay({
   targetRef,
   title,
   description,
-  eyebrow = "Step · 01",
+  step,
+  totalSteps,
   ctaLabel = "Got it",
   onCta,
   placement = "auto",
@@ -187,10 +194,12 @@ export function CoachMarkOverlay({
           className="pointer-events-none absolute inset-x-0 -top-16 h-32 opacity-70 blur-3xl bg-[radial-gradient(60%_60%_at_50%_0%,oklch(0.7_0.18_145/0.5),transparent_70%)]"
         />
         <div className="relative flex flex-col gap-2">
-          <span className="inline-flex w-fit items-center gap-1.5 rounded-full bg-white/[0.05] px-2.5 py-1 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
-            <span className="h-1.5 w-1.5 rounded-full bg-[oklch(0.7_0.18_145)] shadow-[0_0_8px_oklch(0.7_0.18_145)]" />
-            {eyebrow}
-          </span>
+          {totalSteps && totalSteps > 1 && step ? (
+            <span className="inline-flex w-fit items-center gap-1.5 rounded-full bg-white/[0.05] px-2.5 py-1 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+              <span className="h-1.5 w-1.5 rounded-full bg-[oklch(0.7_0.18_145)] shadow-[0_0_8px_oklch(0.7_0.18_145)]" />
+              Step · {step} / {totalSteps}
+            </span>
+          ) : null}
           <h3 className="font-pitch text-lg font-bold uppercase leading-tight tracking-wide text-foreground">
             {title}
           </h3>

@@ -443,7 +443,6 @@ function CoachMarkDemo() {
         open={open}
         onOpenChange={setOpen}
         targetRef={targetRef}
-        eyebrow="Step · 01"
         title="Claim Your 10U Sign-Up Reward"
         description="Registration complete — tap Claim to add your 10 U position voucher to your wallet."
         ctaLabel="Got it"
@@ -455,6 +454,7 @@ function CoachMarkDemo() {
         </div>
         <ul className="space-y-1.5 text-muted-foreground">
           <li>• Single-step spotlight — one clear action, no multi-step tour.</li>
+          <li>• Step eyebrow renders only when <code className="font-mono text-foreground">totalSteps &gt; 1</code>. Single-step guides omit both props (as here); multi-step guides pass e.g. <code className="font-mono text-foreground">step=&#123;1&#125; totalSteps=&#123;3&#125;</code> to show <code className="font-mono text-foreground">STEP · 1 / 3</code>.</li>
           <li>• Scrim is non-dismissable; user must click the CTA (or Esc). Prevents accidental skips.</li>
           <li>• Caller supplies the <code className="font-mono text-foreground">targetRef</code>; overlay measures and re-measures on scroll / resize.</li>
           <li>• Card auto-flips above the target when the target sits in the lower half of the viewport.</li>

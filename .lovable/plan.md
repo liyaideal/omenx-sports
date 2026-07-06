@@ -1,16 +1,24 @@
 ## Change
-Update the coach-mark demo in `/style-guide` so the highlighted T-01 Complete Registration card reflects the actual trigger moment: user has **already completed registration** and the overlay is nudging them to click **Claim**.
+`CoachMarkOverlay` currently always renders the "STEP · 01" eyebrow. That chip should only appear when the guide has multiple steps.
 
-## Edits (style-guide only)
-`src/routes/style-guide.tsx` → `CoachMarkDemo`:
-- Change the demo target task from `status: "in-progress"` / `progress: 0` / `cta: "Register now"` to:
-  - `status: "claimable"`
-  - `progress: 1`
-  - `cta: "Claim 10 U"` (matches the real `TaskCard` claimable CTA formatting)
-  - Drop `ctaHref` / `ctaExternal` (claimable state renders the Claim button, not a link)
-- Tweak the coach-mark description to match the new intent, e.g.  
-  `"Registration complete — tap Claim to add your 10 U position voucher to your wallet."`
-- Keep title `Claim Your 10U Sign-Up Reward`, CTA label `Got it`, eyebrow `Step · 01`.
-- Second card (T-02 First deposit) stays `locked` as visual context.
+## Rule
+- Single-step guide → no step eyebrow.
+- Multi-step guide → eyebrow shows `STEP · N / TOTAL` (e.g. `STEP · 1 / 3`).
 
-No changes to `CoachMarkOverlay`, `/promo/world-cup`, `NewbieRewardsSection`, or fixtures.
+## Edits
+
+**`src/components/sports/activation/CoachMarkOverlay.tsx`**
+- Replace the `eyebrow?: string` prop with a stepper:
+  - `step?: number` (1-based)
+  - `totalSteps?: number`
+- Show the eyebrow chip only when `totalSteps && totalSteps > 1 && step`.  
+  Rendered text: `Step · {step} / {totalSteps}` (uppercased by CSS as today).
+- Update the JSDoc to state the rule explicitly.
+
+**`src/routes/style-guide.tsx` → `CoachMarkDemo`**
+- Drop the `eyebrow="Step · 01"` prop from the demo call (single-step guide → chip hidden).
+- Add a second "Rules" bullet documenting the rule:  
+  "Step eyebrow only renders when `totalSteps > 1`; single-step guides hide it."
+- Optionally add a small note showing the multi-step form (`step={1} totalSteps={3}`) in the rules block so devs see both shapes — pure copy, no extra demo launcher.
+
+No other files touched. No changes to `/promo/world-cup`.
