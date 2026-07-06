@@ -6,6 +6,7 @@
       "name": "tanstack_start_ts",
       "dependencies": {
         "@cloudflare/vite-plugin": "^1.42.2",
+        "@fontsource/jersey-25": "^5.2.8",
         "@fontsource/press-start-2p": "^5.2.7",
         "@fontsource/vt323": "^5.2.7",
         "@hookform/resolvers": "^5.2.2",
@@ -230,6 +231,8 @@
     "@floating-ui/react-dom": ["@floating-ui/react-dom@2.1.8", "", { "dependencies": { "@floating-ui/dom": "^1.7.6" }, "peerDependencies": { "react": ">=16.8.0", "react-dom": ">=16.8.0" } }, "sha512-cC52bHwM/n/CxS87FH0yWdngEZrjdtLW/qVruo68qg+prK7ZQ4YGdut2GyDVpoGeAYe/h899rVeOVm6Oi40k2A=="],
 
     "@floating-ui/utils": ["@floating-ui/utils@0.2.11", "", {}, "sha512-RiB/yIh78pcIxl6lLMG0CgBXAZ2Y0eVHqMPYugu+9U0AeT6YBeiJpf7lbdJNIugFP5SIjwNRgo4DhR1Qxi26Gg=="],
+
+    "@fontsource/jersey-25": ["@fontsource/jersey-25@5.2.8", "https://europe-west4-npm.pkg.dev/lovable-core-prod/sandbox-npm-cache/@fontsource/jersey-25/-/jersey-25-5.2.8.tgz", {}, "sha512-hreXFGgtiWaGtmj4NEtC7jaBOEEx2oxCehMUAqi2bRakS500S41S10wS22pOtaVVGgaR1Iht6+gUfJWJrMEt+A=="],
 
     "@fontsource/press-start-2p": ["@fontsource/press-start-2p@5.2.7", "https://europe-west1-npm.pkg.dev/lovable-core-prod/sandbox-npm-cache/@fontsource/press-start-2p/-/press-start-2p-5.2.7.tgz", {}, "sha512-ezSxYRchANoteja170ZHh2Tt4oejmVEvX42VFPOVVvERSZ68pcuZFjbhHfrK/sNjYmaGg656y7B3431ojO9PCQ=="],
 
