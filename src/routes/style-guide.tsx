@@ -508,16 +508,16 @@ function CoachMarkStage({
             Playground stage
           </span>
         </div>
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+        <div className="grid grid-cols-1 items-stretch gap-4 md:grid-cols-2">
           {targetSlot === "first" ? (
-            <div ref={targetRef}>
+            <div ref={targetRef} className="h-full">
               <TaskCard task={firstTask} />
             </div>
           ) : (
             <TaskCard task={firstTask} />
           )}
           {targetSlot === "second" ? (
-            <div ref={targetRef}>
+            <div ref={targetRef} className="h-full">
               <TaskCard task={secondTask} />
             </div>
           ) : (

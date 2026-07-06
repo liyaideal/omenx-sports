@@ -1,21 +1,14 @@
-## Change
-Add a second playground stage to the Coach-Mark Overlay section in `/style-guide`, mirroring the T-01 example but for T-02 **First Deposit ≥ 20 U** after the user has completed a 20 U+ deposit.
+## Fix Stage 2 card height mismatch
 
-## Edits (style-guide only)
-`src/routes/style-guide.tsx` → `CoachMarkDemo`:
-- Rename the current stage internally to "Stage 1 · Complete Registration" (keep it exactly as-is).
-- Add a second stage below it, "Stage 2 · First Deposit":
-  - Own `useState` for open + own `useRef` for the target.
-  - "Replay guide" button + `TARGET → T-02 FIRST DEPOSIT ≥ 20 U` kicker, same visual as stage 1.
-  - Stage container mirrors SEC-01 header ("SEC-01 · WELCOME PACK") and grid.
-  - **T-02 card in `claimable` state**: `progress: 1`, `status: "claimable"`, `cta: "Claim 20 U"`, `newOnly: true`, no `ctaHref`.
-  - Sibling T-01 card stays visible as context in `claimed` state (`progress: 1`, `status: "claimed"`, `cta: "Claimed"`).
-  - `CoachMarkOverlay` with:
-    - `targetRef` → the T-02 card wrapper
-    - `title="Claim Your 20U Deposit Reward"`
-    - `description="Deposit received — tap Claim to add your 20 U position voucher to your wallet."`
-    - `ctaLabel="Got it"`
-    - No `step` / `totalSteps` (single-step guide → chip stays hidden per the rule we just added).
-- Keep the existing Rules block once at the bottom of the section (no duplication).
+In `src/routes/style-guide.tsx`, the `CoachMarkStage` grid in Stage 2 shows the two task cards at different heights because the claimed `T-01` card has less content (shorter progress area, no CTA button) than the claimable `T-02` card.
 
-No changes to `CoachMarkOverlay`, `/promo/world-cup`, `NewbieRewardsSection`, fixtures, or any other file.
+Stage 1 doesn't have this problem because its target card (claimable) is on the left and the sibling card layout happens to balance.
+
+### Change
+
+- In `CoachMarkStage`, make the two card wrappers stretch to equal height:
+  - Ensure the grid uses `items-stretch` (grid default, but make explicit).
+  - Give each card slot `h-full` and ensure the inner task card component fills its container (`h-full flex flex-col`), pushing the CTA/footer row to the bottom with `mt-auto`.
+- Apply the same treatment in Stage 1 so both stages render identical, equal-height cards regardless of which side holds the claimable card.
+
+No changes to `/promo/world-cup`, `NewbieRewardsSection`, `CoachMarkOverlay`, or the rules copy.
