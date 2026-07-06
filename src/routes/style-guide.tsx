@@ -3677,25 +3677,23 @@ function GlobalLiveStreamDemo() {
   const live =
     MATCH_MARKETS.find((m) => m.isLiveStream && m.liveScore && m.fixture) ??
     FEATURED_MATCH;
-  const { startWatching, stopWatching, openFullscreen, setMinimized, active } =
+  const { startWatching, stopWatching, openFullscreen, active } =
     useLiveStream();
   const watching = active?.marketId === live.id;
+  // Style-guide never shows the floating mini player — clear any lingering
+  // watching session on mount so the bottom-right pip does not follow the
+  // user around this page.
+  useEffect(() => {
+    stopWatching();
+    return () => stopWatching();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
   return (
     <div className="flex flex-wrap items-center gap-2 rounded-2xl border border-border bg-surface/40 p-4 text-xs">
       <span className="font-mono uppercase tracking-widest text-muted-foreground">
         {live.title}
       </span>
       <div className="ml-auto flex flex-wrap items-center gap-2">
-        <button
-          type="button"
-          onClick={() => {
-            startWatching(live.id, live.outcomes[0]?.id);
-            setMinimized(true);
-          }}
-          className="rounded-md bg-primary px-3 py-1.5 font-mono text-[10px] font-semibold uppercase tracking-widest text-primary-foreground hover:bg-primary/90"
-        >
-          Start watching
-        </button>
         <button
           type="button"
           onClick={() => {
