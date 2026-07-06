@@ -11,7 +11,7 @@ import {
   Settings as SettingsIcon,
   Plus,
 } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence } from "motion/react";
 import { Button } from "@/components/ui/button";
 import { MatchCard } from "@/components/sports/MatchCard";
