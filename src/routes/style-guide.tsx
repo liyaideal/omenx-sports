@@ -2569,6 +2569,20 @@ function StyleGuide() {
             </div>
           </Section>
 
+          <Section id="activation" title="Activation dialogs" kicker="30 — user activation">
+            <p className="mb-6 max-w-3xl text-sm text-muted-foreground">
+              Three activation modals for the promo funnel: <b>reward-pool live</b>, <b>voucher ready</b>, and{" "}
+              <b>deposit match</b>. Shared shell in{" "}
+              <code className="font-mono text-foreground">ActivationDialog</code>, themed by{" "}
+              <code className="font-mono text-foreground">variant</code>. Mobile renders as a bottom sheet per{" "}
+              <code className="font-mono text-foreground">mem://rules/mobile-bottom-sheet</code>. The component owns UI + a{" "}
+              <code className="font-mono text-foreground">onCta</code> callback only — register / deposit flows are wired at
+              the page level (they open OmenX-side modals). After success, the caller navigates to{" "}
+              <code className="font-mono text-foreground">/promo/world-cup</code>.
+            </p>
+            <ActivationDemos />
+          </Section>
+
           <Section id="production-inventory" title="Production Inventory" kicker="26 — playground ↔ product sync">
             <p className="mb-6 max-w-3xl text-sm text-muted-foreground">
               Components below are shipping in real routes but don't yet have a self-contained demo on this page.
