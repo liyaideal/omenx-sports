@@ -137,7 +137,6 @@ import {
   type RevealOutcome,
 } from "@/components/sports/promo/LegendRevealOverlay";
 import {
-  ActivationDialog,
   RewardPoolLiveDialog,
   VoucherReadyDialog,
   DepositMatchDialog,
