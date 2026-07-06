@@ -540,6 +540,33 @@ function CoachMarkStage({
 
 function StyleGuide() {
   const [activeNav, setActiveNav] = useState<string>("home");
+  // Style-guide is an internal playground with dozens of heavy demos in one
+  // tree. SSR-hydrating the whole thing up-front blocks the main thread and
+  // makes the page unresponsive for ~1s. Defer the heavy `<main>` body until
+  // after first paint so hydration cost stays near zero and input works
+  // immediately.
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const w = window as Window & {
+      requestIdleCallback?: (cb: () => void) => number;
+      cancelIdleCallback?: (id: number) => void;
+    };
+    let idleId: number | undefined;
+    let timerId: number | undefined;
+    const schedule = () => setMounted(true);
+    if (typeof w.requestIdleCallback === "function") {
+      idleId = w.requestIdleCallback(schedule);
+    } else {
+      timerId = window.setTimeout(schedule, 0);
+    }
+    return () => {
+      if (idleId !== undefined && typeof w.cancelIdleCallback === "function") {
+        w.cancelIdleCallback(idleId);
+      }
+      if (timerId !== undefined) window.clearTimeout(timerId);
+    };
+  }, []);
 
   // Anchor-scroll stabilizer. `/style-guide` is a very long page that
   // renders heavy sections (image cards, tickers, marquees, fonts) which
@@ -549,6 +576,7 @@ function StyleGuide() {
   // `hashchange` for in-page sidebar navigation.
   useEffect(() => {
     if (typeof window === "undefined") return;
+    if (!mounted) return;
 
     const timers: number[] = [];
 
@@ -576,7 +604,7 @@ function StyleGuide() {
       timers.forEach((id) => window.clearTimeout(id));
       window.removeEventListener("hashchange", scrollToHash);
     };
-  }, []);
+  }, [mounted]);
 
   const navItems = [
     { id: "home", icon: Home },
@@ -668,6 +696,16 @@ function StyleGuide() {
         </aside>
 
         <main>
+          {!mounted ? (
+            <div className="space-y-4 py-16 text-center">
+              <div className="mx-auto h-3 w-40 animate-pulse rounded bg-white/10" />
+              <div className="mx-auto h-3 w-64 animate-pulse rounded bg-white/5" />
+              <p className="pt-6 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+                Loading style guide…
+              </p>
+            </div>
+          ) : (
+            <>
           {/* BRAND */}
           <Section id="brand" title="Stadium Neon" kicker="01 — Brand & Tone">
             <div className="mb-6 rounded-3xl border border-border bg-surface p-8 shadow-card">
@@ -2963,6 +3001,8 @@ function StyleGuide() {
           <footer className="mt-12 border-t border-border pt-6 text-center text-xs text-muted-foreground font-mono">
             Stadium Neon · v0.1 · sports prediction design system
           </footer>
+            </>
+          )}
         </main>
       </div>
     </div>
