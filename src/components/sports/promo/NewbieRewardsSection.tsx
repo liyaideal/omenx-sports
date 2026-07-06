@@ -35,7 +35,7 @@ export function TaskCard({ task }: { task: NewbieTask }) {
   const [hasClaimed, setHasClaimed] = useState(false);
   const effectiveClaimed = claimed || hasClaimed;
   return (
-    <div className="relative overflow-hidden border-2 border-zinc-800 bg-[#0a0a0a] p-5">
+    <div className="relative flex h-full flex-col overflow-hidden border-2 border-zinc-800 bg-[#0a0a0a] p-5">
       <div className="flex items-start justify-between">
         <span className="font-scoreboard text-[10px] font-bold tracking-[0.25em] text-zinc-500">
           {task.code}
@@ -66,7 +66,7 @@ export function TaskCard({ task }: { task: NewbieTask }) {
         </div>
       </div>
 
-      <div className="mt-5 flex items-center justify-between gap-3">
+      <div className="mt-auto flex items-center justify-between gap-3 pt-5">
         <span className="font-pitch text-[10px] font-semibold uppercase tracking-widest text-zinc-500">
           {task.newOnly ? "New users only" : "All users"}
         </span>
