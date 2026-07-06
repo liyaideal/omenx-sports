@@ -389,11 +389,9 @@ function CoachMarkDemo() {
     description:
       "Open an OMENX account and verify your email to claim your welcome voucher.",
     rewardLabel: "10 U Position Voucher",
-    progress: 0,
-    status: "in-progress",
-    cta: "Register now",
-    ctaHref: "https://omenx.lovable.app/register",
-    ctaExternal: true,
+    progress: 1,
+    status: "claimable",
+    cta: "Claim 10 U",
     newOnly: true,
   };
 
@@ -447,7 +445,7 @@ function CoachMarkDemo() {
         targetRef={targetRef}
         eyebrow="Step · 01"
         title="Claim Your 10U Sign-Up Reward"
-        description="Register a free OMENX account to unlock your 10 U position voucher — the first step of the World Cup Carnival welcome pack."
+        description="Registration complete — tap Claim to add your 10 U position voucher to your wallet."
         ctaLabel="Got it"
       />
 
