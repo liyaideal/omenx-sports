@@ -2935,6 +2935,19 @@ function StyleGuide() {
             <CoachMarkDemo />
           </Section>
 
+          <Section id="demo-engine" title="Demo engine · main-site Supabase" kicker="32 — Cross-project state">
+            <p className="mb-6 max-w-3xl text-sm text-muted-foreground">
+              This project is a pure front-end blueprint — all cross-module
+              state (auth, balances, orders, positions) flows through the
+              OmenX main-site Supabase. The surfaces below are wired to
+              that engine and mirror what ships in the top bar, the mobile
+              Me sheet, and the trade drawer. See{" "}
+              <code className="font-mono text-foreground">mem://rules/demo-engine</code>{" "}
+              for the governance contract.
+            </p>
+            <DemoEnginePlayground />
+          </Section>
+
           <Section id="production-inventory" title="Production Inventory" kicker="26 — playground ↔ product sync">
             <p className="mb-6 max-w-3xl text-sm text-muted-foreground">
               Components below are shipping in real routes but don't yet have a self-contained demo on this page.
