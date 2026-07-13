@@ -337,6 +337,12 @@ Section 7 is append-only. Every regression the user catches gets pinned here.
   are reserved for win/loss semantics.
 - Don't render a horizontal scroller for the events grid — use the 1-row +
   Show-all pattern instead.
+- Don't restyle the header sign-in entry. It is a solid brand CTA — LogIn icon
+  + literal text "Sign In", `bg-gradient-neon text-white shadow-glow`, `text-sm
+  font-medium` normal case — structurally aligned with the OmenX main-site
+  header. Never use the `font-mono uppercase` badge look for it, and never bake
+  the OAuth provider name (Google, Apple, …) into the label; provider choice
+  belongs inside the account chooser that opens on click.
 - Don't add a `Browse all` link to the home events section — this page IS the
   sport's full events page.
 - Don't show "N people are betting" aggregates in Live activity — rows must
