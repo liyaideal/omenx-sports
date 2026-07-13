@@ -868,7 +868,13 @@ function EventTradePage() {
             outcomeLabel={formLabel}
             price={formPrice}
             balance={balance}
-            onPlaceOrder={(o) => void handlePlaceOrder(o)}
+            onPlaceOrder={(o) => {
+              if (isMapped && !auth.user) {
+                setShowSignIn(true);
+                throw new Error("Sign in to place a real order");
+              }
+              void handlePlaceOrder(o);
+            }}
           />
           {isMapped && (
             <div className="rounded-xl border border-primary/25 bg-primary/[0.05] px-3 py-2 text-[11px] leading-snug text-primary/90">
