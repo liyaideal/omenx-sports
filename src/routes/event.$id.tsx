@@ -35,6 +35,22 @@ import {
   RegulationTimeNotice,
   marketUsesRegulationTimeResolution,
 } from "@/components/sports/RegulationTimeNotice";
+import {
+  getMappingByMarketId,
+  isDemoEngineMarket,
+  useLiveMarkPrices,
+  useLiveOutcomePrices,
+  useOpenPositions,
+} from "@/lib/demoEngineEvents";
+import { useDemoAuth } from "@/hooks/useDemoAuth";
+import {
+  closeDemoPosition,
+  placeDemoOrder,
+  totalBalance,
+  type DemoOpenPosition,
+} from "@/lib/demoEngine";
+import { GoogleAccountChooser } from "@/components/sports/auth/GoogleAccountChooser";
+import { omenxUrl } from "@/lib/omenx";
 
 export const Route = createFileRoute("/event/$id")({
   validateSearch: (raw: Record<string, unknown>): { outcome?: string } => ({
