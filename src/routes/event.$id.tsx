@@ -300,7 +300,7 @@ function EventTradePage() {
   const mapping = getMappingByMarketId(market.id);
   const isMapped = !!mapping;
   const auth = useDemoAuth();
-  const live = useLiveOutcomePrices(isMapped ? market.id : null);
+  const livePrices = useLiveOutcomePrices(isMapped ? market.id : null);
   const [showSignIn, setShowSignIn] = useState(false);
   // Other real events related to this one (shared team / fixture). Rendered
   // as a nav chip strip at the bottom; each chip routes to that event's
@@ -313,12 +313,12 @@ function EventTradePage() {
     return {
       ...market,
       outcomes: market.outcomes.map((o) =>
-        live.byOutcomeId[o.id] != null
-          ? { ...o, price: live.byOutcomeId[o.id] }
+        livePrices.byOutcomeId[o.id] != null
+          ? { ...o, price: livePrices.byOutcomeId[o.id] }
           : o,
       ),
     };
-  }, [isMapped, market, live.byOutcomeId]);
+  }, [isMapped, market, livePrices.byOutcomeId]);
   // For binary 2-outcome events, both outcomes are equally tradable. The
   // selected index alone determines the trade target — we don't nest an
   // extra YES/NO toggle inside a binary event.
