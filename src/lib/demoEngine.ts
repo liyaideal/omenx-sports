@@ -105,6 +105,20 @@ export function totalBalance(
   return Number(p.balance ?? 0) + Number(p.trial_balance ?? 0);
 }
 
+export function getDemoEngineErrorMessage(error: unknown): string {
+  if (error instanceof Error) return error.message;
+  if (error && typeof error === "object" && "message" in error) {
+    const message = (error as { message?: unknown }).message;
+    if (typeof message === "string" && message.length > 0) return message;
+  }
+  try {
+    const serialized = JSON.stringify(error);
+    return serialized && serialized !== "{}" ? serialized : "Unknown error";
+  } catch {
+    return "Unknown error";
+  }
+}
+
 export interface PlaceDemoOrderInput {
   userId: string;
   eventName: string;
@@ -136,7 +150,7 @@ export interface PlaceDemoOrderResult {
  *   - writes one `trades` row + one `positions` row and decrements
  *     `profiles.trial_balance` / `profiles.balance` (Trial first).
  *   - `tp` / `sl` (0..1) persist as `tp_value` / `sl_value` with
- *     `tp_mode = sl_mode = 'price'`.
+ *     `tp_mode = sl_mode = '$'`.
  * Assumes RLS allows the authenticated user to insert into their own rows
  * and update their own profile (main-site policy).
  */
@@ -163,22 +177,32 @@ export async function placeDemoOrder(
 
   const quantity = (amount * leverage) / price;
 
+  const tradeInsert: Record<string, unknown> = {
+    user_id: userId,
+    event_name: eventName,
+    option_label: optionLabel,
+    side: "buy",
+    order_type: "Market",
+    price,
+    amount,
+    quantity,
+    leverage,
+    margin: amount,
+    fee: 0,
+    status: "Filled",
+  };
+  if (tp != null) {
+    tradeInsert.tp_value = tp;
+    tradeInsert.tp_mode = "$";
+  }
+  if (sl != null) {
+    tradeInsert.sl_value = sl;
+    tradeInsert.sl_mode = "$";
+  }
+
   const { data: trade, error: tErr } = await demoEngine
     .from("trades")
-    .insert({
-      user_id: userId,
-      event_name: eventName,
-      option_label: optionLabel,
-      side: "long",
-      order_type: "market",
-      price,
-      amount,
-      quantity,
-      leverage,
-      margin: amount,
-      fee: 0,
-      status: "Filled",
-    })
+    .insert(tradeInsert)
     .select("id")
     .single();
   if (tErr || !trade) throw tErr ?? new Error("Trade insert failed");
@@ -199,11 +223,11 @@ export async function placeDemoOrder(
   };
   if (tp != null) {
     posInsert.tp_value = tp;
-    posInsert.tp_mode = "price";
+    posInsert.tp_mode = "$";
   }
   if (sl != null) {
     posInsert.sl_value = sl;
-    posInsert.sl_mode = "price";
+    posInsert.sl_mode = "$";
   }
   const { data: pos, error: pErr } = await demoEngine
     .from("positions")
@@ -274,8 +298,8 @@ export interface CloseDemoPositionResult {
  *   - pnl = (mark − entry) × size (side is always long)
  *   - proceeds returned to `profiles.balance` = max(margin + pnl, 0)
  *   - `positions` row → status='Closed', closed_at=now(), pnl set
- *   - one closing `trades` row is inserted (order_type='market',
- *     status='Filled', side unchanged, amount = returned)
+ *   - one closing `trades` row is inserted (side='sell', order_type='Market',
+ *     status='Filled', amount = returned)
  */
 export async function closeDemoPosition(
   input: CloseDemoPositionInput,
@@ -313,8 +337,8 @@ export async function closeDemoPosition(
     user_id: userId,
     event_name: pos.event_name,
     option_label: pos.option_label,
-    side: (pos as { side: string }).side ?? "long",
-    order_type: "market",
+    side: "sell",
+    order_type: "Market",
     price: markPrice,
     amount: returned,
     quantity: size,

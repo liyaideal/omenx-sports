@@ -61,12 +61,13 @@ via `src/lib/demoEngine.ts` (`https://lbrwdmnctmivgrsgdpqj.supabase.co`):
   `src/lib/demoEngineEvents.ts` (`DEMO_EVENT_MAPPINGS`).
 - **Order placement**: both `TradeDrawer` quick-buy AND the event detail
   `TradeForm` / `MobileTradeBar` on a mapped event write one `trades` +
-  one `positions` row (`side=long`, `order_type=market`, `fee=0`) and
-  decrement `profiles.trial_balance` / `profiles.balance` (trial first).
+  one `positions` row (`trades.side='buy'`, `positions.side='long'`,
+  `trades.order_type='Market'`, `fee=0`) and decrement
+  `profiles.trial_balance` / `profiles.balance` (trial first).
   Leverage and TP/SL from the form persist:
   `quantity = amount × leverage / price`,
-  `positions.leverage`, `positions.tp_value` / `sl_value` with
-  `tp_mode = sl_mode = 'price'`. The `event_name` stored is the main-site
+  `positions.leverage`, `trades/positions.tp_value` / `sl_value` with
+  `tp_mode = sl_mode = '$'`. The `event_name` stored is the main-site
   canonical string (e.g. "World Cup 2026 Semifinal: France vs Spain?"),
   never the local display name.
 - **Open positions**: `positions.status = 'Open'` for the current user,
@@ -77,7 +78,8 @@ via `src/lib/demoEngine.ts` (`https://lbrwdmnctmivgrsgdpqj.supabase.co`):
 - **Close position**: the `PositionsTable` Close button on a DB row
   market-closes via `closeDemoPosition`: sets
   `positions.status='Closed'`, `closed_at=now()`, `pnl=(mark−entry)×size`;
-  inserts one closing `trades` row; and returns `max(margin+pnl, 0)` to
+  inserts one closing `trades` row with `side='sell'` and
+  `order_type='Market'`; and returns `max(margin+pnl, 0)` to
   `profiles.balance`.
 
 **Pilot scope**: only `wc26-semi-fra-esp` and `wc26-semi-arg-eng`.

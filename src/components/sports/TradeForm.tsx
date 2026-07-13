@@ -22,6 +22,20 @@ interface TradeFormProps {
   className?: string;
 }
 
+function getOrderErrorMessage(error: unknown): string {
+  if (error instanceof Error) return error.message;
+  if (error && typeof error === "object" && "message" in error) {
+    const message = (error as { message?: unknown }).message;
+    if (typeof message === "string" && message.length > 0) return message;
+  }
+  try {
+    const serialized = JSON.stringify(error);
+    return serialized && serialized !== "{}" ? serialized : "Unknown error";
+  } catch {
+    return "Unknown error";
+  }
+}
+
 type Side = "buy" | "sell";
 type Type = "market" | "limit";
 
@@ -154,7 +168,7 @@ export function TradeForm({
       onPlaceOrder?.(order);
     } catch (err) {
       toast.error("Order failed", {
-        description: err instanceof Error ? err.message : "Unknown error",
+        description: getOrderErrorMessage(err),
       });
       return;
     }
