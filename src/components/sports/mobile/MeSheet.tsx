@@ -152,12 +152,10 @@ export function MeSheet({
               <button
                 type="button"
                 onClick={() => setShowSignIn(true)}
-                className="inline-flex items-center gap-1.5 rounded-xl bg-primary/15 px-3 py-2 ring-1 ring-primary/30 transition active:scale-95"
+                className="inline-flex items-center gap-2 rounded-xl bg-gradient-neon px-3 py-2 text-white shadow-glow transition hover:opacity-90 active:scale-95"
               >
-                <LogIn className="h-4 w-4 text-primary" />
-                <span className="font-mono text-xs font-semibold uppercase tracking-widest text-primary">
-                  Sign in
-                </span>
+                <LogIn className="h-4 w-4" />
+                <span className="text-sm font-medium">Sign In</span>
               </button>
             )}
           </div>
@@ -278,9 +276,9 @@ export function MeSheet({
             <button
               type="button"
               onClick={() => setShowSignIn(true)}
-              className="flex w-full items-center justify-center gap-2 rounded-2xl border border-primary/30 bg-primary/10 px-4 py-3 text-sm font-medium text-primary transition active:scale-[0.98]"
+              className="flex w-full items-center justify-center gap-2 rounded-2xl bg-gradient-neon px-4 py-3 text-sm font-medium text-white shadow-glow transition hover:opacity-90 active:scale-[0.98]"
             >
-              <LogIn className="h-4 w-4" /> Continue with Google
+              <LogIn className="h-4 w-4" /> Sign In
             </button>
           )}
         </div>
