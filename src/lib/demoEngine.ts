@@ -340,7 +340,7 @@ export async function closeDemoPosition(
     side: "sell",
     order_type: "Market",
     price: markPrice,
-    amount: returned,
+    amount: Math.max(returned, 0.01),
     quantity: size,
     leverage: Number((pos as { leverage: number }).leverage ?? 1),
     margin: 0,
