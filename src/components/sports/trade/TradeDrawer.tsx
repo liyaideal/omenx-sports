@@ -98,6 +98,9 @@ export function TradeDrawer({
     margin: number;
     price: number;
     outcome: "yes" | "no";
+    leverage: number;
+    tp: number | null;
+    sl: number | null;
   }) => {
     await handlePlaceOrder();
     if (!isMapped || !mapping || !auth.user || !auth.profile) return;
@@ -111,6 +114,9 @@ export function TradeDrawer({
         price: live.byOptionId[outcomeMap.optionId] ?? o.price / 100,
         amount: o.margin,
         profile: auth.profile,
+        leverage: o.leverage,
+        tp: o.tp != null ? o.tp / 100 : null,
+        sl: o.sl != null ? o.sl / 100 : null,
       });
       await auth.refreshProfile();
       toast.success("Filled · saved to OmenX main-site", {
