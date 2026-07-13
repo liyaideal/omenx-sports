@@ -18,7 +18,7 @@ import { omenxUrl, OMENX_BASE } from "@/lib/omenx";
 import { Link } from "@tanstack/react-router";
 import omenxLogo from "@/assets/omenx-logo.svg";
 import { useDemoAuth } from "@/hooks/useDemoAuth";
-import { DemoSignInSheet } from "@/components/sports/auth/DemoSignInSheet";
+import { GoogleAccountChooser } from "@/components/sports/auth/GoogleAccountChooser";
 import { signOutDemo, totalBalance } from "@/lib/demoEngine";
 import {
   DropdownMenu,
@@ -304,7 +304,7 @@ export function AppTopBar({
         </div>
       </div>
     </header>
-    <DemoSignInSheet
+    <GoogleAccountChooser
       open={showSignIn}
       onOpenChange={setShowSignIn}
       onSignedIn={() => auth.refreshProfile()}

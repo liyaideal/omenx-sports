@@ -68,7 +68,7 @@ import { MobileFansSection } from "@/components/sports/mobile/MobileFansSection"
 import { MobileLiveHero } from "@/components/sports/mobile/MobileLiveHero";
 import { MeSheet } from "@/components/sports/mobile/MeSheet";
 import { LivePositionsCard } from "@/components/sports/demoengine/LivePositionsCard";
-import { DemoSignInSheet } from "@/components/sports/auth/DemoSignInSheet";
+import { GoogleAccountChooser } from "@/components/sports/auth/GoogleAccountChooser";
 import { useDemoAuth } from "@/hooks/useDemoAuth";
 import { totalBalance, signOutDemo } from "@/lib/demoEngine";
 import { useLiveOutcomePrices } from "@/lib/demoEngineEvents";
@@ -645,7 +645,7 @@ function DemoEnginePlayground() {
         <LivePositionsCard onSignIn={() => setShowSignIn(true)} />
       </div>
 
-      <DemoSignInSheet
+      <GoogleAccountChooser
         open={showSignIn}
         onOpenChange={setShowSignIn}
         onSignedIn={() => auth.refreshProfile()}
