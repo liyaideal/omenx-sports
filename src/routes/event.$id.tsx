@@ -371,17 +371,27 @@ function EventTradePage() {
   // (Close / Cancel / place order) mutate the same arrays. PnL recomputes
   // from a live "mark" that jitters around each row's entry every second
   // so the user sees motion.
+  //
+  // For mapped World-Cup semifinal events (see mem://rules/demo-engine)
+  // the Positions tab reads real rows from the OmenX main-site `positions`
+  // table via useOpenPositions/useLiveMarkPrices — the mock seed positions
+  // are suppressed on those two events so real and fake data don't mix.
+  // Orders + History still ship the mock seed on every market.
+  // DEMO-STATE: 待接入主站演示引擎 — orders/history mocks stay until the
+  // main site exposes those surfaces to blueprints.
   const league = leagueKeyFromShort(active.league.short);
   const seeded = useMemo(() => buildSeed(active, league), [active, league]);
-  const [positions, setPositions] = useState<PositionRowData[]>(seeded.positions);
+  const [positions, setPositions] = useState<PositionRowData[]>(
+    isMapped ? [] : seeded.positions,
+  );
   const [orders, setOrders] = useState<OrderRowData[]>(seeded.orders);
   const [history, setHistory] = useState<HistoryRowData[]>(seeded.history);
   // Reset to the seed whenever we navigate to a different market.
   useEffect(() => {
-    setPositions(seeded.positions);
+    setPositions(isMapped ? [] : seeded.positions);
     setOrders(seeded.orders);
     setHistory(seeded.history);
-  }, [seeded]);
+  }, [seeded, isMapped]);
   const [tick, setTick] = useState(0);
   useEffect(() => {
     const id = setInterval(() => setTick((t) => t + 1), 1000);
@@ -390,9 +400,92 @@ function EventTradePage() {
 
   const currentPx = Math.round(selected.price * 100);
 
-  // Apply a tiny live jitter so PnL updates every tick.
+  // Demo-engine open positions (mapped events only). Realtime + polling.
+  const dbOpen = useOpenPositions(isMapped ? auth.user?.id ?? null : null);
+  const dbOptionIds = useMemo(
+    () =>
+      dbOpen.positions
+        .filter((p) =>
+          mapping
+            ? Object.values(mapping.outcomes).some(
+                (o) => o.optionId === p.option_id,
+              )
+            : false,
+        )
+        .map((p) => p.option_id)
+        .filter((id): id is string => !!id),
+    [dbOpen.positions, mapping],
+  );
+  const dbMarks = useLiveMarkPrices(dbOptionIds);
+
+  // DB → PositionRowData. Kept in the same list as any mock rows so the
+  // table renders one unified view; `positionSources` tracks the DB id per
+  // row so the close handler can dispatch to the right backend.
+  const dbRows = useMemo<
+    { row: PositionRowData; dbId: string; source: DemoOpenPosition }[]
+  >(() => {
+    if (!isMapped || !mapping) return [];
+    return dbOpen.positions
+      .filter((p) =>
+        Object.values(mapping.outcomes).some(
+          (o) => o.optionId === p.option_id,
+        ),
+      )
+      .map((p) => {
+        // Reverse-map the main-site option → local outcome id → tone/label.
+        const localOutcomeId = Object.entries(mapping.outcomes).find(
+          ([, o]) => o.optionId === p.option_id,
+        )?.[0];
+        const localOutcome = active.outcomes.find(
+          (o) => o.id === localOutcomeId,
+        );
+        const outcome: "yes" | "no" =
+          p.option_label?.toLowerCase() === "no" ? "no" : "yes";
+        const label =
+          localOutcome?.team?.name ?? localOutcome?.label ?? p.option_label;
+        const entryC = Math.round(Number(p.entry_price) * 100);
+        const markPrice =
+          (p.option_id && dbMarks[p.option_id]) ?? Number(p.mark_price);
+        const markC = Math.round(Number(markPrice) * 100);
+        const size = Number(p.size);
+        const lev = Math.max(1, Number(p.leverage));
+        // Long PnL in USDC = (mark − entry) × size.
+        const pnl =
+          Math.round((Number(markPrice) - Number(p.entry_price)) * size * 100) /
+          100;
+        // Rough liq for display only — 1× has no liq (0), higher leverages
+        // wipe roughly `entry / lev` cents of adverse move.
+        const liq =
+          lev > 1
+            ? clampPct(entryC - Math.round(entryC / lev))
+            : 0;
+        const row: PositionRowData = {
+          market: active.title,
+          league,
+          outcome,
+          outcomeLabel: label,
+          eventShape: "binary",
+          size: Math.round(size),
+          entry: entryC,
+          mark: markC,
+          leverage: lev,
+          mode: "cross",
+          margin: Number(p.margin),
+          liq,
+          pnl,
+          tp:
+            p.tp_value != null ? Math.round(Number(p.tp_value) * 100) : null,
+          sl:
+            p.sl_value != null ? Math.round(Number(p.sl_value) * 100) : null,
+        };
+        return { row, dbId: p.id, source: p };
+      });
+  }, [isMapped, mapping, dbOpen.positions, dbMarks, active, league]);
+
+  // Apply a tiny live jitter to mock rows so their PnL animates. DB rows
+  // already move via the realtime mark feed and are appended untouched.
   const livePositions = useMemo<PositionRowData[]>(() => {
-    return positions.map((p, i) => {
+    const mockLive = positions.map((p, i) => {
       const jitter = Math.sin((tick + i * 7) / 3) * 1.4;
       const mark = clampPct(p.entry + jitter);
       const sign = p.outcome === "yes" ? 1 : -1;
@@ -400,14 +493,22 @@ function EventTradePage() {
       const pnl = (mark / 100 - p.entry / 100) * notional * sign;
       return { ...p, mark: Math.round(mark * 10) / 10, pnl: Math.round(pnl * 100) / 100 };
     });
-  }, [positions, tick]);
+    return [...dbRows.map((r) => r.row), ...mockLive];
+  }, [positions, tick, dbRows]);
 
-  const handleClosePosition = useCallback(
-    (idx: number) => {
+  // Parallel array to `livePositions`: DB id for DB-backed rows, null for
+  // mock rows. Consumed by handleClosePosition to route the close call.
+  const positionSources = useMemo<(string | null)[]>(
+    () => [...dbRows.map((r) => r.dbId), ...positions.map(() => null)],
+    [dbRows, positions],
+  );
+
+  const closeMockAtIndex = useCallback(
+    (mockIdx: number) => {
       setPositions((prev) => {
-        const row = prev[idx];
+        const row = prev[mockIdx];
         if (!row) return prev;
-        const jitter = Math.sin((tick + idx * 7) / 3) * 1.4;
+        const jitter = Math.sin((tick + mockIdx * 7) / 3) * 1.4;
         const mark = Math.round(clampPct(row.entry + jitter));
         const sign = row.outcome === "yes" ? 1 : -1;
         const notional = row.margin * row.leverage;
@@ -431,10 +532,53 @@ function EventTradePage() {
         toast.success(
           `Closed ${row.outcomeLabel} at ${mark}¢ · ${pnl >= 0 ? "+" : ""}${pnl.toFixed(2)} USDC`,
         );
-        return prev.filter((_, i) => i !== idx);
+        return prev.filter((_, i) => i !== mockIdx);
       });
     },
     [tick],
+  );
+
+  const handleClosePosition = useCallback(
+    async (idx: number) => {
+      const dbId = positionSources[idx];
+      if (!dbId) {
+        // Mock row — recompute idx into the mock array (DB rows sit first).
+        closeMockAtIndex(idx - dbRows.length);
+        return;
+      }
+      if (!auth.user || !auth.profile) {
+        setShowSignIn(true);
+        return;
+      }
+      const src = dbRows.find((r) => r.dbId === dbId);
+      if (!src) return;
+      const optionId = src.source.option_id;
+      const mark =
+        (optionId && dbMarks[optionId]) ?? Number(src.source.mark_price);
+      try {
+        const res = await closeDemoPosition({
+          userId: auth.user.id,
+          positionId: dbId,
+          markPrice: Number(mark),
+          profile: auth.profile,
+        });
+        await Promise.all([auth.refreshProfile(), dbOpen.refetch()]);
+        toast.success(
+          `Closed · ${res.pnl >= 0 ? "+" : ""}${res.pnl.toFixed(2)} USDC`,
+          {
+            action: {
+              label: "Portfolio ↗",
+              onClick: () => window.open(omenxUrl.portfolio(), "_blank"),
+            },
+          },
+        );
+      } catch (e) {
+        toast.error("Close failed", {
+          description: e instanceof Error ? e.message : String(e),
+        });
+      }
+    },
+    [positionSources, dbRows, dbMarks, auth, dbOpen, closeMockAtIndex],
   );
 
   const handleCancelOrder = useCallback((idx: number) => {
