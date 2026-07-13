@@ -692,8 +692,9 @@ function EventTradePage() {
     live.setMinimized(offscreen);
   }, [offscreen, isLive, live]);
 
-  const balance =
-    isMapped && auth.user ? totalBalance(auth.profile) : ACCOUNT_STATS.available_usd;
+  // TradeForm balance: mapped+signed-in reads the live wallet; every other
+  // path keeps the legacy demo default so mock trading still works.
+  const balance = isMapped && auth.user ? totalBalance(auth.profile) : 5000;
 
   const handlePlaceOrder = async (order: PlacedOrder) => {
     // Mapped events route through the OmenX main-site demo engine.
