@@ -113,6 +113,12 @@ export interface PlaceDemoOrderInput {
   price: number; // 0..1
   amount: number; // USDC
   profile: DemoProfile;
+  /** Leverage multiplier. Defaults to 1 (small-white full-margin market order). */
+  leverage?: number;
+  /** Take-profit price 0..1, or null to skip. */
+  tp?: number | null;
+  /** Stop-loss price 0..1, or null to skip. */
+  sl?: number | null;
 }
 
 export interface PlaceDemoOrderResult {
@@ -122,24 +128,40 @@ export interface PlaceDemoOrderResult {
 }
 
 /**
- * Small-white-user market order:
- *   - full-margin, leverage=1, no fee
- *   - writes one `trades` row + one `positions` row
- *   - decrements profile balances (Trial first)
+ * Market order routed to the OmenX main-site demo engine.
+ *   - `amount` is the user-supplied margin (USDC)
+ *   - `quantity = amount × leverage / price`  (main-site convention:
+ *     margin = quantity × price / leverage)
+ *   - fee = 0 (small-white bracket)
+ *   - writes one `trades` row + one `positions` row and decrements
+ *     `profiles.trial_balance` / `profiles.balance` (Trial first).
+ *   - `tp` / `sl` (0..1) persist as `tp_value` / `sl_value` with
+ *     `tp_mode = sl_mode = 'price'`.
  * Assumes RLS allows the authenticated user to insert into their own rows
  * and update their own profile (main-site policy).
  */
 export async function placeDemoOrder(
   input: PlaceDemoOrderInput,
 ): Promise<PlaceDemoOrderResult> {
-  const { userId, eventName, optionId, optionLabel, price, amount, profile } =
-    input;
+  const {
+    userId,
+    eventName,
+    optionId,
+    optionLabel,
+    price,
+    amount,
+    profile,
+    leverage: leverageIn,
+    tp,
+    sl,
+  } = input;
   if (price <= 0 || price >= 1) throw new Error("Invalid price");
   if (amount <= 0) throw new Error("Enter an amount");
+  const leverage = Math.max(1, Math.round(leverageIn ?? 1));
   const split = splitBalanceCharge(profile, amount);
   if (!split.ok) throw new Error("Insufficient balance");
 
-  const quantity = amount / price;
+  const quantity = (amount * leverage) / price;
 
   const { data: trade, error: tErr } = await demoEngine
     .from("trades")
@@ -152,7 +174,7 @@ export async function placeDemoOrder(
       price,
       amount,
       quantity,
-      leverage: 1,
+      leverage,
       margin: amount,
       fee: 0,
       status: "Filled",
@@ -161,22 +183,31 @@ export async function placeDemoOrder(
     .single();
   if (tErr || !trade) throw tErr ?? new Error("Trade insert failed");
 
+  const posInsert: Record<string, unknown> = {
+    user_id: userId,
+    trade_id: trade.id,
+    event_name: eventName,
+    option_label: optionLabel,
+    option_id: optionId,
+    side: "long",
+    entry_price: price,
+    mark_price: price,
+    size: quantity,
+    margin: amount,
+    leverage,
+    status: "Open",
+  };
+  if (tp != null) {
+    posInsert.tp_value = tp;
+    posInsert.tp_mode = "price";
+  }
+  if (sl != null) {
+    posInsert.sl_value = sl;
+    posInsert.sl_mode = "price";
+  }
   const { data: pos, error: pErr } = await demoEngine
     .from("positions")
-    .insert({
-      user_id: userId,
-      trade_id: trade.id,
-      event_name: eventName,
-      option_label: optionLabel,
-      option_id: optionId,
-      side: "long",
-      entry_price: price,
-      mark_price: price,
-      size: quantity,
-      margin: amount,
-      leverage: 1,
-      status: "Open",
-    })
+    .insert(posInsert)
     .select("id")
     .single();
   if (pErr || !pos) throw pErr ?? new Error("Position insert failed");
@@ -206,6 +237,8 @@ export interface DemoOpenPosition {
   leverage: number;
   status: string;
   created_at: string;
+  tp_value?: number | null;
+  sl_value?: number | null;
 }
 
 export async function fetchOpenPositions(
@@ -214,11 +247,91 @@ export async function fetchOpenPositions(
   const { data, error } = await demoEngine
     .from("positions")
     .select(
-      "id, event_name, option_label, option_id, side, entry_price, mark_price, size, margin, leverage, status, created_at",
+      "id, event_name, option_label, option_id, side, entry_price, mark_price, size, margin, leverage, status, created_at, tp_value, sl_value",
     )
     .eq("user_id", userId)
     .eq("status", "Open")
     .order("created_at", { ascending: false });
   if (error) throw error;
   return (data ?? []) as DemoOpenPosition[];
+}
+
+export interface CloseDemoPositionInput {
+  userId: string;
+  positionId: string;
+  /** Current mark price 0..1 at which the position closes. */
+  markPrice: number;
+  profile: DemoProfile;
+}
+
+export interface CloseDemoPositionResult {
+  pnl: number;
+  returned: number;
+}
+
+/**
+ * Market-close an open position:
+ *   - pnl = (mark − entry) × size (side is always long)
+ *   - proceeds returned to `profiles.balance` = max(margin + pnl, 0)
+ *   - `positions` row → status='Closed', closed_at=now(), pnl set
+ *   - one closing `trades` row is inserted (order_type='market',
+ *     status='Filled', side unchanged, amount = returned)
+ */
+export async function closeDemoPosition(
+  input: CloseDemoPositionInput,
+): Promise<CloseDemoPositionResult> {
+  const { userId, positionId, markPrice, profile } = input;
+  const { data: pos, error: pErr } = await demoEngine
+    .from("positions")
+    .select(
+      "id, event_name, option_label, option_id, side, entry_price, size, margin, leverage",
+    )
+    .eq("id", positionId)
+    .eq("user_id", userId)
+    .maybeSingle();
+  if (pErr || !pos) throw pErr ?? new Error("Position not found");
+
+  const entry = Number(pos.entry_price);
+  const size = Number(pos.size);
+  const margin = Number(pos.margin);
+  const pnl = (Number(markPrice) - entry) * size;
+  const returned = Math.max(0, margin + pnl);
+
+  const { error: upErr } = await demoEngine
+    .from("positions")
+    .update({
+      status: "Closed",
+      closed_at: new Date().toISOString(),
+      mark_price: markPrice,
+      pnl,
+    })
+    .eq("id", positionId)
+    .eq("user_id", userId);
+  if (upErr) throw upErr;
+
+  const { error: tErr } = await demoEngine.from("trades").insert({
+    user_id: userId,
+    event_name: pos.event_name,
+    option_label: pos.option_label,
+    side: (pos as { side: string }).side ?? "long",
+    order_type: "market",
+    price: markPrice,
+    amount: returned,
+    quantity: size,
+    leverage: Number((pos as { leverage: number }).leverage ?? 1),
+    margin: 0,
+    fee: 0,
+    status: "Filled",
+  });
+  if (tErr) throw tErr;
+
+  const { error: bErr } = await demoEngine
+    .from("profiles")
+    .update({
+      balance: Number(profile.balance) + returned,
+    })
+    .eq("user_id", userId);
+  if (bErr) throw bErr;
+
+  return { pnl, returned };
 }
