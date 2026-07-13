@@ -645,6 +645,36 @@ function DemoEnginePlayground() {
         <LivePositionsCard onSignIn={() => setShowSignIn(true)} />
       </div>
 
+      <div className="md:col-span-2 rounded-2xl border border-border bg-surface p-5">
+        <div className="mb-1 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+          Event detail · full trade form → main-site
+        </div>
+        <p className="mb-3 text-[11px] leading-snug text-muted-foreground">
+          On the two mapped WC26 semifinals the event detail{" "}
+          <code className="font-mono text-foreground">TradeForm</code> (with
+          leverage + TP/SL) submits into{" "}
+          <code className="font-mono text-foreground">trades</code> +{" "}
+          <code className="font-mono text-foreground">positions</code>, and{" "}
+          <code className="font-mono text-foreground">PositionsTable</code>{" "}
+          reads live DB rows repriced from{" "}
+          <code className="font-mono text-foreground">event_options</code>.
+          Rows carry a Close button that market-closes the position and
+          returns margin+PnL to the main balance.
+        </p>
+        <div className="flex flex-wrap gap-2">
+          {["wc26-semi-fra-esp", "wc26-semi-arg-eng"].map((id) => (
+            <Link
+              key={id}
+              to="/event/$id"
+              params={{ id }}
+              className="rounded-xl bg-white/[0.04] px-3 py-2 font-mono text-[11px] uppercase tracking-widest text-foreground ring-1 ring-white/10 transition hover:bg-white/[0.08]"
+            >
+              Open /event/{id}
+            </Link>
+          ))}
+        </div>
+      </div>
+
       <GoogleAccountChooser
         open={showSignIn}
         onOpenChange={setShowSignIn}

@@ -59,13 +59,26 @@ via `src/lib/demoEngine.ts` (`https://lbrwdmnctmivgrsgdpqj.supabase.co`):
 - **Live prices**: `event_options` (realtime + 60s polling fallback) for
   the two mapped World Cup 2026 semifinals — see
   `src/lib/demoEngineEvents.ts` (`DEMO_EVENT_MAPPINGS`).
-- **Order placement**: `TradeDrawer` on a mapped event writes one
-  `trades` row + one `positions` row (side=`long`, order_type=`market`,
-  leverage=1, fee=0) and decrements `profiles.trial_balance` /
-  `profiles.balance` (trial first).
+- **Order placement**: both `TradeDrawer` quick-buy AND the event detail
+  `TradeForm` / `MobileTradeBar` on a mapped event write one `trades` +
+  one `positions` row (`side=long`, `order_type=market`, `fee=0`) and
+  decrement `profiles.trial_balance` / `profiles.balance` (trial first).
+  Leverage and TP/SL from the form persist:
+  `quantity = amount × leverage / price`,
+  `positions.leverage`, `positions.tp_value` / `sl_value` with
+  `tp_mode = sl_mode = 'price'`. The `event_name` stored is the main-site
+  canonical string (e.g. "World Cup 2026 Semifinal: France vs Spain?"),
+  never the local display name.
 - **Open positions**: `positions.status = 'Open'` for the current user,
-  repriced via realtime `event_options`; rendered by
-  `LivePositionsCard` inside `MeSheet` and `/style-guide#demo-engine`.
+  repriced via realtime `event_options`. Rendered by `LivePositionsCard`
+  in `MeSheet` + `/style-guide#demo-engine`, AND inside the event detail
+  `PositionsTable` for mapped events (mock seed positions are suppressed
+  on those events to avoid mixing real and fake data).
+- **Close position**: the `PositionsTable` Close button on a DB row
+  market-closes via `closeDemoPosition`: sets
+  `positions.status='Closed'`, `closed_at=now()`, `pnl=(mark−entry)×size`;
+  inserts one closing `trades` row; and returns `max(margin+pnl, 0)` to
+  `profiles.balance`.
 
 **Pilot scope**: only `wc26-semi-fra-esp` and `wc26-semi-arg-eng`.
 Every other market keeps its mock trade flow and carries the
