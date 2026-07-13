@@ -867,13 +867,50 @@ function EventTradePage() {
             outcome={formOutcome}
             outcomeLabel={formLabel}
             price={formPrice}
-            onPlaceOrder={handlePlaceOrder}
+            balance={balance}
+            onPlaceOrder={(o) => void handlePlaceOrder(o)}
           />
+          {isMapped && (
+            <div className="rounded-xl border border-primary/25 bg-primary/[0.05] px-3 py-2 text-[11px] leading-snug text-primary/90">
+              <span className="font-mono uppercase tracking-widest">
+                Live · main-site
+              </span>{" "}
+              — orders on this event write to the OmenX main-site
+              engine and appear in Portfolio ↗.
+              {!auth.user && (
+                <button
+                  type="button"
+                  onClick={() => setShowSignIn(true)}
+                  className="ml-1 underline underline-offset-2 hover:text-primary"
+                >
+                  Sign in to place a real order.
+                </button>
+              )}
+            </div>
+          )}
         </div>
       </div>
 
       <div className="space-y-5 px-6 pb-28 md:px-8 lg:pb-12">
         <RelatedMarketsBar markets={relatedMarkets} />
+        {isMapped && !auth.user && (
+          <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-primary/25 bg-primary/[0.05] px-4 py-3 text-[12px] text-primary/90">
+            <span>
+              <span className="font-mono uppercase tracking-widest">
+                Positions
+              </span>{" "}
+              — sign in with Google to see your live positions from the
+              OmenX main-site.
+            </span>
+            <button
+              type="button"
+              onClick={() => setShowSignIn(true)}
+              className="rounded-lg bg-gradient-neon px-3 py-1.5 text-[11px] font-medium text-white shadow-glow hover:opacity-90"
+            >
+              Sign In
+            </button>
+          </div>
+        )}
         <PositionsTable
           positions={livePositions}
           orders={orders}
@@ -887,6 +924,11 @@ function EventTradePage() {
       {/* Mobile-only sticky trade bar — desktop already has the
           right-column sticky TradeForm. */}
       <MobileTradeBar market={active} selected={selected} onOpenForm={scrollToTradeForm} />
+      <GoogleAccountChooser
+        open={showSignIn}
+        onOpenChange={setShowSignIn}
+        onSignedIn={() => auth.refreshProfile()}
+      />
     </AppShell>
   );
 }
