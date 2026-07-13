@@ -599,7 +599,7 @@ function DemoEnginePlayground() {
             onClick={() => setShowSignIn(true)}
             className="w-full rounded-lg bg-primary/15 py-3 font-mono text-[11px] uppercase tracking-widest text-primary ring-1 ring-primary/30 hover:bg-primary/25"
           >
-            Sign in (demo)
+            Continue with Google
           </button>
         )}
       </div>

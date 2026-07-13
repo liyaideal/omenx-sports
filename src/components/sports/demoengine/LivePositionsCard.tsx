@@ -56,7 +56,7 @@ export function LivePositionsCard({
             onClick={onSignIn}
             className="mt-3 inline-flex items-center gap-1.5 rounded-lg bg-primary/20 px-3 py-1.5 font-mono text-[11px] uppercase tracking-widest text-primary hover:bg-primary/30"
           >
-            <LogIn className="h-3 w-3" /> Sign in (demo)
+            <LogIn className="h-3 w-3" /> Continue with Google
           </button>
         )}
       </div>
