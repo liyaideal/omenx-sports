@@ -38,3 +38,31 @@ Until the demo engine is wired:
 ## Reference
 
 Backend boundary details live in the main-site repository at `docs/backend-boundary.md`.
+
+## Integration status (2026-07-13)
+
+**Wired** — the following surfaces call the OmenX main-site Supabase directly
+via `src/lib/demoEngine.ts` (`https://lbrwdmnctmivgrsgdpqj.supabase.co`):
+
+- **Auth**: `signInDemo(scenario)` → main-site Edge Function
+  `ensure-demo-user` (`matched` / `welcome`) then `signInWithPassword`.
+  Session persists in localStorage under key `omenx-sports-demo-session`.
+- **Profile / balance**: `profiles.balance` + `profiles.trial_balance`.
+  Total equity = sum of both; Trial Bonus is consumed before Main.
+- **Live prices**: `event_options` (realtime + 60s polling fallback) for
+  the two mapped World Cup 2026 semifinals — see
+  `src/lib/demoEngineEvents.ts` (`DEMO_EVENT_MAPPINGS`).
+- **Order placement**: `TradeDrawer` on a mapped event writes one
+  `trades` row + one `positions` row (side=`long`, order_type=`market`,
+  leverage=1, fee=0) and decrements `profiles.trial_balance` /
+  `profiles.balance` (trial first).
+- **Open positions**: `positions.status = 'Open'` for the current user,
+  repriced via realtime `event_options`; rendered by
+  `LivePositionsCard` inside `MeSheet` and `/style-guide#demo-engine`.
+
+**Pilot scope**: only `wc26-semi-fra-esp` and `wc26-semi-arg-eng`.
+Every other market keeps its mock trade flow and carries the
+`// DEMO-STATE: 待接入主站演示引擎` marker.
+
+**Never**: enable Supabase inside this project, initiate schema changes,
+or read/write `wallets` (address book, not balances).

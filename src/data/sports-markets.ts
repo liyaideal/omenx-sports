@@ -103,6 +103,57 @@ export const FEATURED_MATCH: SportsMarket = {
 
 export const MATCH_MARKETS: SportsMarket[] = [
   // ----- FIFA World Cup 2026 — featured at the top of the home grid -----
+  // DEMO-STATE: 主站演示引擎接入 — 以下两场半决赛价格 / 下单 / 持仓走
+  // OmenX 主站 Supabase (`events` + `event_options` + `trades` + `positions`)。
+  // 卡片视觉不变，价格通过 `useLiveOutcomePrices(marketId)` 覆盖。
+  {
+    id: "wc26-semi-fra-esp",
+    kind: "match",
+    shape: "binary",
+    title: "France vs Spain — Semifinal winner",
+    league: { name: "World Cup 2026", short: "WC" },
+    endsLabel: "Jul 14 · 9:00pm",
+    volume: "$1.2M",
+    volume24h: "$284K",
+    participants: 6120,
+    fixture: {
+      home: TEAMS.france,
+      away: TEAMS.spain,
+      kickoff: "9:00pm",
+      whenLabel: "Jul 14",
+    },
+    outcomes: [
+      { id: "h", label: "FRA", price: 0.52, delta24h: 0.02, team: TEAMS.france },
+      { id: "a", label: "ESP", price: 0.48, delta24h: -0.02, team: TEAMS.spain },
+    ],
+    tradeHref: `/event/wc26-semi-fra-esp`,
+    dayOffset: 1,
+    stage: "Semifinal",
+  },
+  {
+    id: "wc26-semi-arg-eng",
+    kind: "match",
+    shape: "binary",
+    title: "Argentina vs England — Semifinal winner",
+    league: { name: "World Cup 2026", short: "WC" },
+    endsLabel: "Jul 15 · 9:00pm",
+    volume: "$1.4M",
+    volume24h: "$312K",
+    participants: 7180,
+    fixture: {
+      home: TEAMS.argentina,
+      away: TEAMS.england,
+      kickoff: "9:00pm",
+      whenLabel: "Jul 15",
+    },
+    outcomes: [
+      { id: "h", label: "ARG", price: 0.57, delta24h: 0.03, team: TEAMS.argentina },
+      { id: "a", label: "ENG", price: 0.43, delta24h: -0.03, team: TEAMS.england },
+    ],
+    tradeHref: `/event/wc26-semi-arg-eng`,
+    dayOffset: 2,
+    stage: "Semifinal",
+  },
   {
     id: "wc26-usa-par",
     kind: "match",

@@ -1,6 +1,10 @@
 import { useMemo, useState } from "react";
 import { Gift, Lock, Pencil, Plus } from "lucide-react";
 import { cn } from "@/lib/utils";
+// DEMO-STATE: 待接入主站演示引擎 —
+// this mock table stays until every event is mapped to the main-site
+// demo engine. Live main-site positions ship via `LivePositionsCard`
+// (used in MeSheet + /style-guide#demo-engine).
 import { LeagueBadge } from "./LeagueBadge";
 import {
   Tooltip,
