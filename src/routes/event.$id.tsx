@@ -294,11 +294,31 @@ function buildSeed(
 }
 function EventTradePage() {
   const { market } = Route.useLoaderData() as { market: SportsMarket };
+  // Demo-engine wiring — see mem://rules/demo-engine. Only the two mapped
+  // World Cup 2026 semifinals route through the OmenX main-site Supabase;
+  // every other market keeps the local mock flow.
+  const mapping = getMappingByMarketId(market.id);
+  const isMapped = !!mapping;
+  const auth = useDemoAuth();
+  const live = useLiveOutcomePrices(isMapped ? market.id : null);
+  const [showSignIn, setShowSignIn] = useState(false);
   // Other real events related to this one (shared team / fixture). Rendered
   // as a nav chip strip at the bottom; each chip routes to that event's
   // detail page. Hidden entirely when empty.
   const relatedMarkets = useMemo(() => getRelatedMarkets(market), [market]);
-  const active = market;
+  // For mapped events, patch outcome prices with the realtime feed so the
+  // TradeForm ticket + outcome pills read straight from main-site.
+  const active: SportsMarket = useMemo(() => {
+    if (!isMapped) return market;
+    return {
+      ...market,
+      outcomes: market.outcomes.map((o) =>
+        live.byOutcomeId[o.id] != null
+          ? { ...o, price: live.byOutcomeId[o.id] }
+          : o,
+      ),
+    };
+  }, [isMapped, market, live.byOutcomeId]);
   // For binary 2-outcome events, both outcomes are equally tradable. The
   // selected index alone determines the trade target — we don't nest an
   // extra YES/NO toggle inside a binary event.
