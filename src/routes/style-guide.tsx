@@ -384,11 +384,6 @@ function ActivationDemos() {
  * `targetRef`, title, description and CTA copy.
  */
 function CoachMarkDemo() {
-  return null;
-}
-// (restored below)
-
-function _unused_CoachMarkDemo_placeholder() {
   return (
     <div className="flex flex-col gap-8">
       <CoachMarkStage
