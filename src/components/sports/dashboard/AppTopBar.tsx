@@ -6,6 +6,7 @@ import {
   Gift,
   Globe,
   HelpCircle,
+  LogIn,
   LogOut,
   MessageCircle,
   Settings as SettingsIcon,
@@ -16,6 +17,9 @@ import {
 import { omenxUrl, OMENX_BASE } from "@/lib/omenx";
 import { Link } from "@tanstack/react-router";
 import omenxLogo from "@/assets/omenx-logo.svg";
+import { useDemoAuth } from "@/hooks/useDemoAuth";
+import { DemoSignInSheet } from "@/components/sports/auth/DemoSignInSheet";
+import { signOutDemo, totalBalance } from "@/lib/demoEngine";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -53,10 +57,20 @@ export function AppTopBar({
   userAvatar: string;
   equity?: string;
 }) {
-  const equityLabel = equity ?? "$0.00";
+  const auth = useDemoAuth();
+  const [showSignIn, setShowSignIn] = useState(false);
   const [language, setLanguage] = useState("EN");
+  // When the user has an active demo session, override the mock props with
+  // live main-site values. Otherwise fall back to the callsite props.
+  const liveBalance = totalBalance(auth.profile);
+  const equityLabel = auth.user
+    ? `$${liveBalance.toFixed(2)}`
+    : (equity ?? "$0.00");
+  const displayName = auth.profile?.username ?? (auth.user ? auth.user.email ?? userName : userName);
+  const displayAvatar = auth.profile?.avatar_url ?? userAvatar;
 
   return (
+    <>
     <header
       className="sticky top-0 z-50 border-b border-border/30 backdrop-blur-md"
       style={{
@@ -161,19 +175,35 @@ export function AppTopBar({
             </span>
           </a>
 
+          {!auth.user ? (
+            <button
+              type="button"
+              onClick={() => setShowSignIn(true)}
+              className="flex shrink-0 items-center gap-1.5 rounded-lg bg-primary/15 px-3 py-2 font-mono text-[11px] uppercase tracking-widest text-primary ring-1 ring-primary/30 transition hover:bg-primary/25"
+            >
+              <LogIn className="h-3.5 w-3.5" />
+              <span className="hidden sm:inline">Sign in (demo)</span>
+            </button>
+          ) : (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <button
                 type="button"
                 className="flex min-w-0 items-center gap-2 rounded-lg px-2 py-1.5 transition-colors hover:bg-white/[0.06] xl:gap-2.5 xl:px-3"
               >
-                <img
-                  src={userAvatar}
-                  alt={userName}
-                  className="h-9 w-9 rounded-full border-2 border-primary/50 object-cover"
-                />
+                {displayAvatar ? (
+                  <img
+                    src={displayAvatar}
+                    alt={displayName}
+                    className="h-9 w-9 rounded-full border-2 border-primary/50 object-cover"
+                  />
+                ) : (
+                  <span className="grid h-9 w-9 place-items-center rounded-full border-2 border-primary/50 bg-white/[0.04] font-display text-sm font-semibold text-primary">
+                    {displayName?.slice(0, 1).toUpperCase() ?? "?"}
+                  </span>
+                )}
                 <span className="max-w-[64px] truncate text-sm font-medium text-foreground xl:max-w-[100px]">
-                  {userName}
+                  {displayName}
                 </span>
                 <ChevronDown className="h-4 w-4 text-muted-foreground" />
               </button>
@@ -258,16 +288,27 @@ export function AppTopBar({
 
               <DropdownMenuSeparator />
 
-              <DropdownMenuItem asChild className="text-loss">
-                <a href={OMENX_BASE + "/"}>
-                  <LogOut className="mr-2 h-4 w-4" />
-                  Sign Out
-                </a>
+              <DropdownMenuItem
+                className="text-loss"
+                onSelect={(e) => {
+                  e.preventDefault();
+                  void signOutDemo();
+                }}
+              >
+                <LogOut className="mr-2 h-4 w-4" />
+                Sign Out
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
+          )}
         </div>
       </div>
     </header>
+    <DemoSignInSheet
+      open={showSignIn}
+      onOpenChange={setShowSignIn}
+      onSignedIn={() => auth.refreshProfile()}
+    />
+    </>
   );
 }
