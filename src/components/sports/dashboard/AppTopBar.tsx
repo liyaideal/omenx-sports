@@ -179,10 +179,10 @@ export function AppTopBar({
             <button
               type="button"
               onClick={() => setShowSignIn(true)}
-              className="flex shrink-0 items-center gap-1.5 rounded-lg bg-primary/15 px-3 py-2 font-mono text-[11px] uppercase tracking-widest text-primary ring-1 ring-primary/30 transition hover:bg-primary/25"
+              className="flex shrink-0 items-center gap-2 rounded-lg bg-gradient-neon px-4 py-2 text-sm font-medium text-white shadow-glow transition hover:opacity-90"
             >
-              <LogIn className="h-3.5 w-3.5" />
-              <span className="hidden sm:inline">Continue with Google</span>
+              <LogIn className="h-4 w-4" />
+              <span>Sign In</span>
             </button>
           ) : (
           <DropdownMenu>
