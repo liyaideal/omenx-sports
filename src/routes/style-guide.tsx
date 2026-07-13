@@ -107,7 +107,7 @@ import { PriceChart } from "@/components/sports/PriceChart";
 import { OrderBook } from "@/components/sports/OrderBook";
 import { TradeForm } from "@/components/sports/TradeForm";
 import { PositionsTable } from "@/components/sports/PositionsTable";
-import { Wallet, TrendingUp, LineChart } from "lucide-react";
+import { Wallet, TrendingUp, LineChart, LogIn } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ScoreboardHero } from "@/components/sports/promo/ScoreboardHero";
 import { ScoreboardTicker } from "@/components/sports/promo/ScoreboardTicker";
