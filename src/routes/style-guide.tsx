@@ -648,6 +648,7 @@ function DemoEnginePlayground() {
       <GoogleAccountChooser
         open={showSignIn}
         onOpenChange={setShowSignIn}
+        previewOnly
         onSignedIn={() => auth.refreshProfile()}
       />
     </div>
