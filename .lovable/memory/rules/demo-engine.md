@@ -47,6 +47,13 @@ via `src/lib/demoEngine.ts` (`https://lbrwdmnctmivgrsgdpqj.supabase.co`):
 - **Auth**: `signInDemo(scenario)` → main-site Edge Function
   `ensure-demo-user` (`matched` / `welcome`) then `signInWithPassword`.
   Session persists in localStorage under key `omenx-sports-demo-session`.
+  Entry UI is a Google "Choose an account" simulator
+  (`GoogleAccountChooser`) matched to the OmenX main-site chooser:
+  `matched` → **Alex Carter** (`alex.carter@gmail.com`), `welcome` →
+  **Mia Reyes** (`mia.reyes@gmail.com`), plus a "Use another account"
+  row that calls `demoEngine.auth.signInAnonymously()` (main-site trigger
+  provisions the profile + trial balance). The product surface must NEVER
+  say "demo" / "test" — call the entry "Continue with Google".
 - **Profile / balance**: `profiles.balance` + `profiles.trial_balance`.
   Total equity = sum of both; Trial Bonus is consumed before Main.
 - **Live prices**: `event_options` (realtime + 60s polling fallback) for
