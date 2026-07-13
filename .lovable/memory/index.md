@@ -20,4 +20,4 @@ Pre-integration convention: until the demo engine is connected, new features may
 - [Quest task rewards never auto-grant](mem://rules/quest-no-auto-grant) — NewbieTask 4-state machine; threshold → claimable, user must click Claim
 - [Guess the Legend reveal](mem://features/signed-jersey-reveal) — /promo/world-cup `legend` tab; 1 country + 4 candidates + 3 clues per round; correct → 1× Tier-01 Basic Vault spin; never 8-in-1; reveal cadence random (no countdown)
 - [Activation dialogs](mem://design/activation-dialogs) — reward-pool / voucher / deposit-match shared shell, mobile bottom sheet, CTA-only callback, OmenX register+deposit wired at page level
-- [Demo engine governance](mem://rules/demo-engine) — no own Supabase; state flows to OmenX main-site DB, content stays in src/data mocks, pre-integration marks with // DEMO-STATE
+- [Demo engine governance](mem://rules/demo-engine) — no own Supabase; state flows to OmenX main-site DB; wired: auth + profiles balance + events prices + trades/positions (WC26 semifinal pilot via src/lib/demoEngine.ts)
