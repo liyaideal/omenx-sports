@@ -692,7 +692,50 @@ function EventTradePage() {
     live.setMinimized(offscreen);
   }, [offscreen, isLive, live]);
 
-  const handlePlaceOrder = (order: PlacedOrder) => {
+  const balance =
+    isMapped && auth.user ? totalBalance(auth.profile) : ACCOUNT_STATS.available_usd;
+
+  const handlePlaceOrder = async (order: PlacedOrder) => {
+    // Mapped events route through the OmenX main-site demo engine.
+    if (isMapped && mapping) {
+      if (!auth.user || !auth.profile) {
+        setShowSignIn(true);
+        throw new Error("Sign in to place a real order");
+      }
+      const outcomeMap = mapping.outcomes[selected.id];
+      if (!outcomeMap) throw new Error("Outcome not mapped");
+      const livePx =
+        livePrices.byOptionId[outcomeMap.optionId] ?? order.price / 100;
+      try {
+        await placeDemoOrder({
+          userId: auth.user.id,
+          eventName: mapping.eventName,
+          optionId: outcomeMap.optionId,
+          optionLabel: outcomeMap.optionLabel,
+          price: livePx,
+          amount: order.margin,
+          profile: auth.profile,
+          leverage: order.leverage,
+          tp: order.tp != null ? order.tp / 100 : null,
+          sl: order.sl != null ? order.sl / 100 : null,
+        });
+        await Promise.all([auth.refreshProfile(), dbOpen.refetch()]);
+        toast.success("Filled · saved to OmenX main-site", {
+          action: {
+            label: "Portfolio ↗",
+            onClick: () => window.open(omenxUrl.portfolio(), "_blank"),
+          },
+        });
+      } catch (e) {
+        toast.error("Order failed", {
+          description: e instanceof Error ? e.message : String(e),
+        });
+        throw e;
+      }
+      return;
+    }
+    // DEMO-STATE: 待接入主站演示引擎 — unmapped events keep the local mock
+    // path (populate the in-memory positions/orders tables).
     const shape: "binary" | "multi" =
       active.outcomes.length === 2 ? "binary" : "multi";
     if (order.type === "limit" && order.side === "buy" && order.price !== currentPx) {
