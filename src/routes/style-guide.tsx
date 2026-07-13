@@ -68,7 +68,7 @@ import { MobileFansSection } from "@/components/sports/mobile/MobileFansSection"
 import { MobileLiveHero } from "@/components/sports/mobile/MobileLiveHero";
 import { MeSheet } from "@/components/sports/mobile/MeSheet";
 import { LivePositionsCard } from "@/components/sports/demoengine/LivePositionsCard";
-import { DemoSignInSheet } from "@/components/sports/auth/DemoSignInSheet";
+import { GoogleAccountChooser } from "@/components/sports/auth/GoogleAccountChooser";
 import { useDemoAuth } from "@/hooks/useDemoAuth";
 import { totalBalance, signOutDemo } from "@/lib/demoEngine";
 import { useLiveOutcomePrices } from "@/lib/demoEngineEvents";
@@ -599,7 +599,7 @@ function DemoEnginePlayground() {
             onClick={() => setShowSignIn(true)}
             className="w-full rounded-lg bg-primary/15 py-3 font-mono text-[11px] uppercase tracking-widest text-primary ring-1 ring-primary/30 hover:bg-primary/25"
           >
-            Sign in (demo)
+            Continue with Google
           </button>
         )}
       </div>
@@ -645,9 +645,10 @@ function DemoEnginePlayground() {
         <LivePositionsCard onSignIn={() => setShowSignIn(true)} />
       </div>
 
-      <DemoSignInSheet
+      <GoogleAccountChooser
         open={showSignIn}
         onOpenChange={setShowSignIn}
+        previewOnly
         onSignedIn={() => auth.refreshProfile()}
       />
     </div>

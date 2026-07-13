@@ -23,7 +23,7 @@ import {
 import { omenxUrl, OMENX_BASE } from "@/lib/omenx";
 import { cn } from "@/lib/utils";
 import { useDemoAuth } from "@/hooks/useDemoAuth";
-import { DemoSignInSheet } from "@/components/sports/auth/DemoSignInSheet";
+import { GoogleAccountChooser } from "@/components/sports/auth/GoogleAccountChooser";
 import { signOutDemo, totalBalance } from "@/lib/demoEngine";
 import { LivePositionsCard } from "@/components/sports/demoengine/LivePositionsCard";
 
@@ -280,13 +280,13 @@ export function MeSheet({
               onClick={() => setShowSignIn(true)}
               className="flex w-full items-center justify-center gap-2 rounded-2xl border border-primary/30 bg-primary/10 px-4 py-3 text-sm font-medium text-primary transition active:scale-[0.98]"
             >
-              <LogIn className="h-4 w-4" /> Sign in (demo)
+              <LogIn className="h-4 w-4" /> Continue with Google
             </button>
           )}
         </div>
       </SheetContent>
     </Sheet>
-    <DemoSignInSheet
+    <GoogleAccountChooser
       open={showSignIn}
       onOpenChange={setShowSignIn}
       onSignedIn={() => auth.refreshProfile()}

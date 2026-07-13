@@ -12,7 +12,7 @@ import {
 } from "@/lib/demoEngineEvents";
 import { placeDemoOrder, totalBalance } from "@/lib/demoEngine";
 import { useDemoAuth } from "@/hooks/useDemoAuth";
-import { DemoSignInSheet } from "@/components/sports/auth/DemoSignInSheet";
+import { GoogleAccountChooser } from "@/components/sports/auth/GoogleAccountChooser";
 import { omenxUrl } from "@/lib/omenx";
 
 /**
@@ -229,7 +229,7 @@ export function TradeDrawer({
         )}
       </SheetContent>
     </Sheet>
-    <DemoSignInSheet
+    <GoogleAccountChooser
       open={showSignIn}
       onOpenChange={setShowSignIn}
       onSignedIn={() => auth.refreshProfile()}
