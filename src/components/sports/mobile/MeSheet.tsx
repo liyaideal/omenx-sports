@@ -4,6 +4,7 @@ import {
   Globe,
   HelpCircle,
   LifeBuoy,
+  LogIn,
   LogOut,
   MessageCircle,
   Settings as SettingsIcon,
@@ -11,6 +12,7 @@ import {
   Users,
   Wallet,
 } from "lucide-react";
+import { useState } from "react";
 import {
   Sheet,
   SheetContent,
@@ -20,6 +22,9 @@ import {
 } from "@/components/ui/sheet";
 import { omenxUrl, OMENX_BASE } from "@/lib/omenx";
 import { cn } from "@/lib/utils";
+import { useDemoAuth } from "@/hooks/useDemoAuth";
+import { DemoSignInSheet } from "@/components/sports/auth/DemoSignInSheet";
+import { signOutDemo, totalBalance } from "@/lib/demoEngine";
 
 interface MeSheetProps {
   open: boolean;
@@ -82,12 +87,19 @@ export function MeSheet({
   pnlToday,
   toClaim,
 }: MeSheetProps) {
+  const auth = useDemoAuth();
+  const [showSignIn, setShowSignIn] = useState(false);
+  const liveEquity = totalBalance(auth.profile);
+  const displayEquity = auth.user ? `$${liveEquity.toFixed(2)}` : equity;
+  const displayName = auth.profile?.username ?? (auth.user ? auth.user.email ?? userName : userName);
+  const displayAvatar = auth.profile?.avatar_url ?? userAvatar;
   const trimmed = pnlToday.trim();
   const pnlUp = trimmed.startsWith("+");
   const pnlDown = trimmed.startsWith("-") || trimmed.startsWith("−");
   const pnlTone = pnlUp ? "text-win" : pnlDown ? "text-loss" : "text-muted-foreground";
 
   return (
+    <>
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent
         side="bottom"
@@ -108,27 +120,66 @@ export function MeSheet({
         <div className="space-y-5 px-5 pb-8 pt-3">
           {/* User card */}
           <div className="flex items-center gap-3 rounded-2xl bg-white/[0.04] p-3 ring-1 ring-white/[0.06]">
-            <img
-              src={userAvatar}
-              alt={userName}
-              className="h-12 w-12 rounded-full border-2 border-primary/50 object-cover"
-            />
+            {displayAvatar ? (
+              <img
+                src={displayAvatar}
+                alt={displayName}
+                className="h-12 w-12 rounded-full border-2 border-primary/50 object-cover"
+              />
+            ) : (
+              <span className="grid h-12 w-12 place-items-center rounded-full border-2 border-primary/50 bg-white/[0.04] font-display text-base font-semibold text-primary">
+                {displayName?.slice(0, 1).toUpperCase() ?? "?"}
+              </span>
+            )}
             <div className="min-w-0 flex-1">
               <div className="truncate font-display text-base font-semibold text-foreground">
-                {userName}
+                {displayName}
               </div>
               <div className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
-                OmenX · Sports
+                {auth.user ? "OmenX main-site · demo" : "OmenX · Sports"}
               </div>
             </div>
-            <a
-              href={omenxUrl.wallet()}
-              className="inline-flex items-center gap-1.5 rounded-xl bg-win/10 px-3 py-2 ring-1 ring-win/30 transition active:scale-95"
-            >
-              <Wallet className="h-4 w-4 text-win" />
-              <span className="font-mono text-sm font-bold text-win">{equity}</span>
-            </a>
+            {auth.user ? (
+              <a
+                href={omenxUrl.wallet()}
+                className="inline-flex items-center gap-1.5 rounded-xl bg-win/10 px-3 py-2 ring-1 ring-win/30 transition active:scale-95"
+              >
+                <Wallet className="h-4 w-4 text-win" />
+                <span className="font-mono text-sm font-bold text-win">{displayEquity}</span>
+              </a>
+            ) : (
+              <button
+                type="button"
+                onClick={() => setShowSignIn(true)}
+                className="inline-flex items-center gap-1.5 rounded-xl bg-primary/15 px-3 py-2 ring-1 ring-primary/30 transition active:scale-95"
+              >
+                <LogIn className="h-4 w-4 text-primary" />
+                <span className="font-mono text-xs font-semibold uppercase tracking-widest text-primary">
+                  Sign in
+                </span>
+              </button>
+            )}
           </div>
+
+          {auth.user && auth.profile && (
+            <div className="rounded-2xl border border-white/[0.05] bg-white/[0.02] px-3 py-2 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+              <div className="flex justify-between">
+                <span>Trial bonus</span>
+                <span className="tabular-nums text-foreground">
+                  ${Number(auth.profile.trial_balance).toFixed(2)}
+                </span>
+              </div>
+              <div className="mt-1 flex justify-between">
+                <span>Main balance</span>
+                <span className="tabular-nums text-foreground">
+                  ${Number(auth.profile.balance).toFixed(2)}
+                </span>
+              </div>
+              <div className="mt-1 text-[9px] normal-case tracking-normal text-muted-foreground/70">
+                Trial Bonus is consumed before Main balance.
+              </div>
+            </div>
+          )}
 
           {/* BridgeStrip stats */}
           <div className="grid grid-cols-3 gap-2">
@@ -203,15 +254,32 @@ export function MeSheet({
             })}
           </div>
 
-          <a
-            href={`${OMENX_BASE}/`}
-            className="flex w-full items-center justify-center gap-2 rounded-2xl border border-loss/30 bg-loss/5 px-4 py-3 text-sm font-medium text-loss transition active:scale-[0.98]"
-          >
-            <LogOut className="h-4 w-4" /> Sign Out
-          </a>
+          {auth.user ? (
+            <button
+              type="button"
+              onClick={() => void signOutDemo()}
+              className="flex w-full items-center justify-center gap-2 rounded-2xl border border-loss/30 bg-loss/5 px-4 py-3 text-sm font-medium text-loss transition active:scale-[0.98]"
+            >
+              <LogOut className="h-4 w-4" /> Sign Out
+            </button>
+          ) : (
+            <button
+              type="button"
+              onClick={() => setShowSignIn(true)}
+              className="flex w-full items-center justify-center gap-2 rounded-2xl border border-primary/30 bg-primary/10 px-4 py-3 text-sm font-medium text-primary transition active:scale-[0.98]"
+            >
+              <LogIn className="h-4 w-4" /> Sign in (demo)
+            </button>
+          )}
         </div>
       </SheetContent>
     </Sheet>
+    <DemoSignInSheet
+      open={showSignIn}
+      onOpenChange={setShowSignIn}
+      onSignedIn={() => auth.refreshProfile()}
+    />
+    </>
   );
 }
 
