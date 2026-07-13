@@ -107,7 +107,7 @@ import { PriceChart } from "@/components/sports/PriceChart";
 import { OrderBook } from "@/components/sports/OrderBook";
 import { TradeForm } from "@/components/sports/TradeForm";
 import { PositionsTable } from "@/components/sports/PositionsTable";
-import { Wallet, TrendingUp, LineChart } from "lucide-react";
+import { Wallet, TrendingUp, LineChart, LogIn } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ScoreboardHero } from "@/components/sports/promo/ScoreboardHero";
 import { ScoreboardTicker } from "@/components/sports/promo/ScoreboardTicker";
@@ -597,9 +597,9 @@ function DemoEnginePlayground() {
           <button
             type="button"
             onClick={() => setShowSignIn(true)}
-            className="w-full rounded-lg bg-primary/15 py-3 font-mono text-[11px] uppercase tracking-widest text-primary ring-1 ring-primary/30 hover:bg-primary/25"
+            className="flex w-full items-center justify-center gap-2 rounded-lg bg-gradient-neon py-3 text-sm font-medium text-white shadow-glow transition hover:opacity-90"
           >
-            Continue with Google
+            <LogIn className="h-4 w-4" /> Sign In
           </button>
         )}
       </div>
