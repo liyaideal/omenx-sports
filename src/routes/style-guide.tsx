@@ -543,6 +543,117 @@ function CoachMarkStage({
   );
 }
 
+/**
+ * DemoEnginePlayground — shows the live wired state (sign-in sheet,
+ * profile balance card, live prices for the two mapped WC26 semifinal
+ * events, and open positions) so devs can eyeball every OmenX main-site
+ * touch point in one place.
+ */
+function DemoEnginePlayground() {
+  const auth = useDemoAuth();
+  const [showSignIn, setShowSignIn] = useState(false);
+  const fraEsp = useLiveOutcomePrices("wc26-semi-fra-esp");
+  const argEng = useLiveOutcomePrices("wc26-semi-arg-eng");
+  const equity = totalBalance(auth.profile);
+
+  return (
+    <div className="grid gap-4 md:grid-cols-2">
+      <div className="rounded-2xl border border-border bg-surface p-5">
+        <div className="mb-3 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+          Auth · profile
+        </div>
+        {auth.user ? (
+          <div className="space-y-2">
+            <div className="font-display text-base font-semibold text-foreground">
+              {auth.profile?.username ?? auth.user.email}
+            </div>
+            <div className="rounded-xl bg-white/[0.03] p-3 font-mono text-[11px]">
+              <div className="flex justify-between text-muted-foreground">
+                <span>Total equity</span>
+                <span className="tabular-nums text-win">${equity.toFixed(2)}</span>
+              </div>
+              <div className="mt-1 flex justify-between text-muted-foreground">
+                <span>Trial bonus</span>
+                <span className="tabular-nums text-foreground">
+                  ${Number(auth.profile?.trial_balance ?? 0).toFixed(2)}
+                </span>
+              </div>
+              <div className="mt-1 flex justify-between text-muted-foreground">
+                <span>Main balance</span>
+                <span className="tabular-nums text-foreground">
+                  ${Number(auth.profile?.balance ?? 0).toFixed(2)}
+                </span>
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={() => void signOutDemo()}
+              className="w-full rounded-lg border border-loss/30 bg-loss/5 py-2 font-mono text-[11px] uppercase tracking-widest text-loss hover:bg-loss/10"
+            >
+              Sign out
+            </button>
+          </div>
+        ) : (
+          <button
+            type="button"
+            onClick={() => setShowSignIn(true)}
+            className="w-full rounded-lg bg-primary/15 py-3 font-mono text-[11px] uppercase tracking-widest text-primary ring-1 ring-primary/30 hover:bg-primary/25"
+          >
+            Sign in (demo)
+          </button>
+        )}
+      </div>
+
+      <div className="rounded-2xl border border-border bg-surface p-5">
+        <div className="mb-3 flex items-center justify-between">
+          <span className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+            Live prices · WC26 semifinals
+          </span>
+          <span className="inline-flex items-center gap-1 font-mono text-[10px] uppercase tracking-widest text-primary">
+            <span className="inline-flex h-1.5 w-1.5 animate-pulse rounded-full bg-primary" />
+            realtime
+          </span>
+        </div>
+        {[{ label: "FRA vs ESP", state: fraEsp, ids: ["h", "a"], names: ["FRA", "ESP"] },
+          { label: "ARG vs ENG", state: argEng, ids: ["h", "a"], names: ["ARG", "ENG"] }].map((row) => (
+          <div key={row.label} className="mb-2 rounded-xl bg-white/[0.03] p-3">
+            <div className="mb-2 font-display text-sm font-semibold text-foreground">
+              {row.label}
+            </div>
+            <div className="grid grid-cols-2 gap-2">
+              {row.ids.map((oid, i) => (
+                <div key={oid} className="flex items-center justify-between rounded-lg bg-white/[0.03] px-2.5 py-1.5">
+                  <span className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+                    {row.names[i]}
+                  </span>
+                  <span className="font-display text-sm tabular-nums text-foreground">
+                    {row.state.byOutcomeId[oid] != null
+                      ? `${Math.round(row.state.byOutcomeId[oid] * 100)}¢`
+                      : "—"}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <div className="md:col-span-2 rounded-2xl border border-border bg-surface p-5">
+        <div className="mb-3 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+          Open positions · from main-site
+        </div>
+        <LivePositionsCard onSignIn={() => setShowSignIn(true)} />
+      </div>
+
+      <DemoSignInSheet
+        open={showSignIn}
+        onOpenChange={setShowSignIn}
+        onSignedIn={() => auth.refreshProfile()}
+      />
+    </div>
+  );
+}
+
 function StyleGuide() {
   const [activeNav, setActiveNav] = useState<string>("home");
   // Style-guide is an internal playground with dozens of heavy demos in one
