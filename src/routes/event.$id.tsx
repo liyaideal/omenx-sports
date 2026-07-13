@@ -45,6 +45,7 @@ import {
 import { useDemoAuth } from "@/hooks/useDemoAuth";
 import {
   closeDemoPosition,
+  getDemoEngineErrorMessage,
   placeDemoOrder,
   totalBalance,
   type DemoOpenPosition,
@@ -574,7 +575,7 @@ function EventTradePage() {
         );
       } catch (e) {
         toast.error("Close failed", {
-          description: e instanceof Error ? e.message : String(e),
+          description: getDemoEngineErrorMessage(e),
         });
       }
     },
@@ -729,7 +730,7 @@ function EventTradePage() {
         });
       } catch (e) {
         toast.error("Order failed", {
-          description: e instanceof Error ? e.message : String(e),
+          description: getDemoEngineErrorMessage(e),
         });
         throw e;
       }

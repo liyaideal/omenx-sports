@@ -10,7 +10,11 @@ import {
   getMappingByMarketId,
   useLiveOutcomePrices,
 } from "@/lib/demoEngineEvents";
-import { placeDemoOrder, totalBalance } from "@/lib/demoEngine";
+import {
+  getDemoEngineErrorMessage,
+  placeDemoOrder,
+  totalBalance,
+} from "@/lib/demoEngine";
 import { useDemoAuth } from "@/hooks/useDemoAuth";
 import { GoogleAccountChooser } from "@/components/sports/auth/GoogleAccountChooser";
 import { omenxUrl } from "@/lib/omenx";
@@ -127,7 +131,7 @@ export function TradeDrawer({
       });
     } catch (e) {
       toast.error("Order failed", {
-        description: e instanceof Error ? e.message : String(e),
+        description: getDemoEngineErrorMessage(e),
       });
       throw e;
     }
