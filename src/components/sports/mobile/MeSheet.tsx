@@ -25,6 +25,7 @@ import { cn } from "@/lib/utils";
 import { useDemoAuth } from "@/hooks/useDemoAuth";
 import { DemoSignInSheet } from "@/components/sports/auth/DemoSignInSheet";
 import { signOutDemo, totalBalance } from "@/lib/demoEngine";
+import { LivePositionsCard } from "@/components/sports/demoengine/LivePositionsCard";
 
 interface MeSheetProps {
   open: boolean;
@@ -193,6 +194,17 @@ export function MeSheet({
           >
             Open Portfolio <ArrowUpRight className="h-4 w-4" />
           </a>
+
+          {/* My live bets — main-site positions for the signed-in demo user. */}
+          <div>
+            <div className="mb-2 flex items-center gap-2 px-1">
+              <span className="inline-flex h-1.5 w-1.5 animate-pulse rounded-full bg-primary" />
+              <span className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+                My bets · live from main site
+              </span>
+            </div>
+            <LivePositionsCard onSignIn={() => setShowSignIn(true)} />
+          </div>
 
           {/* Back to OmenX */}
           <div>
